@@ -1,8 +1,8 @@
 ---
 change_id: backend-bootstrap
-current_phase: 3
-next_step: 3.1
-next_command: /implement backend-bootstrap phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test backend-bootstrap phase 4
 updated: 2026-08-28
 ---
 
@@ -25,8 +25,8 @@ updated: 2026-08-28
 
 #### Automated
 
-- [ ] 3.1 `cd backend && uv run python -c "from backend.config.settings import Settings"` exits 0
-- [ ] 3.2 `cd backend && uv run python -c "from backend.main import app"` exits 0
+- [x] 3.1 `cd backend && uv run python -c "from backend.config.settings import Settings"` exits 0
+- [x] 3.2 `cd backend && uv run python -c "from backend.main import app"` exits 0
 
 ### Phase 4: Bootstrap contract — behavior
 
