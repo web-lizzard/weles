@@ -1,7 +1,7 @@
 ---
 change_id: backend-bootstrap
 title: Install and bootstrap the Python backend service
-status: new
+status: planned
 created: 2026-08-28
 updated: 2026-08-28
 archived_at: null
