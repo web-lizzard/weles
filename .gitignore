@@ -3,7 +3,8 @@
 .cursor/skills
 .devcontainer/devcontainer.env
 .pnpm-store/
-
+node_modules/
+dist/
 
 !.env.example
 
@@ -11,3 +12,5 @@
 .claude/skills
 .ordo/skills
 .ordo/cache
+
+__pycache__/
