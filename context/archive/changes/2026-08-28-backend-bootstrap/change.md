@@ -1,10 +1,10 @@
 ---
 change_id: backend-bootstrap
 title: Install and bootstrap the Python backend service
-status: implemented
+status: archived
 created: 2026-08-28
 updated: 2026-08-28
-archived_at: null
+archived_at: 2026-08-28T17:35:12Z
 origin: backend-stack
 adr_refs:
   - id: backend-stack
