@@ -1,8 +1,8 @@
 ---
 change_id: backend-bootstrap
 current_phase: 4
-next_step: 4.1
-next_command: /unit-test backend-bootstrap phase 4
+next_step: 4.2
+next_command: /implement backend-bootstrap phase 4
 updated: 2026-08-28
 ---
 
@@ -32,11 +32,11 @@ updated: 2026-08-28
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 7a8d207
 
 #### Automated
 
-- [ ] 4.1 `cd backend && uv run pytest` passes (health endpoint 200 `{"status": "ok"}` + `Settings` `ValidationError` on missing `database_url`)
+- [x] 4.1 `cd backend && uv run pytest` passes (health endpoint 200 `{"status": "ok"}` + `Settings` `ValidationError` on missing `database_url`) — 6803067
 
 #### Manual
 
