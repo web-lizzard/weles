@@ -1,8 +1,8 @@
 ---
 change_id: tui-bootstrap
-current_phase: 2
-next_step: 2.1
-next_command: /implement tui-bootstrap phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement tui-bootstrap phase 3
 updated: 2026-08-28
 ---
 
@@ -18,9 +18,9 @@ updated: 2026-08-28
 
 #### Automated
 
-- [ ] 2.1 `pnpm install` (repo root) exits 0
-- [ ] 2.2 `pnpm --filter tui typecheck` exits 0
-- [ ] 2.3 `pnpm --filter tui build` exits 0
+- [x] 2.1 `pnpm install` (repo root) exits 0 — 33f5cc7
+- [x] 2.2 `pnpm --filter tui typecheck` exits 0 — 33f5cc7
+- [x] 2.3 `pnpm --filter tui build` exits 0 — 33f5cc7
 
 ### Phase 3: Bootstrap contract — stubs
 
