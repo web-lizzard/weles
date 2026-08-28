@@ -26,8 +26,8 @@ updated: 2026-08-28
 
 #### Automated
 
-- [x] 3.1 `pnpm --filter tui typecheck` exits 0
-- [x] 3.2 `pnpm --filter tui build` exits 0
+- [x] 3.1 `pnpm --filter tui typecheck` exits 0 — a3a440c
+- [x] 3.2 `pnpm --filter tui build` exits 0 — a3a440c
 
 ### Phase 4: Bootstrap contract — behavior
 
