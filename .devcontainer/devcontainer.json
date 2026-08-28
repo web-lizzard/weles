@@ -1,8 +1,8 @@
 {
 	"name": "Dev Container",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/weles",
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "22"
@@ -22,10 +22,6 @@
 		}
 	},
 	"initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/initialize.sh",
-	"runArgs": [
-		"--env-file",
-		"${localWorkspaceFolder}/.devcontainer/devcontainer.env"
-	],
 	"mounts": [
 		"source=${localEnv:HOME}/.claude-personal,target=/home/vscode/.claude-personal,type=bind,consistency=cached"
 	],
