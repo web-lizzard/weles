@@ -18,8 +18,8 @@ updated: 2026-08-28
 
 #### Automated
 
-- [x] 2.1 `cd backend && uv sync` exits 0
-- [x] 2.2 `cd backend && uv run python -c "import backend"` exits 0
+- [x] 2.1 `cd backend && uv sync` exits 0 — b4d3d82
+- [x] 2.2 `cd backend && uv run python -c "import backend"` exits 0 — b4d3d82
 
 ### Phase 3: Bootstrap contract — stubs
 
