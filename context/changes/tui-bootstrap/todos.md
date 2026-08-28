@@ -37,7 +37,7 @@ updated: 2026-08-28
 
 #### Automated
 
-- [x] 4.1 `pnpm --filter tui test` passes (App renders `"Weles TUI — bootstrap OK"`)
+- [x] 4.1 `pnpm --filter tui test` passes (App renders `"Weles TUI — bootstrap OK"`) — 353c17d
 
 #### Manual
 
