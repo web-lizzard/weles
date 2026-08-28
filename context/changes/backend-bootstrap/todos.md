@@ -1,8 +1,8 @@
 ---
 change_id: backend-bootstrap
-current_phase: 1
-next_step: 1.1
-next_command: /implement backend-bootstrap phase 1
+current_phase: 3
+next_step: 3.1
+next_command: /implement backend-bootstrap phase 3
 updated: 2026-08-28
 ---
 
@@ -18,8 +18,8 @@ updated: 2026-08-28
 
 #### Automated
 
-- [ ] 2.1 `cd backend && uv sync` exits 0
-- [ ] 2.2 `cd backend && uv run python -c "import backend"` exits 0
+- [x] 2.1 `cd backend && uv sync` exits 0
+- [x] 2.2 `cd backend && uv run python -c "import backend"` exits 0
 
 ### Phase 3: Bootstrap contract — stubs
 
