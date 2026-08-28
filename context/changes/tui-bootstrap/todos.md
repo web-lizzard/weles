@@ -42,3 +42,7 @@ updated: 2026-08-28
 #### Manual
 
 - [ ] 4.2 `pnpm --filter tui build` then `node tui/dist/cli.js` prints `Weles TUI — bootstrap OK`
+
+#### Triage
+
+- [x] 4.3 R1-F1 `pnpm --filter tui typecheck` exits non-zero
