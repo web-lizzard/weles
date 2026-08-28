@@ -1,8 +1,8 @@
 ---
 change_id: tui-bootstrap
 current_phase: 4
-next_step: 4.2
-next_command: /implement tui-bootstrap phase 4
+next_step:
+next_command: /archive tui-bootstrap
 updated: 2026-08-28
 ---
 
@@ -41,7 +41,7 @@ updated: 2026-08-28
 
 #### Manual
 
-- [ ] 4.2 `pnpm --filter tui build` then `node tui/dist/cli.js` prints `Weles TUI — bootstrap OK`
+- [x] 4.2 `pnpm build` (in `tui/`) then `node dist/cli.js` prints `Weles TUI — bootstrap OK`
 
 #### Triage
 
