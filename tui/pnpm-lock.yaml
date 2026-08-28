@@ -6,9 +6,7 @@ settings:
 
 importers:
 
-  .: {}
-
-  tui:
+  .:
     dependencies:
       ink:
         specifier: ^7.0.0

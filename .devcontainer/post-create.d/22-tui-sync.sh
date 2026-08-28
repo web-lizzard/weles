@@ -2,8 +2,8 @@
 set -euo pipefail
 
 WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "${WORKSPACE_ROOT}"
+cd "${WORKSPACE_ROOT}/tui"
 
 pnpm install
 
-echo "TUI workspace dependencies synced."
+echo "TUI dependencies synced."
