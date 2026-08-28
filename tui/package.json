@@ -1,0 +1,33 @@
+{
+  "name": "tui",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "weles": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "generate:api": "openapi-typescript http://localhost:8000/openapi.json -o src/api/generated/schema.d.ts"
+  },
+  "dependencies": {
+    "ink": "^7.0.0",
+    "meow": "^14.0.0",
+    "openapi-fetch": "^0.17.0",
+    "react": "^19.0.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "ink-testing-library": "^4.0.0",
+    "openapi-typescript": "^7.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}
