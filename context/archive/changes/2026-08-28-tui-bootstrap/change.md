@@ -1,10 +1,10 @@
 ---
 change_id: tui-bootstrap
 title: Install and bootstrap the TUI client
-status: implementing
+status: archived
 created: 2026-08-28
 updated: 2026-08-28
-archived_at: null
+archived_at: 2026-08-28T18:00:40Z
 origin: tui-stack
 adr_refs:
   - id: tui-stack
