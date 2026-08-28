@@ -1,0 +1,184 @@
+{
+  "artifacts": {
+    "adr-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "arch-map": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "archive": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "change-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "commit-convention": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "container-map": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "core": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "create-adr": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "duck": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "duck-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "effort": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "effort-roadmap": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "effort-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "governance": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "ideation": {
+      "kind": "capability",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "impl-review": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "implement": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "init": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "new-container": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "plan": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "prd": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "proof-ritual": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "research": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "roadmap": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "stories-schema": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "todos-format": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "unit-test": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "user-stories": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "walk": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    }
+  },
+  "capabilities": [
+    "core",
+    "effort",
+    "governance",
+    "ideation"
+  ]
+}

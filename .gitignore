@@ -1,0 +1,13 @@
+.env
+.env.*
+.cursor/skills
+.devcontainer/devcontainer.env
+.pnpm-store/
+
+
+!.env.example
+
+
+.claude/skills
+.ordo/skills
+.ordo/cache

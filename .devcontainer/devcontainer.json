@@ -1,0 +1,37 @@
+{
+	"name": "Dev Container",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "22"
+		}
+	},
+	"remoteUser": "vscode",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/usr/bin/zsh"
+					}
+				}
+			}
+		}
+	},
+	"initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/initialize.sh",
+	"runArgs": [
+		"--env-file",
+		"${localWorkspaceFolder}/.devcontainer/devcontainer.env"
+	],
+	"mounts": [
+		"source=${localEnv:HOME}/.claude-personal,target=/home/vscode/.claude-personal,type=bind,consistency=cached"
+	],
+	"containerEnv": {
+		"CLAUDE_CONFIG_DIR": "/home/vscode/.claude-personal",
+		"SHELL": "/usr/bin/zsh"
+	},
+	"postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh"
+}
