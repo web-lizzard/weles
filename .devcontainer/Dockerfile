@@ -7,6 +7,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # Default login shell for the devcontainer user (Cursor integrated terminal picks this up too).
 RUN chsh -s /usr/bin/zsh vscode
 
+COPY --from=ghcr.io/astral-sh/uv:0.9.6 /uv /uvx /usr/local/bin/
+
 # User-local CLIs (ordo, Claude Code) without breaking the image PATH in containerEnv.
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
