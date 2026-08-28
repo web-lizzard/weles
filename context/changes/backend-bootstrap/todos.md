@@ -1,8 +1,8 @@
 ---
 change_id: backend-bootstrap
 current_phase: 4
-next_step: 4.2
-next_command: /implement backend-bootstrap phase 4
+next_step:
+next_command: /archive backend-bootstrap
 updated: 2026-08-28
 ---
 
@@ -40,4 +40,4 @@ updated: 2026-08-28
 
 #### Manual
 
-- [ ] 4.2 `cd backend && uv run fastapi dev src/main.py` then `curl localhost:8000/health` returns `200 {"status": "ok"}`
+- [x] 4.2 `cd backend && uv run fastapi dev src/main.py` then `curl localhost:8000/health` returns `200 {"status": "ok"}`
