@@ -219,6 +219,13 @@ Wire real behavior behind Phase 3's stub: `App` renders the bootstrap greeting �
 #### Manual Verification:
 - `pnpm --filter tui build`, then `node tui/dist/cli.js` (or `pnpm --filter tui exec weles`) prints `Weles TUI — bootstrap OK` to the terminal.
 
+### Review r1
+
+Artifact: `reviews/2026-08-28-r1-impl-review.md`
+
+- `R1-F1` — `pnpm --filter tui typecheck` exits non-zero
+  Fix: Test imports must resolve under `tsc --noEmit` without enabling `allowImportingTsExtensions`; `pnpm --filter tui typecheck` must exit 0 as required by Phase 2 and Phase 3 automated verification.
+
 ---
 
 ## Testing Strategy

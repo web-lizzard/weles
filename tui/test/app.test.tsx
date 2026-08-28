@@ -1,6 +1,6 @@
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
-import App from "../src/app.tsx";
+import App from "../src/app";
 
 describe("App", () => {
   it('renders "Weles TUI — bootstrap OK" in the terminal', () => {
