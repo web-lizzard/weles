@@ -1,8 +1,8 @@
 ---
 change_id: tui-bootstrap
-current_phase: 3
-next_step: 3.1
-next_command: /implement tui-bootstrap phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test tui-bootstrap phase 4
 updated: 2026-08-28
 ---
 
@@ -26,8 +26,8 @@ updated: 2026-08-28
 
 #### Automated
 
-- [ ] 3.1 `pnpm --filter tui typecheck` exits 0
-- [ ] 3.2 `pnpm --filter tui build` exits 0
+- [x] 3.1 `pnpm --filter tui typecheck` exits 0
+- [x] 3.2 `pnpm --filter tui build` exits 0
 
 ### Phase 4: Bootstrap contract — behavior
 
