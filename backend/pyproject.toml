@@ -22,9 +22,9 @@ dev = [
     "mypy>=1.13.0",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.uv]
+package = false
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/backend"]
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
