@@ -45,4 +45,4 @@ updated: 2026-08-28
 
 #### Triage
 
-- [x] 4.3 R1-F1 `pnpm --filter tui typecheck` exits non-zero
+- [x] 4.3 R1-F1 `pnpm --filter tui typecheck` exits non-zero — ed99991
