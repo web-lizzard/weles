@@ -1,3 +1,5 @@
+import { Text } from "ink";
+
 export default function App() {
-  return null;
+  return <Text>Weles TUI — bootstrap OK</Text>;
 }

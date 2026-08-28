@@ -1,8 +1,8 @@
 ---
 change_id: tui-bootstrap
 current_phase: 4
-next_step: 4.1
-next_command: /unit-test tui-bootstrap phase 4
+next_step: 4.2
+next_command: /implement tui-bootstrap phase 4
 updated: 2026-08-28
 ---
 
@@ -33,11 +33,11 @@ updated: 2026-08-28
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 77706a2
 
 #### Automated
 
-- [ ] 4.1 `pnpm --filter tui test` passes (App renders `"Weles TUI — bootstrap OK"`)
+- [x] 4.1 `pnpm --filter tui test` passes (App renders `"Weles TUI — bootstrap OK"`)
 
 #### Manual
 
