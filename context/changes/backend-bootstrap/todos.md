@@ -10,9 +10,9 @@ updated: 2026-08-28
 
 #### Manual
 
-- [ ] 1.1 Rebuild the devcontainer
-- [ ] 1.2 `docker compose -f .devcontainer/docker-compose.yml ps` shows `postgres` healthy
-- [ ] 1.3 `ordo status` succeeds inside the rebuilt container
+- [x] 1.1 Rebuild the devcontainer — c0b829f
+- [x] 1.2 `docker compose -f .devcontainer/docker-compose.yml ps` shows `postgres` healthy — c0b829f
+- [x] 1.3 `ordo status` succeeds inside the rebuilt container — c0b829f
 
 ### Phase 2: Backend project scaffolding
 
