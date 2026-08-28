@@ -2,7 +2,7 @@ import httpx
 import pytest
 from httpx import ASGITransport
 
-from backend.main import app
+from main import app
 
 
 @pytest.mark.asyncio

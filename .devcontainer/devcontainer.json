@@ -31,6 +31,7 @@
 	],
 	"containerEnv": {
 		"CLAUDE_CONFIG_DIR": "/home/vscode/.claude-personal",
+		"PYTHONPATH": "${containerWorkspaceFolder}/backend/src",
 		"SHELL": "/usr/bin/zsh"
 	},
 	"postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh"

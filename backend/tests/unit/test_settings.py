@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from backend.config.settings import Settings
+from config.settings import Settings
 
 
 def test_settings_raises_when_database_url_missing(monkeypatch: pytest.MonkeyPatch) -> None:
