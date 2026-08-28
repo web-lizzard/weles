@@ -1,7 +1,7 @@
 ---
 change_id: tui-bootstrap
 title: Install and bootstrap the TUI client
-status: new
+status: planned
 created: 2026-08-28
 updated: 2026-08-28
 archived_at: null
