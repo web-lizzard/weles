@@ -25,8 +25,8 @@ updated: 2026-08-28
 
 #### Automated
 
-- [x] 3.1 `cd backend && uv run python -c "from backend.config.settings import Settings"` exits 0
-- [x] 3.2 `cd backend && uv run python -c "from backend.main import app"` exits 0
+- [x] 3.1 `cd backend && uv run python -c "from backend.config.settings import Settings"` exits 0 — a1b63b2
+- [x] 3.2 `cd backend && uv run python -c "from backend.main import app"` exits 0 — a1b63b2
 
 ### Phase 4: Bootstrap contract — behavior
 
