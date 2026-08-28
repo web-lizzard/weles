@@ -1,8 +1,8 @@
 ---
 adr_id: repo-shape
-title: Kształt i struktura repozytorium
-status: new
+title: Repository Shape and Core Stack
+status: open
 created: 2026-08-28
 done_at: null
-topics: []
+topics: [monorepo, tech-stack, tui-backend-boundary]
 ---
