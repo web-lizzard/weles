@@ -1,8 +1,8 @@
 ---
 change_id: tui-bootstrap
-current_phase: 1
-next_step: 1.1
-next_command: /implement tui-bootstrap phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement tui-bootstrap phase 2
 updated: 2026-08-28
 ---
 
@@ -10,9 +10,9 @@ updated: 2026-08-28
 
 #### Manual
 
-- [ ] 1.1 Rebuild the devcontainer
-- [ ] 1.2 `pnpm --version` succeeds inside the rebuilt container
-- [ ] 1.3 `ordo status` still succeeds
+- [x] 1.1 Rebuild the devcontainer — f0ff634
+- [x] 1.2 `pnpm --version` succeeds inside the rebuilt container — f0ff634
+- [x] 1.3 `ordo status` still succeeds — f0ff634
 
 ### Phase 2: TUI project scaffolding
 
