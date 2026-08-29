@@ -22,3 +22,12 @@ repos:
         types: [python]
         files: ^backend/
         pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: biome-check
+        name: biome check
+        entry: pnpm --dir tui exec biome check --write .
+        language: system
+        files: ^tui/
+        pass_filenames: false
