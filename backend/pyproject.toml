@@ -20,6 +20,9 @@ dev = [
     "httpx>=0.27.0",
     "ruff>=0.8.0",
     "basedpyright>=1.39.10",
+    "pytest-bdd>=8.1.0",
+    "mutmut>=3.7.0",
+    "hypothesis>=6.165.10",
 ]
 
 [tool.uv]
@@ -28,6 +31,11 @@ package = false
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+bdd_features_base_dir = "tests/features"
+asyncio_mode = "auto"
+markers = [
+    "bdd: Gherkin tag applied by pytest-bdd (effort id or AC-nn)",
+]
 
 [tool.ruff]
 line-length = 88
@@ -42,3 +50,7 @@ select = ["E", "F", "I", "UP", "B"]
 include = ["src", "tests"]
 extraPaths = ["src"]
 pythonVersion = "3.12"
+
+[tool.mutmut]
+source_paths = ["src"]
+pytest_add_cli_args_test_selection = ["tests/"]
