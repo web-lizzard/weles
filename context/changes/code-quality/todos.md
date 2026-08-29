@@ -1,8 +1,8 @@
 ---
 change_id: code-quality
-current_phase: 3
-next_step: 3.4
-next_command: /implement code-quality phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement code-quality phase 4
 updated: 2026-08-29
 ---
 
@@ -29,7 +29,7 @@ updated: 2026-08-29
 
 #### Manual
 
-- [ ] 3.4 Stage a deliberately broken file under `backend/`, confirm `git commit` is rejected, then discard the staged change
+- [x] 3.4 Stage a deliberately broken file under `backend/`, confirm `git commit` is rejected, then discard the staged change
 
 ### Phase 4: TUI — Biome config and cleanup
 
