@@ -1,8 +1,8 @@
 ---
 change_id: code-quality
 current_phase: 5
-next_step: 5.2
-next_command: /implement code-quality phase 5
+next_step:
+next_command: /archive code-quality
 updated: 2026-08-29
 ---
 
@@ -46,4 +46,4 @@ updated: 2026-08-29
 
 #### Manual
 
-- [ ] 5.2 Stage a deliberately broken file under `tui/`, confirm `git commit` is rejected, then discard the staged change
+- [x] 5.2 Stage a deliberately broken file under `tui/`, confirm `git commit` is rejected, then discard the staged change
