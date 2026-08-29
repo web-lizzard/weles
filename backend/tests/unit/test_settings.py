@@ -9,7 +9,7 @@ def test_settings_raises_when_database_url_missing(
 ) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(ValidationError):
-        Settings()
+        _ = Settings()  # pyright: ignore[reportCallIssue]
 
 
 def test_settings_loads_database_url_from_environment(
@@ -17,5 +17,5 @@ def test_settings_loads_database_url_from_environment(
 ) -> None:
     database_url = "postgresql+asyncpg://weles:weles@postgres:5432/weles"
     monkeypatch.setenv("DATABASE_URL", database_url)
-    settings = Settings()
+    settings = Settings()  # pyright: ignore[reportCallIssue]
     assert settings.database_url == database_url
