@@ -18,6 +18,12 @@
       "release": "v1.0.0",
       "version": "1.0.0"
     },
+    "bdd": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
     "change-schema": {
       "kind": "reference-pack",
       "pinned": false,
@@ -31,6 +37,12 @@
       "version": "1.0.0"
     },
     "container-map": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "contract-materialization": {
       "kind": "reference-pack",
       "pinned": false,
       "release": "v1.0.0",
@@ -78,6 +90,12 @@
       "release": "v1.0.0",
       "version": "1.0.0"
     },
+    "feature-file": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
     "governance": {
       "kind": "capability",
       "pinned": false,
@@ -108,6 +126,12 @@
       "release": "v1.0.0",
       "version": "1.0.0"
     },
+    "mutation-test": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
     "new-container": {
       "kind": "skill",
       "pinned": false,
@@ -128,6 +152,18 @@
     },
     "proof-ritual": {
       "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "property-test": {
+      "kind": "skill",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "quality": {
+      "kind": "capability",
       "pinned": false,
       "release": "v1.0.0",
       "version": "1.0.0"
@@ -156,6 +192,30 @@
       "release": "v1.0.0",
       "version": "1.0.0"
     },
+    "tool-bdd-framework": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "tool-mutation-engine": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "tool-pbt-framework": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
+    "tool-test-runner": {
+      "kind": "reference-pack",
+      "pinned": false,
+      "release": "v1.0.0",
+      "version": "1.0.0"
+    },
     "unit-test": {
       "kind": "skill",
       "pinned": false,
@@ -179,6 +239,7 @@
     "core",
     "effort",
     "governance",
-    "ideation"
+    "ideation",
+    "quality"
   ]
 }
