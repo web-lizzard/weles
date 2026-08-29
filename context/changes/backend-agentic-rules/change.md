@@ -1,9 +1,9 @@
 ---
 change_id: backend-agentic-rules
 title: Backend agentic rules
-status: new
+status: planned
 created: 2026-08-28
-updated: 2026-08-28
+updated: 2026-08-29
 archived_at: null
 origin: hexagonal-arch-shape
 adr_refs:
