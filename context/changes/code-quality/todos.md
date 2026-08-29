@@ -17,7 +17,7 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 2.1 `cd backend && uv run basedpyright` exits 0
+- [x] 2.1 `cd backend && uv run basedpyright` exits 0 — 5a8e381
 
 ### Phase 3: Backend — pre-commit wiring
 
