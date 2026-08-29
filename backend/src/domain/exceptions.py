@@ -24,3 +24,7 @@ def _to_snake_case(name: str) -> str:
             name = name[: -len(suffix)]
             break
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+
+
+class NotFoundError(CoreException):
+    pass

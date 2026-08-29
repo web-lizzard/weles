@@ -3,9 +3,11 @@ from fastapi.responses import JSONResponse
 
 from domain.exceptions import CoreException
 
-EXCEPTION_STATUS_MAP: dict[str, int] = {}
+EXCEPTION_STATUS_MAP: dict[str, int] = {"not_found": 404}
 
 
 async def core_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, CoreException)
-    raise NotImplementedError
+    status_code = EXCEPTION_STATUS_MAP.get(exc.code(), 500)
+    content = {"code": exc.code(), "detail": str(exc)}
+    return JSONResponse(status_code=status_code, content=content)
