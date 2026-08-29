@@ -36,8 +36,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 3.1 Implement __init_subclass__ auto-derivation of code (snake_case, strip Error/Exception)
-- [x] 3.2 Implement explicit _code override support
+- [x] 3.1 Implement __init_subclass__ auto-derivation of code (snake_case, strip Error/Exception) — 4439679
+- [x] 3.2 Implement explicit _code override support — 4439679
 
 ### Phase 4: HTTP exception-mapping stubs
 
