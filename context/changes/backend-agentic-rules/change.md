@@ -1,7 +1,7 @@
 ---
 change_id: backend-agentic-rules
 title: Backend agentic rules
-status: planned
+status: implementing
 created: 2026-08-28
 updated: 2026-08-29
 archived_at: null

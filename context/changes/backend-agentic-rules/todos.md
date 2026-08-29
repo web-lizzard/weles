@@ -1,7 +1,7 @@
 ---
 change_id: backend-agentic-rules
 current_phase: 1
-next_step: 1.1
+next_step: 1.7
 next_command: /implement backend-agentic-rules phase 1
 updated: 2026-08-29
 ---
@@ -10,12 +10,12 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 1.1 Write context/foundation/rules/layering.md
-- [ ] 1.2 Write context/foundation/rules/cqrs-lite.md
-- [ ] 1.3 Write context/foundation/rules/contract-testing.md
-- [ ] 1.4 Write context/foundation/rules/exceptions.md
-- [ ] 1.5 Symlink .claude/rules/*.md (4 topics) to canonical files
-- [ ] 1.6 Symlink .cursor/rules/*.mdc (4 topics) to canonical files
+- [x] 1.1 Write context/foundation/rules/layering.md
+- [x] 1.2 Write context/foundation/rules/cqrs-lite.md
+- [x] 1.3 Write context/foundation/rules/contract-testing.md
+- [x] 1.4 Write context/foundation/rules/exceptions.md
+- [x] 1.5 Symlink .claude/rules/*.md (4 topics) to canonical files
+- [x] 1.6 Symlink .cursor/rules/*.mdc (4 topics) to canonical files
 
 #### Manual
 
