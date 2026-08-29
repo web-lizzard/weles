@@ -54,6 +54,6 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 5.1 Add NotFoundError(CoreException) mapped to HTTP 404 in EXCEPTION_STATUS_MAP
-- [x] 5.2 Implement core_exception_handler response shape ({"code": ..., "detail": ...})
-- [x] 5.3 Implement exhaustiveness test walking CoreException.__subclasses__() recursively
+- [x] 5.1 Add NotFoundError(CoreException) mapped to HTTP 404 in EXCEPTION_STATUS_MAP — e1a64f8
+- [x] 5.2 Implement core_exception_handler response shape ({"code": ..., "detail": ...}) — e1a64f8
+- [x] 5.3 Implement exhaustiveness test walking CoreException.__subclasses__() recursively — e1a64f8
