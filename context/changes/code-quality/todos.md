@@ -1,8 +1,8 @@
 ---
 change_id: code-quality
-current_phase: 2
-next_step: 2.1
-next_command: /implement code-quality phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement code-quality phase 3
 updated: 2026-08-29
 ---
 
@@ -17,7 +17,7 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 2.1 `cd backend && uv run basedpyright` exits 0
+- [x] 2.1 `cd backend && uv run basedpyright` exits 0
 
 ### Phase 3: Backend — pre-commit wiring
 
