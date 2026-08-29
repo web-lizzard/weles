@@ -1,8 +1,8 @@
 ---
 change_id: code-quality
-current_phase: 1
-next_step: 1.1
-next_command: /implement code-quality phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement code-quality phase 2
 updated: 2026-08-29
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 1.1 `cd backend && uv run ruff check .` exits 0
-- [ ] 1.2 `cd backend && uv run ruff format --check .` exits 0
+- [x] 1.1 `cd backend && uv run ruff check .` exits 0
+- [x] 1.2 `cd backend && uv run ruff format --check .` exits 0
 
 ### Phase 2: Backend — Replace mypy with basedpyright, config and cleanup
 
