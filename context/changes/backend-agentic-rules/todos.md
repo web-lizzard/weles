@@ -26,7 +26,7 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 2.1 Add CoreException class stub + code() signature in backend/src/domain/exceptions.py
+- [x] 2.1 Add CoreException class stub + code() signature in backend/src/domain/exceptions.py — 1e7334b
 
 ### Phase 3: CoreException behavior
 
