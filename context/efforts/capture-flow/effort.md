@@ -1,7 +1,7 @@
 ---
 effort_id: capture-flow
 title: Capture flow
-status: new
+status: preparing
 created: 2026-08-29
 updated: 2026-08-29
 archived_at: null
@@ -15,4 +15,4 @@ origin: overview-thougts
 
 ## Goal
 
-<!-- Filled by /prd from prd.md (Problem & Outcome + Primary success criteria). Run /prd <id> to write it. -->
+Capture flow lets the single Weles user turn a live conversation about a topic into a persisted note: the agent runs an interactive, Socratic exchange that gently surfaces where the user's understanding is solid or shaky, drafts a note and tags from that exchange, and only sends it to the outbox once the user explicitly approves — so notes reflect genuinely worked-through understanding rather than a raw, unchecked dump, and every session ends in either an approved note or no trace at all.
