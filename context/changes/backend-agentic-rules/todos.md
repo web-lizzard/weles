@@ -1,8 +1,8 @@
 ---
 change_id: backend-agentic-rules
 current_phase: 5
-next_step: 5.1
-next_command: /unit-test backend-agentic-rules phase 5
+next_step: ""
+next_command: /archive backend-agentic-rules
 updated: 2026-08-29
 ---
 
@@ -50,10 +50,10 @@ updated: 2026-08-29
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — bc7788a
 
 #### Automated
 
-- [ ] 5.1 Add NotFoundError(CoreException) mapped to HTTP 404 in EXCEPTION_STATUS_MAP
-- [ ] 5.2 Implement core_exception_handler response shape ({"code": ..., "detail": ...})
-- [ ] 5.3 Implement exhaustiveness test walking CoreException.__subclasses__() recursively
+- [x] 5.1 Add NotFoundError(CoreException) mapped to HTTP 404 in EXCEPTION_STATUS_MAP
+- [x] 5.2 Implement core_exception_handler response shape ({"code": ..., "detail": ...})
+- [x] 5.3 Implement exhaustiveness test walking CoreException.__subclasses__() recursively
