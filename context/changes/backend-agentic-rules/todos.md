@@ -1,8 +1,8 @@
 ---
 change_id: backend-agentic-rules
-current_phase: 2
-next_step: 2.1
-next_command: /implement backend-agentic-rules phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test backend-agentic-rules phase 3
 updated: 2026-08-29
 ---
 
@@ -26,7 +26,7 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 2.1 Add CoreException class stub + code() signature in backend/src/domain/exceptions.py
+- [x] 2.1 Add CoreException class stub + code() signature in backend/src/domain/exceptions.py
 
 ### Phase 3: CoreException behavior
 
