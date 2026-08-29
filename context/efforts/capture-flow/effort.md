@@ -6,6 +6,9 @@ created: 2026-08-29
 updated: 2026-08-29
 archived_at: null
 origin: overview-thougts
+adr_refs:
+  - id: capture-flow-domain-shape
+    kinds: [implements]
 ---
 
 ## Context
