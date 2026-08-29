@@ -1,8 +1,8 @@
 ---
 change_id: backend-agentic-rules
-current_phase: 1
-next_step: 1.7
-next_command: /implement backend-agentic-rules phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement backend-agentic-rules phase 2
 updated: 2026-08-29
 ---
 
@@ -10,17 +10,17 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 1.1 Write context/foundation/rules/layering.md
-- [x] 1.2 Write context/foundation/rules/cqrs-lite.md
-- [x] 1.3 Write context/foundation/rules/contract-testing.md
-- [x] 1.4 Write context/foundation/rules/exceptions.md
-- [x] 1.5 Symlink .claude/rules/*.md (4 topics) to canonical files
-- [x] 1.6 Symlink .cursor/rules/*.mdc (4 topics) to canonical files
+- [x] 1.1 Write context/foundation/rules/layering.md — 4a964f1
+- [x] 1.2 Write context/foundation/rules/cqrs-lite.md — 4a964f1
+- [x] 1.3 Write context/foundation/rules/contract-testing.md — 4a964f1
+- [x] 1.4 Write context/foundation/rules/exceptions.md — 4a964f1
+- [x] 1.5 Symlink .claude/rules/*.md (4 topics) to canonical files — 4a964f1
+- [x] 1.6 Symlink .cursor/rules/*.mdc (4 topics) to canonical files — 4a964f1
 
 #### Manual
 
-- [ ] 1.7 Verify Claude Code loads a rule via /context when reading a backend/ file
-- [ ] 1.8 Verify Cursor activates the rule when editing a backend/ file
+- [x] 1.7 Verify Claude Code loads a rule via /context when reading a backend/ file — 4a964f1
+- [x] 1.8 Verify Cursor activates the rule when editing a backend/ file — 4a964f1
 
 ### Phase 2: CoreException stubs
 
