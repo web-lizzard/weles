@@ -1,7 +1,7 @@
 ---
 change_id: code-quality
 current_phase: 3
-next_step: 3.1
+next_step: 3.4
 next_command: /implement code-quality phase 3
 updated: 2026-08-29
 ---
@@ -23,9 +23,9 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 3.1 `pre-commit run ruff-check --all-files` exits 0
-- [ ] 3.2 `pre-commit run ruff-format --all-files` exits 0
-- [ ] 3.3 `pre-commit run basedpyright --all-files` exits 0
+- [x] 3.1 `pre-commit run ruff-check --all-files` exits 0
+- [x] 3.2 `pre-commit run ruff-format --all-files` exits 0
+- [x] 3.3 `pre-commit run basedpyright --all-files` exits 0
 
 #### Manual
 
