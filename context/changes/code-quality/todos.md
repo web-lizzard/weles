@@ -10,8 +10,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 1.1 `cd backend && uv run ruff check .` exits 0
-- [x] 1.2 `cd backend && uv run ruff format --check .` exits 0
+- [x] 1.1 `cd backend && uv run ruff check .` exits 0 — b1e49d5
+- [x] 1.2 `cd backend && uv run ruff format --check .` exits 0 — b1e49d5
 
 ### Phase 2: Backend — Replace mypy with basedpyright, config and cleanup
 
