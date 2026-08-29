@@ -1,7 +1,7 @@
 ---
 change_id: code-quality
 current_phase: 5
-next_step: 5.1
+next_step: 5.2
 next_command: /implement code-quality phase 5
 updated: 2026-08-29
 ---
@@ -42,7 +42,7 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 5.1 `pre-commit run biome-check --all-files` exits 0
+- [x] 5.1 `pre-commit run biome-check --all-files` exits 0
 
 #### Manual
 
