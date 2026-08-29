@@ -14,6 +14,8 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "generate:api": "openapi-typescript http://localhost:8000/openapi.json -o src/api/generated/schema.d.ts"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.10",
     "@types/react": "^19.0.0",
     "ink-testing-library": "^4.0.0",
     "openapi-typescript": "^7.0.0",
