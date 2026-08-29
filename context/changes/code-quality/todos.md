@@ -35,8 +35,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 4.1 `cd tui && pnpm install` completes (new dependency)
-- [x] 4.2 `cd tui && pnpm exec biome check .` exits 0
+- [x] 4.1 `cd tui && pnpm install` completes (new dependency) — 61eec32
+- [x] 4.2 `cd tui && pnpm exec biome check .` exits 0 — 61eec32
 
 ### Phase 5: TUI — pre-commit wiring
 
