@@ -1,8 +1,8 @@
 ---
 change_id: backend-agentic-rules
-current_phase: 4
-next_step: 4.1
-next_command: /implement backend-agentic-rules phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /unit-test backend-agentic-rules phase 5
 updated: 2026-08-29
 ---
 
@@ -43,8 +43,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 4.1 Add empty EXCEPTION_STATUS_MAP + core_exception_handler stub in backend/src/adapters/http/errors.py
-- [ ] 4.2 Register handler in backend/src/main.py
+- [x] 4.1 Add empty EXCEPTION_STATUS_MAP + core_exception_handler stub in backend/src/adapters/http/errors.py
+- [x] 4.2 Register handler in backend/src/main.py
 
 ### Phase 5: HTTP exception-mapping behavior and exhaustiveness test
 
