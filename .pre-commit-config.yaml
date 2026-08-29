@@ -3,3 +3,22 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: basedpyright
+        name: basedpyright
+        entry: uv run --directory backend --no-sync basedpyright
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
