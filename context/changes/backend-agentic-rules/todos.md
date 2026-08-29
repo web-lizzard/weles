@@ -43,8 +43,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 4.1 Add empty EXCEPTION_STATUS_MAP + core_exception_handler stub in backend/src/adapters/http/errors.py
-- [x] 4.2 Register handler in backend/src/main.py
+- [x] 4.1 Add empty EXCEPTION_STATUS_MAP + core_exception_handler stub in backend/src/adapters/http/errors.py — bfebf20
+- [x] 4.2 Register handler in backend/src/main.py — bfebf20
 
 ### Phase 5: HTTP exception-mapping behavior and exhaustiveness test
 
