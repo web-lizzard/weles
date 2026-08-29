@@ -1,8 +1,8 @@
 ---
 change_id: backend-agentic-rules
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test backend-agentic-rules phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement backend-agentic-rules phase 4
 updated: 2026-08-29
 ---
 
@@ -32,12 +32,12 @@ updated: 2026-08-29
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — ef609f5
 
 #### Automated
 
-- [ ] 3.1 Implement __init_subclass__ auto-derivation of code (snake_case, strip Error/Exception)
-- [ ] 3.2 Implement explicit _code override support
+- [x] 3.1 Implement __init_subclass__ auto-derivation of code (snake_case, strip Error/Exception)
+- [x] 3.2 Implement explicit _code override support
 
 ### Phase 4: HTTP exception-mapping stubs
 
