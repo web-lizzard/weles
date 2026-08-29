@@ -1,0 +1,1 @@
+../../context/foundation/rules/contract-testing.md
