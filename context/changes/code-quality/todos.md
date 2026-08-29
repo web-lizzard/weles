@@ -1,8 +1,8 @@
 ---
 change_id: code-quality
-current_phase: 4
-next_step: 4.1
-next_command: /implement code-quality phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement code-quality phase 5
 updated: 2026-08-29
 ---
 
@@ -35,8 +35,8 @@ updated: 2026-08-29
 
 #### Automated
 
-- [ ] 4.1 `cd tui && pnpm install` completes (new dependency)
-- [ ] 4.2 `cd tui && pnpm exec biome check .` exits 0
+- [x] 4.1 `cd tui && pnpm install` completes (new dependency)
+- [x] 4.2 `cd tui && pnpm exec biome check .` exits 0
 
 ### Phase 5: TUI — pre-commit wiring
 
