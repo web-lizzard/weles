@@ -1,0 +1,49 @@
+---
+change_id: code-quality
+current_phase: 1
+next_step: 1.1
+next_command: /implement code-quality phase 1
+updated: 2026-08-29
+---
+
+### Phase 1: Backend — Ruff config and cleanup
+
+#### Automated
+
+- [ ] 1.1 `cd backend && uv run ruff check .` exits 0
+- [ ] 1.2 `cd backend && uv run ruff format --check .` exits 0
+
+### Phase 2: Backend — Replace mypy with basedpyright, config and cleanup
+
+#### Automated
+
+- [ ] 2.1 `cd backend && uv run basedpyright` exits 0
+
+### Phase 3: Backend — pre-commit wiring
+
+#### Automated
+
+- [ ] 3.1 `pre-commit run ruff-check --all-files` exits 0
+- [ ] 3.2 `pre-commit run ruff-format --all-files` exits 0
+- [ ] 3.3 `pre-commit run basedpyright --all-files` exits 0
+
+#### Manual
+
+- [ ] 3.4 Stage a deliberately broken file under `backend/`, confirm `git commit` is rejected, then discard the staged change
+
+### Phase 4: TUI — Biome config and cleanup
+
+#### Automated
+
+- [ ] 4.1 `cd tui && pnpm install` completes (new dependency)
+- [ ] 4.2 `cd tui && pnpm exec biome check .` exits 0
+
+### Phase 5: TUI — pre-commit wiring
+
+#### Automated
+
+- [ ] 5.1 `pre-commit run biome-check --all-files` exits 0
+
+#### Manual
+
+- [ ] 5.2 Stage a deliberately broken file under `tui/`, confirm `git commit` is rejected, then discard the staged change
