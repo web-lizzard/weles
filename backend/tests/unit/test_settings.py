@@ -4,7 +4,9 @@ from pydantic import ValidationError
 from config.settings import Settings
 
 
-def test_settings_raises_when_database_url_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_settings_raises_when_database_url_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
     with pytest.raises(ValidationError):
         Settings()
