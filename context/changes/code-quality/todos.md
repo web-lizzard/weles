@@ -23,9 +23,9 @@ updated: 2026-08-29
 
 #### Automated
 
-- [x] 3.1 `pre-commit run ruff-check --all-files` exits 0
-- [x] 3.2 `pre-commit run ruff-format --all-files` exits 0
-- [x] 3.3 `pre-commit run basedpyright --all-files` exits 0
+- [x] 3.1 `pre-commit run ruff-check --all-files` exits 0 — 02b7b72
+- [x] 3.2 `pre-commit run ruff-format --all-files` exits 0 — 02b7b72
+- [x] 3.3 `pre-commit run basedpyright --all-files` exits 0 — 02b7b72
 
 #### Manual
 
