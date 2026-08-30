@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 1
-next_step: 1.1
-next_command: /implement capture-flow-socratic-conversation phase 1
+current_phase: 2
+next_step: tests
+next_command: /unit-test capture-flow-socratic-conversation
 updated: 2026-08-30
 ---
 
@@ -10,11 +10,11 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 1.1 Create `domain/capture/value_objects.py` — Topic, MessageContent, MessageRole, SessionId, MessageId, SessionStatus (structure only)
-- [ ] 1.2 Create `domain/capture/capture_session.py` — CaptureSession shape + start()/assign_topic() signatures
-- [ ] 1.3 Create `domain/capture/message.py` — Message shape + record() signature
-- [ ] 1.4 Create `domain/capture/ports.py` — CaptureSessionRepository, MessageRepository Protocols
-- [ ] 1.5 Create `domain/capture/exceptions.py` — VO and aggregate-guard exceptions
+- [x] 1.1 Create `domain/capture/value_objects.py` — Topic, MessageContent, MessageRole, SessionId, MessageId, SessionStatus (structure only)
+- [x] 1.2 Create `domain/capture/capture_session.py` — CaptureSession shape + start()/assign_topic() signatures
+- [x] 1.3 Create `domain/capture/message.py` — Message shape + record() signature
+- [x] 1.4 Create `domain/capture/ports.py` — CaptureSessionRepository, MessageRepository Protocols
+- [x] 1.5 Create `domain/capture/exceptions.py` — VO and aggregate-guard exceptions
 
 ### Phase 2: Domain model — behavior
 
