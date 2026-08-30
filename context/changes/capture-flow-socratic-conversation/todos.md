@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 7
-next_step: 7.1
-next_command: /implement capture-flow-socratic-conversation phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test capture-flow-socratic-conversation phase 8
 updated: 2026-08-30
 ---
 
@@ -80,8 +80,8 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, incl. `get_turn_context` Depends wrapper, not yet wired
-- [ ] 7.2 Extend `adapters/http/errors.py:EXCEPTION_STATUS_MAP` with capture-specific codes
+- [x] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, incl. `get_turn_context` Depends wrapper, not yet wired
+- [x] 7.2 Extend `adapters/http/errors.py:EXCEPTION_STATUS_MAP` with capture-specific codes
 
 ### Phase 8: HTTP adapter — behavior
 
