@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 11
-next_step: 11.0
-next_command: /unit-test capture-flow-socratic-conversation phase 11
+current_phase: 12
+next_step: 12.1
+next_command: /implement capture-flow-socratic-conversation phase 12
 updated: 2026-08-31
 ---
 
@@ -120,15 +120,15 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — d13a5c2
 
 #### Automated
 
-- [ ] 11.1 Implement SSE parsing in stream.ts (ReadableStream + TextDecoderStream)
-- [ ] 11.2 Implement startCaptureSession/sendMessage
-- [ ] 11.3 Implement useChatStore reducer logic
-- [ ] 11.4 Write Vitest unit tests: SSE parser (fake ReadableStream), store reducer
-- [ ] 11.5 `pnpm --dir tui test` green
+- [x] 11.1 Implement SSE parsing in stream.ts (ReadableStream + TextDecoderStream)
+- [x] 11.2 Implement startCaptureSession/sendMessage
+- [x] 11.3 Implement useChatStore reducer logic
+- [x] 11.4 Write Vitest unit tests: SSE parser (fake ReadableStream), store reducer
+- [x] 11.5 `pnpm --dir tui test` green
 
 ### Phase 12: TUI chat screen — stubs
 
