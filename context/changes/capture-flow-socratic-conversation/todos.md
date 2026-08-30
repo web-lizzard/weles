@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 5
-next_step: 5.1
-next_command: /implement capture-flow-socratic-conversation phase 5
+current_phase: 7
+next_step: 7.1
+next_command: /implement capture-flow-socratic-conversation phase 7
 updated: 2026-08-30
 ---
 
@@ -58,23 +58,23 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 5.1 Create `application/capture/dto.py` — StartCaptureSessionResponseDTO, SendMessageRequestDTO, ReplyDeltaEvent, ReplyDoneEvent, ReplyStreamEvent
-- [ ] 5.2 Create `application/capture/commands/start_capture_session.py` — StartCaptureSessionCommand shell
-- [ ] 5.3 Create `application/capture/commands/send_message.py` — load_open_session_for_turn + GenerateReplyCommand shells
+- [x] 5.1 Create `application/capture/dto.py` — StartCaptureSessionResponseDTO, SendMessageRequestDTO, ReplyDeltaEvent, ReplyDoneEvent, ReplyStreamEvent
+- [x] 5.2 Create `application/capture/commands/start_capture_session.py` — StartCaptureSessionCommand shell
+- [x] 5.3 Create `application/capture/commands/send_message.py` — load_open_session_for_turn + GenerateReplyCommand shells
 
 ### Phase 6: Application commands — behavior
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 427df3c
 
 #### Automated
 
-- [ ] 6.1 Implement StartCaptureSessionCommand.handle()
-- [ ] 6.2 Implement load_open_session_for_turn() — content validation, session lookup/guard, no write, no UnitOfWork
-- [ ] 6.3 Implement GenerateReplyCommand.handle() — one UnitOfWork: lazy topic assignment, streamed reply, agent-message persist, single commit, done event
-- [ ] 6.4 Write unit tests: load_open_session_for_turn raises exact CoreException subclass for not-found/closed/invalid-content; GenerateReplyCommand — first-turn lazy-start, second-turn skip, commit-after-drain (one commit), rollback-on-cancel
-- [ ] 6.5 `uv run pytest tests/unit/capture -v` green
+- [x] 6.1 Implement StartCaptureSessionCommand.handle()
+- [x] 6.2 Implement load_open_session_for_turn() — content validation, session lookup/guard, no write, no UnitOfWork
+- [x] 6.3 Implement GenerateReplyCommand.handle() — one UnitOfWork: lazy topic assignment, streamed reply, agent-message persist, single commit, done event
+- [x] 6.4 Write unit tests: load_open_session_for_turn raises exact CoreException subclass for not-found/closed/invalid-content; GenerateReplyCommand — first-turn lazy-start, second-turn skip, commit-after-drain (one commit), rollback-on-cancel
+- [x] 6.5 `uv run pytest tests/unit/capture -v` green
 
 ### Phase 7: HTTP adapter — stubs
 
