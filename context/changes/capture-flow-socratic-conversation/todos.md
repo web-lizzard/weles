@@ -47,12 +47,12 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 4.1 Implement ConfidencePoint validation (manual, no `Field(min_length=...)`)
-- [x] 4.2 Implement InMemoryMessageStore, InMemoryCaptureSessionRepository, InMemoryMessageRepository, InMemoryTranscriptQueryAdapter (shared store)
-- [x] 4.3 Implement InMemoryUnitOfWork with snapshot-on-enter / restore-on-rollback
-- [x] 4.4 Implement DeterministicTopicExtractionAdapter, DeterministicConfidenceAssessmentAdapter, DeterministicReplyGenerationAdapter
+- [x] 4.1 Implement ConfidencePoint validation (manual, no `Field(min_length=...)`) — 26d6ae7
+- [x] 4.2 Implement InMemoryMessageStore, InMemoryCaptureSessionRepository, InMemoryMessageRepository, InMemoryTranscriptQueryAdapter (shared store) — 26d6ae7
+- [x] 4.3 Implement InMemoryUnitOfWork with snapshot-on-enter / restore-on-rollback — 26d6ae7
+- [x] 4.4 Implement DeterministicTopicExtractionAdapter, DeterministicConfidenceAssessmentAdapter, DeterministicReplyGenerationAdapter — 26d6ae7
 - [x] 4.5 Write contract-test suites for all 6 ports (parametrized, in-memory only) — c540593
-- [x] 4.6 `uv run pytest tests/unit/capture -v` green
+- [x] 4.6 `uv run pytest tests/unit/capture -v` green — 26d6ae7
 
 ### Phase 5: Application commands — stubs
 
