@@ -112,9 +112,9 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 10.1 Create `tui/src/api/stream.ts` — ReplyStreamEvent types + function signatures
-- [x] 10.2 Create `tui/src/store/chat.ts` — useChatStore shape/action signatures
-- [x] 10.3 Run `pnpm generate:api` against a running dev backend; verify SSE route codegen, fall back to hand-declared types if unusable
+- [x] 10.1 Create `tui/src/api/stream.ts` — ReplyStreamEvent types + function signatures — 7a43d9f
+- [x] 10.2 Create `tui/src/store/chat.ts` — useChatStore shape/action signatures — 7a43d9f
+- [x] 10.3 Run `pnpm generate:api` against a running dev backend; verify SSE route codegen, fall back to hand-declared types if unusable — 7a43d9f
 
 ### Phase 11: TUI data layer — behavior
 
