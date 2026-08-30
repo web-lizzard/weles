@@ -1,9 +1,11 @@
 from domain.capture.value_objects import MessageContent, Topic
 
+_MAX_TOPIC_WORDS = 8
+_DEFAULT_TOPIC = "Untitled capture session"
+
 
 class DeterministicTopicExtractionAdapter:
-    async def extract(
-        self,
-        first_message: MessageContent,  # pyright: ignore[reportUnusedParameter]
-    ) -> Topic:
-        raise NotImplementedError
+    async def extract(self, first_message: MessageContent) -> Topic:
+        words = first_message.value.strip().split()
+        value = " ".join(words[:_MAX_TOPIC_WORDS]) or _DEFAULT_TOPIC
+        return Topic(value=value)

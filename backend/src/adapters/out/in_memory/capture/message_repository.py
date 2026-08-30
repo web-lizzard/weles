@@ -8,5 +8,5 @@ class InMemoryMessageRepository:
     def __init__(self, store: InMemoryMessageStore) -> None:
         self._store = store
 
-    async def add(self, message: Message) -> None:  # pyright: ignore[reportUnusedParameter]
-        raise NotImplementedError
+    async def add(self, message: Message) -> None:
+        self._store.add(message)

@@ -1,16 +1,15 @@
+from uuid import UUID
+
 from domain.capture.capture_session import CaptureSession
 from domain.capture.value_objects import SessionId
 
 
 class InMemoryCaptureSessionRepository:
-    async def get(
-        self,
-        session_id: SessionId,  # pyright: ignore[reportUnusedParameter]
-    ) -> CaptureSession | None:
-        raise NotImplementedError
+    def __init__(self) -> None:
+        self._sessions: dict[UUID, CaptureSession] = {}
 
-    async def save(
-        self,
-        session: CaptureSession,  # pyright: ignore[reportUnusedParameter]
-    ) -> None:
-        raise NotImplementedError
+    async def get(self, session_id: SessionId) -> CaptureSession | None:
+        return self._sessions.get(session_id.value)
+
+    async def save(self, session: CaptureSession) -> None:
+        self._sessions[session.id.value] = session
