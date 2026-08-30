@@ -3,7 +3,17 @@ from fastapi.responses import JSONResponse
 
 from domain.exceptions import CoreException
 
-EXCEPTION_STATUS_MAP: dict[str, int] = {"not_found": 404}
+EXCEPTION_STATUS_MAP: dict[str, int] = {
+    "not_found": 404,
+    "capture_session_not_found": 404,
+    "capture_session_closed": 409,
+    "session_topic_already_assigned": 409,
+    "empty_topic": 422,
+    "topic_too_long": 422,
+    "empty_message_content": 422,
+    "message_content_too_long": 422,
+    "empty_confidence_point": 422,
+}
 
 
 async def core_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
