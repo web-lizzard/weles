@@ -80,8 +80,8 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, incl. `get_turn_context` Depends wrapper, not yet wired
-- [x] 7.2 Extend `adapters/http/errors.py:EXCEPTION_STATUS_MAP` with capture-specific codes
+- [x] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, incl. `get_turn_context` Depends wrapper, not yet wired — 73a67df
+- [x] 7.2 Extend `adapters/http/errors.py:EXCEPTION_STATUS_MAP` with capture-specific codes — 73a67df
 
 ### Phase 8: HTTP adapter — behavior
 
