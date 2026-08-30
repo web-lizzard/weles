@@ -70,11 +70,11 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 6.1 Implement StartCaptureSessionCommand.handle()
-- [x] 6.2 Implement load_open_session_for_turn() — content validation, session lookup/guard, no write, no UnitOfWork
-- [x] 6.3 Implement GenerateReplyCommand.handle() — one UnitOfWork: lazy topic assignment, streamed reply, agent-message persist, single commit, done event
-- [x] 6.4 Write unit tests: load_open_session_for_turn raises exact CoreException subclass for not-found/closed/invalid-content; GenerateReplyCommand — first-turn lazy-start, second-turn skip, commit-after-drain (one commit), rollback-on-cancel
-- [x] 6.5 `uv run pytest tests/unit/capture -v` green
+- [x] 6.1 Implement StartCaptureSessionCommand.handle() — 6e7de42
+- [x] 6.2 Implement load_open_session_for_turn() — content validation, session lookup/guard, no write, no UnitOfWork — 6e7de42
+- [x] 6.3 Implement GenerateReplyCommand.handle() — one UnitOfWork: lazy topic assignment, streamed reply, agent-message persist, single commit, done event — 6e7de42
+- [x] 6.4 Write unit tests: load_open_session_for_turn raises exact CoreException subclass for not-found/closed/invalid-content; GenerateReplyCommand — first-turn lazy-start, second-turn skip, commit-after-drain (one commit), rollback-on-cancel — 6e7de42
+- [x] 6.5 `uv run pytest tests/unit/capture -v` green — 6e7de42
 
 ### Phase 7: HTTP adapter — stubs
 
