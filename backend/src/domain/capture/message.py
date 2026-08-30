@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
@@ -20,8 +20,14 @@ class Message(BaseModel, frozen=True):
     @classmethod
     def record(
         cls,
-        session_id: SessionId,  # pyright: ignore[reportUnusedParameter]
-        role: MessageRole,  # pyright: ignore[reportUnusedParameter]
-        content: MessageContent,  # pyright: ignore[reportUnusedParameter]
+        session_id: SessionId,
+        role: MessageRole,
+        content: MessageContent,
     ) -> "Message":
-        raise NotImplementedError
+        return cls(
+            id=MessageId.new(),
+            session_id=session_id,
+            role=role,
+            content=content,
+            created_at=datetime.now(UTC),
+        )
