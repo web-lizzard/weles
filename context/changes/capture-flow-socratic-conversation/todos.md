@@ -33,6 +33,8 @@ updated: 2026-08-31
 
 - [x] 2.5 R1-F1 CaptureSession.start() allows naive local created_at — 6ec2483
 - [x] 2.6 R1-F2 Message.record() allows naive local created_at — 6ec2483
+- [x] 2.7 R2-F1 Topic stores trailing CR after strip-based validation — d9d1592
+- [x] 2.8 R2-F2 MessageContent stores trailing CR after strip-based validation — d9d1592
 
 ### Phase 3: Application ports & in-memory adapters — stubs
 
