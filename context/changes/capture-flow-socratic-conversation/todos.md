@@ -124,11 +124,11 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 11.1 Implement SSE parsing in stream.ts (ReadableStream + TextDecoderStream)
-- [x] 11.2 Implement startCaptureSession/sendMessage
-- [x] 11.3 Implement useChatStore reducer logic
-- [x] 11.4 Write Vitest unit tests: SSE parser (fake ReadableStream), store reducer
-- [x] 11.5 `pnpm --dir tui test` green
+- [x] 11.1 Implement SSE parsing in stream.ts (ReadableStream + TextDecoderStream) — 54f6892
+- [x] 11.2 Implement startCaptureSession/sendMessage — 54f6892
+- [x] 11.3 Implement useChatStore reducer logic — 54f6892
+- [x] 11.4 Write Vitest unit tests: SSE parser (fake ReadableStream), store reducer — 54f6892
+- [x] 11.5 `pnpm --dir tui test` green — 54f6892
 
 ### Phase 12: TUI chat screen — stubs
 
