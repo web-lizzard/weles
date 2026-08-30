@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-socratic-conversation
 title: Users can talk through a topic and have the agent probe understanding gaps
-status: new
+status: planned
 created: 2026-08-29
 updated: 2026-08-30
 archived_at: null
