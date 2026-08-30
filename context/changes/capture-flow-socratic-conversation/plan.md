@@ -156,6 +156,15 @@ Real validation and factory/guard logic for everything Phase 1 stubbed.
 - `cd backend && uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` — each invalid-input case asserts the *exact* `CoreException` subclass (`pytest.raises(EmptyTopicError)`, `pytest.raises(TopicTooLongError)`, etc.), never a bare `Exception` or `pydantic.ValidationError`, to guard against a future edit reintroducing a `Field()` constraint
 - `cd backend && uv run basedpyright src/domain/capture`
 
+### Review r1
+
+Artifact: `reviews/2026-08-31-r1-mutation-test-phase-2.md`
+
+- `R1-F1` — CaptureSession.start() allows naive local created_at
+  Fix: assert `CaptureSession.start().created_at.tzinfo is UTC`
+- `R1-F2` — Message.record() allows naive local created_at
+  Fix: assert `Message.record(...).created_at.tzinfo is UTC`
+
 ---
 
 ## Phase 3: Application ports & in-memory adapters — stubs

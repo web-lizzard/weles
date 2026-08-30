@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
 current_phase: 13
-next_step: tests
-next_command: /mutation-test phase 2 capture-flow-socratic-conversation
+next_step: 13.1
+next_command: /unit-test capture-flow-socratic-conversation phase 13
 updated: 2026-08-31
 ---
 
@@ -28,6 +28,11 @@ updated: 2026-08-31
 - [x] 2.2 Implement CaptureSession.start()/assign_topic() — e4ad6bc
 - [x] 2.3 Implement Message.record() — e4ad6bc
 - [x] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green — e4ad6bc
+
+#### Triage
+
+- [x] 2.5 R1-F1 CaptureSession.start() allows naive local created_at
+- [x] 2.6 R1-F2 Message.record() allows naive local created_at
 
 ### Phase 3: Application ports & in-memory adapters — stubs
 
