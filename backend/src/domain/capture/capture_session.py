@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
+from domain.capture.exceptions import SessionTopicAlreadyAssignedError
 from domain.capture.value_objects import SessionId, SessionStatus, Topic
 
 
@@ -13,7 +14,14 @@ class CaptureSession(BaseModel):
 
     @classmethod
     def start(cls) -> "CaptureSession":
-        raise NotImplementedError
+        return cls(
+            id=SessionId.new(),
+            topic=None,
+            status=SessionStatus.OPEN,
+            created_at=datetime.now(UTC),
+        )
 
-    def assign_topic(self, topic: Topic) -> None:  # pyright: ignore[reportUnusedParameter]
-        raise NotImplementedError
+    def assign_topic(self, topic: Topic) -> None:
+        if self.topic is not None:
+            raise SessionTopicAlreadyAssignedError
+        self.topic = topic

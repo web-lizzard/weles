@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 2
-next_step: tests
-next_command: /unit-test capture-flow-socratic-conversation
+current_phase: 3
+next_step: implement
+next_command: /implement capture-flow-socratic-conversation phase 3
 updated: 2026-08-30
 ---
 
@@ -20,14 +20,14 @@ updated: 2026-08-30
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 774a209
 
 #### Automated
 
-- [ ] 2.1 Implement VO validators (non-empty + length caps) in `model_validator(mode="after")`, raising CoreException subclasses directly — no `Field(min_length=/max_length=)`
-- [ ] 2.2 Implement CaptureSession.start()/assign_topic()
-- [ ] 2.3 Implement Message.record()
-- [ ] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green
+- [x] 2.1 Implement VO validators (non-empty + length caps) in `model_validator(mode="after")`, raising CoreException subclasses directly — no `Field(min_length=/max_length=)`
+- [x] 2.2 Implement CaptureSession.start()/assign_topic()
+- [x] 2.3 Implement Message.record()
+- [x] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green
 
 ### Phase 3: Application ports & in-memory adapters — stubs
 
