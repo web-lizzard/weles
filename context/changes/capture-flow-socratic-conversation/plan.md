@@ -16,12 +16,14 @@ The Socratic "probing" mechanics (topic extraction, solid/shaky assessment, foll
 ### Key Discoveries
 
 - `context/adrs/capture-flow-domain-shape/decision.md:21-32` — `CaptureSession`/`Message` aggregate shape and factories this plan realizes a subset of (only `start()`/`open`, and `record()`).
-- `context/adrs/capture-flow-domain-shape/decision.md:62` — command handlers, not the aggregate, own status-guard enforcement; this plan's `SendMessageCommand` follows that pattern.
+- `context/adrs/capture-flow-domain-shape/decision.md:62` — command handlers, not the aggregate, own status-guard enforcement; this plan's `load_open_session_for_turn` follows that pattern.
 - `context/adrs/hexagonal-arch-shape/decision.md:16-35` — layering, CQRS-lite, InMemoryFirst, contract-testing, and exception-mapping rules this plan must satisfy for every new port.
 - `context/adrs/tui-stack/decision.md:18-20` — streaming/async endpoints get a hand-written `fetch`/`ReadableStream` client layer, typed from backend-declared response models, not `openapi-fetch`.
 - `backend/src/domain/exceptions.py:1-29` — existing `CoreException`/`code()` mechanism this plan's new exceptions plug into; verified (see below) that a `model_validator` raising a non-`ValueError` exception propagates unmodified through Pydantic v2, which is what lets a VO validator raise a `CoreException` subclass directly.
 - `backend/src/adapters/http/errors.py:1-13` — existing `EXCEPTION_STATUS_MAP`, extended by this plan rather than replaced.
 - `tui/package.json:21-37` — current TUI dependencies; this plan adds `ink-text-input` for the message box.
+- Empirically verified (throwaway `httpx.ASGITransport` probe against the installed `fastapi==0.141.1`, not kept in the repo): an exception raised *inside* a `response_class=EventSourceResponse` generator route — before or after its first `yield` — is **not** caught by `add_exception_handler`; it surfaces as an unhandled `ExceptionGroup`, because FastAPI's SSE machinery constructs and commits the streaming response (a producer task inside an `anyio` task group) before the generator body has run at all. The same exception raised from a `Depends`-injected dependency **is** caught cleanly (confirmed: a clean 4xx via the registered handler). This is why turn validation is a dependency, not code inside the streaming command — see Critical Implementation Details.
+- Also confirmed: Pydantic's own field constraints (`Field(min_length=..., max_length=...)`) are enforced by Pydantic's core validation *before* any `@model_validator` runs, and raise `pydantic.ValidationError` — not whatever a validator would have raised. Every domain/application VO in this plan must do its own non-empty/length checks by hand inside `model_validator(mode="after")` and must **not** declare `Field(min_length=/max_length=)` on the underlying string field, or its errors silently stop being `CoreException`s.
 
 ## Desired End State
 
@@ -34,13 +36,15 @@ A user runs the TUI, it opens a capture session against the running backend, the
 - No session persistence, listing, or resume (PRD Non-Goal) — the in-memory adapter is the only store, matching `InMemoryFirst`.
 - No authentication — deferred with `repo-shape`'s auth mechanism, not decided here.
 - No new observability/metrics infrastructure — standard Python `logging` only, no new dependency.
-- No separate HTTP endpoint for reading the transcript — it's fetched internally by `SendMessageCommand` via `TranscriptQueryPort`, never exposed over HTTP in this slice (nothing needs to resume/list a session).
+- No separate HTTP endpoint for reading the transcript — it's fetched internally by `GenerateReplyCommand` via `TranscriptQueryPort`, never exposed over HTTP in this slice (nothing needs to resume/list a session).
 - No exposing `ConfidenceAssessment` to the TUI as a distinct UI element — deferred; for now it only shapes the generated reply text.
 - Mutation/property testing is not part of this plan's phases — left to a separate `/mutation-test`/`/property-test` pass at the author's discretion.
 
 ## Implementation Approach
 
 **Two HTTP endpoints, not three.** `POST /capture-sessions` (no body) creates and persists a real `CaptureSession` via `CaptureSession.start()` — no topic yet, since none exists before any message is sent. `POST /capture-sessions/{session_id}/messages` is the single combined "send message, get streamed reply" endpoint, used identically for the first and every later turn. On the first call for a session (`session.topic is None`), it derives the topic from that message via `TopicExtractionPort` and calls the new guarded `CaptureSession.assign_topic()` before proceeding — this is a deliberate, documented deviation from `capture-flow-domain-shape`'s literal `start(topic) -> CaptureSession` factory, forced by the no-body session-start endpoint (the id must exist before any topic-bearing content does).
+
+**Turn validation is a read-only `Depends`; the write stays a single `UnitOfWork`.** `load_open_session_for_turn` — a plain, non-mutating function, wired as a FastAPI dependency of the `messages` route — builds `MessageContent` (can raise `EmptyMessageContentError`/`MessageContentTooLongError`) and loads the `CaptureSession` by id (can raise `CaptureSessionNotFoundError`/`CaptureSessionClosedError`), touching no repository write and no `UnitOfWork`. It hands the already-loaded `(session, content)` pair straight to `GenerateReplyCommand`, which does everything that mutates state — recording the user message, lazily assigning the topic, generating and streaming the reply, recording the agent message — inside **one** `async with uow: ... await uow.commit()`. This keeps the turn atomic (one commit, not two) while still routing every validation failure through FastAPI's normal exception handling, per the SSE-generator finding above.
 
 **Why not stream session-creation too.** A header value computed inside an SSE generator's body cannot reliably reach the response — confirmed by reading `fastapi/routing.py`: for `is_sse_stream` routes, `response.headers.raw.extend(solved_result.response.headers.raw)` runs immediately after the generator object is *created*, before the generator body has executed even one line (Python generators don't run until first iterated). So a newly-minted `session_id` set as a header from inside the handler would never make it onto the response. Keeping session creation as a plain, non-streamed JSON call sidesteps this entirely.
 
@@ -54,11 +58,13 @@ A user runs the TUI, it opens a capture session against the running backend, the
 
 ## Critical Implementation Details
 
-`InMemoryUnitOfWork` must give a real rollback, not just a no-op wrapper: it snapshots the `CaptureSessionRepository`'s and `MessageRepository`'s underlying dict/list state on `__aenter__`, and restores that snapshot on `__aexit__` if `commit()` was never called (including on the client disconnecting mid-stream, which propagates as a `CancelledError` through `SendMessageCommand`'s async generator). Without this, "commit after the stream drains" has nothing to actually roll back to.
+**Validation and guards for the streaming endpoint must run in a `Depends`, never inside the generator body.** Confirmed empirically against the installed `fastapi==0.141.1`: once a route is detected as an SSE generator (`response_class=EventSourceResponse`), FastAPI resolves its dependencies, then unconditionally constructs and returns a 200 `StreamingResponse` wrapping a producer task — all *before* the route function's own body has executed a single line. An exception raised anywhere inside that body (before or after any `yield`) propagates as an unhandled `ExceptionGroup` from the `anyio` task group during response teardown, bypassing `add_exception_handler` entirely; a real ASGI server would surface this as a broken/incomplete response, not a clean 4xx. An exception raised from a `Depends`-injected dependency, by contrast, is resolved *before* that commitment and is caught normally. Consequence: `load_open_session_for_turn` (content validation, session lookup/guard — no write) is wired as a dependency of the `messages` route; `GenerateReplyCommand`'s generator body only does work that cannot fail with this slice's deterministic adapters, and owns the turn's single `UnitOfWork` commit.
+
+**VO validation must never rely on Pydantic's own field constraints.** `Field(min_length=..., max_length=...)` is enforced by Pydantic's core validation *before* any `@model_validator` runs, and raises `pydantic.ValidationError` on failure — not a `CoreException`, and not caught by the existing `core_exception_handler`/`EXCEPTION_STATUS_MAP` mechanism at all. Every string-backed VO (`Topic`, `MessageContent`, `ConfidencePoint`) declares its field as a bare `value: str` / `note: str` with **no** `Field(min_length=..., max_length=...)`, and does its own non-empty-after-strip and length-cap comparisons by hand inside `@model_validator(mode="after")`, raising the `CoreException` subclass directly. Verified locally that Pydantic v2 (`2.13.5`, installed) propagates a non-`ValueError`/`TypeError`/`AssertionError` exception raised inside a validator unmodified, rather than wrapping it into a `pydantic.ValidationError` — this is what lets a hand-written check raise `TopicTooLongError` (say) and have it actually surface as that type. Every VO unit test must assert the *exact* domain exception type (`pytest.raises(TopicTooLongError)`, not a bare `Exception` or `pydantic.ValidationError`), specifically to catch a future edit that reintroduces a `Field()` constraint by accident.
+
+`InMemoryUnitOfWork` must give a real rollback, not just a no-op wrapper: it snapshots the `CaptureSessionRepository`'s and `MessageRepository`'s underlying dict/list state on `__aenter__`, and restores that snapshot on `__aexit__` if `commit()` was never called (including on the client disconnecting mid-stream, which propagates as a `CancelledError` through `GenerateReplyCommand`'s async generator). Without this, "commit after the stream drains" has nothing to actually roll back to.
 
 `CaptureSession` and `Message` differ in mutability: `Message` has no mutators (per ADR) and can be a frozen `pydantic.BaseModel`; `CaptureSession` mutates (`assign_topic`, and later `close`) and must **not** be frozen. Only true Value Objects (`Topic`, `MessageContent`, `MessageRole`, `SessionId`, `MessageId`, `TranscriptEntry`, `ConfidencePoint`, `ConfidenceAssessment`) are frozen.
-
-VO validators raise the domain `CoreException` subclass directly from a `@model_validator(mode="after")`, not `ValueError` — verified locally that Pydantic v2 (`2.13.5`, installed) propagates a non-`ValueError`/`TypeError`/`AssertionError` exception raised inside a validator unmodified, rather than wrapping it into a `pydantic.ValidationError`. This is what lets these VOs plug into the existing `CoreException.code()`/`EXCEPTION_STATUS_MAP` mechanism without a translation layer.
 
 Length caps (`Topic` ≤ 200 chars, `MessageContent` ≤ 4000 chars) are this plan's own assumption — no upstream artifact specifies a number. Flagged here as easy to revise; not blocking.
 
@@ -128,7 +134,7 @@ Real validation and factory/guard logic for everything Phase 1 stubbed.
 
 **Intent**: Enforce "non-empty after strip" and a length cap on the two string-backed VOs.
 
-**Contract**: `Topic` and `MessageContent` each get a `@model_validator(mode="after")` that strips `.value`, raises `EmptyTopicError`/`EmptyMessageContentError` on empty, and raises `TopicTooLongError` (>200 chars) / `MessageContentTooLongError` (>4000 chars) otherwise — raised directly, not via `ValueError`, per the Critical Implementation Details note above.
+**Contract**: `value: str` on both, with **no** `Field(min_length=/max_length=)` — length and emptiness are checked by hand. `Topic` and `MessageContent` each get a `@model_validator(mode="after")` that strips `.value`, raises `EmptyTopicError`/`EmptyMessageContentError` on empty, and raises `TopicTooLongError` (>200 chars) / `MessageContentTooLongError` (>4000 chars) otherwise — raised directly, not via `ValueError` and not via a Pydantic field constraint, per the Critical Implementation Details note above.
 
 #### 2. Aggregate behavior
 
@@ -147,7 +153,7 @@ Real validation and factory/guard logic for everything Phase 1 stubbed.
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v`
+- `cd backend && uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` — each invalid-input case asserts the *exact* `CoreException` subclass (`pytest.raises(EmptyTopicError)`, `pytest.raises(TopicTooLongError)`, etc.), never a bare `Exception` or `pydantic.ValidationError`, to guard against a future edit reintroducing a `Field()` constraint
 - `cd backend && uv run basedpyright src/domain/capture`
 
 ---
@@ -236,7 +242,7 @@ Real logic for every adapter stubbed in Phase 3, plus one contract-test suite pe
 
 **Intent**: Same non-empty-after-strip discipline as the domain string VOs.
 
-**Contract**: `ConfidencePoint` gets a `@model_validator(mode="after")` raising `EmptyConfidencePointError` when `note.strip()` is empty.
+**Contract**: `note: str` with **no** `Field(min_length=...)`. `ConfidencePoint` gets a `@model_validator(mode="after")` raising `EmptyConfidencePointError` directly when `note.strip()` is empty.
 
 #### 2. Store, repositories, query
 
@@ -266,7 +272,7 @@ Real logic for every adapter stubbed in Phase 3, plus one contract-test suite pe
 
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/capture/contracts -v` — one parametrized contract suite per port (`CaptureSessionRepository`, `MessageRepository`, `TranscriptQueryPort`, `TopicExtractionPort`, `ConfidenceAssessmentPort`, `ReplyGenerationPort`), asserting structural invariants (non-empty/valid output), not literal stand-in text
-- `cd backend && uv run pytest tests/unit/capture -v`
+- `cd backend && uv run pytest tests/unit/capture -v` — `ConfidencePoint`'s empty-note case asserts `pytest.raises(EmptyConfidencePointError)` specifically, same exact-type discipline as Phase 2
 
 ---
 
@@ -315,9 +321,31 @@ ReplyStreamEvent = Annotated[ReplyDeltaEvent | ReplyDoneEvent, Field(discriminat
 
 **File**: `backend/src/application/capture/commands/send_message.py`
 
-**Intent**: The orchestrating command — records the message, lazily assigns topic on first turn, streams the reply.
+**Intent**: Split by what can fail and where FastAPI can still map that failure to a status code (see Critical Implementation Details) — a non-mutating validation step, and the mutating, streaming command.
 
-**Contract**: `SendMessageCommand(uow, transcript_query: TranscriptQueryPort, topic_extraction: TopicExtractionPort, confidence_assessment: ConfidenceAssessmentPort, reply_generation: ReplyGenerationPort)` with `async def handle(self, session_id: SessionId, raw_content: str) -> AsyncIterator[ReplyStreamEvent]` (async generator), body `raise NotImplementedError` for now (a bare `raise` in a generator function needs a `yield` still present for the type to hold — stub with `if False: yield`).
+**Contract**:
+```python
+async def load_open_session_for_turn(
+    session_id: SessionId,
+    raw_content: str,
+    capture_sessions: CaptureSessionRepository,
+) -> tuple[CaptureSession, MessageContent]: ...  # raise NotImplementedError
+
+class GenerateReplyCommand:
+    def __init__(
+        self,
+        uow: UnitOfWork,
+        transcript_query: TranscriptQueryPort,
+        topic_extraction: TopicExtractionPort,
+        confidence_assessment: ConfidenceAssessmentPort,
+        reply_generation: ReplyGenerationPort,
+    ) -> None: ...
+
+    async def handle(
+        self, session: CaptureSession, content: MessageContent
+    ) -> AsyncIterator[ReplyStreamEvent]: ...  # stub with `if False: yield` to keep the generator type
+```
+`load_open_session_for_turn` takes no `UnitOfWork` — it only reads, never writes, so it has nothing to commit or roll back.
 
 ### Success Criteria:
 
@@ -342,18 +370,26 @@ Real orchestration logic for both commands.
 
 **Contract**: `async with self._uow as uow: session = CaptureSession.start(); await uow.capture_sessions.save(session); await uow.commit()`, returns `StartCaptureSessionResponseDTO(session_id=session.id.value)`.
 
-#### 2. `SendMessageCommand`
+#### 2. `load_open_session_for_turn`
 
 **File**: `backend/src/application/capture/commands/send_message.py`
 
-**Intent**: The full per-turn flow: validate input, load-or-reject the session, lazily assign topic on turn one, record the user message, generate and stream the reply, persist the agent message, commit, then signal completion.
+**Intent**: Everything that can legitimately reject the request, with no persistence involved — safe to run as a FastAPI dependency, per the empirical SSE finding in Critical Implementation Details.
 
-**Contract**: Order matters — (1) `content = MessageContent(value=raw_content)`; (2) load session, raise `CaptureSessionNotFoundError` if missing, raise `CaptureSessionClosedError` if `status != OPEN`; (3) `Message.record(session_id, MessageRole.USER, content)`, `uow.messages.add(...)`; (4) if `session.topic is None`: `topic = await self._topic_extraction.extract(content)`, `session.assign_topic(topic)`, `uow.capture_sessions.save(session)`; (5) `transcript = await self._transcript_query.get_transcript(session_id)`; (6) `assessment = await self._confidence_assessment.assess(transcript)`; (7) stream `self._reply_generation.generate(transcript, assessment)`, yielding `ReplyDeltaEvent(text=chunk)` per chunk while accumulating `full_text`; (8) after the generator drains: `reply_content = MessageContent(value=full_text)`, `agent_message = Message.record(session_id, MessageRole.AGENT, reply_content)`, `uow.messages.add(...)`, `await uow.commit()`; (9) `yield ReplyDoneEvent(message_id=agent_message.id.value, content=reply_content.value, topic=session.topic.value)`.
+**Contract**: (1) `content = MessageContent(value=raw_content)` — raises `EmptyMessageContentError`/`MessageContentTooLongError`; (2) `session = await capture_sessions.get(session_id)` — raises `CaptureSessionNotFoundError` if `None`, raises `CaptureSessionClosedError` if `session.status != SessionStatus.OPEN`; (3) `return session, content`. No `UnitOfWork`, no write.
+
+#### 3. `GenerateReplyCommand`
+
+**File**: `backend/src/application/capture/commands/send_message.py`
+
+**Intent**: Everything that mutates state for the turn, in one atomic commit: record the user message, lazily assign topic on turn one, generate and stream the reply, persist the agent message.
+
+**Contract**: Takes the already-validated `(session, content)` from `load_open_session_for_turn` — no re-fetch, no re-validation. Order inside **one** `async with self._uow as uow: ...`: (1) `Message.record(session.id, MessageRole.USER, content)`, `uow.messages.add(...)`; (2) if `session.topic is None`: `topic = await self._topic_extraction.extract(content)`, `session.assign_topic(topic)`, `uow.capture_sessions.save(session)`; (3) `transcript = await self._transcript_query.get_transcript(session.id)`; (4) `assessment = await self._confidence_assessment.assess(transcript)`; (5) stream `self._reply_generation.generate(transcript, assessment)`, yielding `ReplyDeltaEvent(text=chunk)` per chunk while accumulating `full_text`; (6) after the generator drains: `reply_content = MessageContent(value=full_text)`, `agent_message = Message.record(session.id, MessageRole.AGENT, reply_content)`, `uow.messages.add(...)`, `await uow.commit()`; (7) `yield ReplyDoneEvent(message_id=agent_message.id.value, content=reply_content.value, topic=session.topic.value)` — outside the `async with` block, after commit.
 
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pytest tests/unit/capture/test_start_capture_session_command.py tests/unit/capture/test_send_message_command.py -v` — covers: first-turn lazy topic assignment, second-turn skips it, unknown session raises `CaptureSessionNotFoundError`, a fixture-constructed closed session raises `CaptureSessionClosedError` (status never transitions in this slice's production code, so this fixture bypasses the normal factory on purpose), commit happens only after the stream fully drains, an early `aclose()` on the generator leaves nothing persisted (rollback)
+- `cd backend && uv run pytest tests/unit/capture/test_start_capture_session_command.py tests/unit/capture/test_send_message_command.py -v` — covers: `load_open_session_for_turn` raises `CaptureSessionNotFoundError` for an unknown id and `CaptureSessionClosedError` for a fixture-constructed closed session (status never transitions in this slice's production code, so this fixture bypasses the normal factory on purpose) with the *exact* exception type in both cases; `GenerateReplyCommand` — first-turn lazy topic assignment, second-turn skips it, commit happens only after the stream fully drains (one `uow.commit()` call, not two), an early `aclose()` on the generator leaves nothing persisted (rollback)
 
 ---
 
@@ -371,7 +407,7 @@ Route signatures and DI wiring skeleton, error-code table extended.
 
 **Intent**: Two routes matching the design above.
 
-**Contract**: `POST /capture-sessions` (no request body) → `StartCaptureSessionResponseDTO`. `POST /capture-sessions/{session_id}/messages`, body `SendMessageRequestDTO`, `response_class=EventSourceResponse`, return annotation `AsyncIterator[ReplyStreamEvent]`. Both take their command via `Depends`; dependency-provider functions exist but return not-yet-wired instances.
+**Contract**: `POST /capture-sessions` (no request body) → `StartCaptureSessionResponseDTO`, via `Depends(StartCaptureSessionCommand)`. `POST /capture-sessions/{session_id}/messages`, body `SendMessageRequestDTO`, `response_class=EventSourceResponse`, return annotation `AsyncIterator[ReplyStreamEvent]` — its `(session, content)` parameter comes from `Depends(get_turn_context)`, a small wrapper `Depends` that calls `load_open_session_for_turn`; the route's own body is just `async for event in command.handle(session, content): yield event`, nothing else, so it stays exception-free by construction. Dependency-provider functions exist but return not-yet-wired instances.
 
 #### 2. Error mapping
 
@@ -403,7 +439,7 @@ Real dependency wiring (the composition root for this slice), router registratio
 
 **Intent**: One shared `InMemoryMessageStore` feeds both the message repository and the transcript query adapter; one shared `InMemoryUnitOfWork` wraps both repositories.
 
-**Contract**: Module-level singletons (store, repos, three stand-in adapters, `UnitOfWork`) constructed once; `Depends`-based provider functions build `StartCaptureSessionCommand`/`SendMessageCommand` from them per request.
+**Contract**: Module-level singletons (store, repos, three stand-in adapters, `UnitOfWork`) constructed once; `Depends`-based provider functions build `StartCaptureSessionCommand`, `get_turn_context` (wrapping `load_open_session_for_turn` with the singleton `CaptureSessionRepository`), and `GenerateReplyCommand` from them per request.
 
 **File**: `backend/src/main.py`
 
@@ -414,7 +450,7 @@ Real dependency wiring (the composition root for this slice), router registratio
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pytest tests/integration/test_capture_http.py -v` — via `httpx.AsyncClient(transport=httpx.ASGITransport(app=app))` and `client.stream(...)`: session creation returns a valid UUID; first message triggers a `delta*` then one `done` event carrying a non-empty `topic`; a second message on the same session streams without re-deriving the topic; unknown session id → 404; empty message body → 422
+- `cd backend && uv run pytest tests/integration/test_capture_http.py -v` — via `httpx.AsyncClient(transport=httpx.ASGITransport(app=app))` and `client.stream(...)`: session creation returns a valid UUID; first message triggers a `delta*` then one `done` event carrying a non-empty `topic`; a second message on the same session streams without re-deriving the topic; unknown session id → clean 404 (via `get_turn_context`'s `Depends`, not a broken stream); empty message body → clean 422 (same path) — this is the concrete regression test for the empirical FastAPI/SSE finding in Critical Implementation Details
 
 #### Manual Verification:
 - `cd backend && uv run fastapi dev src/main.py`, then in another terminal: `curl -s -X POST localhost:8000/capture-sessions` to get a `session_id`, then `curl -N -X POST localhost:8000/capture-sessions/<id>/messages -H 'Content-Type: application/json' -d '{"content": "I want to talk through how TCP handshakes work"}'` and eyeball the SSE stream
@@ -589,7 +625,7 @@ Wire the screen to the store and stream client; this is the user-visible end sta
 ## Testing Strategy
 
 ### Unit Tests:
-Domain VOs/aggregates (Phase 2), application VOs (Phase 4), both commands (Phase 6) — all via `pytest`, in-memory-only, no I/O.
+Domain VOs/aggregates (Phase 2), application VOs (Phase 4), both commands (Phase 6) — all via `pytest`, in-memory-only, no I/O. Every invalid-VO-input test asserts the exact `CoreException` subclass raised (never a bare `Exception` or `pydantic.ValidationError`) — see Critical Implementation Details.
 
 ### Integration Tests:
 Full HTTP surface via `httpx.ASGITransport` (Phase 8); TUI store + SSE parser via Vitest with a fake stream (Phase 11); TUI screen via `ink-testing-library` (Phase 13).

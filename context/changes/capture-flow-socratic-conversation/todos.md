@@ -24,7 +24,7 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 2.1 Implement VO validators (non-empty + length caps) raising CoreException subclasses directly
+- [ ] 2.1 Implement VO validators (non-empty + length caps) in `model_validator(mode="after")`, raising CoreException subclasses directly — no `Field(min_length=/max_length=)`
 - [ ] 2.2 Implement CaptureSession.start()/assign_topic()
 - [ ] 2.3 Implement Message.record()
 - [ ] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green
@@ -47,7 +47,7 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 4.1 Implement ConfidencePoint validation
+- [ ] 4.1 Implement ConfidencePoint validation (manual, no `Field(min_length=...)`)
 - [ ] 4.2 Implement InMemoryMessageStore, InMemoryCaptureSessionRepository, InMemoryMessageRepository, InMemoryTranscriptQueryAdapter (shared store)
 - [ ] 4.3 Implement InMemoryUnitOfWork with snapshot-on-enter / restore-on-rollback
 - [ ] 4.4 Implement DeterministicTopicExtractionAdapter, DeterministicConfidenceAssessmentAdapter, DeterministicReplyGenerationAdapter
@@ -60,7 +60,7 @@ updated: 2026-08-30
 
 - [ ] 5.1 Create `application/capture/dto.py` — StartCaptureSessionResponseDTO, SendMessageRequestDTO, ReplyDeltaEvent, ReplyDoneEvent, ReplyStreamEvent
 - [ ] 5.2 Create `application/capture/commands/start_capture_session.py` — StartCaptureSessionCommand shell
-- [ ] 5.3 Create `application/capture/commands/send_message.py` — SendMessageCommand shell
+- [ ] 5.3 Create `application/capture/commands/send_message.py` — load_open_session_for_turn + GenerateReplyCommand shells
 
 ### Phase 6: Application commands — behavior
 
@@ -71,15 +71,16 @@ updated: 2026-08-30
 #### Automated
 
 - [ ] 6.1 Implement StartCaptureSessionCommand.handle()
-- [ ] 6.2 Implement SendMessageCommand.handle() — lazy topic assignment, guard, streamed reply, commit, done event
-- [ ] 6.3 Write unit tests: first-turn lazy-start, second-turn skip, not-found, closed-session guard (fixture-constructed), commit-after-drain, rollback-on-cancel
-- [ ] 6.4 `uv run pytest tests/unit/capture -v` green
+- [ ] 6.2 Implement load_open_session_for_turn() — content validation, session lookup/guard, no write, no UnitOfWork
+- [ ] 6.3 Implement GenerateReplyCommand.handle() — one UnitOfWork: lazy topic assignment, streamed reply, agent-message persist, single commit, done event
+- [ ] 6.4 Write unit tests: load_open_session_for_turn raises exact CoreException subclass for not-found/closed/invalid-content; GenerateReplyCommand — first-turn lazy-start, second-turn skip, commit-after-drain (one commit), rollback-on-cancel
+- [ ] 6.5 `uv run pytest tests/unit/capture -v` green
 
 ### Phase 7: HTTP adapter — stubs
 
 #### Automated
 
-- [ ] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, not yet wired
+- [ ] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, incl. `get_turn_context` Depends wrapper, not yet wired
 - [ ] 7.2 Extend `adapters/http/errors.py:EXCEPTION_STATUS_MAP` with capture-specific codes
 
 ### Phase 8: HTTP adapter — behavior
@@ -90,9 +91,9 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 8.1 Wire composition root (shared store/repos/adapters/commands) via FastAPI Depends
+- [ ] 8.1 Wire composition root (shared store/repos/adapters/commands, get_turn_context) via FastAPI Depends
 - [ ] 8.2 Register capture router in `main.py`
-- [ ] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, 404, 422)
+- [ ] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, clean 404 for unknown session, clean 422 for empty content — both via the Depends chain, not a broken stream)
 - [ ] 8.4 `uv run pytest tests/integration -v` green
 
 #### Manual
