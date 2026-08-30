@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 12
-next_step: 12.1
-next_command: /implement capture-flow-socratic-conversation phase 12
+current_phase: 13
+next_step: tests
+next_command: /unit-test capture-flow-socratic-conversation phase 13
 updated: 2026-08-31
 ---
 
@@ -134,9 +134,9 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 12.1 Add `ink-text-input` dependency
-- [ ] 12.2 Create `tui/src/screens/CaptureScreen.tsx` — component shell
-- [ ] 12.3 Update `tui/src/app.tsx` to render CaptureScreen
+- [x] 12.1 Add `ink-text-input` dependency
+- [x] 12.2 Create `tui/src/screens/CaptureScreen.tsx` — component shell
+- [x] 12.3 Update `tui/src/app.tsx` to render CaptureScreen
 
 ### Phase 13: TUI chat screen — behavior
 

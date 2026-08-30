@@ -1,5 +1,5 @@
-import { Text } from "ink";
+import CaptureScreen from "./screens/CaptureScreen.js";
 
 export default function App() {
-  return <Text>Weles TUI — bootstrap OK</Text>;
+  return <CaptureScreen />;
 }
