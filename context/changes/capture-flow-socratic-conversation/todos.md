@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 4
-next_step: unit-test
-next_command: /unit-test capture-flow-socratic-conversation phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement capture-flow-socratic-conversation phase 5
 updated: 2026-08-30
 ---
 
@@ -43,16 +43,16 @@ updated: 2026-08-30
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — c540593
 
 #### Automated
 
-- [ ] 4.1 Implement ConfidencePoint validation (manual, no `Field(min_length=...)`)
-- [ ] 4.2 Implement InMemoryMessageStore, InMemoryCaptureSessionRepository, InMemoryMessageRepository, InMemoryTranscriptQueryAdapter (shared store)
-- [ ] 4.3 Implement InMemoryUnitOfWork with snapshot-on-enter / restore-on-rollback
-- [ ] 4.4 Implement DeterministicTopicExtractionAdapter, DeterministicConfidenceAssessmentAdapter, DeterministicReplyGenerationAdapter
-- [ ] 4.5 Write contract-test suites for all 6 ports (parametrized, in-memory only)
-- [ ] 4.6 `uv run pytest tests/unit/capture -v` green
+- [x] 4.1 Implement ConfidencePoint validation (manual, no `Field(min_length=...)`)
+- [x] 4.2 Implement InMemoryMessageStore, InMemoryCaptureSessionRepository, InMemoryMessageRepository, InMemoryTranscriptQueryAdapter (shared store)
+- [x] 4.3 Implement InMemoryUnitOfWork with snapshot-on-enter / restore-on-rollback
+- [x] 4.4 Implement DeterministicTopicExtractionAdapter, DeterministicConfidenceAssessmentAdapter, DeterministicReplyGenerationAdapter
+- [x] 4.5 Write contract-test suites for all 6 ports (parametrized, in-memory only) — c540593
+- [x] 4.6 `uv run pytest tests/unit/capture -v` green
 
 ### Phase 5: Application commands — stubs
 
