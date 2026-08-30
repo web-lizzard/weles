@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 8
-next_step: 8.1
-next_command: /unit-test capture-flow-socratic-conversation phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /implement capture-flow-socratic-conversation phase 9
 updated: 2026-08-30
 ---
 
@@ -87,18 +87,18 @@ updated: 2026-08-30
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 32406f0
 
 #### Automated
 
-- [ ] 8.1 Wire composition root (shared store/repos/adapters/commands, get_turn_context) via FastAPI Depends
-- [ ] 8.2 Register capture router in `main.py`
-- [ ] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, clean 404 for unknown session, clean 422 for empty content — both via the Depends chain, not a broken stream)
-- [ ] 8.4 `uv run pytest tests/integration -v` green
+- [x] 8.1 Wire composition root (shared store/repos/adapters/commands, get_turn_context) via FastAPI Depends
+- [x] 8.2 Register capture router in `main.py`
+- [x] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, clean 404 for unknown session, clean 422 for empty content — both via the Depends chain, not a broken stream)
+- [x] 8.4 `uv run pytest tests/integration -v` green
 
 #### Manual
 
-- [ ] 8.5 Run the dev server and curl both endpoints, eyeball the SSE stream
+- [x] 8.5 Run the dev server and curl both endpoints, eyeball the SSE stream
 
 ### Phase 9: Acceptance scenarios (BDD, AC-01–AC-04)
 

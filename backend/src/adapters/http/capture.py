@@ -5,6 +5,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from fastapi.sse import EventSourceResponse
 
+from adapters.compose import (
+    get_capture_session_repository,
+    get_generate_reply_command,
+    get_start_capture_session_command,
+)
 from application.capture.commands.send_message import (
     GenerateReplyCommand,
     load_open_session_for_turn,
@@ -22,18 +27,6 @@ from domain.capture.ports import CaptureSessionRepository
 from domain.capture.value_objects import MessageContent, SessionId
 
 router = APIRouter()
-
-
-def get_capture_session_repository() -> CaptureSessionRepository:
-    raise NotImplementedError
-
-
-def get_start_capture_session_command() -> StartCaptureSessionCommand:
-    raise NotImplementedError
-
-
-def get_generate_reply_command() -> GenerateReplyCommand:
-    raise NotImplementedError
 
 
 async def get_turn_context(
