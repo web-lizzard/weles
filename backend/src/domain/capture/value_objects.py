@@ -1,7 +1,7 @@
 from enum import StrEnum
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from domain.capture.exceptions import (
     EmptyMessageContentError,
@@ -27,12 +27,18 @@ class SessionStatus(StrEnum):
 class Topic(BaseModel, frozen=True):
     value: str
 
+    @field_validator("value", mode="before")
+    @classmethod
+    def _canonicalize_value(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
     @model_validator(mode="after")
     def _validate_value(self) -> "Topic":
-        stripped = self.value.strip()
-        if not stripped:
+        if not self.value:
             raise EmptyTopicError
-        if len(stripped) > TOPIC_MAX_LENGTH:
+        if len(self.value) > TOPIC_MAX_LENGTH:
             raise TopicTooLongError
         return self
 
@@ -40,12 +46,18 @@ class Topic(BaseModel, frozen=True):
 class MessageContent(BaseModel, frozen=True):
     value: str
 
+    @field_validator("value", mode="before")
+    @classmethod
+    def _canonicalize_value(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
     @model_validator(mode="after")
     def _validate_value(self) -> "MessageContent":
-        stripped = self.value.strip()
-        if not stripped:
+        if not self.value:
             raise EmptyMessageContentError
-        if len(stripped) > MESSAGE_CONTENT_MAX_LENGTH:
+        if len(self.value) > MESSAGE_CONTENT_MAX_LENGTH:
             raise MessageContentTooLongError
         return self
 

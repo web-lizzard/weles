@@ -165,6 +165,15 @@ Artifact: `reviews/2026-08-31-r1-mutation-test-phase-2.md`
 - `R1-F2` — Message.record() allows naive local created_at
   Fix: assert `Message.record(...).created_at.tzinfo is UTC`
 
+### Review r2
+
+Artifact: `reviews/2026-08-31-r2-property-test-phase-2.md`
+
+- `R2-F1` — Topic stores trailing CR after strip-based validation
+  Fix: `"0\r"` must fail `test_R2_F1_topic_stores_canonical_stripped_value` until `Topic` normalizes on construction, then remain as regression
+- `R2-F2` — MessageContent stores trailing CR after strip-based validation
+  Fix: `"0\r"` must fail `test_R2_F2_message_content_stores_canonical_stripped_value` until `MessageContent` normalizes on construction, then remain as regression
+
 ---
 
 ## Phase 3: Application ports & in-memory adapters — stubs
