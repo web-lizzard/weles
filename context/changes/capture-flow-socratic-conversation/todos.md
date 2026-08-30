@@ -91,14 +91,14 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 8.1 Wire composition root (shared store/repos/adapters/commands, get_turn_context) via FastAPI Depends
-- [x] 8.2 Register capture router in `main.py`
-- [x] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, clean 404 for unknown session, clean 422 for empty content — both via the Depends chain, not a broken stream)
-- [x] 8.4 `uv run pytest tests/integration -v` green
+- [x] 8.1 Wire composition root (shared store/repos/adapters/commands, get_turn_context) via FastAPI Depends — e0acf77
+- [x] 8.2 Register capture router in `main.py` — e0acf77
+- [x] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, clean 404 for unknown session, clean 422 for empty content — both via the Depends chain, not a broken stream) — e0acf77
+- [x] 8.4 `uv run pytest tests/integration -v` green — e0acf77
 
 #### Manual
 
-- [x] 8.5 Run the dev server and curl both endpoints, eyeball the SSE stream
+- [x] 8.5 Run the dev server and curl both endpoints, eyeball the SSE stream — e0acf77
 
 ### Phase 9: Acceptance scenarios (BDD, AC-01–AC-04)
 
