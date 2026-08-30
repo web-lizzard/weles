@@ -2,7 +2,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast
 
-from adapters.http.capture import (
+from adapters.compose import (
     get_capture_session_repository,
     get_generate_reply_command,
     get_start_capture_session_command,
