@@ -1,0 +1,154 @@
+---
+change_id: capture-flow-socratic-conversation
+current_phase: 1
+next_step: 1.1
+next_command: /implement capture-flow-socratic-conversation phase 1
+updated: 2026-08-30
+---
+
+### Phase 1: Domain model — stubs
+
+#### Automated
+
+- [ ] 1.1 Create `domain/capture/value_objects.py` — Topic, MessageContent, MessageRole, SessionId, MessageId, SessionStatus (structure only)
+- [ ] 1.2 Create `domain/capture/capture_session.py` — CaptureSession shape + start()/assign_topic() signatures
+- [ ] 1.3 Create `domain/capture/message.py` — Message shape + record() signature
+- [ ] 1.4 Create `domain/capture/ports.py` — CaptureSessionRepository, MessageRepository Protocols
+- [ ] 1.5 Create `domain/capture/exceptions.py` — VO and aggregate-guard exceptions
+
+### Phase 2: Domain model — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 2.1 Implement VO validators (non-empty + length caps) raising CoreException subclasses directly
+- [ ] 2.2 Implement CaptureSession.start()/assign_topic()
+- [ ] 2.3 Implement Message.record()
+- [ ] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green
+
+### Phase 3: Application ports & in-memory adapters — stubs
+
+#### Automated
+
+- [ ] 3.1 Create `application/capture/value_objects.py` — TranscriptEntry, ConfidencePointKind, ConfidencePoint, ConfidenceAssessment
+- [ ] 3.2 Create `application/capture/exceptions.py` — EmptyConfidencePointError
+- [ ] 3.3 Create `application/capture/ports.py` — TopicExtractionPort, ConfidenceAssessmentPort, ReplyGenerationPort, UnitOfWork
+- [ ] 3.4 Create `application/capture/queries/transcript.py` — TranscriptQueryPort
+- [ ] 3.5 Create `adapters/out/in_memory/capture/` module shells (store, both repos, transcript query, unit of work, 3 stand-in adapters)
+
+### Phase 4: Application ports & in-memory adapters — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 4.1 Implement ConfidencePoint validation
+- [ ] 4.2 Implement InMemoryMessageStore, InMemoryCaptureSessionRepository, InMemoryMessageRepository, InMemoryTranscriptQueryAdapter (shared store)
+- [ ] 4.3 Implement InMemoryUnitOfWork with snapshot-on-enter / restore-on-rollback
+- [ ] 4.4 Implement DeterministicTopicExtractionAdapter, DeterministicConfidenceAssessmentAdapter, DeterministicReplyGenerationAdapter
+- [ ] 4.5 Write contract-test suites for all 6 ports (parametrized, in-memory only)
+- [ ] 4.6 `uv run pytest tests/unit/capture -v` green
+
+### Phase 5: Application commands — stubs
+
+#### Automated
+
+- [ ] 5.1 Create `application/capture/dto.py` — StartCaptureSessionResponseDTO, SendMessageRequestDTO, ReplyDeltaEvent, ReplyDoneEvent, ReplyStreamEvent
+- [ ] 5.2 Create `application/capture/commands/start_capture_session.py` — StartCaptureSessionCommand shell
+- [ ] 5.3 Create `application/capture/commands/send_message.py` — SendMessageCommand shell
+
+### Phase 6: Application commands — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 6.1 Implement StartCaptureSessionCommand.handle()
+- [ ] 6.2 Implement SendMessageCommand.handle() — lazy topic assignment, guard, streamed reply, commit, done event
+- [ ] 6.3 Write unit tests: first-turn lazy-start, second-turn skip, not-found, closed-session guard (fixture-constructed), commit-after-drain, rollback-on-cancel
+- [ ] 6.4 `uv run pytest tests/unit/capture -v` green
+
+### Phase 7: HTTP adapter — stubs
+
+#### Automated
+
+- [ ] 7.1 Create `adapters/http/capture.py` — route signatures for both endpoints, not yet wired
+- [ ] 7.2 Extend `adapters/http/errors.py:EXCEPTION_STATUS_MAP` with capture-specific codes
+
+### Phase 8: HTTP adapter — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 8.1 Wire composition root (shared store/repos/adapters/commands) via FastAPI Depends
+- [ ] 8.2 Register capture router in `main.py`
+- [ ] 8.3 Write integration tests via httpx.ASGITransport (creation, first-turn stream, second-turn stream, 404, 422)
+- [ ] 8.4 `uv run pytest tests/integration -v` green
+
+#### Manual
+
+- [ ] 8.5 Run the dev server and curl both endpoints, eyeball the SSE stream
+
+### Phase 9: Acceptance scenarios (BDD, AC-01–AC-04)
+
+#### Automated
+
+- [ ] 9.1 Write `tests/features/capture-flow/US-01-socratic-conversation.feature` (AC-01–AC-04, tagged)
+- [ ] 9.2 Write `tests/bdd/steps/capture.py`, import from `tests/bdd/test_features.py`
+- [ ] 9.3 `uv run pytest tests/bdd -m "capture-flow and (AC-01 or AC-02 or AC-03 or AC-04)" -v` green
+
+### Phase 10: TUI data layer — stubs
+
+#### Automated
+
+- [ ] 10.1 Create `tui/src/api/stream.ts` — ReplyStreamEvent types + function signatures
+- [ ] 10.2 Create `tui/src/store/chat.ts` — useChatStore shape/action signatures
+- [ ] 10.3 Run `pnpm generate:api` against a running dev backend; verify SSE route codegen, fall back to hand-declared types if unusable
+
+### Phase 11: TUI data layer — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 11.1 Implement SSE parsing in stream.ts (ReadableStream + TextDecoderStream)
+- [ ] 11.2 Implement startCaptureSession/sendMessage
+- [ ] 11.3 Implement useChatStore reducer logic
+- [ ] 11.4 Write Vitest unit tests: SSE parser (fake ReadableStream), store reducer
+- [ ] 11.5 `pnpm --dir tui test` green
+
+### Phase 12: TUI chat screen — stubs
+
+#### Automated
+
+- [ ] 12.1 Add `ink-text-input` dependency
+- [ ] 12.2 Create `tui/src/screens/CaptureScreen.tsx` — component shell
+- [ ] 12.3 Update `tui/src/app.tsx` to render CaptureScreen
+
+### Phase 13: TUI chat screen — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 13.1 Wire CaptureScreen to useChatStore + api/stream.ts (Static transcript, live reply line, TextInput)
+- [ ] 13.2 Write ink-testing-library interaction tests (submit, incremental deltas, final transcript, topic update)
+- [ ] 13.3 `pnpm --dir tui test` green
+
+#### Manual
+
+- [ ] 13.4 Build and run the TUI CLI against the running backend; hold a real multi-turn conversation
