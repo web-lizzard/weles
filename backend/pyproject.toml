@@ -29,12 +29,17 @@ dev = [
 package = false
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "tests"]
 testpaths = ["tests"]
 bdd_features_base_dir = "tests/features"
 asyncio_mode = "auto"
 markers = [
     "bdd: Gherkin tag applied by pytest-bdd (effort id or AC-nn)",
+    "capture-flow: capture-flow effort acceptance scenarios",
+    "AC-01: acceptance criterion 01",
+    "AC-02: acceptance criterion 02",
+    "AC-03: acceptance criterion 03",
+    "AC-04: acceptance criterion 04",
 ]
 
 [tool.ruff]
