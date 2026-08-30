@@ -33,11 +33,11 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 3.1 Create `application/capture/value_objects.py` — TranscriptEntry, ConfidencePointKind, ConfidencePoint, ConfidenceAssessment
-- [ ] 3.2 Create `application/capture/exceptions.py` — EmptyConfidencePointError
-- [ ] 3.3 Create `application/capture/ports.py` — TopicExtractionPort, ConfidenceAssessmentPort, ReplyGenerationPort, UnitOfWork
-- [ ] 3.4 Create `application/capture/queries/transcript.py` — TranscriptQueryPort
-- [ ] 3.5 Create `adapters/out/in_memory/capture/` module shells (store, both repos, transcript query, unit of work, 3 stand-in adapters)
+- [x] 3.1 Create `application/capture/value_objects.py` — TranscriptEntry, ConfidencePointKind, ConfidencePoint, ConfidenceAssessment
+- [x] 3.2 Create `application/capture/exceptions.py` — EmptyConfidencePointError
+- [x] 3.3 Create `application/capture/ports.py` — TopicExtractionPort, ConfidenceAssessmentPort, ReplyGenerationPort, UnitOfWork
+- [x] 3.4 Create `application/capture/queries/transcript.py` — TranscriptQueryPort
+- [x] 3.5 Create `adapters/out/in_memory/capture/` module shells (store, both repos, transcript query, unit of work, 3 stand-in adapters)
 
 ### Phase 4: Application ports & in-memory adapters — behavior
 
