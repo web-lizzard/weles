@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 3
-next_step: implement
-next_command: /implement capture-flow-socratic-conversation phase 3
+current_phase: 4
+next_step: unit-test
+next_command: /unit-test capture-flow-socratic-conversation phase 4
 updated: 2026-08-30
 ---
 
@@ -33,11 +33,11 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 3.1 Create `application/capture/value_objects.py` — TranscriptEntry, ConfidencePointKind, ConfidencePoint, ConfidenceAssessment
-- [x] 3.2 Create `application/capture/exceptions.py` — EmptyConfidencePointError
-- [x] 3.3 Create `application/capture/ports.py` — TopicExtractionPort, ConfidenceAssessmentPort, ReplyGenerationPort, UnitOfWork
-- [x] 3.4 Create `application/capture/queries/transcript.py` — TranscriptQueryPort
-- [x] 3.5 Create `adapters/out/in_memory/capture/` module shells (store, both repos, transcript query, unit of work, 3 stand-in adapters)
+- [x] 3.1 Create `application/capture/value_objects.py` — TranscriptEntry, ConfidencePointKind, ConfidencePoint, ConfidenceAssessment — 08e9fb4
+- [x] 3.2 Create `application/capture/exceptions.py` — EmptyConfidencePointError — 08e9fb4
+- [x] 3.3 Create `application/capture/ports.py` — TopicExtractionPort, ConfidenceAssessmentPort, ReplyGenerationPort, UnitOfWork — 08e9fb4
+- [x] 3.4 Create `application/capture/queries/transcript.py` — TranscriptQueryPort — 08e9fb4
+- [x] 3.5 Create `adapters/out/in_memory/capture/` module shells (store, both repos, transcript query, unit of work, 3 stand-in adapters) — 08e9fb4
 
 ### Phase 4: Application ports & in-memory adapters — behavior
 
