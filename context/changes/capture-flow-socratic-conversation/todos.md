@@ -10,11 +10,11 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 1.1 Create `domain/capture/value_objects.py` — Topic, MessageContent, MessageRole, SessionId, MessageId, SessionStatus (structure only)
-- [x] 1.2 Create `domain/capture/capture_session.py` — CaptureSession shape + start()/assign_topic() signatures
-- [x] 1.3 Create `domain/capture/message.py` — Message shape + record() signature
-- [x] 1.4 Create `domain/capture/ports.py` — CaptureSessionRepository, MessageRepository Protocols
-- [x] 1.5 Create `domain/capture/exceptions.py` — VO and aggregate-guard exceptions
+- [x] 1.1 Create `domain/capture/value_objects.py` — Topic, MessageContent, MessageRole, SessionId, MessageId, SessionStatus (structure only) — 7d6d619
+- [x] 1.2 Create `domain/capture/capture_session.py` — CaptureSession shape + start()/assign_topic() signatures — 7d6d619
+- [x] 1.3 Create `domain/capture/message.py` — Message shape + record() signature — 7d6d619
+- [x] 1.4 Create `domain/capture/ports.py` — CaptureSessionRepository, MessageRepository Protocols — 7d6d619
+- [x] 1.5 Create `domain/capture/exceptions.py` — VO and aggregate-guard exceptions — 7d6d619
 
 ### Phase 2: Domain model — behavior
 
