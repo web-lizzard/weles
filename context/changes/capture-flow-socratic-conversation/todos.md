@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 9
-next_step: 9.1
-next_command: /implement capture-flow-socratic-conversation phase 9
-updated: 2026-08-30
+current_phase: 10
+next_step: 10.1
+next_command: /implement capture-flow-socratic-conversation phase 10
+updated: 2026-08-31
 ---
 
 ### Phase 1: Domain model — stubs
@@ -104,9 +104,9 @@ updated: 2026-08-30
 
 #### Automated
 
-- [ ] 9.1 Write `tests/features/capture-flow/US-01-socratic-conversation.feature` (AC-01–AC-04, tagged)
-- [ ] 9.2 Write `tests/bdd/steps/capture.py`, import from `tests/bdd/test_features.py`
-- [ ] 9.3 `uv run pytest tests/bdd -m "capture-flow and (AC-01 or AC-02 or AC-03 or AC-04)" -v` green
+- [x] 9.1 Write `tests/features/capture-flow/US-01-socratic-conversation.feature` (AC-01–AC-04, tagged)
+- [x] 9.2 Write `tests/bdd/steps/capture.py`, import from `tests/bdd/test_features.py`
+- [x] 9.3 `uv run pytest tests/bdd -m "capture-flow and (AC-01 or AC-02 or AC-03 or AC-04)" -v` green
 
 ### Phase 10: TUI data layer — stubs
 
