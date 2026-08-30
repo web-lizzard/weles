@@ -24,10 +24,10 @@ updated: 2026-08-30
 
 #### Automated
 
-- [x] 2.1 Implement VO validators (non-empty + length caps) in `model_validator(mode="after")`, raising CoreException subclasses directly — no `Field(min_length=/max_length=)`
-- [x] 2.2 Implement CaptureSession.start()/assign_topic()
-- [x] 2.3 Implement Message.record()
-- [x] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green
+- [x] 2.1 Implement VO validators (non-empty + length caps) in `model_validator(mode="after")`, raising CoreException subclasses directly — no `Field(min_length=/max_length=)` — e4ad6bc
+- [x] 2.2 Implement CaptureSession.start()/assign_topic() — e4ad6bc
+- [x] 2.3 Implement Message.record() — e4ad6bc
+- [x] 2.4 `uv run pytest tests/unit/capture/test_value_objects.py tests/unit/capture/test_model.py -v` green — e4ad6bc
 
 ### Phase 3: Application ports & in-memory adapters — stubs
 
