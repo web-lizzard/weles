@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 
@@ -22,6 +22,13 @@ def test_start_creates_open_session_without_topic() -> None:
     assert session.topic is None
     assert session.status == SessionStatus.OPEN
     assert isinstance(session.created_at, datetime)
+
+
+def test_start_created_at_is_utc() -> None:
+    """R1-F1: CaptureSession.start() must stamp created_at in UTC."""
+    session = CaptureSession.start()
+
+    assert session.created_at.tzinfo is UTC
 
 
 def test_assign_topic_sets_topic_on_open_session() -> None:
@@ -53,3 +60,14 @@ def test_record_creates_message_with_given_fields() -> None:
     assert message.role == MessageRole.USER
     assert message.content == content
     assert isinstance(message.id, MessageId)
+
+
+def test_record_created_at_is_utc() -> None:
+    """R1-F2: Message.record() must stamp created_at in UTC."""
+    message = Message.record(
+        session_id=SessionId.new(),
+        role=MessageRole.USER,
+        content=MessageContent(value="hello"),
+    )
+
+    assert message.created_at.tzinfo is UTC
