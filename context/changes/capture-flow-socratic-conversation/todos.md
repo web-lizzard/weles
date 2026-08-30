@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 10
-next_step: 10.1
-next_command: /implement capture-flow-socratic-conversation phase 10
+current_phase: 11
+next_step: 11.0
+next_command: /unit-test capture-flow-socratic-conversation phase 11
 updated: 2026-08-31
 ---
 
@@ -112,9 +112,9 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 10.1 Create `tui/src/api/stream.ts` — ReplyStreamEvent types + function signatures
-- [ ] 10.2 Create `tui/src/store/chat.ts` — useChatStore shape/action signatures
-- [ ] 10.3 Run `pnpm generate:api` against a running dev backend; verify SSE route codegen, fall back to hand-declared types if unusable
+- [x] 10.1 Create `tui/src/api/stream.ts` — ReplyStreamEvent types + function signatures
+- [x] 10.2 Create `tui/src/store/chat.ts` — useChatStore shape/action signatures
+- [x] 10.3 Run `pnpm generate:api` against a running dev backend; verify SSE route codegen, fall back to hand-declared types if unusable
 
 ### Phase 11: TUI data layer — behavior
 
