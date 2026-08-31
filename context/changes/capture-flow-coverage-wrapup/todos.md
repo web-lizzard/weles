@@ -10,8 +10,8 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 1.1 Add `coverage_confidence: float` field to `ConfidenceAssessment`, bounded `Field(ge=0.0, le=1.0)` with a `description` — `application/capture/value_objects.py`
-- [x] 1.2 Add `coverage_confidence: float` field to `ReplyDoneEvent`, bounded `Field(ge=0.0, le=1.0)` — `application/capture/dto.py`
+- [x] 1.1 Add `coverage_confidence: float` field to `ConfidenceAssessment`, bounded `Field(ge=0.0, le=1.0)` with a `description` — `application/capture/value_objects.py` — 2d881f4
+- [x] 1.2 Add `coverage_confidence: float` field to `ReplyDoneEvent`, bounded `Field(ge=0.0, le=1.0)` — `application/capture/dto.py` — 2d881f4
 
 ### Phase 2: Coverage confidence — behavior
 
