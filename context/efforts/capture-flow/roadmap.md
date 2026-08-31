@@ -1,14 +1,14 @@
 ---
 effort_id: capture-flow
 created: 2026-08-29
-updated: 2026-08-29
+updated: 2026-08-31
 ---
 
 ## At a glance
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | Users can talk through a topic and have the agent probe understanding gaps | capture-flow-socratic-conversation | in_progress |
+| S-01 | Users can talk through a topic and have the agent probe understanding gaps | capture-flow-socratic-conversation | done |
 | S-02 | Users control when the conversation ends, even when the agent thinks it's done | capture-flow-coverage-wrapup | pending |
 | S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | pending |
 | S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | pending |
@@ -33,7 +33,7 @@ flowchart LR
 - **Outcome:** Users can talk through a topic and have the agent probe understanding gaps
 - **Acceptance criteria:** AC-01, AC-02, AC-03, AC-04
 - **Change ID:** capture-flow-socratic-conversation
-- **Status:** in_progress
+- **Status:** done
 
 ### S-02: Users control when the conversation ends, even when the agent thinks it's done
 
@@ -80,3 +80,5 @@ flowchart LR
 - **Parallel with:** S-05
 
 ## Done
+
+- **S-01: Users can talk through a topic and have the agent probe understanding gaps** — Archived 2026-08-31 → `context/archive/changes/2026-08-29-capture-flow-socratic-conversation/`. Lesson: —.
