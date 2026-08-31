@@ -15,6 +15,7 @@ export default function CaptureScreen() {
   const currentReply = useChatStore((state) => state.currentReply);
   const isStreaming = useChatStore((state) => state.isStreaming);
   const topic = useChatStore((state) => state.topic);
+  const coverageConfidence = useChatStore((state) => state.coverageConfidence);
   const streamError = useChatStore((state) => state.streamError);
 
   const [inputValue, setInputValue] = useState("");
@@ -60,6 +61,7 @@ export default function CaptureScreen() {
           </Text>
         )}
       </Box>
+      <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
         <UserLabel />
@@ -100,6 +102,14 @@ function TopicHeading({ topic }: { topic: string }) {
       <Text bold>Topic: {topic}</Text>
     </Box>
   );
+}
+
+function CoverageBanner({
+  coverageConfidence: _coverageConfidence,
+}: {
+  coverageConfidence: number | null;
+}) {
+  return null;
 }
 
 function StatusBar({ error }: { error: { code: string; detail: string } }) {

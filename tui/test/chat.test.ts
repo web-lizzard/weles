@@ -30,15 +30,15 @@ async function* streamEvents(
 }
 
 function failingStream(error: unknown): AsyncGenerator<ReplyStreamEvent> {
-  const iterator: AsyncIterator<ReplyStreamEvent> = {
+  const iterator = {
     next() {
       return Promise.reject(error);
     },
     [Symbol.asyncIterator]() {
       return this;
     },
-  };
-  return iterator as AsyncGenerator<ReplyStreamEvent>;
+  } as AsyncGenerator<ReplyStreamEvent>;
+  return iterator;
 }
 
 describe("useChatStore", () => {
@@ -66,6 +66,7 @@ describe("useChatStore", () => {
           messageId: "m1",
           content: "Reply",
           topic: "Topic",
+          coverageConfidence: 0,
         },
       ]),
     );
@@ -89,6 +90,7 @@ describe("useChatStore", () => {
         messageId: "m1",
         content: "Hello",
         topic: "Topic",
+        coverageConfidence: 0,
       };
     });
 
@@ -124,6 +126,7 @@ describe("useChatStore", () => {
           messageId: "m1",
           content: "Canonical server reply",
           topic: "TCP handshakes",
+          coverageConfidence: 0,
         },
       ]),
     );
@@ -196,6 +199,7 @@ describe("useChatStore", () => {
           messageId: "m1",
           content: "Ok",
           topic: "Topic",
+          coverageConfidence: 0,
         },
       ]),
     );
