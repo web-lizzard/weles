@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-draft-note
 title: Users receive a drafted note and topic synthesized from the conversation
-status: new
+status: planned
 created: 2026-08-31
 updated: 2026-08-31
 archived_at: null
