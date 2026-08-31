@@ -41,8 +41,8 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 4.1 Add `coverageConfidence: number` to `ReplyDoneEvent` and `RawReplyStreamEvent`'s done variant — `tui/src/api/stream.ts`
-- [x] 4.2 Add `coverageConfidence: number | null` to `ChatState` — `tui/src/store/chat.ts`
+- [x] 4.1 Add `coverageConfidence: number` to `ReplyDoneEvent` and `RawReplyStreamEvent`'s done variant — `tui/src/api/stream.ts` — d088012
+- [x] 4.2 Add `coverageConfidence: number | null` to `ChatState` — `tui/src/store/chat.ts` — d088012
 
 ### Phase 5: TUI data layer — behavior
 
