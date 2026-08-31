@@ -125,6 +125,24 @@ describe("sendMessage SSE parser", () => {
     );
   });
 
+  it("maps coverage_confidence to coverageConfidence on done events", async () => {
+    mockFetchWithSseChunks([
+      'data: {"type":"done","message_id":"00000000-0000-4000-8000-000000000003","content":"Hello","topic":"TCP handshakes","coverage_confidence":1.0}\n\n',
+    ]);
+
+    const events = await collectEvents("sess-1", "How does TCP work?");
+
+    expect(events).toEqual([
+      {
+        type: "done",
+        messageId: "00000000-0000-4000-8000-000000000003",
+        content: "Hello",
+        topic: "TCP handshakes",
+        coverageConfidence: 1.0,
+      },
+    ]);
+  });
+
   it("parses events when SSE lines are split across stream chunks", async () => {
     mockFetchWithSseChunks([
       'data: {"type":"delta","text":"Hel',
