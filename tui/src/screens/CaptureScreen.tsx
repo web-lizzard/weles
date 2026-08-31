@@ -15,14 +15,17 @@ export default function CaptureScreen() {
   const currentReply = useChatStore((state) => state.currentReply);
   const isStreaming = useChatStore((state) => state.isStreaming);
   const topic = useChatStore((state) => state.topic);
+  const streamError = useChatStore((state) => state.streamError);
 
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
+  const hasStreamError = streamError !== null;
   const showBrand = shouldShowWelesBrand(
     stdout.rows,
     transcript,
     hasTopic,
     isStreaming,
+    hasStreamError,
   );
   const separator = "─".repeat(
     stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
@@ -57,6 +60,7 @@ export default function CaptureScreen() {
           </Text>
         )}
       </Box>
+      {streamError !== null && <StatusBar error={streamError} />}
       <Box>
         <UserLabel />
         <TextInput
@@ -98,22 +102,38 @@ function TopicHeading({ topic }: { topic: string }) {
   );
 }
 
+function StatusBar({ error }: { error: { code: string; detail: string } }) {
+  return (
+    <Box marginY={1}>
+      <Text color="red">{error.detail}</Text>
+    </Box>
+  );
+}
+
 function shouldShowWelesBrand(
   terminalRows: number,
   transcript: TranscriptEntry[],
   hasTopic: boolean,
   isStreaming: boolean,
+  hasError: boolean,
 ): boolean {
   const rows = terminalRows > 0 ? terminalRows : DEFAULT_TERMINAL_ROWS;
   const inputBlock = 1;
   const topicBlock = hasTopic ? 2 : 0;
+  const errorBlock = hasError ? 2 : 0;
   const brandBlock = 3;
   const streamingReserve = isStreaming ? 1 : 0;
   const padding = 1;
 
   const transcriptBudget = Math.max(
     0,
-    rows - inputBlock - topicBlock - brandBlock - streamingReserve - padding,
+    rows -
+      inputBlock -
+      topicBlock -
+      errorBlock -
+      brandBlock -
+      streamingReserve -
+      padding,
   );
   const usedLines = transcript.length + streamingReserve;
 
