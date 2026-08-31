@@ -1,12 +1,14 @@
 import pytest
 
 from domain.capture.exceptions import (
+    EmptyEmbeddingError,
+    EmptyLabelError,
     EmptyMessageContentError,
     EmptySessionTopicError,
     MessageContentTooLongError,
     SessionTopicTooLongError,
 )
-from domain.capture.value_objects import MessageContent, SessionTopic
+from domain.capture.value_objects import Embedding, Label, MessageContent, SessionTopic
 
 
 def test_session_topic_empty_after_strip_raises_empty_session_topic_error() -> None:
@@ -43,3 +45,13 @@ def test_R2_F2_message_content_stores_canonical_stripped_value() -> None:
     content = MessageContent(value="0\r")
 
     assert content.value == "0"
+
+
+def test_label_empty_after_strip_raises_empty_label_error() -> None:
+    with pytest.raises(EmptyLabelError):
+        _ = Label(value="   ")
+
+
+def test_embedding_empty_values_raises_empty_embedding_error() -> None:
+    with pytest.raises(EmptyEmbeddingError):
+        _ = Embedding(values=())
