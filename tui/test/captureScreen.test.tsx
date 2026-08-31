@@ -4,6 +4,8 @@ import { sendMessage, startCaptureSession } from "../src/api/stream";
 import CaptureScreen from "../src/screens/CaptureScreen";
 import { useChatStore } from "../src/store/chat";
 
+const WELES_TAGLINE = "wisdom through questions";
+
 vi.mock("../src/api/stream", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/api/stream")>();
   return {
@@ -57,6 +59,7 @@ describe("CaptureScreen", () => {
       transcript: [],
       currentReply: "",
       isStreaming: false,
+      streamError: null,
     });
     vi.mocked(startCaptureSession).mockResolvedValue({ sessionId: "sess-1" });
     vi.mocked(sendMessage).mockReset();
@@ -152,5 +155,84 @@ describe("CaptureScreen", () => {
       f.includes("TCP handshakes"),
     );
     expect(frame).toContain("TCP handshakes");
+  });
+
+  it("displays stream error detail in a status bar when streamError is set", () => {
+    useChatStore.setState({
+      streamError: {
+        code: "capture_session_closed",
+        detail: "Session is closed",
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+
+    expect(lastFrame()).toContain("Session is closed");
+  });
+
+  it("shows status bar after an in-band error while sending a message", async () => {
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield {
+        type: "error",
+        code: "capture_session_closed",
+        detail: "Session is closed",
+      };
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    await submitMessage(stdin, "Hi");
+
+    const frame = await waitForFrame(lastFrame, (f) =>
+      f.includes("Session is closed"),
+    );
+    expect(frame).toContain("Session is closed");
+  });
+
+  it("hides status bar after the next successful send clears streamError", async () => {
+    useChatStore.setState({
+      streamError: { code: "old_error", detail: "Old problem" },
+    });
+
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield {
+        type: "done",
+        messageId: "m1",
+        content: "Ok",
+        topic: "Topic",
+      };
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    expect(lastFrame()).toContain("Old problem");
+
+    await submitMessage(stdin, "Hi");
+
+    const frame = await waitForFrame(
+      lastFrame,
+      (f) => f.includes("Ok") && !f.includes("Old problem"),
+    );
+    expect(frame).not.toContain("Old problem");
+  });
+
+  it("hides Weles brand when the error bar consumes remaining row budget", () => {
+    const transcript = Array.from({ length: 16 }, (_, index) => ({
+      role: "user" as const,
+      content: `line ${index}`,
+    }));
+
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      transcript,
+      streamError: {
+        code: "capture_session_closed",
+        detail: "Session is closed",
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain("Session is closed");
+    expect(frame).not.toContain(WELES_TAGLINE);
   });
 });
