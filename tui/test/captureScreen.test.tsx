@@ -56,6 +56,7 @@ describe("CaptureScreen", () => {
     useChatStore.setState({
       sessionId: "sess-1",
       topic: null,
+      coverageConfidence: null,
       transcript: [],
       currentReply: "",
       isStreaming: false,
@@ -76,6 +77,7 @@ describe("CaptureScreen", () => {
         messageId: "m1",
         content: "Agent reply",
         topic: "First topic",
+        coverageConfidence: 0,
       };
     });
 
@@ -99,6 +101,7 @@ describe("CaptureScreen", () => {
         messageId: "m1",
         content: "Hello",
         topic: "TCP handshakes",
+        coverageConfidence: 0,
       };
     });
 
@@ -125,6 +128,7 @@ describe("CaptureScreen", () => {
         messageId: "m1",
         content: "Canonical server reply",
         topic: "TCP handshakes",
+        coverageConfidence: 0,
       };
     });
 
@@ -145,6 +149,7 @@ describe("CaptureScreen", () => {
         messageId: "m1",
         content: "First reply",
         topic: "TCP handshakes",
+        coverageConfidence: 0,
       };
     });
 
@@ -199,6 +204,7 @@ describe("CaptureScreen", () => {
         messageId: "m1",
         content: "Ok",
         topic: "Topic",
+        coverageConfidence: 0,
       };
     });
 
