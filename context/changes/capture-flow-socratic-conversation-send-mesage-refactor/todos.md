@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 3
+current_phase: 5
+next_step: 5.1
+next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 5
 updated: 2026-08-31
 ---
 
@@ -39,23 +39,23 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 0c3f0a6
 
 #### Automated
 
-- [ ] 3.1 Add `ReplyErrorEvent`/widen union + `parseStreamEvent` handling in `stream.ts`
-- [ ] 3.2 Add `SendMessageHttpError`, parse JSON body on `!response.ok`
+- [x] 3.1 Add `ReplyErrorEvent`/widen union + `parseStreamEvent` handling in `stream.ts`
+- [x] 3.2 Add `SendMessageHttpError`, parse JSON body on `!response.ok`
 
 ### Phase 4: TUI `chat.ts` store — `streamError` state
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 747668d
 
 #### Automated
 
-- [ ] 4.1 Add `streamError` state + clear-on-send in `chat.ts`
-- [ ] 4.2 Catch in-band error event and thrown `SendMessageHttpError`/fallback in `sendUserMessage`
+- [x] 4.1 Add `streamError` state + clear-on-send in `chat.ts`
+- [x] 4.2 Catch in-band error event and thrown `SendMessageHttpError`/fallback in `sendUserMessage`
 
 ### Phase 5: TUI `CaptureScreen.tsx` — status-bar rendering
 
