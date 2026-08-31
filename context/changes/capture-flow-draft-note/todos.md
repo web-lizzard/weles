@@ -46,11 +46,11 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 4.1 Add `ReplyChunkKind` and the four chunk classes under `Field(discriminator="kind")` — `application/capture/value_objects.py`
-- [x] 4.2 Retype `ReplyGenerationPort.generate`, add `EmbeddingPort`, add `notes`/`topics`/`tags` to `UnitOfWork` — `application/capture/ports.py`
-- [x] 4.3 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` to the `ReplyStreamEvent` union — `application/capture/dto.py`
-- [x] 4.4 Wrap the deterministic adapter's output in `ReplyTextChunk` and read `chunk.text` in `GenerateReplyCommand`
-- [x] 4.5 Update `test_reply_generation_contract.py` to join `chunk.text`
+- [x] 4.1 Add `ReplyChunkKind` and the four chunk classes under `Field(discriminator="kind")` — `application/capture/value_objects.py` — d431c49
+- [x] 4.2 Retype `ReplyGenerationPort.generate`, add `EmbeddingPort`, add `notes`/`topics`/`tags` to `UnitOfWork` — `application/capture/ports.py` — d431c49
+- [x] 4.3 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` to the `ReplyStreamEvent` union — `application/capture/dto.py` — d431c49
+- [x] 4.4 Wrap the deterministic adapter's output in `ReplyTextChunk` and read `chunk.text` in `GenerateReplyCommand` — d431c49
+- [x] 4.5 Update `test_reply_generation_contract.py` to join `chunk.text` — d431c49
 
 ### Phase 5: Deterministic draft adapter — behavior
 
