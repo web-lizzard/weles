@@ -1,9 +1,20 @@
 import json
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from typing import Protocol, cast
 from uuid import UUID
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+from adapters.http.capture import router as capture_router
+from adapters.out.in_memory.capture.reply_generation import (
+    DeterministicReplyGenerationAdapter,
+)
+from application.capture.value_objects import ConfidenceAssessment, Transcript
+from domain.capture.exceptions import CaptureSessionClosedError
+from main import app
+
+from .support.in_memory_capture import InMemoryCaptureComposition
 
 
 class SseResponse(Protocol):
@@ -105,3 +116,53 @@ def test_empty_message_content_returns_clean_422_before_streaming(
 
     assert response.status_code == 422
     assert response.json()["code"] == "empty_message_content"
+
+
+class _OneChunkThenFailReplyGeneration:
+    async def generate(
+        self,
+        transcript: Transcript,
+        assessment: ConfidenceAssessment,
+    ) -> AsyncIterator[str]:
+        _ = transcript
+        _ = assessment
+        yield "partial"
+        raise CaptureSessionClosedError
+
+
+def _capture_routes_registered(application: FastAPI) -> bool:
+    return any(
+        getattr(route, "path", None) == "/capture-sessions"
+        for route in application.routes
+    )
+
+
+def test_core_exception_during_generation_yields_in_band_error_event() -> None:
+    if not _capture_routes_registered(app):
+        app.include_router(capture_router)
+
+    composition = InMemoryCaptureComposition.create()
+    composition.reply_generation = cast(
+        DeterministicReplyGenerationAdapter,
+        cast(object, _OneChunkThenFailReplyGeneration()),
+    )
+    app.dependency_overrides.update(composition.dependency_overrides())
+    try:
+        with TestClient(app, raise_server_exceptions=False) as client:
+            session_id = _create_session(client)
+
+            with client.stream(
+                "POST",
+                f"/capture-sessions/{session_id}/messages",
+                json={"content": "Hello"},
+            ) as response:
+                assert response.status_code == 200
+                events = _collect_sse_events(cast(SseResponse, response))
+    finally:
+        app.dependency_overrides.clear()
+
+    assert len(events) == 2
+    assert events[0]["type"] == "delta"
+    assert events[1]["type"] == "error"
+    assert events[1]["code"] == CaptureSessionClosedError.code()
+    assert events[1]["detail"]
