@@ -82,12 +82,12 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 7.1 Implement the three repository adapters (dict-backed, deep-copy snapshots)
-- [x] 7.2 Implement `DeterministicEmbeddingAdapter.embed`
-- [x] 7.3 Implement `InMemoryUnitOfWork` snapshot/restore across all five stores
-- [x] 7.4 Write contract suites for `NoteRepository`, `TopicRepository`, `TagRepository` and `EmbeddingPort`
-- [x] 7.5 Write the `InMemoryUnitOfWork` rollback test covering notes, topics and tags
-- [x] 7.6 `cd backend && uv run pytest` green
+- [x] 7.1 Implement the three repository adapters (dict-backed, deep-copy snapshots) — d756eff
+- [x] 7.2 Implement `DeterministicEmbeddingAdapter.embed` — d756eff
+- [x] 7.3 Implement `InMemoryUnitOfWork` snapshot/restore across all five stores — d756eff
+- [x] 7.4 Write contract suites for `NoteRepository`, `TopicRepository`, `TagRepository` and `EmbeddingPort` — d756eff
+- [x] 7.5 Write the `InMemoryUnitOfWork` rollback test covering notes, topics and tags — d756eff
+- [x] 7.6 `cd backend && uv run pytest` green — d756eff
 
 ### Phase 8: Vocabulary resolver and command routing — stubs
 
