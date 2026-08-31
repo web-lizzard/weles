@@ -62,9 +62,14 @@ class GenerateReplyCommand:
             await uow.messages.add(user_message)
 
             if session.topic is None:
-                topic = await self._topic_extraction.extract(content)
-                session.assign_topic(topic)
-                await uow.capture_sessions.save(session)
+                persisted = await uow.capture_sessions.get(session.id)
+                if persisted is not None and persisted.topic is not None:
+                    topic = persisted.topic
+                    session.assign_topic(topic)
+                else:
+                    topic = await self._topic_extraction.extract(content)
+                    session.assign_topic(topic)
+                    await uow.capture_sessions.save(session)
             else:
                 topic = session.topic
 
@@ -79,10 +84,12 @@ class GenerateReplyCommand:
             reply_content = MessageContent(value=full_text)
             agent_message = Message.record(session.id, MessageRole.AGENT, reply_content)
             await uow.messages.add(agent_message)
-            await uow.commit()
 
-            yield ReplyDoneEvent(
+            done_event = ReplyDoneEvent(
                 message_id=agent_message.id.value,
                 content=reply_content.value,
                 topic=topic.value,
             )
+            await uow.commit()
+
+        yield done_event
