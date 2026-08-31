@@ -7,6 +7,69 @@ const WELES_TAGLINE = "wisdom through questions";
 const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
 
+export default function CaptureScreen() {
+  const { stdout } = useStdout();
+  const initSession = useChatStore((state) => state.initSession);
+  const sendUserMessage = useChatStore((state) => state.sendUserMessage);
+  const transcript = useChatStore((state) => state.transcript);
+  const currentReply = useChatStore((state) => state.currentReply);
+  const isStreaming = useChatStore((state) => state.isStreaming);
+  const topic = useChatStore((state) => state.topic);
+
+  const [inputValue, setInputValue] = useState("");
+  const hasTopic = topic !== null;
+  const showBrand = shouldShowWelesBrand(
+    stdout.rows,
+    transcript,
+    hasTopic,
+    isStreaming,
+  );
+  const separator = "─".repeat(
+    stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
+  );
+
+  useEffect(() => {
+    void initSession();
+  }, [initSession]);
+
+  const handleSubmit = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed || isStreaming) {
+      return;
+    }
+    setInputValue("");
+    void sendUserMessage(trimmed);
+  };
+
+  return (
+    <Box flexDirection="column">
+      {showBrand && <WelesBrand separator={separator} />}
+      {hasTopic && <TopicHeading topic={topic} />}
+      <Box flexDirection="column" flexGrow={1}>
+        {transcript.map((entry, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: append-only transcript entries have no stable id
+          <TranscriptLine key={index} entry={entry} />
+        ))}
+        {currentReply.length > 0 && (
+          <Text>
+            <WelesAgentLabel />
+            {currentReply}
+          </Text>
+        )}
+      </Box>
+      <Box>
+        <UserLabel />
+        <TextInput
+          value={inputValue}
+          onChange={setInputValue}
+          onSubmit={handleSubmit}
+          focus={!isStreaming}
+        />
+      </Box>
+    </Box>
+  );
+}
+
 function UserLabel() {
   return <Text>🧑 You: </Text>;
 }
@@ -76,65 +139,5 @@ function TranscriptLine({ entry }: { entry: TranscriptEntry }) {
       <WelesAgentLabel />
       {entry.content}
     </Text>
-  );
-}
-
-export default function CaptureScreen() {
-  const { stdout } = useStdout();
-  const initSession = useChatStore((state) => state.initSession);
-  const sendUserMessage = useChatStore((state) => state.sendUserMessage);
-  const transcript = useChatStore((state) => state.transcript);
-  const currentReply = useChatStore((state) => state.currentReply);
-  const isStreaming = useChatStore((state) => state.isStreaming);
-  const topic = useChatStore((state) => state.topic);
-
-  const [inputValue, setInputValue] = useState("");
-  const hasTopic = topic !== null;
-  const showBrand =
-    inputValue.length === 0 &&
-    shouldShowWelesBrand(stdout.rows, transcript, hasTopic, isStreaming);
-  const separator = "─".repeat(
-    stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
-  );
-
-  useEffect(() => {
-    void initSession();
-  }, [initSession]);
-
-  const handleSubmit = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed || isStreaming) {
-      return;
-    }
-    setInputValue("");
-    void sendUserMessage(trimmed);
-  };
-
-  return (
-    <Box flexDirection="column">
-      {showBrand && <WelesBrand separator={separator} />}
-      {hasTopic && <TopicHeading topic={topic} />}
-      <Box flexDirection="column" flexGrow={1}>
-        {transcript.map((entry, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: append-only transcript entries have no stable id
-          <TranscriptLine key={index} entry={entry} />
-        ))}
-        {currentReply.length > 0 && (
-          <Text>
-            <WelesAgentLabel />
-            {currentReply}
-          </Text>
-        )}
-      </Box>
-      <Box>
-        <UserLabel />
-        <TextInput
-          value={inputValue}
-          onChange={setInputValue}
-          onSubmit={handleSubmit}
-          focus={!isStreaming}
-        />
-      </Box>
-    </Box>
   );
 }

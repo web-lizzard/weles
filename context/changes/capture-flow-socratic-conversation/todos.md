@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 6
-next_step: epilogue
-next_command: /archive capture-flow-socratic-conversation
+current_phase: 13
+next_step: 13.5
+next_command: /implement capture-flow-socratic-conversation phase 13
 updated: 2026-08-31
 ---
 
@@ -170,3 +170,9 @@ updated: 2026-08-31
 #### Manual
 
 - [x] 13.4 Build and run the TUI CLI against the running backend; hold a real multi-turn conversation — 663dfad
+
+#### Triage
+
+- [ ] 13.5 R5-F1 CaptureScreen renders transcript via `.map()`, not Ink's `Static`
+- [ ] 13.6 R5-F2 Undocumented branding/layout code shipped in a manual-verification commit
+- [x] 13.7 R5-F3 stream.ts and CaptureScreen.tsx declare private helpers before public exports
