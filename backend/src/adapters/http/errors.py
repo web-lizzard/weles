@@ -13,6 +13,12 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "empty_message_content": 422,
     "message_content_too_long": 422,
     "empty_confidence_point": 422,
+    "empty_label": 422,
+    "label_too_long": 422,
+    "empty_embedding": 422,
+    "empty_note_content": 422,
+    "note_content_too_long": 422,
+    "session_note_already_drafted": 409,
 }
 
 
