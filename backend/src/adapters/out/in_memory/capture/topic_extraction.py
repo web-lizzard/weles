@@ -1,11 +1,11 @@
-from domain.capture.value_objects import MessageContent, Topic
+from domain.capture.value_objects import MessageContent, SessionTopic
 
 _MAX_TOPIC_WORDS = 8
 _DEFAULT_TOPIC = "Untitled capture session"
 
 
 class DeterministicTopicExtractionAdapter:
-    async def extract(self, first_message: MessageContent) -> Topic:
+    async def extract(self, first_message: MessageContent) -> SessionTopic:
         words = first_message.value.strip().split()
         value = " ".join(words[:_MAX_TOPIC_WORDS]) or _DEFAULT_TOPIC
-        return Topic(value=value)
+        return SessionTopic(value=value)

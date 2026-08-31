@@ -1,11 +1,11 @@
 from domain.exceptions import CoreException
 
 
-class EmptyTopicError(CoreException):
+class EmptySessionTopicError(CoreException):
     pass
 
 
-class TopicTooLongError(CoreException):
+class SessionTopicTooLongError(CoreException):
     pass
 
 

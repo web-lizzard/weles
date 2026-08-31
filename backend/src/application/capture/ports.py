@@ -3,11 +3,11 @@ from typing import Protocol
 
 from application.capture.value_objects import ConfidenceAssessment, Transcript
 from domain.capture.ports import CaptureSessionRepository, MessageRepository
-from domain.capture.value_objects import MessageContent, Topic
+from domain.capture.value_objects import MessageContent, SessionTopic
 
 
 class TopicExtractionPort(Protocol):
-    async def extract(self, first_message: MessageContent) -> Topic: ...
+    async def extract(self, first_message: MessageContent) -> SessionTopic: ...
 
 
 class ConfidenceAssessmentPort(Protocol):

@@ -5,12 +5,12 @@ from pydantic import BaseModel, field_validator, model_validator
 
 from domain.capture.exceptions import (
     EmptyMessageContentError,
-    EmptyTopicError,
+    EmptySessionTopicError,
     MessageContentTooLongError,
-    TopicTooLongError,
+    SessionTopicTooLongError,
 )
 
-TOPIC_MAX_LENGTH = 200
+SESSION_TOPIC_MAX_LENGTH = 200
 MESSAGE_CONTENT_MAX_LENGTH = 4000
 
 
@@ -24,7 +24,7 @@ class SessionStatus(StrEnum):
     CLOSED = "closed"
 
 
-class Topic(BaseModel, frozen=True):
+class SessionTopic(BaseModel, frozen=True):
     value: str
 
     @field_validator("value", mode="before")
@@ -35,11 +35,11 @@ class Topic(BaseModel, frozen=True):
         return value
 
     @model_validator(mode="after")
-    def _validate_value(self) -> "Topic":
+    def _validate_value(self) -> "SessionTopic":
         if not self.value:
-            raise EmptyTopicError
-        if len(self.value) > TOPIC_MAX_LENGTH:
-            raise TopicTooLongError
+            raise EmptySessionTopicError
+        if len(self.value) > SESSION_TOPIC_MAX_LENGTH:
+            raise SessionTopicTooLongError
         return self
 
 

@@ -3,12 +3,12 @@ from datetime import UTC, datetime
 from pydantic import BaseModel
 
 from domain.capture.exceptions import SessionTopicAlreadyAssignedError
-from domain.capture.value_objects import SessionId, SessionStatus, Topic
+from domain.capture.value_objects import SessionId, SessionStatus, SessionTopic
 
 
 class CaptureSession(BaseModel):
     id: SessionId
-    topic: Topic | None
+    topic: SessionTopic | None
     status: SessionStatus
     created_at: datetime
 
@@ -21,7 +21,7 @@ class CaptureSession(BaseModel):
             created_at=datetime.now(UTC),
         )
 
-    def assign_topic(self, topic: Topic) -> None:
+    def assign_topic(self, topic: SessionTopic) -> None:
         if self.topic is not None:
             raise SessionTopicAlreadyAssignedError
         self.topic = topic
