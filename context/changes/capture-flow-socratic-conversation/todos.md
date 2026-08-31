@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
 current_phase: 6
-next_step: 6.6
-next_command: /implement capture-flow-socratic-conversation phase 6
+next_step: epilogue
+next_command: /archive capture-flow-socratic-conversation
 updated: 2026-08-31
 ---
 
@@ -90,8 +90,8 @@ updated: 2026-08-31
 
 #### Triage
 
-- [ ] 6.6 Yield ReplyDoneEvent after UnitOfWork async with block exits, not from within it
-- [ ] 6.7 Guard topic assignment when a topic is already persisted despite stale in-memory session
+- [x] 6.6 Yield ReplyDoneEvent after UnitOfWork async with block exits, not from within it — 9d6baea
+- [x] 6.7 Guard topic assignment when a topic is already persisted despite stale in-memory session — 9d6baea
 
 ### Phase 7: HTTP adapter — stubs
 
