@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 7
-next_step: tests
-next_command: /unit-test capture-flow-draft-note phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /implement capture-flow-draft-note phase 8
 updated: 2026-09-01
 ---
 
@@ -78,16 +78,16 @@ updated: 2026-09-01
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1391687
 
 #### Automated
 
-- [ ] 7.1 Implement the three repository adapters (dict-backed, deep-copy snapshots)
-- [ ] 7.2 Implement `DeterministicEmbeddingAdapter.embed`
-- [ ] 7.3 Implement `InMemoryUnitOfWork` snapshot/restore across all five stores
-- [ ] 7.4 Write contract suites for `NoteRepository`, `TopicRepository`, `TagRepository` and `EmbeddingPort`
-- [ ] 7.5 Write the `InMemoryUnitOfWork` rollback test covering notes, topics and tags
-- [ ] 7.6 `cd backend && uv run pytest` green
+- [x] 7.1 Implement the three repository adapters (dict-backed, deep-copy snapshots)
+- [x] 7.2 Implement `DeterministicEmbeddingAdapter.embed`
+- [x] 7.3 Implement `InMemoryUnitOfWork` snapshot/restore across all five stores
+- [x] 7.4 Write contract suites for `NoteRepository`, `TopicRepository`, `TagRepository` and `EmbeddingPort`
+- [x] 7.5 Write the `InMemoryUnitOfWork` rollback test covering notes, topics and tags
+- [x] 7.6 `cd backend && uv run pytest` green
 
 ### Phase 8: Vocabulary resolver and command routing — stubs
 

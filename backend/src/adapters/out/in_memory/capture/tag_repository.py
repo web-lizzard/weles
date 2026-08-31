@@ -9,11 +9,11 @@ class InMemoryTagRepository:
     def __init__(self) -> None:
         self._tags: dict[UUID, Tag] = {}
 
-    async def add(self, _tag: Tag) -> None:
-        raise NotImplementedError
+    async def add(self, tag: Tag) -> None:
+        self._tags[tag.id.value] = tag
 
-    async def get(self, _tag_id: TagId) -> Tag | None:
-        raise NotImplementedError
+    async def get(self, tag_id: TagId) -> Tag | None:
+        return self._tags.get(tag_id.value)
 
     def snapshot(self) -> dict[UUID, Tag]:
         return copy.deepcopy(self._tags)
