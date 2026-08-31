@@ -25,10 +25,7 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
-from application.capture.commands.send_message import (
-    GenerateReplyCommand,
-    load_open_session_for_turn,
-)
+from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.dto import ReplyDoneEvent, ReplyStreamEvent
 from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
@@ -44,42 +41,41 @@ from domain.capture.value_objects import (
 )
 
 
-async def test_load_open_session_for_turn_raises_not_found_for_unknown_id() -> None:
-    repository = InMemoryCaptureSessionRepository()
+async def test_guard_session_raises_not_found_for_unknown_id() -> None:
+    stack = _make_command_stack()
 
     with pytest.raises(CaptureSessionNotFoundError):
-        _ = await load_open_session_for_turn(
-            SessionId.new(),
-            "Hello there",
-            repository,
+        _ = await stack.command.guard_session(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType]
+            SessionId.new(), "Hello there"
         )
 
 
-async def test_load_open_session_for_turn_raises_closed_for_closed_session() -> None:
-    repository = InMemoryCaptureSessionRepository()
+async def test_guard_session_raises_closed_for_closed_session() -> None:
+    stack = _make_command_stack()
     closed_session = CaptureSession(
         id=SessionId.new(),
         topic=Topic(value="TCP handshakes"),
         status=SessionStatus.CLOSED,
         created_at=datetime.now(UTC),
     )
-    await repository.save(closed_session)
+    await stack.session_repo.save(closed_session)
 
     with pytest.raises(CaptureSessionClosedError):
-        _ = await load_open_session_for_turn(
+        _ = await stack.command.guard_session(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType]
             closed_session.id,
             "Can we continue?",
-            repository,
         )
 
 
-async def test_load_open_session_for_turn_raises_for_blank_content() -> None:
-    repository = InMemoryCaptureSessionRepository()
+async def test_guard_session_raises_for_blank_content() -> None:
+    stack = _make_command_stack()
     session = CaptureSession.start()
-    await repository.save(session)
+    await stack.session_repo.save(session)
 
     with pytest.raises(EmptyMessageContentError):
-        _ = await load_open_session_for_turn(session.id, "   ", repository)
+        _ = await stack.command.guard_session(  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType]
+            session.id, "   "
+        )
 
 
 async def test_generate_reply_assigns_topic_on_first_turn_and_streams_done_event() -> (
@@ -90,7 +86,13 @@ async def test_generate_reply_assigns_topic_on_first_turn_and_streams_done_event
     await stack.session_repo.save(session)
     content = MessageContent(value="I want to talk through TCP handshakes")
 
-    events = [event async for event in stack.command.handle(session, content)]
+    events = [
+        event
+        async for event in stack.command.handle(
+            session.id,  # pyright: ignore[reportArgumentType]
+            content,
+        )
+    ]
 
     assert any(event.type == "delta" for event in events)
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
@@ -108,7 +110,13 @@ async def test_generate_reply_skips_topic_extraction_on_second_turn() -> None:
     await stack.session_repo.save(session)
     content = MessageContent(value="Tell me more about the three-way handshake")
 
-    events = [event async for event in stack.command.handle(session, content)]
+    events = [
+        event
+        async for event in stack.command.handle(
+            session.id,  # pyright: ignore[reportArgumentType]
+            content,
+        )
+    ]
 
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
     assert done.topic == "Existing topic"
@@ -124,7 +132,13 @@ async def test_generate_reply_commits_once_after_stream_drains() -> None:
     await stack.session_repo.save(session)
     content = MessageContent(value="Walk me through congestion control")
 
-    events = [event async for event in stack.command.handle(session, content)]
+    events = [
+        event
+        async for event in stack.command.handle(
+            session.id,  # pyright: ignore[reportArgumentType]
+            content,
+        )
+    ]
 
     assert stack.uow.commit_count == 1
     assert any(isinstance(event, ReplyDoneEvent) for event in events)
@@ -140,7 +154,10 @@ async def test_generate_reply_rollback_leaves_nothing_persisted_on_early_close()
 
     stream = cast(
         AsyncGenerator[ReplyStreamEvent, None],
-        stack.command.handle(session, content),
+        stack.command.handle(
+            session.id,  # pyright: ignore[reportArgumentType]
+            content,
+        ),
     )
     async with aclosing(stream) as events:
         _ = await anext(events)
@@ -149,6 +166,39 @@ async def test_generate_reply_rollback_leaves_nothing_persisted_on_early_close()
     persisted = await stack.session_repo.get(session.id)
     assert persisted is not None
     assert persisted.topic is None
+
+
+async def test_generate_reply_raises_not_found_if_session_missing_at_handle_time() -> (
+    None
+):
+    stack = _make_command_stack()
+    content = MessageContent(value="Hello")
+
+    with pytest.raises(CaptureSessionNotFoundError):
+        async for _ in stack.command.handle(
+            SessionId.new(),  # pyright: ignore[reportArgumentType]
+            content,
+        ):
+            pass
+
+
+async def test_generate_reply_raises_closed_if_session_closed_at_handle_time() -> None:
+    stack = _make_command_stack()
+    closed = CaptureSession(
+        id=SessionId.new(),
+        topic=None,
+        status=SessionStatus.CLOSED,
+        created_at=datetime.now(UTC),
+    )
+    await stack.session_repo.save(closed)
+    content = MessageContent(value="Hello")
+
+    with pytest.raises(CaptureSessionClosedError):
+        async for _ in stack.command.handle(
+            closed.id,  # pyright: ignore[reportArgumentType]
+            content,
+        ):
+            pass
 
 
 class _CommandStack:
@@ -179,7 +229,8 @@ def _make_command_stack() -> _CommandStack:
     message_repo = InMemoryMessageRepository(store)
     uow = _SpyUnitOfWork(session_repo, message_repo, store)
     command = GenerateReplyCommand(
-        uow=uow,  # pyright: ignore[reportArgumentType]
+        capture_sessions=session_repo,  # pyright: ignore[reportCallIssue]
+        uow=uow,
         transcript_query=InMemoryTranscriptQueryAdapter(store),
         topic_extraction=DeterministicTopicExtractionAdapter(),
         confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
