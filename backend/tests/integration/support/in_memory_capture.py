@@ -31,7 +31,7 @@ from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
-from application.capture.ports import UnitOfWork
+from application.capture.ports import ConfidenceAssessmentPort, UnitOfWork
 
 
 @dataclass
@@ -41,7 +41,7 @@ class InMemoryCaptureComposition:
     messages: InMemoryMessageRepository
     transcript_query: InMemoryTranscriptQueryAdapter
     topic_extraction: DeterministicTopicExtractionAdapter
-    confidence_assessment: DeterministicConfidenceAssessmentAdapter
+    confidence_assessment: ConfidenceAssessmentPort
     reply_generation: DeterministicReplyGenerationAdapter
 
     @classmethod

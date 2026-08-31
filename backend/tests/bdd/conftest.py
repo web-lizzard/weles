@@ -21,12 +21,18 @@ def _capture_routes_registered(application: FastAPI) -> bool:
 
 
 @pytest.fixture
-def capture_client() -> Iterator[TestClient]:
+def capture_composition() -> Iterator[InMemoryCaptureComposition]:
+    yield InMemoryCaptureComposition.create()
+
+
+@pytest.fixture
+def capture_client(
+    capture_composition: InMemoryCaptureComposition,
+) -> Iterator[TestClient]:
     if not _capture_routes_registered(app):
         app.include_router(capture_router)
 
-    composition = InMemoryCaptureComposition.create()
-    app.dependency_overrides.update(composition.dependency_overrides())
+    app.dependency_overrides.update(capture_composition.dependency_overrides())
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()

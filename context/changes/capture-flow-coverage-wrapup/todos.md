@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-coverage-wrapup
-current_phase: 3
-next_step: 3.1
-next_command: /implement capture-flow-coverage-wrapup phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement capture-flow-coverage-wrapup phase 4
 updated: 2026-08-31
 ---
 
@@ -31,11 +31,11 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 3.1 Widen `InMemoryCaptureComposition.confidence_assessment`'s type to `ConfidenceAssessmentPort`
-- [ ] 3.2 Expose the composition to BDD steps via `tests/bdd/conftest.py`
-- [ ] 3.3 Write `tests/features/capture-flow/US-02-coverage-wrapup.feature` (AC-05, AC-06 scenarios)
-- [ ] 3.4 Write `tests/bdd/steps/coverage_wrapup.py`; register `bdd.steps.coverage_wrapup` in `tests/bdd/test_features.py`'s `pytest_plugins`
-- [ ] 3.5 `uv run pytest tests/bdd -m "capture-flow and (AC-05 or AC-06)" -v` green
+- [x] 3.1 Widen `InMemoryCaptureComposition.confidence_assessment`'s type to `ConfidenceAssessmentPort`
+- [x] 3.2 Expose the composition to BDD steps via `tests/bdd/conftest.py`
+- [x] 3.3 Write `tests/features/capture-flow/US-02-coverage-wrapup.feature` (AC-05, AC-06 scenarios)
+- [x] 3.4 Write `tests/bdd/steps/coverage_wrapup.py`; register `bdd.steps.coverage_wrapup` in `tests/bdd/test_features.py`'s `pytest_plugins`
+- [x] 3.5 `uv run pytest tests/bdd -m "capture-flow and (AC-05 or AC-06)" -v` green
 
 ### Phase 4: TUI data layer — stubs
 
