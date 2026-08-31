@@ -5,6 +5,8 @@ import CaptureScreen from "../src/screens/CaptureScreen";
 import { useChatStore } from "../src/store/chat";
 
 const WELES_TAGLINE = "wisdom through questions";
+const COVERAGE_BANNER_TEXT =
+  "✓ This topic seems well covered — keep going, or wrap up when you're ready.";
 
 vi.mock("../src/api/stream", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/api/stream")>();
@@ -240,5 +242,109 @@ describe("CaptureScreen", () => {
 
     expect(frame).toContain("Session is closed");
     expect(frame).not.toContain(WELES_TAGLINE);
+  });
+
+  it("shows the coverage wrap-up banner when coverageConfidence is fully covered", () => {
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      coverageConfidence: 1,
+      transcript: [{ role: "user", content: "How does TCP work?" }],
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+
+    expect(lastFrame()).toContain(COVERAGE_BANNER_TEXT);
+  });
+
+  it("shows the coverage wrap-up banner when coverageConfidence is above one", () => {
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      coverageConfidence: 1.25,
+      transcript: [{ role: "user", content: "How does TCP work?" }],
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+
+    expect(lastFrame()).toContain(COVERAGE_BANNER_TEXT);
+  });
+
+  it("hides the coverage wrap-up banner when coverageConfidence is null or below one", () => {
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      coverageConfidence: null,
+      transcript: [{ role: "user", content: "How does TCP work?" }],
+    });
+
+    const { lastFrame, rerender } = render(<CaptureScreen />);
+    expect(lastFrame()).not.toContain(COVERAGE_BANNER_TEXT);
+
+    useChatStore.setState({ coverageConfidence: 0.75 });
+    rerender(<CaptureScreen />);
+    expect(lastFrame()).not.toContain(COVERAGE_BANNER_TEXT);
+  });
+
+  it("renders the coverage wrap-up banner after transcript content", () => {
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      coverageConfidence: 1,
+      transcript: [{ role: "user", content: "Transcript marker line" }],
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+    const transcriptIndex = frame.indexOf("Transcript marker line");
+    const bannerIndex = frame.indexOf(COVERAGE_BANNER_TEXT);
+
+    expect(transcriptIndex).toBeGreaterThanOrEqual(0);
+    expect(bannerIndex).toBeGreaterThan(transcriptIndex);
+  });
+
+  it("hides Weles brand when the coverage banner consumes remaining row budget", () => {
+    const transcript = Array.from({ length: 16 }, (_, index) => ({
+      role: "user" as const,
+      content: `line ${index}`,
+    }));
+
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      coverageConfidence: 1,
+      transcript,
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain(COVERAGE_BANNER_TEXT);
+    expect(frame).not.toContain(WELES_TAGLINE);
+  });
+
+  it("still accepts a new message while the coverage wrap-up banner is visible", async () => {
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      coverageConfidence: 1,
+      transcript: [{ role: "user", content: "First question" }],
+    });
+
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield {
+        type: "done",
+        messageId: "m2",
+        content: "Follow-up reply",
+        topic: "TCP handshakes",
+        coverageConfidence: 1,
+      };
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    expect(lastFrame()).toContain(COVERAGE_BANNER_TEXT);
+
+    await submitMessage(stdin, "Follow-up question");
+
+    const frame = await waitForFrame(lastFrame, (f) =>
+      f.includes("Follow-up question"),
+    );
+    expect(frame).toContain(COVERAGE_BANNER_TEXT);
+    expect(frame).toContain("Follow-up question");
+    expect(sendMessage).toHaveBeenCalled();
   });
 });
