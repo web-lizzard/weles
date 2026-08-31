@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-coverage-wrapup
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test capture-flow-coverage-wrapup phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement capture-flow-coverage-wrapup phase 3
 updated: 2026-08-31
 ---
 
@@ -17,15 +17,15 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — c02544f
 
 #### Automated
 
-- [ ] 2.1 Set `coverage_confidence` on every `ConfidenceAssessment` returned by `DeterministicConfidenceAssessmentAdapter` (`0.0`)
-- [ ] 2.2 Thread `coverage_confidence=assessment.coverage_confidence` into `GenerateReplyCommand.handle()`'s `done_event` construction
-- [ ] 2.3 Extend `_make_command_stack` with an injectable `confidence_assessment` param; add `_AllSolidConfidenceAssessmentAdapter` test double (`coverage_confidence=1.0`)
-- [ ] 2.4 Write unit tests: `ConfidenceAssessment.coverage_confidence` field bounds, `done_event.coverage_confidence` threading, AC-06 guarantee (session stays `OPEN`, a following `send_message` still succeeds)
-- [ ] 2.5 `uv run pytest tests/unit/capture -v` green
+- [x] 2.1 Set `coverage_confidence` on every `ConfidenceAssessment` returned by `DeterministicConfidenceAssessmentAdapter` (`0.0`)
+- [x] 2.2 Thread `coverage_confidence=assessment.coverage_confidence` into `GenerateReplyCommand.handle()`'s `done_event` construction
+- [x] 2.3 Extend `_make_command_stack` with an injectable `confidence_assessment` param; add `_AllSolidConfidenceAssessmentAdapter` test double (`coverage_confidence=1.0`)
+- [x] 2.4 Write unit tests: `ConfidenceAssessment.coverage_confidence` field bounds, `done_event.coverage_confidence` threading, AC-06 guarantee (session stays `OPEN`, a following `send_message` still succeeds)
+- [x] 2.5 `uv run pytest tests/unit/capture -v` green
 
 ### Phase 3: Acceptance scenarios (BDD, AC-05 & AC-06)
 

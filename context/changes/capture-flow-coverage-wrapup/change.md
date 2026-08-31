@@ -3,7 +3,7 @@ change_id: capture-flow-coverage-wrapup
 title: Users control when the conversation ends, even when the agent thinks it's done
 status: implementing
 created: 2026-08-31
-updated: 2026-08-31T17:05:00Z
+updated: 2026-08-31
 archived_at: null
 origin: overview-thougts
 adr_refs:
