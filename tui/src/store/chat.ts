@@ -68,6 +68,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
             ],
             currentReply: "",
             topic: event.topic,
+            coverageConfidence: event.coverageConfidence,
           }));
         }
       }
