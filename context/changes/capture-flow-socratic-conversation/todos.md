@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
 current_phase: 13
-next_step: 13.4
-next_command: /implement capture-flow-socratic-conversation phase 13
+next_step:
+next_command: /archive capture-flow-socratic-conversation
 updated: 2026-08-31
 ---
 
@@ -159,4 +159,4 @@ updated: 2026-08-31
 
 #### Manual
 
-- [ ] 13.4 Build and run the TUI CLI against the running backend; hold a real multi-turn conversation
+- [x] 13.4 Build and run the TUI CLI against the running backend; hold a real multi-turn conversation — 663dfad
