@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-coverage-wrapup
-current_phase: 5
-next_step: tests
-next_command: /unit-test capture-flow-coverage-wrapup phase 5
+current_phase: 7
+next_step: 7.1
+next_command: /unit-test capture-flow-coverage-wrapup phase 7
 updated: 2026-08-31
 ---
 
@@ -48,20 +48,20 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a78f8b0
 
 #### Automated
 
-- [ ] 5.1 Implement `parseStreamEvent`'s `done`-branch `coverageConfidence` parsing — `tui/src/api/stream.ts`
-- [ ] 5.2 Update the chat store's `done`-branch `set(...)` to include `coverageConfidence` — `tui/src/store/chat.ts`
-- [ ] 5.3 Write Vitest tests: SSE parser and store reducer cover `coverageConfidence`
-- [ ] 5.4 `pnpm --dir tui test` green
+- [x] 5.1 Implement `parseStreamEvent`'s `done`-branch `coverageConfidence` parsing — `tui/src/api/stream.ts`
+- [x] 5.2 Update the chat store's `done`-branch `set(...)` to include `coverageConfidence` — `tui/src/store/chat.ts`
+- [x] 5.3 Write Vitest tests: SSE parser and store reducer cover `coverageConfidence`
+- [x] 5.4 `pnpm --dir tui test` green
 
 ### Phase 6: TUI screen — stubs
 
 #### Automated
 
-- [ ] 6.1 Add `CoverageBanner` placeholder component (returns `null`), wired in between the transcript `Box` and the `streamError`/input rows — `tui/src/screens/CaptureScreen.tsx`
+- [x] 6.1 Add `CoverageBanner` placeholder component (returns `null`), wired in between the transcript `Box` and the `streamError`/input rows — `tui/src/screens/CaptureScreen.tsx` — 273ec95
 
 ### Phase 7: TUI screen — behavior
 
