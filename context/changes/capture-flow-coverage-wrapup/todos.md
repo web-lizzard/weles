@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-coverage-wrapup
 current_phase: 7
-next_step: 7.1
-next_command: /unit-test capture-flow-coverage-wrapup phase 7
+next_step: done
+next_command: /archive capture-flow-coverage-wrapup
 updated: 2026-08-31
 ---
 
@@ -52,10 +52,10 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 5.1 Implement `parseStreamEvent`'s `done`-branch `coverageConfidence` parsing — `tui/src/api/stream.ts`
-- [x] 5.2 Update the chat store's `done`-branch `set(...)` to include `coverageConfidence` — `tui/src/store/chat.ts`
-- [x] 5.3 Write Vitest tests: SSE parser and store reducer cover `coverageConfidence`
-- [x] 5.4 `pnpm --dir tui test` green
+- [x] 5.1 Implement `parseStreamEvent`'s `done`-branch `coverageConfidence` parsing — `tui/src/api/stream.ts` — acb6402
+- [x] 5.2 Update the chat store's `done`-branch `set(...)` to include `coverageConfidence` — `tui/src/store/chat.ts` — acb6402
+- [x] 5.3 Write Vitest tests: SSE parser and store reducer cover `coverageConfidence` — a78f8b0
+- [x] 5.4 `pnpm --dir tui test` green — acb6402
 
 ### Phase 6: TUI screen — stubs
 
@@ -67,15 +67,15 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e85ffe3
 
 #### Automated
 
-- [ ] 7.1 Implement the real `CoverageBanner` (green banner text, shown when `coverageConfidence >= 1`)
-- [ ] 7.2 Extend `shouldShowWelesBrand`'s row-budget calculation with a `bannerBlock` term
-- [ ] 7.3 Write `ink-testing-library` tests: banner shown/hidden per `coverageConfidence`
-- [ ] 7.4 `pnpm --dir tui test` green
+- [x] 7.1 Implement the real `CoverageBanner` (green banner text, shown when `coverageConfidence >= 1`) — 4db6682
+- [x] 7.2 Extend `shouldShowWelesBrand`'s row-budget calculation with a `bannerBlock` term — 4db6682
+- [x] 7.3 Write `ink-testing-library` tests: banner shown/hidden per `coverageConfidence` — e85ffe3
+- [x] 7.4 `pnpm --dir tui test` green — 4db6682
 
 #### Manual
 
-- [ ] 7.5 Run the TUI CLI against the running backend, hold a multi-turn conversation, confirm the banner stays absent and nothing else regresses
+- [x] 7.5 Run the TUI CLI against the running backend, hold a multi-turn conversation, confirm the banner stays absent and nothing else regresses — 4db6682
