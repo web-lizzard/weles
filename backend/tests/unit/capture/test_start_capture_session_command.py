@@ -7,6 +7,9 @@ from adapters.out.in_memory.capture.message_repository import (
     InMemoryMessageRepository,
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
+from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
+from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
@@ -18,7 +21,14 @@ async def test_handle_creates_and_persists_bare_session() -> None:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
-    uow = InMemoryUnitOfWork(session_repo, message_repo, store)
+    uow = InMemoryUnitOfWork(
+        session_repo,
+        message_repo,
+        store,
+        InMemoryNoteRepository(),
+        InMemoryTopicRepository(),
+        InMemoryTagRepository(),
+    )
     command = StartCaptureSessionCommand(uow)  # pyright: ignore[reportArgumentType]
 
     response = await command.handle()
