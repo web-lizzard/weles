@@ -46,6 +46,7 @@ describe("useChatStore", () => {
     useChatStore.setState({
       sessionId: "sess-1",
       topic: null,
+      coverageConfidence: null,
       transcript: [],
       currentReply: "",
       isStreaming: false,
@@ -94,6 +95,24 @@ describe("useChatStore", () => {
     await useChatStore.getState().sendUserMessage("Hi");
 
     expect(useChatStore.getState().currentReply).toBe("");
+  });
+
+  it("sets coverageConfidence when a done event is received", async () => {
+    vi.mocked(sendMessage).mockImplementation(() =>
+      streamEvents([
+        {
+          type: "done",
+          messageId: "m1",
+          content: "Reply",
+          topic: "Topic",
+          coverageConfidence: 0.75,
+        },
+      ]),
+    );
+
+    await useChatStore.getState().sendUserMessage("My question");
+
+    expect(useChatStore.getState().coverageConfidence).toBe(0.75);
   });
 
   it("uses server done content for the agent transcript entry and sets topic", async () => {
