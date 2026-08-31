@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
-current_phase: 1
-next_step: 1.6
-next_command: /implement capture-flow-socratic-conversation-send-mesage-refactor phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 2
 updated: 2026-08-31
 ---
 
@@ -22,7 +22,7 @@ updated: 2026-08-31
 
 #### Manual
 
-- [ ] 1.6 Curl unknown-session repro against dev server, confirm clean 404 JSON
+- [x] 1.6 Curl unknown-session repro against dev server, confirm clean 404 JSON — b20a14f
 
 ### Phase 2: In-band `CoreException` → `ReplyErrorEvent`
 
