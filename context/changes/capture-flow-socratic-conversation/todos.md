@@ -63,8 +63,8 @@ updated: 2026-08-31
 
 #### Triage
 
-- [x] 4.7 InMemoryUnitOfWork must snapshot/restore via public repository and store methods
-- [x] 4.8 ConfidencePoint.note must canonicalize strip(note) on construction
+- [x] 4.7 InMemoryUnitOfWork must snapshot/restore via public repository and store methods — 7c83932
+- [x] 4.8 ConfidencePoint.note must canonicalize strip(note) on construction — 7c83932
 
 ### Phase 5: Application commands — stubs
 
