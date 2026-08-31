@@ -36,8 +36,16 @@ _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
 _reply_generation = DeterministicReplyGenerationAdapter()
 
 
-def _unit_of_work() -> InMemoryUnitOfWork:
-    return InMemoryUnitOfWork(_capture_session_repository, _message_repository)
+def _unit_of_work() -> UnitOfWork:
+    return cast(
+        UnitOfWork,
+        cast(
+            object,
+            InMemoryUnitOfWork(
+                _capture_session_repository, _message_repository, _store
+            ),
+        ),
+    )
 
 
 def get_capture_session_repository() -> CaptureSessionRepository:
@@ -45,14 +53,12 @@ def get_capture_session_repository() -> CaptureSessionRepository:
 
 
 def get_start_capture_session_command() -> StartCaptureSessionCommand:
-    return StartCaptureSessionCommand(
-        uow=cast(UnitOfWork, cast(object, _unit_of_work()))
-    )
+    return StartCaptureSessionCommand(uow=_unit_of_work())
 
 
 def get_generate_reply_command() -> GenerateReplyCommand:
     return GenerateReplyCommand(
-        uow=cast(UnitOfWork, cast(object, _unit_of_work())),
+        uow=_unit_of_work(),
         transcript_query=_transcript_query,
         topic_extraction=_topic_extraction,
         confidence_assessment=_confidence_assessment,

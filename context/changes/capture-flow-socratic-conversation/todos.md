@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
-current_phase: 13
-next_step:
-next_command: /archive capture-flow-socratic-conversation
+current_phase: 6
+next_step: 6.6
+next_command: /implement capture-flow-socratic-conversation phase 6
 updated: 2026-08-31
 ---
 
@@ -31,10 +31,10 @@ updated: 2026-08-31
 
 #### Triage
 
-- [x] 2.5 R1-F1 CaptureSession.start() allows naive local created_at — 6ec2483
-- [x] 2.6 R1-F2 Message.record() allows naive local created_at — 6ec2483
-- [x] 2.7 R2-F1 Topic stores trailing CR after strip-based validation — d9d1592
-- [x] 2.8 R2-F2 MessageContent stores trailing CR after strip-based validation — d9d1592
+- [x] 2.5 CaptureSession.start() must use UTC created_at — 6ec2483
+- [x] 2.6 Message.record() must use UTC created_at — 6ec2483
+- [x] 2.7 Topic must canonicalize strip(value) on construction — d9d1592
+- [x] 2.8 MessageContent must canonicalize strip(value) on construction — d9d1592
 
 ### Phase 3: Application ports & in-memory adapters — stubs
 
@@ -61,6 +61,11 @@ updated: 2026-08-31
 - [x] 4.5 Write contract-test suites for all 6 ports (parametrized, in-memory only) — c540593
 - [x] 4.6 `uv run pytest tests/unit/capture -v` green — 26d6ae7
 
+#### Triage
+
+- [x] 4.7 InMemoryUnitOfWork must snapshot/restore via public repository and store methods
+- [x] 4.8 ConfidencePoint.note must canonicalize strip(note) on construction
+
 ### Phase 5: Application commands — stubs
 
 #### Automated
@@ -82,6 +87,11 @@ updated: 2026-08-31
 - [x] 6.3 Implement GenerateReplyCommand.handle() — one UnitOfWork: lazy topic assignment, streamed reply, agent-message persist, single commit, done event — 6e7de42
 - [x] 6.4 Write unit tests: load_open_session_for_turn raises exact CoreException subclass for not-found/closed/invalid-content; GenerateReplyCommand — first-turn lazy-start, second-turn skip, commit-after-drain (one commit), rollback-on-cancel — 6e7de42
 - [x] 6.5 `uv run pytest tests/unit/capture -v` green — 6e7de42
+
+#### Triage
+
+- [ ] 6.6 Yield ReplyDoneEvent after UnitOfWork async with block exits, not from within it
+- [ ] 6.7 Guard topic assignment when a topic is already persisted despite stale in-memory session
 
 ### Phase 7: HTTP adapter — stubs
 

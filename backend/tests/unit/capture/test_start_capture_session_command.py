@@ -18,7 +18,7 @@ async def test_handle_creates_and_persists_bare_session() -> None:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
-    uow = InMemoryUnitOfWork(session_repo, message_repo)
+    uow = InMemoryUnitOfWork(session_repo, message_repo, store)
     command = StartCaptureSessionCommand(uow)  # pyright: ignore[reportArgumentType]
 
     response = await command.handle()

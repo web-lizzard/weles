@@ -60,7 +60,7 @@ class InMemoryCaptureComposition:
         )
 
     def unit_of_work(self) -> InMemoryUnitOfWork:
-        return InMemoryUnitOfWork(self.capture_sessions, self.messages)
+        return InMemoryUnitOfWork(self.capture_sessions, self.messages, self.store)
 
     def dependency_overrides(
         self,
