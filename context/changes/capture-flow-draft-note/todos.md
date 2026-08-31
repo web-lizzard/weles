@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 5
-next_step: 5.1
-next_command: /unit-test capture-flow-draft-note phase 5
-updated: 2026-09-01
+current_phase: 6
+next_step: 6.1
+next_command: /implement capture-flow-draft-note phase 6
+updated: 2026-09-02
 ---
 
 ### Phase 1: Rename `Topic` to `SessionTopic`
@@ -56,13 +56,13 @@ updated: 2026-09-01
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f0abf27
 
 #### Automated
 
-- [ ] 5.1 Add the confirmation-phrase set and the drafting branch to `DeterministicReplyGenerationAdapter` (`reply` → `topic` → `tag`* → `note`*)
-- [ ] 5.2 Write contract-test assertions for chunk kinds and stream ordering, both for a drafting and a non-drafting transcript
-- [ ] 5.3 `cd backend && uv run pytest` green
+- [x] 5.1 Add the confirmation-phrase set and the drafting branch to `DeterministicReplyGenerationAdapter` (`reply` → `topic` → `tag`* → `note`*)
+- [x] 5.2 Write contract-test assertions for chunk kinds and stream ordering, both for a drafting and a non-drafting transcript — f0abf27
+- [x] 5.3 `cd backend && uv run pytest` green
 
 ### Phase 6: In-memory persistence and UnitOfWork — stubs
 
