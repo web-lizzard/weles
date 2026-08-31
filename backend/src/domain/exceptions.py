@@ -1,5 +1,5 @@
 import re
-from typing import ClassVar
+from typing import ClassVar, override
 
 
 class CoreException(Exception):
@@ -13,6 +13,12 @@ class CoreException(Exception):
     @classmethod
     def code(cls) -> str:
         return cls._code
+
+    @override
+    def __str__(self) -> str:
+        if self.args:
+            return super().__str__()
+        return self.code().replace("_", " ")
 
 
 _TRAILING_SUFFIXES = ("Error", "Exception")

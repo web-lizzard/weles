@@ -24,6 +24,12 @@ class ReplyDoneEvent(BaseModel):
     topic: str
 
 
+class ReplyErrorEvent(BaseModel):
+    type: Literal["error"] = "error"
+    code: str
+    detail: str
+
+
 ReplyStreamEvent = Annotated[
-    ReplyDeltaEvent | ReplyDoneEvent, Field(discriminator="type")
+    ReplyDeltaEvent | ReplyDoneEvent | ReplyErrorEvent, Field(discriminator="type")
 ]
