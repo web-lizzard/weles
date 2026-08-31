@@ -22,6 +22,10 @@ class ReplyDoneEvent(BaseModel):
     message_id: UUID
     content: str
     topic: str
+    coverage_confidence: float = Field(
+        ge=0.0,
+        le=1.0,
+    )
 
 
 class ReplyErrorEvent(BaseModel):

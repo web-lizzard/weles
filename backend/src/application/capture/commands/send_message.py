@@ -81,6 +81,7 @@ class GenerateReplyCommand:
                 message_id=agent_message.id.value,
                 content=reply_content.value,
                 topic=topic.value,
+                coverage_confidence=assessment.coverage_confidence,
             )
             await uow.commit()
 

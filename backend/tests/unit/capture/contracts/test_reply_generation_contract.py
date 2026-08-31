@@ -34,7 +34,8 @@ async def test_generate_yields_chunks_that_join_into_a_nonempty_reply(
         points=[
             ConfidencePoint(kind=ConfidencePointKind.SOLID, note="knows the basics"),
             ConfidencePoint(kind=ConfidencePointKind.SHAKY, note="retransmission"),
-        ]
+        ],
+        coverage_confidence=0.0,
     )
 
     chunks = [chunk async for chunk in adapter.generate(transcript, assessment)]

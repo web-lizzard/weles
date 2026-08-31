@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from application.capture.exceptions import EmptyConfidencePointError
 from domain.capture.value_objects import MessageContent, MessageRole
@@ -39,3 +39,11 @@ class ConfidencePoint(BaseModel, frozen=True):
 
 class ConfidenceAssessment(BaseModel, frozen=True):
     points: list[ConfidencePoint]
+    coverage_confidence: float = Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "How fully the agent judges the topic covered as of this turn, "
+            "0.0-1.0; 1.0 means fully covered."
+        ),
+    )
