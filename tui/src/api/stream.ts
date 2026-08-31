@@ -136,5 +136,6 @@ function parseStreamEvent(json: string): ReplyStreamEvent {
     messageId: raw.message_id,
     content: raw.content,
     topic: raw.topic,
-  } as ReplyDoneEvent;
+    coverageConfidence: raw.coverage_confidence,
+  };
 }
