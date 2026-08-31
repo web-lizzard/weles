@@ -27,3 +27,27 @@ class CaptureSessionClosedError(CoreException):
 
 class SessionTopicAlreadyAssignedError(CoreException):
     pass
+
+
+class EmptyLabelError(CoreException):
+    pass
+
+
+class LabelTooLongError(CoreException):
+    pass
+
+
+class EmptyEmbeddingError(CoreException):
+    pass
+
+
+class EmptyNoteContentError(CoreException):
+    pass
+
+
+class NoteContentTooLongError(CoreException):
+    pass
+
+
+class SessionNoteAlreadyDraftedError(CoreException):
+    pass

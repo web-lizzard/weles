@@ -12,6 +12,8 @@ from domain.capture.exceptions import (
 
 SESSION_TOPIC_MAX_LENGTH = 200
 MESSAGE_CONTENT_MAX_LENGTH = 4000
+LABEL_MAX_LENGTH = 120
+NOTE_CONTENT_MAX_LENGTH = 20000
 
 
 class MessageRole(StrEnum):
@@ -22,6 +24,12 @@ class MessageRole(StrEnum):
 class SessionStatus(StrEnum):
     OPEN = "open"
     CLOSED = "closed"
+
+
+class NoteStatus(StrEnum):
+    DRAFT = "draft"
+    APPROVED = "approved"
+    DISCARDED = "discarded"
 
 
 class SessionTopic(BaseModel, frozen=True):
@@ -75,4 +83,40 @@ class MessageId(BaseModel, frozen=True):
 
     @classmethod
     def new(cls) -> "MessageId":
+        return cls(value=uuid4())
+
+
+class Label(BaseModel, frozen=True):
+    value: str
+
+
+class Embedding(BaseModel, frozen=True):
+    values: tuple[float, ...]
+
+
+class NoteContent(BaseModel, frozen=True):
+    value: str
+
+
+class NoteId(BaseModel, frozen=True):
+    value: UUID
+
+    @classmethod
+    def new(cls) -> "NoteId":
+        return cls(value=uuid4())
+
+
+class TopicId(BaseModel, frozen=True):
+    value: UUID
+
+    @classmethod
+    def new(cls) -> "TopicId":
+        return cls(value=uuid4())
+
+
+class TagId(BaseModel, frozen=True):
+    value: UUID
+
+    @classmethod
+    def new(cls) -> "TagId":
         return cls(value=uuid4())
