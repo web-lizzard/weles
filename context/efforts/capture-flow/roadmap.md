@@ -10,7 +10,7 @@ updated: 2026-08-31
 |----|---------|-----------|--------|
 | S-01 | Users can talk through a topic and have the agent probe understanding gaps | capture-flow-socratic-conversation | done |
 | S-02 | Users control when the conversation ends, even when the agent thinks it's done | capture-flow-coverage-wrapup | done |
-| S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | pending |
+| S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | in_progress |
 | S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | pending |
 | S-05 | Users' topics and tags stay deduplicated through reuse | capture-flow-tag-dedup | pending |
 | S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | pending |
@@ -49,7 +49,7 @@ flowchart LR
 - **Outcome:** Users can abandon a capture session and leave no trace
 - **Acceptance criteria:** AC-07
 - **Change ID:** capture-flow-abandon-session
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01
 - **Parallel with:** S-02
 
