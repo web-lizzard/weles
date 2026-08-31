@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
 current_phase: 13
-next_step: 13.5
-next_command: /implement capture-flow-socratic-conversation phase 13
+next_step: ""
+next_command: /archive capture-flow-socratic-conversation
 updated: 2026-08-31
 ---
 
@@ -173,6 +173,6 @@ updated: 2026-08-31
 
 #### Triage
 
-- [ ] 13.5 R5-F1 CaptureScreen renders transcript via `.map()`, not Ink's `Static`
-- [ ] 13.6 R5-F2 Undocumented branding/layout code shipped in a manual-verification commit
+- [ ] 13.5 R5-F1 CaptureScreen renders transcript via `.map()`, not Ink's `Static` - DISMISSED
+- [ ] 13.6 R5-F2 Undocumented branding/layout code shipped in a manual-verification commit - DISMISSED
 - [x] 13.7 R5-F3 stream.ts and CaptureScreen.tsx declare private helpers before public exports — 18d8bac
