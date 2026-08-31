@@ -58,6 +58,7 @@ def get_start_capture_session_command() -> StartCaptureSessionCommand:
 
 def get_generate_reply_command() -> GenerateReplyCommand:
     return GenerateReplyCommand(
+        capture_sessions=_capture_session_repository,
         uow=_unit_of_work(),
         transcript_query=_transcript_query,
         topic_extraction=_topic_extraction,

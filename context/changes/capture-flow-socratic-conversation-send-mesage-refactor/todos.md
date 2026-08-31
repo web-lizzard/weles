@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
 current_phase: 1
-next_step: 1.1
-next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 1
+next_step: 1.6
+next_command: /implement capture-flow-socratic-conversation-send-mesage-refactor phase 1
 updated: 2026-08-31
 ---
 
@@ -10,15 +10,15 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f1766f5
 
 #### Automated
 
-- [ ] 1.1 Add `guard_session` + `capture_sessions` param to `GenerateReplyCommand`; delete `load_open_session_for_turn`
-- [ ] 1.2 Change `handle` to `handle(session_id, content)`, loading and re-validating its own session; drop the R4-F1 re-read
-- [ ] 1.3 Wire `capture_sessions` into `compose.get_generate_reply_command`
-- [ ] 1.4 Rewire `get_turn_context` + route to depend on `get_generate_reply_command` and call `guard_session`/`handle` with `session_id`
-- [ ] 1.5 Update `tests/integration/support/in_memory_capture.py`'s override factory for the new constructor signature
+- [x] 1.1 Add `guard_session` + `capture_sessions` param to `GenerateReplyCommand`; delete `load_open_session_for_turn`
+- [x] 1.2 Change `handle` to `handle(session_id, content)`, loading and re-validating its own session; drop the R4-F1 re-read
+- [x] 1.3 Wire `capture_sessions` into `compose.get_generate_reply_command`
+- [x] 1.4 Rewire `get_turn_context` + route to depend on `get_generate_reply_command` and call `guard_session`/`handle` with `session_id`
+- [x] 1.5 Update `tests/integration/support/in_memory_capture.py`'s override factory for the new constructor signature
 
 #### Manual
 

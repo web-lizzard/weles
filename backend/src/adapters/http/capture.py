@@ -6,14 +6,10 @@ from fastapi import APIRouter, Depends
 from fastapi.sse import EventSourceResponse
 
 from adapters.compose import (
-    get_capture_session_repository,
     get_generate_reply_command,
     get_start_capture_session_command,
 )
-from application.capture.commands.send_message import (
-    GenerateReplyCommand,
-    load_open_session_for_turn,
-)
+from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
@@ -22,8 +18,6 @@ from application.capture.dto import (
     SendMessageRequestDTO,
     StartCaptureSessionResponseDTO,
 )
-from domain.capture.capture_session import CaptureSession
-from domain.capture.ports import CaptureSessionRepository
 from domain.capture.value_objects import MessageContent, SessionId
 
 router = APIRouter()
@@ -32,15 +26,9 @@ router = APIRouter()
 async def get_turn_context(
     session_id: UUID,
     body: SendMessageRequestDTO,
-    capture_sessions: Annotated[
-        CaptureSessionRepository, Depends(get_capture_session_repository)
-    ],
-) -> tuple[CaptureSession, MessageContent]:
-    return await load_open_session_for_turn(
-        SessionId(value=session_id),
-        body.content,
-        capture_sessions,
-    )
+    command: Annotated[GenerateReplyCommand, Depends(get_generate_reply_command)],
+) -> MessageContent:
+    return await command.guard_session(SessionId(value=session_id), body.content)
 
 
 @router.post("/capture-sessions")
@@ -57,9 +45,9 @@ async def start_capture_session(
     response_class=EventSourceResponse,
 )
 async def send_message(
-    turn: Annotated[tuple[CaptureSession, MessageContent], Depends(get_turn_context)],
+    session_id: UUID,
+    content: Annotated[MessageContent, Depends(get_turn_context)],
     command: Annotated[GenerateReplyCommand, Depends(get_generate_reply_command)],
 ) -> AsyncIterator[ReplyStreamEvent]:
-    session, content = turn
-    async for event in command.handle(session, content):
+    async for event in command.handle(SessionId(value=session_id), content):
         yield event

@@ -23,53 +23,45 @@ from domain.capture.value_objects import (
 )
 
 
-async def load_open_session_for_turn(
-    session_id: SessionId,
-    raw_content: str,
-    capture_sessions: CaptureSessionRepository,
-) -> tuple[CaptureSession, MessageContent]:
-    content = MessageContent(value=raw_content)
-    session = await capture_sessions.get(session_id)
-    if session is None:
-        raise CaptureSessionNotFoundError
-    if session.status != SessionStatus.OPEN:
-        raise CaptureSessionClosedError
-    return session, content
-
-
 class GenerateReplyCommand:
     def __init__(
         self,
+        capture_sessions: CaptureSessionRepository,
         uow: UnitOfWork,
         transcript_query: TranscriptQueryPort,
         topic_extraction: TopicExtractionPort,
         confidence_assessment: ConfidenceAssessmentPort,
         reply_generation: ReplyGenerationPort,
     ) -> None:
+        self._capture_sessions: CaptureSessionRepository = capture_sessions
         self._uow: UnitOfWork = uow
         self._transcript_query: TranscriptQueryPort = transcript_query
         self._topic_extraction: TopicExtractionPort = topic_extraction
         self._confidence_assessment: ConfidenceAssessmentPort = confidence_assessment
         self._reply_generation: ReplyGenerationPort = reply_generation
 
+    async def guard_session(
+        self, session_id: SessionId, raw_content: str
+    ) -> MessageContent:
+        content = MessageContent(value=raw_content)
+        _ = await self._get_open_session(self._capture_sessions, session_id)
+        return content
+
     async def handle(
         self,
-        session: CaptureSession,
+        session_id: SessionId,
         content: MessageContent,
     ) -> AsyncIterator[ReplyStreamEvent]:
         async with self._uow as uow:
+            session = await self._get_open_session(uow.capture_sessions, session_id)
+
             user_message = Message.record(session.id, MessageRole.USER, content)
             await uow.messages.add(user_message)
 
             if session.topic is None:
-                persisted = await uow.capture_sessions.get(session.id)
-                if persisted is not None and persisted.topic is not None:
-                    topic = persisted.topic
-                    session.assign_topic(topic)
-                else:
-                    topic = await self._topic_extraction.extract(content)
-                    session.assign_topic(topic)
-                    await uow.capture_sessions.save(session)
+                topic = await self._topic_extraction.extract(content)
+                session.assign_topic(topic)
+                await uow.capture_sessions.save(session)
             else:
                 topic = session.topic
 
@@ -93,3 +85,15 @@ class GenerateReplyCommand:
             await uow.commit()
 
         yield done_event
+
+    async def _get_open_session(
+        self,
+        capture_sessions: CaptureSessionRepository,
+        session_id: SessionId,
+    ) -> CaptureSession:
+        session = await capture_sessions.get(session_id)
+        if session is None:
+            raise CaptureSessionNotFoundError
+        if session.status != SessionStatus.OPEN:
+            raise CaptureSessionClosedError
+        return session

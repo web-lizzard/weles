@@ -77,6 +77,7 @@ class InMemoryCaptureComposition:
 
         def override_generate_reply_command() -> GenerateReplyCommand:
             return GenerateReplyCommand(
+                capture_sessions=composition.capture_sessions,
                 uow=cast(UnitOfWork, cast(object, composition.unit_of_work())),
                 transcript_query=composition.transcript_query,
                 topic_extraction=composition.topic_extraction,
