@@ -60,9 +60,9 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 5.1 Add the confirmation-phrase set and the drafting branch to `DeterministicReplyGenerationAdapter` (`reply` → `topic` → `tag`* → `note`*)
+- [x] 5.1 Add the confirmation-phrase set and the drafting branch to `DeterministicReplyGenerationAdapter` (`reply` → `topic` → `tag`* → `note`*) — eecf429
 - [x] 5.2 Write contract-test assertions for chunk kinds and stream ordering, both for a drafting and a non-drafting transcript — f0abf27
-- [x] 5.3 `cd backend && uv run pytest` green
+- [x] 5.3 `cd backend && uv run pytest` green — eecf429
 
 ### Phase 6: In-memory persistence and UnitOfWork — stubs
 
