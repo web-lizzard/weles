@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 3
-next_step: tests
-next_command: /unit-test capture-flow-draft-note phase 3
-updated: 2026-08-31
+current_phase: 5
+next_step: 5.1
+next_command: /unit-test capture-flow-draft-note phase 5
+updated: 2026-09-01
 ---
 
 ### Phase 1: Rename `Topic` to `SessionTopic`
@@ -31,26 +31,26 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — cb07401
 
 #### Automated
 
-- [ ] 3.1 Implement the `Label`, `Embedding` and `NoteContent` validators
-- [ ] 3.2 Implement `Topic.mint`, `Tag.mint` and `Note.draft` (extracting `topic_id` and `tag_ids`)
-- [ ] 3.3 Implement `CaptureSession.draft_note()` with the closed-session and already-drafted guards
-- [ ] 3.4 Add the six new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [ ] 3.5 Write unit tests: value-object validation, the three factories, both guards, exception-mapping exhaustiveness
-- [ ] 3.6 `cd backend && uv run pytest` green
+- [x] 3.1 Implement the `Label`, `Embedding` and `NoteContent` validators
+- [x] 3.2 Implement `Topic.mint`, `Tag.mint` and `Note.draft` (extracting `topic_id` and `tag_ids`)
+- [x] 3.3 Implement `CaptureSession.draft_note()` with the closed-session and already-drafted guards
+- [x] 3.4 Add the six new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [x] 3.5 Write unit tests: value-object validation, the three factories, both guards, exception-mapping exhaustiveness
+- [x] 3.6 `cd backend && uv run pytest` green
 
 ### Phase 4: Chunk protocol and SSE events — stubs
 
 #### Automated
 
-- [ ] 4.1 Add `ReplyChunkKind` and the four chunk classes under `Field(discriminator="kind")` — `application/capture/value_objects.py`
-- [ ] 4.2 Retype `ReplyGenerationPort.generate`, add `EmbeddingPort`, add `notes`/`topics`/`tags` to `UnitOfWork` — `application/capture/ports.py`
-- [ ] 4.3 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` to the `ReplyStreamEvent` union — `application/capture/dto.py`
-- [ ] 4.4 Wrap the deterministic adapter's output in `ReplyTextChunk` and read `chunk.text` in `GenerateReplyCommand`
-- [ ] 4.5 Update `test_reply_generation_contract.py` to join `chunk.text`
+- [x] 4.1 Add `ReplyChunkKind` and the four chunk classes under `Field(discriminator="kind")` — `application/capture/value_objects.py`
+- [x] 4.2 Retype `ReplyGenerationPort.generate`, add `EmbeddingPort`, add `notes`/`topics`/`tags` to `UnitOfWork` — `application/capture/ports.py`
+- [x] 4.3 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` to the `ReplyStreamEvent` union — `application/capture/dto.py`
+- [x] 4.4 Wrap the deterministic adapter's output in `ReplyTextChunk` and read `chunk.text` in `GenerateReplyCommand`
+- [x] 4.5 Update `test_reply_generation_contract.py` to join `chunk.text`
 
 ### Phase 5: Deterministic draft adapter — behavior
 

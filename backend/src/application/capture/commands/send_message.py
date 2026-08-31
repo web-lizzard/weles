@@ -8,6 +8,7 @@ from application.capture.ports import (
     UnitOfWork,
 )
 from application.capture.queries.transcript import TranscriptQueryPort
+from application.capture.value_objects import ReplyTextChunk
 from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
@@ -70,8 +71,9 @@ class GenerateReplyCommand:
 
             full_text = ""
             async for chunk in self._reply_generation.generate(transcript, assessment):
-                full_text += chunk
-                yield ReplyDeltaEvent(text=chunk)
+                if isinstance(chunk, ReplyTextChunk):
+                    full_text += chunk.text
+                    yield ReplyDeltaEvent(text=chunk.text)
 
             reply_content = MessageContent(value=full_text)
             agent_message = Message.record(session.id, MessageRole.AGENT, reply_content)

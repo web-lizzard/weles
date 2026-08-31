@@ -34,6 +34,36 @@ class ReplyErrorEvent(BaseModel):
     detail: str
 
 
+class DraftTopicEvent(BaseModel):
+    type: Literal["draft_topic"] = "draft_topic"
+    label: str
+
+
+class DraftTagEvent(BaseModel):
+    type: Literal["draft_tag"] = "draft_tag"
+    label: str
+
+
+class DraftDeltaEvent(BaseModel):
+    type: Literal["draft_delta"] = "draft_delta"
+    text: str
+
+
+class DraftDoneEvent(BaseModel):
+    type: Literal["draft_done"] = "draft_done"
+    note_id: UUID
+    topic: str
+    content: str
+    tags: list[str]
+
+
 ReplyStreamEvent = Annotated[
-    ReplyDeltaEvent | ReplyDoneEvent | ReplyErrorEvent, Field(discriminator="type")
+    ReplyDeltaEvent
+    | ReplyDoneEvent
+    | ReplyErrorEvent
+    | DraftTopicEvent
+    | DraftTagEvent
+    | DraftDeltaEvent
+    | DraftDoneEvent,
+    Field(discriminator="type"),
 ]

@@ -10,7 +10,12 @@ from adapters.http.capture import router as capture_router
 from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
-from application.capture.value_objects import ConfidenceAssessment, Transcript
+from application.capture.value_objects import (
+    ConfidenceAssessment,
+    ReplyChunk,
+    ReplyTextChunk,
+    Transcript,
+)
 from domain.capture.exceptions import CaptureSessionClosedError
 from main import app
 
@@ -123,10 +128,10 @@ class _OneChunkThenFailReplyGeneration:
         self,
         transcript: Transcript,
         assessment: ConfidenceAssessment,
-    ) -> AsyncIterator[str]:
+    ) -> AsyncIterator[ReplyChunk]:
         _ = transcript
         _ = assessment
-        yield "partial"
+        yield ReplyTextChunk(text="partial")
         raise CaptureSessionClosedError
 
 
