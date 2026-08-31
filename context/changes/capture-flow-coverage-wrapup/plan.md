@@ -44,7 +44,7 @@ Backend first (score computation, then its regression lock at both the command l
 
 ## Critical Implementation Details
 
-`coverage_confidence` is deliberately a float even though today's computation is binary (`1.0` or `0.0`) — the field name and type leave room for a future assessment adapter to return a graded score without a contract change. Treat `>= 1` as the trigger threshold everywhere (TUI banner, BDD assertions), not `== 1.0`, so a future fractional adapter can adjust the underlying computation without every consumer needing a matching change.
+`coverage_confidence` is deliberately a float bounded to `[0.0, 1.0]` (enforced via `Field(ge=0.0, le=1.0)` on `ReplyDoneEvent`), even though today's computation is binary (`1.0` or `0.0`) — the bound and type leave room for a future assessment adapter to return a graded score without a contract change. Treat `>= 1` as the trigger threshold everywhere (TUI banner, BDD assertions), not `== 1.0`, so a future fractional adapter can adjust the underlying computation without every consumer needing a matching change.
 
 ## Phase 1: Coverage confidence — stubs
 
@@ -71,7 +71,17 @@ def coverage_confidence(self) -> float:
 
 **Intent**: Carry the score across the wire so BDD and the TUI can read it without recomputing it from raw points.
 
-**Contract**: Add `coverage_confidence: float` to `ReplyDoneEvent`.
+**Contract**: Add to `ReplyDoneEvent`:
+```python
+coverage_confidence: float = Field(
+    ge=0.0,
+    le=1.0,
+    description=(
+        "How fully the agent judges the topic covered as of this turn, "
+        "0.0-1.0; 1.0 means no shaky points remain."
+    ),
+)
+```
 
 ### Success Criteria:
 
@@ -93,7 +103,7 @@ Implement the computation, thread it into the command's `done` event, and lock b
 
 **Intent**: Realize the coverage rule settled in planning: fully covered exactly when nothing shaky remains.
 
-**Contract**: `coverage_confidence()` returns `1.0` when `self.points` is non-empty and every point's `kind == ConfidencePointKind.SOLID`; `0.0` otherwise (including the empty-points case).
+**Contract**: `coverage_confidence()` returns `1.0` when `self.points` is non-empty and every point's `kind == ConfidencePointKind.SOLID`; `0.0` otherwise (including the empty-points case). Always within `[0.0, 1.0]`, matching the `ReplyDoneEvent.coverage_confidence` field's `Field(ge=0.0, le=1.0)` bound from Phase 1.
 
 #### 2. Thread the score into the reply
 
