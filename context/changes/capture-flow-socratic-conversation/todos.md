@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation
 current_phase: 13
-next_step: 13.1
-next_command: /unit-test capture-flow-socratic-conversation phase 13
+next_step: 13.4
+next_command: /implement capture-flow-socratic-conversation phase 13
 updated: 2026-08-31
 ---
 
@@ -149,13 +149,13 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a4496ea
 
 #### Automated
 
-- [ ] 13.1 Wire CaptureScreen to useChatStore + api/stream.ts (Static transcript, live reply line, TextInput)
-- [ ] 13.2 Write ink-testing-library interaction tests (submit, incremental deltas, final transcript, topic update)
-- [ ] 13.3 `pnpm --dir tui test` green
+- [x] 13.1 Wire CaptureScreen to useChatStore + api/stream.ts (Static transcript, live reply line, TextInput) — 276bd89
+- [x] 13.2 Write ink-testing-library interaction tests (submit, incremental deltas, final transcript, topic update) — 276bd89
+- [x] 13.3 `pnpm --dir tui test` green — 276bd89
 
 #### Manual
 
