@@ -1,3 +1,4 @@
+import copy
 from uuid import UUID
 
 from domain.capture.message import Message
@@ -13,3 +14,9 @@ class InMemoryMessageStore:
 
     def list_by_session(self, session_id: SessionId) -> list[Message]:
         return self._messages.get(session_id.value, [])
+
+    def snapshot(self) -> dict[UUID, list[Message]]:
+        return copy.deepcopy(self._messages)
+
+    def restore(self, snapshot: dict[UUID, list[Message]]) -> None:
+        self._messages = copy.deepcopy(snapshot)

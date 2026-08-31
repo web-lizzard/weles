@@ -177,7 +177,7 @@ def _make_command_stack() -> _CommandStack:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
-    uow = _SpyUnitOfWork(session_repo, message_repo)
+    uow = _SpyUnitOfWork(session_repo, message_repo, store)
     command = GenerateReplyCommand(
         uow=uow,  # pyright: ignore[reportArgumentType]
         transcript_query=InMemoryTranscriptQueryAdapter(store),
@@ -195,8 +195,9 @@ class _SpyUnitOfWork(InMemoryUnitOfWork):
         self,
         capture_sessions: InMemoryCaptureSessionRepository,
         messages: InMemoryMessageRepository,
+        message_store: InMemoryMessageStore,
     ) -> None:
-        super().__init__(capture_sessions, messages)
+        super().__init__(capture_sessions, messages, message_store)
         self.commit_count = 0
 
     @override

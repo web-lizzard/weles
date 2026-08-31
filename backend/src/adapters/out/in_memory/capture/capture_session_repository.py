@@ -1,3 +1,4 @@
+import copy
 from uuid import UUID
 
 from domain.capture.capture_session import CaptureSession
@@ -13,3 +14,9 @@ class InMemoryCaptureSessionRepository:
 
     async def save(self, session: CaptureSession) -> None:
         self._sessions[session.id.value] = session
+
+    def snapshot(self) -> dict[UUID, CaptureSession]:
+        return copy.deepcopy(self._sessions)
+
+    def restore(self, snapshot: dict[UUID, CaptureSession]) -> None:
+        self._sessions = copy.deepcopy(snapshot)
