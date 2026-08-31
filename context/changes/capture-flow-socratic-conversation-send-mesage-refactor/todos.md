@@ -14,11 +14,11 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 1.1 Add `guard_session` + `capture_sessions` param to `GenerateReplyCommand`; delete `load_open_session_for_turn`
-- [x] 1.2 Change `handle` to `handle(session_id, content)`, loading and re-validating its own session; drop the R4-F1 re-read
-- [x] 1.3 Wire `capture_sessions` into `compose.get_generate_reply_command`
-- [x] 1.4 Rewire `get_turn_context` + route to depend on `get_generate_reply_command` and call `guard_session`/`handle` with `session_id`
-- [x] 1.5 Update `tests/integration/support/in_memory_capture.py`'s override factory for the new constructor signature
+- [x] 1.1 Add `guard_session` + `capture_sessions` param to `GenerateReplyCommand`; delete `load_open_session_for_turn` — b20a14f
+- [x] 1.2 Change `handle` to `handle(session_id, content)`, loading and re-validating its own session; drop the R4-F1 re-read — b20a14f
+- [x] 1.3 Wire `capture_sessions` into `compose.get_generate_reply_command` — b20a14f
+- [x] 1.4 Rewire `get_turn_context` + route to depend on `get_generate_reply_command` and call `guard_session`/`handle` with `session_id` — b20a14f
+- [x] 1.5 Update `tests/integration/support/in_memory_capture.py`'s override factory for the new constructor signature — b20a14f
 
 #### Manual
 
