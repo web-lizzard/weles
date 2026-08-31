@@ -44,7 +44,7 @@ from domain.capture.value_objects import (
     MessageContent,
     SessionId,
     SessionStatus,
-    Topic,
+    SessionTopic,
 )
 
 
@@ -59,7 +59,7 @@ async def test_guard_session_raises_closed_for_closed_session() -> None:
     stack = _make_command_stack()
     closed_session = CaptureSession(
         id=SessionId.new(),
-        topic=Topic(value="TCP handshakes"),
+        topic=SessionTopic(value="TCP handshakes"),
         status=SessionStatus.CLOSED,
         created_at=datetime.now(UTC),
     )
@@ -103,7 +103,7 @@ async def test_generate_reply_assigns_topic_on_first_turn_and_streams_done_event
 async def test_generate_reply_skips_topic_extraction_on_second_turn() -> None:
     stack = _make_command_stack()
     session = CaptureSession.start()
-    session.assign_topic(Topic(value="Existing topic"))
+    session.assign_topic(SessionTopic(value="Existing topic"))
     await stack.session_repo.save(session)
     content = MessageContent(value="Tell me more about the three-way handshake")
 

@@ -11,7 +11,7 @@ from domain.capture.value_objects import (
     MessageRole,
     SessionId,
     SessionStatus,
-    Topic,
+    SessionTopic,
 )
 
 
@@ -33,7 +33,7 @@ def test_start_created_at_is_utc() -> None:
 
 def test_assign_topic_sets_topic_on_open_session() -> None:
     session = CaptureSession.start()
-    topic = Topic(value="TCP handshakes")
+    topic = SessionTopic(value="TCP handshakes")
 
     session.assign_topic(topic)
 
@@ -42,10 +42,10 @@ def test_assign_topic_sets_topic_on_open_session() -> None:
 
 def test_assign_topic_raises_when_topic_already_set() -> None:
     session = CaptureSession.start()
-    session.assign_topic(Topic(value="TCP handshakes"))
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
 
     with pytest.raises(SessionTopicAlreadyAssignedError):
-        session.assign_topic(Topic(value="Something else"))
+        session.assign_topic(SessionTopic(value="Something else"))
 
 
 def test_record_creates_message_with_given_fields() -> None:

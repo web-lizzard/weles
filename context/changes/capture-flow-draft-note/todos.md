@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 1
-next_step: 1.1
-next_command: /implement capture-flow-draft-note phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement capture-flow-draft-note phase 2
 updated: 2026-08-31
 ---
 
@@ -10,11 +10,11 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 1.1 Rename `Topic` → `SessionTopic`, `TOPIC_MAX_LENGTH` → `SESSION_TOPIC_MAX_LENGTH`, `EmptyTopicError` → `EmptySessionTopicError`, `TopicTooLongError` → `SessionTopicTooLongError` — `domain/capture/value_objects.py`, `domain/capture/exceptions.py`
-- [ ] 1.2 Follow the rename through `CaptureSession`, `TopicExtractionPort`, `GenerateReplyCommand`, `DeterministicTopicExtractionAdapter`
-- [ ] 1.3 Update `EXCEPTION_STATUS_MAP` keys to `empty_session_topic` and `session_topic_too_long` — `adapters/http/errors.py`
-- [ ] 1.4 Update every test referencing the old name: unit, contract, and BDD step modules
-- [ ] 1.5 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
+- [x] 1.1 Rename `Topic` → `SessionTopic`, `TOPIC_MAX_LENGTH` → `SESSION_TOPIC_MAX_LENGTH`, `EmptyTopicError` → `EmptySessionTopicError`, `TopicTooLongError` → `SessionTopicTooLongError` — `domain/capture/value_objects.py`, `domain/capture/exceptions.py`
+- [x] 1.2 Follow the rename through `CaptureSession`, `TopicExtractionPort`, `GenerateReplyCommand`, `DeterministicTopicExtractionAdapter`
+- [x] 1.3 Update `EXCEPTION_STATUS_MAP` keys to `empty_session_topic` and `session_topic_too_long` — `adapters/http/errors.py`
+- [x] 1.4 Update every test referencing the old name: unit, contract, and BDD step modules
+- [x] 1.5 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
 
 ### Phase 2: Domain vocabulary and aggregates — stubs
 
