@@ -21,12 +21,15 @@ export default function CaptureScreen() {
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
   const hasStreamError = streamError !== null;
+  const hasCoverageBanner =
+    coverageConfidence !== null && coverageConfidence >= 1;
   const showBrand = shouldShowWelesBrand(
     stdout.rows,
     transcript,
     hasTopic,
     isStreaming,
     hasStreamError,
+    hasCoverageBanner,
   );
   const separator = "─".repeat(
     stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
@@ -105,11 +108,22 @@ function TopicHeading({ topic }: { topic: string }) {
 }
 
 function CoverageBanner({
-  coverageConfidence: _coverageConfidence,
+  coverageConfidence,
 }: {
   coverageConfidence: number | null;
 }) {
-  return null;
+  if (coverageConfidence === null || coverageConfidence < 1) {
+    return null;
+  }
+
+  return (
+    <Box marginY={1}>
+      <Text color="green">
+        ✓ This topic seems well covered — keep going, or wrap up when you're
+        ready.
+      </Text>
+    </Box>
+  );
 }
 
 function StatusBar({ error }: { error: { code: string; detail: string } }) {
@@ -126,11 +140,13 @@ function shouldShowWelesBrand(
   hasTopic: boolean,
   isStreaming: boolean,
   hasError: boolean,
+  hasBanner: boolean,
 ): boolean {
   const rows = terminalRows > 0 ? terminalRows : DEFAULT_TERMINAL_ROWS;
   const inputBlock = 1;
   const topicBlock = hasTopic ? 2 : 0;
   const errorBlock = hasError ? 2 : 0;
+  const bannerBlock = hasBanner ? 2 : 0;
   const brandBlock = 3;
   const streamingReserve = isStreaming ? 1 : 0;
   const padding = 1;
@@ -141,6 +157,7 @@ function shouldShowWelesBrand(
       inputBlock -
       topicBlock -
       errorBlock -
+      bannerBlock -
       brandBlock -
       streamingReserve -
       padding,
