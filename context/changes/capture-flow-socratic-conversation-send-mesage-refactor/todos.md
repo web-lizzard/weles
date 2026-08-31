@@ -70,4 +70,4 @@ updated: 2026-08-31
 
 #### Manual
 
-- [x] 5.3 Run built TUI + dev backend, send a normal message, confirm no layout regression
+- [x] 5.3 Run built TUI + dev backend, send a normal message, confirm no layout regression — 66cc957
