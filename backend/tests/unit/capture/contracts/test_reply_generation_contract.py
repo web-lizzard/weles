@@ -10,6 +10,7 @@ from application.capture.value_objects import (
     ConfidenceAssessment,
     ConfidencePoint,
     ConfidencePointKind,
+    ReplyTextChunk,
     TranscriptEntry,
 )
 from domain.capture.value_objects import MessageContent, MessageRole
@@ -41,4 +42,6 @@ async def test_generate_yields_chunks_that_join_into_a_nonempty_reply(
     chunks = [chunk async for chunk in adapter.generate(transcript, assessment)]
 
     assert chunks
-    assert "".join(chunks).strip() != ""
+    reply_chunks = [chunk for chunk in chunks if isinstance(chunk, ReplyTextChunk)]
+    assert len(reply_chunks) == len(chunks)
+    assert "".join(chunk.text for chunk in reply_chunks).strip() != ""

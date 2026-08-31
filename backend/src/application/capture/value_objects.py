@@ -1,9 +1,10 @@
 from enum import StrEnum
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from application.capture.exceptions import EmptyConfidencePointError
-from domain.capture.value_objects import MessageContent, MessageRole
+from domain.capture.value_objects import Label, MessageContent, MessageRole
 
 
 class ConfidencePointKind(StrEnum):
@@ -47,3 +48,36 @@ class ConfidenceAssessment(BaseModel, frozen=True):
             "0.0-1.0; 1.0 means fully covered."
         ),
     )
+
+
+class ReplyChunkKind(StrEnum):
+    REPLY = "reply"
+    TOPIC = "topic"
+    TAG = "tag"
+    NOTE = "note"
+
+
+class ReplyTextChunk(BaseModel, frozen=True):
+    kind: Literal[ReplyChunkKind.REPLY] = ReplyChunkKind.REPLY
+    text: str
+
+
+class DraftTopicChunk(BaseModel, frozen=True):
+    kind: Literal[ReplyChunkKind.TOPIC] = ReplyChunkKind.TOPIC
+    label: Label
+
+
+class DraftTagChunk(BaseModel, frozen=True):
+    kind: Literal[ReplyChunkKind.TAG] = ReplyChunkKind.TAG
+    label: Label
+
+
+class DraftContentChunk(BaseModel, frozen=True):
+    kind: Literal[ReplyChunkKind.NOTE] = ReplyChunkKind.NOTE
+    text: str
+
+
+ReplyChunk = Annotated[
+    ReplyTextChunk | DraftTopicChunk | DraftTagChunk | DraftContentChunk,
+    Field(discriminator="kind"),
+]

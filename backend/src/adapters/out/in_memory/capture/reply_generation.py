@@ -4,6 +4,8 @@ from collections.abc import AsyncIterator
 from application.capture.value_objects import (
     ConfidenceAssessment,
     ConfidencePointKind,
+    ReplyChunk,
+    ReplyTextChunk,
     Transcript,
 )
 
@@ -18,7 +20,7 @@ class DeterministicReplyGenerationAdapter:
         self,
         transcript: Transcript,  # pyright: ignore[reportUnusedParameter]
         assessment: ConfidenceAssessment,
-    ) -> AsyncIterator[str]:
+    ) -> AsyncIterator[ReplyChunk]:
         solid = next(
             (
                 point.note
@@ -38,5 +40,5 @@ class DeterministicReplyGenerationAdapter:
         reply = f"You've got a handle on: {solid}. Let's dig into: {shaky}."
 
         for start in range(0, len(reply), _CHUNK_SIZE):
-            yield reply[start : start + _CHUNK_SIZE]
+            yield ReplyTextChunk(text=reply[start : start + _CHUNK_SIZE])
             await asyncio.sleep(_CHUNK_DELAY_SECONDS)
