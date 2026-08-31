@@ -14,11 +14,13 @@ from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.dto import (
+    ReplyErrorEvent,
     ReplyStreamEvent,
     SendMessageRequestDTO,
     StartCaptureSessionResponseDTO,
 )
 from domain.capture.value_objects import MessageContent, SessionId
+from domain.exceptions import CoreException
 
 router = APIRouter()
 
@@ -49,5 +51,9 @@ async def send_message(
     content: Annotated[MessageContent, Depends(get_turn_context)],
     command: Annotated[GenerateReplyCommand, Depends(get_generate_reply_command)],
 ) -> AsyncIterator[ReplyStreamEvent]:
-    async for event in command.handle(SessionId(value=session_id), content):
-        yield event
+    try:
+        async for event in command.handle(SessionId(value=session_id), content):
+            yield event
+    except CoreException as exc:
+        yield ReplyErrorEvent(code=exc.code(), detail=str(exc))
+        return

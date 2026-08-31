@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 3
 updated: 2026-08-31
 ---
 
@@ -28,12 +28,12 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5e72c73
 
 #### Automated
 
-- [ ] 2.1 Add `ReplyErrorEvent` to `dto.py`, widen `ReplyStreamEvent`
-- [ ] 2.2 Wrap `send_message` generator body in `try/except CoreException`, yield `ReplyErrorEvent`
+- [x] 2.1 Add `ReplyErrorEvent` to `dto.py`, widen `ReplyStreamEvent`
+- [x] 2.2 Wrap `send_message` generator body in `try/except CoreException`, yield `ReplyErrorEvent`
 
 ### Phase 3: TUI `stream.ts` — parse `error` events + richer pre-stream errors
 
