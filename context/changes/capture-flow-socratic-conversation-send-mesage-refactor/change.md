@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
 title: Capture flow socratic conversation send mesage refactor
-status: new
+status: planned
 created: 2026-08-31
 updated: 2026-08-31
 archived_at: null
