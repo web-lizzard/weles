@@ -11,7 +11,7 @@ updated: 2026-08-31
 #### Automated
 
 - [ ] 1.1 Add `ConfidenceAssessment.coverage_confidence()` stub signature (`raise NotImplementedError`) — `application/capture/value_objects.py`
-- [ ] 1.2 Add `coverage_confidence: float` field to `ReplyDoneEvent` — `application/capture/dto.py`
+- [ ] 1.2 Add `coverage_confidence: float` field to `ReplyDoneEvent`, bounded `Field(ge=0.0, le=1.0)` with a `description` — `application/capture/dto.py`
 
 ### Phase 2: Coverage confidence — behavior
 
