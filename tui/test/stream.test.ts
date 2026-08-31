@@ -1,6 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { type ReplyStreamEvent, sendMessage } from "../src/api/stream";
 
+function mockFetchError(
+  status: number,
+  body: unknown,
+  options: { jsonThrows?: boolean } = {},
+) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: false,
+      status,
+      json: options.jsonThrows
+        ? vi.fn().mockRejectedValue(new Error("invalid json"))
+        : vi.fn().mockResolvedValue(body),
+    }),
+  );
+}
+
 function mockFetchWithSseChunks(chunks: string[]) {
   const encoder = new TextEncoder();
   let index = 0;
@@ -61,6 +78,51 @@ describe("sendMessage SSE parser", () => {
         topic: "TCP handshakes",
       },
     ]);
+  });
+
+  it("yields error events from an SSE response body", async () => {
+    mockFetchWithSseChunks([
+      'data: {"type":"error","code":"capture_session_not_found","detail":"Capture session not found"}\n\n',
+    ]);
+
+    const events = await collectEvents("sess-1", "hi");
+
+    expect(events).toEqual([
+      {
+        type: "error",
+        code: "capture_session_not_found",
+        detail: "Capture session not found",
+      },
+    ]);
+  });
+
+  it("throws a typed error with code and detail on a pre-stream 4xx", async () => {
+    mockFetchError(404, {
+      code: "capture_session_not_found",
+      detail: "Capture session not found",
+    });
+
+    await expect(collectEvents("missing", "hi")).rejects.toMatchObject({
+      code: "capture_session_not_found",
+      detail: "Capture session not found",
+      status: 404,
+    });
+  });
+
+  it("throws a generic error when the pre-stream response body is not JSON", async () => {
+    mockFetchError(500, null, { jsonThrows: true });
+
+    await expect(collectEvents("sess-1", "hi")).rejects.toThrow(
+      "sendMessage failed: 500",
+    );
+  });
+
+  it("throws a generic error when pre-stream JSON lacks code and detail", async () => {
+    mockFetchError(422, { message: "validation failed" });
+
+    await expect(collectEvents("sess-1", "hi")).rejects.toThrow(
+      "sendMessage failed: 422",
+    );
   });
 
   it("parses events when SSE lines are split across stream chunks", async () => {
