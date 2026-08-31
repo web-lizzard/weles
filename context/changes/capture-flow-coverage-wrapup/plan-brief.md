@@ -4,7 +4,7 @@
 
 ## What & Why
 
-Roadmap slice S-02 wants users to see when the agent thinks a topic is well covered, while staying fully in control of when the conversation actually ends. This plan adds a `coverage_confidence` score derived from the existing per-turn `ConfidenceAssessment`, threads it to the TUI as a persistent banner, and locks (unit + BDD) the guarantee that the score never itself closes the conversation.
+Roadmap slice S-02 wants users to see when the agent thinks a topic is well covered, while staying fully in control of when the conversation actually ends. This plan adds a `coverage_confidence` field on `ConfidenceAssessment` (populated by adapters, threaded to `ReplyDoneEvent`), surfaces it in the TUI as a persistent banner, and locks (unit + BDD) the guarantee that the score never itself closes the conversation.
 
 ## Starting Point
 
@@ -12,14 +12,14 @@ Roadmap slice S-02 wants users to see when the agent thinks a topic is well cove
 
 ## Desired End State
 
-Every turn's `ReplyDoneEvent`/store carries a `coverage_confidence` score (`1.0` when the assessment has no shaky points, else `0.0`). The TUI shows a persistent green banner between the transcript and the input row whenever the latest score is `>= 1`, and the user can keep chatting normally while it's showing.
+Every turn's `ConfidenceAssessment` carries `coverage_confidence` (adapters set it; today's deterministic adapter always `0.0`, test double can force `1.0`). `ReplyDoneEvent`/store thread the same value. The TUI shows a persistent green banner between the transcript and the input row whenever the latest score is `>= 1`, and the user can keep chatting normally while it's showing.
 
 ## Key Decisions Made
 
 | Decision | Choice | Why (1 sentence) | Source |
 | --- | --- | --- | --- |
-| AC-05 signal shape | Structured `coverage_confidence: float` on `ReplyDoneEvent`, not text copy | Keeps the signal LLM-agnostic and avoids logic that only lives in the throwaway deterministic adapter | Plan |
-| Coverage rule | `1.0` iff no `SHAKY` points, else `0.0` | Simplest predicate matching today's flat `ConfidenceAssessment.points` shape, no new threshold config | Plan |
+| AC-05 signal shape | `coverage_confidence: float` on `ConfidenceAssessment` + `ReplyDoneEvent`, not text copy | Matches LLM structured-output shape; keeps the signal out of reply copy | Plan |
+| Coverage rule (today) | Adapters set the field; deterministic adapter always `0.0`, test double `1.0` | No derived-method layer; future LLM adapter maps structured output straight to the field | Plan |
 | "User confirms done" (2nd half of AC-06) | No backend action in this slice | Nothing exists yet to trigger (drafting is S-04); matches the ADR's explicit no-`abandon()`/no-`discard()` precedent | Research |
 | Unit-test seam | Injectable `ConfidenceAssessmentPort` via `_make_command_stack`, subclass double | Matches the existing `_SpyUnitOfWork` pattern already in this test file | Plan |
 | BDD-test seam | Widen `InMemoryCaptureComposition.confidence_assessment` to the port protocol, swap at composition level | The command-level double can't reach the HTTP/SSE stack; this is the actual seam at that layer | Plan |
@@ -28,7 +28,7 @@ Every turn's `ReplyDoneEvent`/store carries a `coverage_confidence` score (`1.0`
 
 ## Scope
 
-**In scope:** `coverage_confidence` computation and DTO field; unit + BDD regression locking AC-06's negative guarantee; TUI banner (data layer + rendering).
+**In scope:** `coverage_confidence` field on `ConfidenceAssessment` and `ReplyDoneEvent`; adapter population + command threading; unit + BDD regression locking AC-06's negative guarantee; TUI banner (data layer + rendering).
 
 **Out of scope:** any real/smarter coverage-computation algorithm; any backend "confirm conversation done" action; changes to `DeterministicReplyGenerationAdapter`'s reply text; roadmap/stories edits.
 
@@ -40,8 +40,8 @@ Backend first (score computation → unit lock → BDD lock over HTTP), then TUI
 
 | Phase | What it delivers | Key risk |
 | --- | --- | --- |
-| 1. Coverage confidence — stubs | `coverage_confidence()` signature + DTO field | — |
-| 2. Coverage confidence — behavior | Real computation, threaded into `done`, unit-tested incl. AC-06 guarantee | Test double must genuinely implement `ConfidenceAssessmentPort` to stay swappable |
+| 1. Coverage confidence — stubs | `coverage_confidence` field on `ConfidenceAssessment` + DTO field | — |
+| 2. Coverage confidence — behavior | Adapter population, threaded into `done`, unit-tested incl. AC-06 guarantee | Test double must genuinely implement `ConfidenceAssessmentPort` to stay swappable |
 | 3. BDD (AC-05 & AC-06) | End-to-end HTTP/SSE lock of the same guarantee | Composition-level swap point must not leak into production wiring |
 | 4. TUI data layer — stubs | `coverageConfidence` on the event type + store | — |
 | 5. TUI data layer — behavior | Parsing + store update, Vitest-covered | — |
@@ -58,6 +58,6 @@ Backend first (score computation → unit lock → BDD lock over HTTP), then TUI
 
 ## Success Criteria (Summary)
 
-- `coverage_confidence` is `1.0` exactly when an assessment has no shaky points, proven by unit test.
+- `coverage_confidence` is threaded from adapter → assessment → `ReplyDoneEvent`, proven by unit test (`1.0` via test double, `0.0` via deterministic adapter).
 - The conversation never closes and further messages keep succeeding regardless of the score, proven by unit test and BDD.
 - The TUI shows the green banner exactly when the latest turn's score is `>= 1`, and hides it otherwise, proven by `ink-testing-library`.

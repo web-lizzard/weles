@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-coverage-wrapup
-current_phase: 1
-next_step: 1.1
-next_command: /implement capture-flow-coverage-wrapup phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test capture-flow-coverage-wrapup phase 2
 updated: 2026-08-31
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 1.1 Add `ConfidenceAssessment.coverage_confidence()` stub signature (`raise NotImplementedError`) — `application/capture/value_objects.py`
-- [ ] 1.2 Add `coverage_confidence: float` field to `ReplyDoneEvent`, bounded `Field(ge=0.0, le=1.0)` with a `description` — `application/capture/dto.py`
+- [x] 1.1 Add `coverage_confidence: float` field to `ConfidenceAssessment`, bounded `Field(ge=0.0, le=1.0)` with a `description` — `application/capture/value_objects.py`
+- [x] 1.2 Add `coverage_confidence: float` field to `ReplyDoneEvent`, bounded `Field(ge=0.0, le=1.0)` — `application/capture/dto.py`
 
 ### Phase 2: Coverage confidence — behavior
 
@@ -21,10 +21,10 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 2.1 Implement `ConfidenceAssessment.coverage_confidence()` — `1.0` iff `points` non-empty and all `SOLID`, else `0.0`
-- [ ] 2.2 Thread `coverage_confidence` into `GenerateReplyCommand.handle()`'s `done_event` construction
-- [ ] 2.3 Extend `_make_command_stack` with an injectable `confidence_assessment` param; add `_AllSolidConfidenceAssessmentAdapter` test double
-- [ ] 2.4 Write unit tests: `coverage_confidence` pure-function cases (empty/mixed/all-solid), `done_event.coverage_confidence` threading, AC-06 guarantee (session stays `OPEN`, a following `send_message` still succeeds)
+- [ ] 2.1 Set `coverage_confidence` on every `ConfidenceAssessment` returned by `DeterministicConfidenceAssessmentAdapter` (`0.0`)
+- [ ] 2.2 Thread `coverage_confidence=assessment.coverage_confidence` into `GenerateReplyCommand.handle()`'s `done_event` construction
+- [ ] 2.3 Extend `_make_command_stack` with an injectable `confidence_assessment` param; add `_AllSolidConfidenceAssessmentAdapter` test double (`coverage_confidence=1.0`)
+- [ ] 2.4 Write unit tests: `ConfidenceAssessment.coverage_confidence` field bounds, `done_event.coverage_confidence` threading, AC-06 guarantee (session stays `OPEN`, a following `send_message` still succeeds)
 - [ ] 2.5 `uv run pytest tests/unit/capture -v` green
 
 ### Phase 3: Acceptance scenarios (BDD, AC-05 & AC-06)

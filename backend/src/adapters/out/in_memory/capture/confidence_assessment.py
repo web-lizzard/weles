@@ -11,7 +11,7 @@ class DeterministicConfidenceAssessmentAdapter:
     async def assess(self, transcript: Transcript) -> ConfidenceAssessment:
         user_entries = [entry for entry in transcript if entry.role == MessageRole.USER]
         if not user_entries:
-            return ConfidenceAssessment(points=[])
+            return ConfidenceAssessment(points=[], coverage_confidence=0.0)
 
         latest = user_entries[-1]
         return ConfidenceAssessment(
@@ -24,5 +24,6 @@ class DeterministicConfidenceAssessmentAdapter:
                     kind=ConfidencePointKind.SHAKY,
                     note=f"The details behind: {latest.content.value.strip()}",
                 ),
-            ]
+            ],
+            coverage_confidence=0.0,
         )

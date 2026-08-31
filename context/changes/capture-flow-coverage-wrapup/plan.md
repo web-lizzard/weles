@@ -23,7 +23,7 @@ Implements roadmap slice S-02 (`Users control when the conversation ends, even w
 
 ## Desired End State
 
-- `ReplyDoneEvent` (backend) and its TUI counterpart carry a `coverage_confidence`/`coverageConfidence` score derived purely from the turn's `ConfidenceAssessment`.
+- `ReplyDoneEvent` (backend) and its TUI counterpart carry a `coverage_confidence`/`coverageConfidence` score read from the turn's `ConfidenceAssessment.coverage_confidence` field.
 - A unit test proves the score is `1.0` exactly when the assessment has no shaky points, `0.0` otherwise, and that neither value ever affects `CaptureSession.status` or blocks a following `send_message` call.
 - A BDD scenario proves the same guarantee end-to-end over HTTP/SSE.
 - The TUI shows a persistent green banner between the transcript and the input row whenever the latest turn's `coverageConfidence >= 1`, and shows nothing otherwise; sending another message still works while the banner is showing.
@@ -32,7 +32,7 @@ Verification: `cd backend && uv run pytest tests/unit/capture -v`, `cd backend &
 
 ## What We're NOT Doing
 
-- **Real coverage computation.** `DeterministicConfidenceAssessmentAdapter` is untouched and still always returns one solid + one shaky point — it can never trigger `coverage_confidence == 1.0` in a real run today. This change builds the plumbing and proves it via test doubles; a smarter/real assessment adapter is future work (PRD Open Question 1, explicitly deferred).
+- **Real coverage computation.** `DeterministicConfidenceAssessmentAdapter`'s point list is untouched and still always returns one solid + one shaky point — it can never trigger `coverage_confidence == 1.0` in a real run today; the adapter only gains an explicit `coverage_confidence=0.0` on the assessment it returns. This change builds the plumbing and proves the `1.0` path via test doubles; a smarter/LLM-backed assessment adapter is future work (PRD Open Question 1, explicitly deferred).
 - **Any backend action for "the user explicitly confirms they're done."** Nothing in this slice hooks into that half of AC-06 — there is nothing yet for a confirmation to trigger (drafting is S-04, out of scope here), and the ADR's precedent (no `abandon()`/`discard()`) argues against adding a consumer-less endpoint now.
 - **Changing `DeterministicReplyGenerationAdapter`'s reply copy.** The wrap-up signal is a structured field, not a text branch — the deterministic adapter's "Let's dig into: ..." phrasing is left exactly as-is; a future LLM-backed adapter owns expressing coverage in natural language.
 - **A toast/overlay component.** Ink has no overlay primitive; the signal is a persistent conditionally-rendered banner, not a transient notification.
@@ -44,25 +44,31 @@ Backend first (score computation, then its regression lock at both the command l
 
 ## Critical Implementation Details
 
-`coverage_confidence` is deliberately a float bounded to `[0.0, 1.0]` (enforced via `Field(ge=0.0, le=1.0)` on `ReplyDoneEvent`), even though today's computation is binary (`1.0` or `0.0`) — the bound and type leave room for a future assessment adapter to return a graded score without a contract change. Treat `>= 1` as the trigger threshold everywhere (TUI banner, BDD assertions), not `== 1.0`, so a future fractional adapter can adjust the underlying computation without every consumer needing a matching change.
+`coverage_confidence` is deliberately a float bounded to `[0.0, 1.0]` on both `ConfidenceAssessment` and `ReplyDoneEvent` (enforced via `Field(ge=0.0, le=1.0)`), even though today's deterministic adapter only ever sets `0.0` or `1.0` — the bound and type leave room for a future LLM-backed adapter to return a graded score as structured output without a contract change. The score lives as a **field on `ConfidenceAssessment`**, not a derived method: adapters own the value (today's deterministic adapter sets it explicitly; a future LLM adapter maps it straight from structured output). Treat `>= 1` as the trigger threshold everywhere (TUI banner, BDD assertions), not `== 1.0`, so a future fractional adapter can adjust the underlying computation without every consumer needing a matching change.
 
 ## Phase 1: Coverage confidence — stubs
 
 ### Overview
-Materialize the new symbols both later phases build on: the derived-score method and the DTO field that carries it.
+Materialize the new symbols both later phases build on: the assessment field that carries the score and the DTO field that threads it to consumers.
 
 ### Changes Required:
 
-#### 1. Coverage confidence method signature
+#### 1. Assessment field
 
 **File**: `backend/src/application/capture/value_objects.py`
 
-**Intent**: Give `ConfidenceAssessment` a single, reusable place to express "how covered is this," independent of any specific adapter.
+**Intent**: Give `ConfidenceAssessment` a first-class score field — the shape a future LLM structured-output adapter will populate directly, independent of how today's deterministic adapter derives it.
 
 **Contract**: Add to `ConfidenceAssessment`:
 ```python
-def coverage_confidence(self) -> float:
-    raise NotImplementedError
+coverage_confidence: float = Field(
+    ge=0.0,
+    le=1.0,
+    description=(
+        "How fully the agent judges the topic covered as of this turn, "
+        "0.0-1.0; 1.0 means fully covered."
+    ),
+)
 ```
 
 #### 2. DTO field
@@ -73,14 +79,7 @@ def coverage_confidence(self) -> float:
 
 **Contract**: Add to `ReplyDoneEvent`:
 ```python
-coverage_confidence: float = Field(
-    ge=0.0,
-    le=1.0,
-    description=(
-        "How fully the agent judges the topic covered as of this turn, "
-        "0.0-1.0; 1.0 means no shaky points remain."
-    ),
-)
+coverage_confidence: float = Field(ge=0.0, le=1.0)
 ```
 
 ### Success Criteria:
@@ -93,25 +92,25 @@ coverage_confidence: float = Field(
 ## Phase 2: Coverage confidence — behavior
 
 ### Overview
-Implement the computation, thread it into the command's `done` event, and lock both the score's correctness and the AC-06 negative guarantee.
+Populate the score in adapters, thread it into the command's `done` event, and lock both the field's correctness and the AC-06 negative guarantee.
 
 ### Changes Required:
 
-#### 1. Implement `coverage_confidence`
+#### 1. Populate `coverage_confidence` in adapters
 
-**File**: `backend/src/application/capture/value_objects.py`
+**File**: `backend/src/adapters/out/in_memory/capture/confidence_assessment.py`
 
-**Intent**: Realize the coverage rule settled in planning: fully covered exactly when nothing shaky remains.
+**Intent**: The deterministic adapter sets the field explicitly on every `ConfidenceAssessment` it returns — today's rule is binary (`0.0` for the shipped solid+shaky mix, `0.0` for empty points).
 
-**Contract**: `coverage_confidence()` returns `1.0` when `self.points` is non-empty and every point's `kind == ConfidencePointKind.SOLID`; `0.0` otherwise (including the empty-points case). Always within `[0.0, 1.0]`, matching the `ReplyDoneEvent.coverage_confidence` field's `Field(ge=0.0, le=1.0)` bound from Phase 1.
+**Contract**: Every `ConfidenceAssessment(...)` this adapter constructs includes `coverage_confidence=0.0`.
 
 #### 2. Thread the score into the reply
 
 **File**: `backend/src/application/capture/commands/send_message.py`
 
-**Intent**: Make the score observable on every turn without a second read of the transcript.
+**Intent**: Make the score observable on every turn without recomputing it from raw points.
 
-**Contract**: `GenerateReplyCommand.handle()` passes `coverage_confidence=assessment.coverage_confidence()` when constructing `done_event`.
+**Contract**: `GenerateReplyCommand.handle()` passes `coverage_confidence=assessment.coverage_confidence` when constructing `done_event`.
 
 #### 3. Injectable confidence-assessment test seam
 
@@ -119,12 +118,12 @@ Implement the computation, thread it into the command's `done` event, and lock b
 
 **Intent**: Let a test force a fully-covered assessment without touching production adapters.
 
-**Contract**: `_make_command_stack` gains an optional `confidence_assessment: ConfidenceAssessmentPort | None = None` parameter, defaulting to `DeterministicConfidenceAssessmentAdapter()`; add `_AllSolidConfidenceAssessmentAdapter` (a small class implementing `ConfidenceAssessmentPort`, returning only `SOLID` points), following the `_SpyUnitOfWork` precedent already in this file.
+**Contract**: `_make_command_stack` gains an optional `confidence_assessment: ConfidenceAssessmentPort | None = None` parameter, defaulting to `DeterministicConfidenceAssessmentAdapter()`; add `_AllSolidConfidenceAssessmentAdapter` (a small class implementing `ConfidenceAssessmentPort`, returning only `SOLID` points with `coverage_confidence=1.0`), following the `_SpyUnitOfWork` precedent already in this file.
 
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pytest tests/unit/capture/test_application_value_objects.py -v` — `coverage_confidence` is `1.0` for all-solid points, `0.0` for empty points and for mixed solid/shaky points.
+- `cd backend && uv run pytest tests/unit/capture/test_application_value_objects.py -v` — `ConfidenceAssessment` accepts `coverage_confidence` within `[0.0, 1.0]` and rejects out-of-range values.
 - `cd backend && uv run pytest tests/unit/capture/test_send_message_command.py -v` — `done_event.coverage_confidence == 1.0` when `_AllSolidConfidenceAssessmentAdapter` is injected; `== 0.0` with the default deterministic adapter; the session's `status` stays `OPEN` after an all-solid turn; a following `send_message` call on the same session still succeeds (no `CaptureSessionClosedError`).
 
 ---
@@ -303,7 +302,7 @@ Make the banner real: a persistent green line shown while the latest turn reads 
 ## Testing Strategy
 
 ### Unit Tests:
-- `backend/tests/unit/capture/test_application_value_objects.py` — `coverage_confidence()` pure-function cases.
+- `backend/tests/unit/capture/test_application_value_objects.py` — `ConfidenceAssessment.coverage_confidence` field bounds.
 - `backend/tests/unit/capture/test_send_message_command.py` — `done_event.coverage_confidence` threading, plus the AC-06 negative guarantee (session stays open, next message succeeds).
 - `tui` Vitest suites for the SSE parser and the chat store reducer.
 - `tui` `ink-testing-library` suite for `CoverageBanner`'s conditional rendering.
@@ -316,7 +315,7 @@ Make the banner real: a persistent green line shown while the latest turn reads 
 
 ## Performance Considerations
 
-None — `coverage_confidence` is an O(n) scan over an already-loaded, per-turn points list; no new I/O or query is introduced.
+None — `coverage_confidence` is a field set by the assessment adapter; no new I/O or query is introduced.
 
 ## Migration Notes
 
