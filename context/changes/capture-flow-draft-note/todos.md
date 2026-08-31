@@ -20,12 +20,12 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 2.1 Add `NoteStatus`, `Label`, `Embedding`, `NoteContent`, `NoteId`, `TopicId`, `TagId` and the two length constants — `domain/capture/value_objects.py`
-- [x] 2.2 Add `EmptyLabelError`, `LabelTooLongError`, `EmptyEmbeddingError`, `EmptyNoteContentError`, `NoteContentTooLongError`, `SessionNoteAlreadyDraftedError` — `domain/capture/exceptions.py`
-- [x] 2.3 Add `Topic` and `Tag` aggregates with `mint()` raising `NotImplementedError` — `domain/capture/topic.py`, `domain/capture/tag.py`
-- [x] 2.4 Add `Note` aggregate with `draft()` raising `NotImplementedError` — `domain/capture/note.py`
-- [x] 2.5 Add `note_id: NoteId | None` and the `draft_note()` signature to `CaptureSession`
-- [x] 2.6 Add `NoteRepository`, `TopicRepository`, `TagRepository` protocols — `domain/capture/ports.py`
+- [x] 2.1 Add `NoteStatus`, `Label`, `Embedding`, `NoteContent`, `NoteId`, `TopicId`, `TagId` and the two length constants — `domain/capture/value_objects.py` — 2ee7327
+- [x] 2.2 Add `EmptyLabelError`, `LabelTooLongError`, `EmptyEmbeddingError`, `EmptyNoteContentError`, `NoteContentTooLongError`, `SessionNoteAlreadyDraftedError` — `domain/capture/exceptions.py` — 2ee7327
+- [x] 2.3 Add `Topic` and `Tag` aggregates with `mint()` raising `NotImplementedError` — `domain/capture/topic.py`, `domain/capture/tag.py` — 2ee7327
+- [x] 2.4 Add `Note` aggregate with `draft()` raising `NotImplementedError` — `domain/capture/note.py` — 2ee7327
+- [x] 2.5 Add `note_id: NoteId | None` and the `draft_note()` signature to `CaptureSession` — 2ee7327
+- [x] 2.6 Add `NoteRepository`, `TopicRepository`, `TagRepository` protocols — `domain/capture/ports.py` — 2ee7327
 
 ### Phase 3: Domain vocabulary and aggregates — behavior
 
