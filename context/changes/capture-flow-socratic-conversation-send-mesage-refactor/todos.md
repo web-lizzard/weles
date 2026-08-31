@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
 current_phase: 5
-next_step: 5.3
-next_command: /implement capture-flow-socratic-conversation-send-mesage-refactor phase 5
+next_step: epilogue
+next_command: /archive capture-flow-socratic-conversation-send-mesage-refactor
 updated: 2026-08-31
 ---
 
@@ -70,4 +70,4 @@ updated: 2026-08-31
 
 #### Manual
 
-- [ ] 5.3 Run built TUI + dev backend, send a normal message, confirm no layout regression
+- [x] 5.3 Run built TUI + dev backend, send a normal message, confirm no layout regression
