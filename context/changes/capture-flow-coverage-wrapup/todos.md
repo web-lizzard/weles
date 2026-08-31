@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-coverage-wrapup
-current_phase: 4
-next_step: 4.1
-next_command: /implement capture-flow-coverage-wrapup phase 4
+current_phase: 5
+next_step: tests
+next_command: /unit-test capture-flow-coverage-wrapup phase 5
 updated: 2026-08-31
 ---
 
@@ -41,8 +41,8 @@ updated: 2026-08-31
 
 #### Automated
 
-- [ ] 4.1 Add `coverageConfidence: number` to `ReplyDoneEvent` and `RawReplyStreamEvent`'s done variant — `tui/src/api/stream.ts`
-- [ ] 4.2 Add `coverageConfidence: number | null` to `ChatState` — `tui/src/store/chat.ts`
+- [x] 4.1 Add `coverageConfidence: number` to `ReplyDoneEvent` and `RawReplyStreamEvent`'s done variant — `tui/src/api/stream.ts`
+- [x] 4.2 Add `coverageConfidence: number | null` to `ChatState` — `tui/src/store/chat.ts`
 
 ### Phase 5: TUI data layer — behavior
 

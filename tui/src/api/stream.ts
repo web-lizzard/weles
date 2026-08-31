@@ -17,9 +17,29 @@ export type ReplyDoneEvent = {
   messageId: string;
   content: string;
   topic: string;
+  coverageConfidence: number;
 };
 
-export type ReplyStreamEvent = ReplyDeltaEvent | ReplyDoneEvent;
+export type ReplyErrorEvent = {
+  type: "error";
+  code: string;
+  detail: string;
+};
+
+export type ReplyStreamEvent =
+  | ReplyDeltaEvent
+  | ReplyDoneEvent
+  | ReplyErrorEvent;
+
+export class SendMessageHttpError extends Error {
+  constructor(
+    public code: string,
+    public detail: string,
+    public status: number,
+  ) {
+    super(detail);
+  }
+}
 
 export async function startCaptureSession(): Promise<{ sessionId: string }> {
   const { data, error } = await client.POST("/capture-sessions");
@@ -43,6 +63,17 @@ export async function* sendMessage(
   );
 
   if (!response.ok) {
+    try {
+      const body = (await response.json()) as Record<string, unknown>;
+      const { code, detail } = body;
+      if (typeof code === "string" && typeof detail === "string") {
+        throw new SendMessageHttpError(code, detail, response.status);
+      }
+    } catch (error) {
+      if (error instanceof SendMessageHttpError) {
+        throw error;
+      }
+    }
     throw new Error(`sendMessage failed: ${response.status}`);
   }
 
@@ -83,17 +114,27 @@ export async function* sendMessage(
 
 type RawReplyStreamEvent =
   | { type: "delta"; text: string }
-  | { type: "done"; message_id: string; content: string; topic: string };
+  | {
+      type: "done";
+      message_id: string;
+      content: string;
+      topic: string;
+      coverage_confidence: number;
+    }
+  | { type: "error"; code: string; detail: string };
 
 function parseStreamEvent(json: string): ReplyStreamEvent {
   const raw = JSON.parse(json) as RawReplyStreamEvent;
   if (raw.type === "delta") {
     return { type: "delta", text: raw.text };
   }
+  if (raw.type === "error") {
+    return { type: "error", code: raw.code, detail: raw.detail };
+  }
   return {
     type: "done",
     messageId: raw.message_id,
     content: raw.content,
     topic: raw.topic,
-  };
+  } as ReplyDoneEvent;
 }

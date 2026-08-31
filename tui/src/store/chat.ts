@@ -15,6 +15,7 @@ type StreamError = { code: string; detail: string } | null;
 type ChatState = {
   sessionId: string | null;
   topic: string | null;
+  coverageConfidence: number | null;
   transcript: TranscriptEntry[];
   currentReply: string;
   isStreaming: boolean;
@@ -29,6 +30,7 @@ type ChatActions = {
 export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   sessionId: null,
   topic: null,
+  coverageConfidence: null,
   transcript: [],
   currentReply: "",
   isStreaming: false,
