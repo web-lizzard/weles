@@ -1,19 +1,86 @@
-import { Box, Static, Text } from "ink";
+import { Box, Text, useStdout } from "ink";
 import TextInput from "ink-text-input";
 import { useEffect, useState } from "react";
 import { type TranscriptEntry, useChatStore } from "../store/chat.js";
 
+const WELES_TAGLINE = "wisdom through questions";
+const DEFAULT_TERMINAL_ROWS = 24;
+const DEFAULT_TERMINAL_COLUMNS = 80;
+
+function UserLabel() {
+  return <Text>🧑 You: </Text>;
+}
+
+function WelesAgentLabel() {
+  return <Text color="yellow">🦉 Weles: </Text>;
+}
+
+function WelesBrand({ separator }: { separator: string }) {
+  return (
+    <Box flexDirection="column" marginBottom={1}>
+      <Text>
+        <Text color="yellow">Weles:</Text>
+        <Text> {WELES_TAGLINE}</Text>
+      </Text>
+      <Text dimColor>{separator}</Text>
+    </Box>
+  );
+}
+
+function TopicHeading({ topic }: { topic: string }) {
+  return (
+    <Box marginY={1}>
+      <Text bold>Topic: {topic}</Text>
+    </Box>
+  );
+}
+
+function shouldShowWelesBrand(
+  terminalRows: number,
+  transcript: TranscriptEntry[],
+  hasTopic: boolean,
+  isStreaming: boolean,
+): boolean {
+  const rows = terminalRows > 0 ? terminalRows : DEFAULT_TERMINAL_ROWS;
+  const inputBlock = 1;
+  const topicBlock = hasTopic ? 2 : 0;
+  const brandBlock = 3;
+  const streamingReserve = isStreaming ? 1 : 0;
+  const padding = 1;
+
+  const transcriptBudget = Math.max(
+    0,
+    rows - inputBlock - topicBlock - brandBlock - streamingReserve - padding,
+  );
+  const usedLines = transcript.length + streamingReserve;
+
+  if (usedLines === 0) {
+    return true;
+  }
+
+  return usedLines < transcriptBudget;
+}
+
 function TranscriptLine({ entry }: { entry: TranscriptEntry }) {
-  const prefix = entry.role === "user" ? "> " : "  ";
+  if (entry.role === "user") {
+    return (
+      <Text>
+        <UserLabel />
+        {entry.content}
+      </Text>
+    );
+  }
+
   return (
     <Text>
-      {prefix}
+      <WelesAgentLabel />
       {entry.content}
     </Text>
   );
 }
 
 export default function CaptureScreen() {
+  const { stdout } = useStdout();
   const initSession = useChatStore((state) => state.initSession);
   const sendUserMessage = useChatStore((state) => state.sendUserMessage);
   const transcript = useChatStore((state) => state.transcript);
@@ -22,6 +89,13 @@ export default function CaptureScreen() {
   const topic = useChatStore((state) => state.topic);
 
   const [inputValue, setInputValue] = useState("");
+  const hasTopic = topic !== null;
+  const showBrand =
+    inputValue.length === 0 &&
+    shouldShowWelesBrand(stdout.rows, transcript, hasTopic, isStreaming);
+  const separator = "─".repeat(
+    stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
+  );
 
   useEffect(() => {
     void initSession();
@@ -38,15 +112,22 @@ export default function CaptureScreen() {
 
   return (
     <Box flexDirection="column">
-      {topic !== null && <Text>Topic: {topic}</Text>}
+      {showBrand && <WelesBrand separator={separator} />}
+      {hasTopic && <TopicHeading topic={topic} />}
       <Box flexDirection="column" flexGrow={1}>
-        <Static items={transcript}>
-          {(entry, index) => <TranscriptLine key={index} entry={entry} />}
-        </Static>
-        {currentReply.length > 0 && <Text> {currentReply}</Text>}
+        {transcript.map((entry, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: append-only transcript entries have no stable id
+          <TranscriptLine key={index} entry={entry} />
+        ))}
+        {currentReply.length > 0 && (
+          <Text>
+            <WelesAgentLabel />
+            {currentReply}
+          </Text>
+        )}
       </Box>
       <Box>
-        <Text>&gt; </Text>
+        <UserLabel />
         <TextInput
           value={inputValue}
           onChange={setInputValue}

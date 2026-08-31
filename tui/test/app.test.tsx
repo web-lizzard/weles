@@ -6,7 +6,7 @@ describe("App", () => {
   it("renders the capture screen input prompt", () => {
     const { lastFrame } = render(<App />);
 
-    expect(lastFrame()).toContain(">");
+    expect(lastFrame()).toContain("Weles");
   });
 
   it("renders a non-empty bootstrap frame", () => {
