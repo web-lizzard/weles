@@ -13,16 +13,20 @@ from adapters.out.in_memory.capture.capture_session_repository import (
 from adapters.out.in_memory.capture.confidence_assessment import (
     DeterministicConfidenceAssessmentAdapter,
 )
+from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.in_memory.capture.message_repository import (
     InMemoryMessageRepository,
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
+from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
 from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
+from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_extraction import (
     DeterministicTopicExtractionAdapter,
 )
+from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
@@ -39,28 +43,46 @@ class InMemoryCaptureComposition:
     store: InMemoryMessageStore
     capture_sessions: InMemoryCaptureSessionRepository
     messages: InMemoryMessageRepository
+    notes: InMemoryNoteRepository
+    topics: InMemoryTopicRepository
+    tags: InMemoryTagRepository
     transcript_query: InMemoryTranscriptQueryAdapter
     topic_extraction: DeterministicTopicExtractionAdapter
     confidence_assessment: ConfidenceAssessmentPort
     reply_generation: DeterministicReplyGenerationAdapter
+    embedding: DeterministicEmbeddingAdapter
 
     @classmethod
     def create(cls) -> "InMemoryCaptureComposition":
         store = InMemoryMessageStore()
         capture_sessions = InMemoryCaptureSessionRepository()
         messages = InMemoryMessageRepository(store)
+        notes = InMemoryNoteRepository()
+        topics = InMemoryTopicRepository()
+        tags = InMemoryTagRepository()
         return cls(
             store=store,
             capture_sessions=capture_sessions,
             messages=messages,
+            notes=notes,
+            topics=topics,
+            tags=tags,
             transcript_query=InMemoryTranscriptQueryAdapter(store),
             topic_extraction=DeterministicTopicExtractionAdapter(),
             confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
             reply_generation=DeterministicReplyGenerationAdapter(),
+            embedding=DeterministicEmbeddingAdapter(),
         )
 
     def unit_of_work(self) -> InMemoryUnitOfWork:
-        return InMemoryUnitOfWork(self.capture_sessions, self.messages, self.store)
+        return InMemoryUnitOfWork(
+            self.capture_sessions,
+            self.messages,
+            self.store,
+            self.notes,
+            self.topics,
+            self.tags,
+        )
 
     def dependency_overrides(
         self,

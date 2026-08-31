@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 6
-next_step: 6.1
-next_command: /implement capture-flow-draft-note phase 6
-updated: 2026-09-02
+current_phase: 7
+next_step: tests
+next_command: /unit-test capture-flow-draft-note phase 7
+updated: 2026-09-01
 ---
 
 ### Phase 1: Rename `Topic` to `SessionTopic`
@@ -68,11 +68,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 6.1 Add `InMemoryNoteRepository`, `InMemoryTopicRepository`, `InMemoryTagRepository` skeletons with `add`/`get`/`snapshot`/`restore`
-- [ ] 6.2 Add the `DeterministicEmbeddingAdapter` skeleton — `adapters/out/in_memory/capture/embedding.py`
-- [ ] 6.3 Extend `InMemoryUnitOfWork` with the three repositories and their snapshot/restore hooks
-- [ ] 6.4 Wire the new adapters into `adapters/compose.py`
-- [ ] 6.5 Wire the new adapters into `InMemoryCaptureComposition` — `tests/integration/support/in_memory_capture.py`
+- [x] 6.1 Add `InMemoryNoteRepository`, `InMemoryTopicRepository`, `InMemoryTagRepository` skeletons with `add`/`get`/`snapshot`/`restore`
+- [x] 6.2 Add the `DeterministicEmbeddingAdapter` skeleton — `adapters/out/in_memory/capture/embedding.py`
+- [x] 6.3 Extend `InMemoryUnitOfWork` with the three repositories and their snapshot/restore hooks
+- [x] 6.4 Wire the new adapters into `adapters/compose.py`
+- [x] 6.5 Wire the new adapters into `InMemoryCaptureComposition` — `tests/integration/support/in_memory_capture.py`
 
 ### Phase 7: In-memory persistence and UnitOfWork — behavior
 

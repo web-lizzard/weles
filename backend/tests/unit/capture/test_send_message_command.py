@@ -15,12 +15,15 @@ from adapters.out.in_memory.capture.message_repository import (
     InMemoryMessageRepository,
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
+from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
 from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
+from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_extraction import (
     DeterministicTopicExtractionAdapter,
 )
+from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
@@ -298,8 +301,18 @@ class _SpyUnitOfWork(InMemoryUnitOfWork):
         capture_sessions: InMemoryCaptureSessionRepository,
         messages: InMemoryMessageRepository,
         message_store: InMemoryMessageStore,
+        notes: InMemoryNoteRepository | None = None,
+        topics: InMemoryTopicRepository | None = None,
+        tags: InMemoryTagRepository | None = None,
     ) -> None:
-        super().__init__(capture_sessions, messages, message_store)
+        super().__init__(
+            capture_sessions,
+            messages,
+            message_store,
+            notes or InMemoryNoteRepository(),
+            topics or InMemoryTopicRepository(),
+            tags or InMemoryTagRepository(),
+        )
         self.commit_count = 0
 
     @override
