@@ -68,11 +68,11 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 6.1 Add `InMemoryNoteRepository`, `InMemoryTopicRepository`, `InMemoryTagRepository` skeletons with `add`/`get`/`snapshot`/`restore`
-- [x] 6.2 Add the `DeterministicEmbeddingAdapter` skeleton — `adapters/out/in_memory/capture/embedding.py`
-- [x] 6.3 Extend `InMemoryUnitOfWork` with the three repositories and their snapshot/restore hooks
-- [x] 6.4 Wire the new adapters into `adapters/compose.py`
-- [x] 6.5 Wire the new adapters into `InMemoryCaptureComposition` — `tests/integration/support/in_memory_capture.py`
+- [x] 6.1 Add `InMemoryNoteRepository`, `InMemoryTopicRepository`, `InMemoryTagRepository` skeletons with `add`/`get`/`snapshot`/`restore` — 5db94a2
+- [x] 6.2 Add the `DeterministicEmbeddingAdapter` skeleton — `adapters/out/in_memory/capture/embedding.py` — 5db94a2
+- [x] 6.3 Extend `InMemoryUnitOfWork` with the three repositories and their snapshot/restore hooks — 5db94a2
+- [x] 6.4 Wire the new adapters into `adapters/compose.py` — 5db94a2
+- [x] 6.5 Wire the new adapters into `InMemoryCaptureComposition` — `tests/integration/support/in_memory_capture.py` — 5db94a2
 
 ### Phase 7: In-memory persistence and UnitOfWork — behavior
 
