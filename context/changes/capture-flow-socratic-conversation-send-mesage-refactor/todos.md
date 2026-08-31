@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-socratic-conversation-send-mesage-refactor
 current_phase: 5
-next_step: 5.1
-next_command: /unit-test capture-flow-socratic-conversation-send-mesage-refactor phase 5
+next_step: 5.3
+next_command: /implement capture-flow-socratic-conversation-send-mesage-refactor phase 5
 updated: 2026-08-31
 ---
 
@@ -61,12 +61,12 @@ updated: 2026-08-31
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — d22c7f4
 
 #### Automated
 
-- [ ] 5.1 Add `StatusBar` component and wire `streamError` into `CaptureScreen`
-- [ ] 5.2 Adjust `shouldShowWelesBrand` row-budget math for the error block
+- [x] 5.1 Add `StatusBar` component and wire `streamError` into `CaptureScreen` — 9d17052
+- [x] 5.2 Adjust `shouldShowWelesBrand` row-budget math for the error block — 9d17052
 
 #### Manual
 
