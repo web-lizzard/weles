@@ -54,8 +54,8 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 4.1 Add `streamError` state + clear-on-send in `chat.ts`
-- [x] 4.2 Catch in-band error event and thrown `SendMessageHttpError`/fallback in `sendUserMessage`
+- [x] 4.1 Add `streamError` state + clear-on-send in `chat.ts` — 3143087
+- [x] 4.2 Catch in-band error event and thrown `SendMessageHttpError`/fallback in `sendUserMessage` — 3143087
 
 ### Phase 5: TUI `CaptureScreen.tsx` — status-bar rendering
 
