@@ -292,6 +292,15 @@ Real logic for every adapter stubbed in Phase 3, plus one contract-test suite pe
 - `cd backend && uv run pytest tests/unit/capture/contracts -v` — one parametrized contract suite per port (`CaptureSessionRepository`, `MessageRepository`, `TranscriptQueryPort`, `TopicExtractionPort`, `ConfidenceAssessmentPort`, `ReplyGenerationPort`), asserting structural invariants (non-empty/valid output), not literal stand-in text
 - `cd backend && uv run pytest tests/unit/capture -v` — `ConfidencePoint`'s empty-note case asserts `pytest.raises(EmptyConfidencePointError)` specifically, same exact-type discipline as Phase 2
 
+### Review r3
+
+Artifact: `reviews/2026-08-31-r3-impl-review.md`
+
+- `R3-F2` — InMemoryUnitOfWork reaches into private repository/store attributes for snapshot/restore
+  Fix: give `InMemoryCaptureSessionRepository` and `InMemoryMessageStore` their own snapshot/restore methods for `InMemoryUnitOfWork` to call, instead of reaching past their leading-underscore attributes — a unit-of-work coordinates repositories through their own contract, it does not open their internals.
+- `R3-F3` — ConfidencePoint.note not canonicalized on construction unlike sibling VOs
+  Fix: `ConfidencePoint.note` should canonicalize to its stripped form on construction the same way `Topic.value`/`MessageContent.value` do — a caller constructing `ConfidencePoint(note="x\r")` directly should not be able to store a value the plan's own R2 fix explicitly ruled out for its siblings.
+
 ---
 
 ## Phase 5: Application commands — stubs
@@ -408,6 +417,20 @@ Real orchestration logic for both commands.
 
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/capture/test_start_capture_session_command.py tests/unit/capture/test_send_message_command.py -v` — covers: `load_open_session_for_turn` raises `CaptureSessionNotFoundError` for an unknown id and `CaptureSessionClosedError` for a fixture-constructed closed session (status never transitions in this slice's production code, so this fixture bypasses the normal factory on purpose) with the *exact* exception type in both cases; `GenerateReplyCommand` — first-turn lazy topic assignment, second-turn skips it, commit happens only after the stream fully drains (one `uow.commit()` call, not two), an early `aclose()` on the generator leaves nothing persisted (rollback)
+
+### Review r3
+
+Artifact: `reviews/2026-08-31-r3-impl-review.md`
+
+- `R3-F1` — ReplyDoneEvent yielded inside UnitOfWork's async with block, not after it exits
+  Fix: `GenerateReplyCommand.handle()`'s terminal `ReplyDoneEvent` must be yielded after the `async with self._uow` block exits, not from within it — keep the commit boundary and the terminal yield structurally separate so a future `UnitOfWork.__aexit__` that does more than restore-on-rollback can't silently delay or entangle the client's final event with adapter teardown.
+
+### Review r4
+
+Artifact: `reviews/2026-08-31-r4-property-test-phase-6.md`
+
+- `R4-F1` — GenerateReplyCommand re-extracts topic when in-memory session.topic is None despite persisted topic
+  Fix: `"0"` with a stale `topic=None` in-memory session must fail `test_R4_F1_stale_session_does_not_overwrite_persisted_topic` until `GenerateReplyCommand` guards topic assignment against an already-persisted topic, then remain as regression.
 
 ---
 
@@ -637,6 +660,17 @@ Wire the screen to the store and stream client; this is the user-visible end sta
 
 #### Manual Verification:
 - `uv run fastapi dev src/main.py` (backend) and, in another terminal, `cd tui && pnpm build && node dist/cli.js`: type a message that starts a topic, confirm the streamed reply renders progressively, then send a follow-up and confirm the conversation continues
+
+### Review r5
+
+Artifact: `reviews/2026-08-31-r5-impl-review.md`
+
+- `R5-F1` — CaptureScreen renders transcript via `.map()`, not Ink's `Static`
+  Fix: `CaptureScreen`'s finalized transcript must render through Ink's `<Static items={transcript}>`, not a plain `.map()` — this is what keeps already-printed conversation history out of the per-frame reconciliation loop that every streamed delta otherwise re-triggers, per the plan's explicit Contract.
+- `R5-F2` — Undocumented branding/layout code shipped in a manual-verification commit
+  Fix: UI polish beyond a phase's Contract (branding, labels, layout budgeting) belongs in its own planned phase or a follow-up change, not folded into a Manual Verification step's commit — keep a verification step's commit, if any, limited to what verification actually requires.
+- `R5-F3` — stream.ts and CaptureScreen.tsx declare private helpers before public exports
+  Fix: move each file's public/exported symbols above its private helpers — the private helpers may stay defined after their first use, per `code-ordering.md`'s own carve-out, but must not precede the public interface.
 
 ---
 

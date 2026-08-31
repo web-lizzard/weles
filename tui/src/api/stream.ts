@@ -21,23 +21,6 @@ export type ReplyDoneEvent = {
 
 export type ReplyStreamEvent = ReplyDeltaEvent | ReplyDoneEvent;
 
-type RawReplyStreamEvent =
-  | { type: "delta"; text: string }
-  | { type: "done"; message_id: string; content: string; topic: string };
-
-function parseStreamEvent(json: string): ReplyStreamEvent {
-  const raw = JSON.parse(json) as RawReplyStreamEvent;
-  if (raw.type === "delta") {
-    return { type: "delta", text: raw.text };
-  }
-  return {
-    type: "done",
-    messageId: raw.message_id,
-    content: raw.content,
-    topic: raw.topic,
-  };
-}
-
 export async function startCaptureSession(): Promise<{ sessionId: string }> {
   const { data, error } = await client.POST("/capture-sessions");
   if (error || !data) {
@@ -96,4 +79,21 @@ export async function* sendMessage(
     const json = trailing.slice("data:".length).trim();
     yield parseStreamEvent(json);
   }
+}
+
+type RawReplyStreamEvent =
+  | { type: "delta"; text: string }
+  | { type: "done"; message_id: string; content: string; topic: string };
+
+function parseStreamEvent(json: string): ReplyStreamEvent {
+  const raw = JSON.parse(json) as RawReplyStreamEvent;
+  if (raw.type === "delta") {
+    return { type: "delta", text: raw.text };
+  }
+  return {
+    type: "done",
+    messageId: raw.message_id,
+    content: raw.content,
+    topic: raw.topic,
+  };
 }
