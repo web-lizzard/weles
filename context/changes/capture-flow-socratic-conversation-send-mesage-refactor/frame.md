@@ -35,6 +35,14 @@ Rejected: `guard` / `validate` — the success path returns domain values, not a
 - `EventSource.onerror` as an application-error channel (it is a connection failure).
 - HTTP trailers as an error channel (browsers/Fetch do not expose them).
 
+## Amendment (2026-08-31)
+
+`plan.md` Revision 1 supersedes this frame's "Move the pre-stream work onto `GenerateReplyCommand` as a second method, **`load_turn`**" paragraph and its "Why `load_turn`" rejection of `guard`/`validate` naming. Final shape: `guard_session(session_id, raw_content) -> MessageContent` — a pure validator, returning only the validated content, not a `(CaptureSession, MessageContent)` pair. `handle(session_id, content)` loads its own `CaptureSession` fresh, inside its own transaction, instead of trusting a caller-supplied one from Depends.
+
+Reason for the change: this frame's original argument — "loading an open session is intake, not a check" — held only as long as `handle` trusted the Depends-loaded session directly. Once `handle` needs its own authoritative read anyway (to be lock-ready for a future real adapter, and to structurally close the R4-F1 staleness class this frame already flagged as unresolved), the Depends-side session load stops being intake and becomes purely a fast-fail check whose value is never used again — so `guard`-style naming and a content-only return are the accurate shape after all. `MessageContent` construction remains genuine intake, unchanged, and is still returned.
+
+This also resolves the "load_turn ... will not survive I/O-bound adapters" concern this frame raised: `handle`'s self-load is already the shape a future `SELECT ... FOR UPDATE` would wrap, with no further signature change needed when real adapters land.
+
 ## Success
 
 - Unknown session and empty content still produce clean HTTP 404/422 JSON, not a broken or 200 stream. Closed session remains HTTP 409 on the same path.
