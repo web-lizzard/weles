@@ -175,4 +175,4 @@ updated: 2026-08-31
 
 - [ ] 13.5 R5-F1 CaptureScreen renders transcript via `.map()`, not Ink's `Static`
 - [ ] 13.6 R5-F2 Undocumented branding/layout code shipped in a manual-verification commit
-- [x] 13.7 R5-F3 stream.ts and CaptureScreen.tsx declare private helpers before public exports
+- [x] 13.7 R5-F3 stream.ts and CaptureScreen.tsx declare private helpers before public exports — 18d8bac
