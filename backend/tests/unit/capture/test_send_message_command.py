@@ -27,6 +27,13 @@ from adapters.out.in_memory.capture.transcript_query import (
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.dto import ReplyDoneEvent, ReplyStreamEvent
+from application.capture.ports import ConfidenceAssessmentPort
+from application.capture.value_objects import (
+    ConfidenceAssessment,
+    ConfidencePoint,
+    ConfidencePointKind,
+    Transcript,
+)
 from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
@@ -170,6 +177,78 @@ async def test_generate_reply_raises_closed_if_session_closed_at_handle_time() -
             pass
 
 
+async def test_done_event_reports_full_coverage_when_assessment_is_all_solid() -> None:
+    stack = _make_command_stack(
+        confidence_assessment=_AllSolidConfidenceAssessmentAdapter(),
+    )
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    content = MessageContent(value="I think we've covered TCP thoroughly")
+
+    events = [event async for event in stack.command.handle(session.id, content)]
+
+    done = next(event for event in events if isinstance(event, ReplyDoneEvent))
+    assert done.coverage_confidence == 1.0
+
+
+async def test_done_event_reports_zero_coverage_with_deterministic_assessment() -> None:
+    stack = _make_command_stack()
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    content = MessageContent(value="Tell me about slow start")
+
+    events = [event async for event in stack.command.handle(session.id, content)]
+
+    done = next(event for event in events if isinstance(event, ReplyDoneEvent))
+    assert done.coverage_confidence == 0.0
+
+
+async def test_full_coverage_does_not_close_session_or_block_follow_up_message() -> (
+    None
+):
+    stack = _make_command_stack(
+        confidence_assessment=_AllSolidConfidenceAssessmentAdapter(),
+    )
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    first_content = MessageContent(value="We've covered everything about TCP")
+    follow_up_content = MessageContent(value="One more thing about retransmission")
+
+    first_events = [
+        event async for event in stack.command.handle(session.id, first_content)
+    ]
+    first_done = next(
+        event for event in first_events if isinstance(event, ReplyDoneEvent)
+    )
+    assert first_done.coverage_confidence == 1.0
+
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.status == SessionStatus.OPEN
+
+    follow_up_events = [
+        event async for event in stack.command.handle(session.id, follow_up_content)
+    ]
+    follow_up_done = next(
+        event for event in follow_up_events if isinstance(event, ReplyDoneEvent)
+    )
+    assert follow_up_done.content != ""
+
+
+class _AllSolidConfidenceAssessmentAdapter:
+    async def assess(self, transcript: Transcript) -> ConfidenceAssessment:
+        _ = transcript
+        return ConfidenceAssessment(
+            points=[
+                ConfidencePoint(
+                    kind=ConfidencePointKind.SOLID,
+                    note="Topic appears fully covered",
+                ),
+            ],
+            coverage_confidence=1.0,
+        )
+
+
 class _CommandStack:
     store: InMemoryMessageStore
     session_repo: InMemoryCaptureSessionRepository
@@ -192,7 +271,9 @@ class _CommandStack:
         self.command = command
 
 
-def _make_command_stack() -> _CommandStack:
+def _make_command_stack(
+    confidence_assessment: ConfidenceAssessmentPort | None = None,
+) -> _CommandStack:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
@@ -202,7 +283,8 @@ def _make_command_stack() -> _CommandStack:
         uow=uow,  # pyright: ignore[reportArgumentType]
         transcript_query=InMemoryTranscriptQueryAdapter(store),
         topic_extraction=DeterministicTopicExtractionAdapter(),
-        confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
+        confidence_assessment=confidence_assessment
+        or DeterministicConfidenceAssessmentAdapter(),
         reply_generation=DeterministicReplyGenerationAdapter(),
     )
     return _CommandStack(store, session_repo, message_repo, uow, command)
