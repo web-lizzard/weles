@@ -32,8 +32,8 @@ updated: 2026-08-31
 
 #### Automated
 
-- [x] 2.1 Add `ReplyErrorEvent` to `dto.py`, widen `ReplyStreamEvent`
-- [x] 2.2 Wrap `send_message` generator body in `try/except CoreException`, yield `ReplyErrorEvent`
+- [x] 2.1 Add `ReplyErrorEvent` to `dto.py`, widen `ReplyStreamEvent` — 3771527
+- [x] 2.2 Wrap `send_message` generator body in `try/except CoreException`, yield `ReplyErrorEvent` — 3771527
 
 ### Phase 3: TUI `stream.ts` — parse `error` events + richer pre-stream errors
 
