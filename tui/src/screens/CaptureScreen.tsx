@@ -1,7 +1,11 @@
 import { Box, Text, useStdout } from "ink";
 import TextInput from "ink-text-input";
 import { useEffect, useState } from "react";
-import { type TranscriptEntry, useChatStore } from "../store/chat.js";
+import {
+  type Draft,
+  type TranscriptEntry,
+  useChatStore,
+} from "../store/chat.js";
 
 const WELES_TAGLINE = "wisdom through questions";
 const DEFAULT_TERMINAL_ROWS = 24;
@@ -17,6 +21,7 @@ export default function CaptureScreen() {
   const topic = useChatStore((state) => state.topic);
   const coverageConfidence = useChatStore((state) => state.coverageConfidence);
   const streamError = useChatStore((state) => state.streamError);
+  const draft = useChatStore((state) => state.draft);
 
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
@@ -64,6 +69,7 @@ export default function CaptureScreen() {
           </Text>
         )}
       </Box>
+      <DraftNotePanel draft={draft} />
       <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
@@ -105,6 +111,11 @@ function TopicHeading({ topic }: { topic: string }) {
       <Text bold>Topic: {topic}</Text>
     </Box>
   );
+}
+
+// biome-ignore lint/correctness/noUnusedFunctionParameters: stub panel — phase 14 renders draft
+function DraftNotePanel({ draft }: { draft: Draft | null }) {
+  return null;
 }
 
 function CoverageBanner({
