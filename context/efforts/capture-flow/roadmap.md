@@ -12,7 +12,7 @@ updated: 2026-09-01
 | S-02 | Users control when the conversation ends, even when the agent thinks it's done | capture-flow-coverage-wrapup | done |
 | S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | in_progress |
 | S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | done |
-| S-05 | Users' topics and tags stay deduplicated through reuse | capture-flow-tag-dedup | pending |
+| S-05 | Users' topics and tags stay deduplicated through reuse | capture-flow-tag-dedup | in_progress |
 | S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | pending |
 
 ## Dependencies
@@ -66,7 +66,7 @@ flowchart LR
 - **Outcome:** Users' topics and tags stay deduplicated through reuse
 - **Acceptance criteria:** AC-10, AC-11
 - **Change ID:** capture-flow-tag-dedup
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-04
 - **Parallel with:** S-06
 
