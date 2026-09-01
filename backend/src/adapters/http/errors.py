@@ -19,6 +19,7 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "empty_note_content": 422,
     "note_content_too_long": 422,
     "session_note_already_drafted": 409,
+    "draft_topic_missing": 500,
 }
 
 

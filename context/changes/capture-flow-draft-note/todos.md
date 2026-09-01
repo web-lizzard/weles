@@ -1,6 +1,6 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 3
+current_phase: 10
 next_step: epilogue
 next_command: /archive capture-flow-draft-note
 updated: 2026-09-01
@@ -115,6 +115,11 @@ updated: 2026-09-01
 - [x] 9.3 Implement draft assembly: `session.draft_note()`, note and session saves, `DraftDoneEvent` built before `commit()`, draft-then-done yielded after the block — ac63e4b
 - [x] 9.4 Write unit tests: event sequence, persisted note shape and `session.note_id`, mid-stream rollback, second-confirmation error, unchanged conversation path — ac63e4b
 - [x] 9.5 `cd backend && uv run pytest` green — ac63e4b
+
+#### Triage
+
+- [x] 9.6 R3-F1 DraftDoneEvent content must match persisted note content after NoteContent stripping
+- [x] 9.7 R3-F2 Draft stream without draft_topic must raise CoreException not AssertionError
 
 ### Phase 10: HTTP integration and acceptance scenarios (AC-08, AC-09)
 
