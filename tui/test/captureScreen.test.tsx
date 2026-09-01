@@ -63,6 +63,7 @@ describe("CaptureScreen", () => {
       currentReply: "",
       isStreaming: false,
       streamError: null,
+      draft: null,
     });
     vi.mocked(startCaptureSession).mockResolvedValue({ sessionId: "sess-1" });
     vi.mocked(sendMessage).mockReset();
@@ -346,5 +347,82 @@ describe("CaptureScreen", () => {
     expect(frame).toContain(COVERAGE_BANNER_TEXT);
     expect(frame).toContain("Follow-up question");
     expect(sendMessage).toHaveBeenCalled();
+  });
+
+  it("does not render the draft panel when draft is null", () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: null,
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain("Session topic");
+    expect(frame).not.toContain("draft-panel-topic");
+    expect(frame).not.toContain("draft-panel-tag-a");
+  });
+
+  it("renders topic and tags received so far in a partial draft", () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-panel-topic",
+        tags: ["draft-panel-tag-a", "draft-panel-tag-b"],
+        content: "",
+        noteId: null,
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain("draft-panel-topic");
+    expect(frame).toContain("draft-panel-tag-a");
+    expect(frame).toContain("draft-panel-tag-b");
+    expect(frame).not.toContain("draft-panel-body");
+  });
+
+  it("renders the draft body when the draft is complete", () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-panel-topic",
+        tags: ["draft-panel-tag-a"],
+        content: "draft-panel-body",
+        noteId: "00000000-0000-4000-8000-000000000010",
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+
+    expect(lastFrame()).toContain("draft-panel-body");
+  });
+
+  it("hides Weles brand when the draft panel consumes remaining row budget", () => {
+    const transcript = Array.from({ length: 16 }, (_, index) => ({
+      role: "user" as const,
+      content: `line ${index}`,
+    }));
+
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      transcript,
+      draft: {
+        topic: "draft-panel-topic",
+        tags: ["draft-panel-tag-a"],
+        content: "draft-panel-body",
+        noteId: "00000000-0000-4000-8000-000000000010",
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain("draft-panel-topic");
+    expect(frame).not.toContain(WELES_TAGLINE);
   });
 });
