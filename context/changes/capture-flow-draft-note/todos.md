@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 12
-next_step: 12.1
-next_command: /implement capture-flow-draft-note phase 12
+current_phase: 13
+next_step: 13.1
+next_command: /implement capture-flow-draft-note phase 13
 updated: 2026-09-01
 ---
 
@@ -140,10 +140,10 @@ updated: 2026-09-01
 
 #### Automated
 
-- [ ] 12.1 Implement the four new branches in `parseStreamEvent`
-- [ ] 12.2 Implement the store reducers, including reset on a new turn and on `streamError`
-- [ ] 12.3 Write Vitest tests for the parser and for a full drafting sequence through the store
-- [ ] 12.4 `pnpm --dir tui test` green
+- [x] 12.1 Implement the four new branches in `parseStreamEvent` — 75b6ff9
+- [x] 12.2 Implement the store reducers, including reset on a new turn and on `streamError` — 75b6ff9
+- [x] 12.3 Write Vitest tests for the parser and for a full drafting sequence through the store — 75b6ff9
+- [x] 12.4 `pnpm --dir tui test` green — 75b6ff9
 
 ### Phase 13: TUI screen — stubs
 
