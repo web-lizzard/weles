@@ -166,4 +166,4 @@ updated: 2026-09-01
 
 #### Manual
 
-- [x] 14.5 Run the backend and the TUI together, hold a short conversation, type a confirmation phrase and watch the panel fill with topic, then tags, then body
+- [x] 14.5 Run the backend and the TUI together, hold a short conversation, type a confirmation phrase and watch the panel fill with topic, then tags, then body — ceec112
