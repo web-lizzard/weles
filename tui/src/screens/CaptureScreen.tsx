@@ -71,7 +71,7 @@ export default function CaptureScreen() {
           </Text>
         )}
       </Box>
-      <DraftNotePanel draft={draft} />
+      <DraftNotePanel draft={draft} separator={separator} />
       <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
@@ -115,16 +115,51 @@ function TopicHeading({ topic }: { topic: string }) {
   );
 }
 
-function DraftNotePanel({ draft }: { draft: Draft | null }) {
+function DraftNotePanel({
+  draft,
+  separator,
+}: {
+  draft: Draft | null;
+  separator: string;
+}) {
   if (draft === null) {
     return null;
   }
 
+  const hasBody = draft.content.length > 0;
+
   return (
     <Box flexDirection="column" marginY={1}>
-      {draft.topic !== null && <Text bold>{draft.topic}</Text>}
-      {draft.tags.length > 0 && <Text>{draft.tags.join(", ")}</Text>}
-      {draft.content.length > 0 && <Text>{draft.content}</Text>}
+      {draft.topic !== null && (
+        <Text>
+          <Text color="yellow">Topic: </Text>
+          <Text bold>{draft.topic}</Text>
+        </Text>
+      )}
+      {draft.tags.length > 0 && <DraftTags tags={draft.tags} />}
+      {hasBody && (
+        <Box flexDirection="column" marginTop={1}>
+          <Text dimColor>{separator}</Text>
+          <Text>{draft.content}</Text>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+function DraftTags({ tags }: { tags: string[] }) {
+  return (
+    <Box marginTop={1}>
+      <Text>
+        <Text dimColor>Tags: </Text>
+        {tags.map((tag, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: tags have no stable id
+          <Text key={index}>
+            {index > 0 && <Text dimColor> · </Text>}
+            <Text color="cyan">{tag}</Text>
+          </Text>
+        ))}
+      </Text>
     </Box>
   );
 }
