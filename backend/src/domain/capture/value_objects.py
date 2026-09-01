@@ -1,9 +1,11 @@
 from enum import StrEnum
+from math import isfinite, sqrt
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, field_validator, model_validator
 
 from domain.capture.exceptions import (
+    EmbeddingDimensionMismatchError,
     EmptyEmbeddingError,
     EmptyLabelError,
     EmptyMessageContentError,
@@ -13,12 +15,16 @@ from domain.capture.exceptions import (
     MessageContentTooLongError,
     NoteContentTooLongError,
     SessionTopicTooLongError,
+    SimilarityScoreOutOfRangeError,
+    ZeroMagnitudeEmbeddingError,
 )
 
 SESSION_TOPIC_MAX_LENGTH = 200
 MESSAGE_CONTENT_MAX_LENGTH = 4000
 LABEL_MAX_LENGTH = 120
 NOTE_CONTENT_MAX_LENGTH = 20000
+SIMILARITY_SCORE_MIN = -1.0
+SIMILARITY_SCORE_MAX = 1.0
 
 
 class MessageRole(StrEnum):
@@ -115,17 +121,24 @@ class SimilarityScore(BaseModel, frozen=True):
 
     @model_validator(mode="after")
     def _validate_value(self) -> "SimilarityScore":
+        if not isfinite(self.value):
+            raise SimilarityScoreOutOfRangeError
+        if not SIMILARITY_SCORE_MIN <= self.value <= SIMILARITY_SCORE_MAX:
+            raise SimilarityScoreOutOfRangeError
         return self
 
 
 class Embedding(BaseModel, frozen=True):
     values: tuple[float, ...]
 
-    def cosine_similarity(
-        self,
-        other: "Embedding",  # pyright: ignore[reportUnusedParameter]
-    ) -> SimilarityScore:
-        raise NotImplementedError
+    def cosine_similarity(self, other: "Embedding") -> SimilarityScore:
+        if len(self.values) != len(other.values):
+            raise EmbeddingDimensionMismatchError
+        left = _scaled_to_largest_component(self.values)
+        right = _scaled_to_largest_component(other.values)
+        dot = sum(a * b for a, b in zip(left, right, strict=True))
+        magnitudes = _magnitude(left) * _magnitude(right)
+        return SimilarityScore(value=_clamped_to_score_range(dot / magnitudes))
 
     @model_validator(mode="after")
     def _validate_values(self) -> "Embedding":
@@ -175,3 +188,18 @@ class TagId(BaseModel, frozen=True):
     @classmethod
     def new(cls) -> "TagId":
         return cls(value=uuid4())
+
+
+def _scaled_to_largest_component(values: tuple[float, ...]) -> tuple[float, ...]:
+    largest = max(abs(value) for value in values)
+    if largest == 0.0:
+        raise ZeroMagnitudeEmbeddingError
+    return tuple(value / largest for value in values)
+
+
+def _magnitude(values: tuple[float, ...]) -> float:
+    return sqrt(sum(value * value for value in values))
+
+
+def _clamped_to_score_range(value: float) -> float:
+    return min(max(value, SIMILARITY_SCORE_MIN), SIMILARITY_SCORE_MAX)
