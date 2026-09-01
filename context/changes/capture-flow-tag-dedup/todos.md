@@ -32,7 +32,7 @@ updated: 2026-09-01
 
 #### Triage
 
-- [x] 2.7 R1-F1 Self-similarity scores below 1.0 for equal non-zero components
+- [x] 2.7 R1-F1 Self-similarity scores below 1.0 for equal non-zero components — c699dfa
 
 ### Phase 3: Candidate retrieval and embedding conditioning — stubs
 
