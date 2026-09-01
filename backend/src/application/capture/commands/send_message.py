@@ -8,7 +8,12 @@ from application.capture.ports import (
     UnitOfWork,
 )
 from application.capture.queries.transcript import TranscriptQueryPort
-from application.capture.value_objects import ReplyTextChunk
+from application.capture.services.vocabulary import VocabularyResolver
+from application.capture.value_objects import (
+    DraftTagChunk,
+    DraftTopicChunk,
+    ReplyTextChunk,
+)
 from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
@@ -33,6 +38,7 @@ class GenerateReplyCommand:
         topic_extraction: TopicExtractionPort,
         confidence_assessment: ConfidenceAssessmentPort,
         reply_generation: ReplyGenerationPort,
+        vocabulary: VocabularyResolver,
     ) -> None:
         self._capture_sessions: CaptureSessionRepository = capture_sessions
         self._uow: UnitOfWork = uow
@@ -40,6 +46,7 @@ class GenerateReplyCommand:
         self._topic_extraction: TopicExtractionPort = topic_extraction
         self._confidence_assessment: ConfidenceAssessmentPort = confidence_assessment
         self._reply_generation: ReplyGenerationPort = reply_generation
+        self._vocabulary: VocabularyResolver = vocabulary
 
     async def guard_session(
         self, session_id: SessionId, raw_content: str
@@ -74,6 +81,12 @@ class GenerateReplyCommand:
                 if isinstance(chunk, ReplyTextChunk):
                     full_text += chunk.text
                     yield ReplyDeltaEvent(text=chunk.text)
+                elif isinstance(chunk, DraftTopicChunk):
+                    raise NotImplementedError
+                elif isinstance(chunk, DraftTagChunk):
+                    raise NotImplementedError
+                else:
+                    raise NotImplementedError
 
             reply_content = MessageContent(value=full_text)
             agent_message = Message.record(session.id, MessageRole.AGENT, reply_content)
