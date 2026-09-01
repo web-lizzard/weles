@@ -1,4 +1,4 @@
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import aclosing
 from datetime import UTC, datetime
 from typing import cast, override
@@ -30,13 +30,21 @@ from adapters.out.in_memory.capture.transcript_query import (
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from application.capture.commands.send_message import GenerateReplyCommand
-from application.capture.dto import ReplyDoneEvent, ReplyStreamEvent
-from application.capture.ports import ConfidenceAssessmentPort
+from application.capture.dto import (
+    DraftDoneEvent,
+    DraftTagEvent,
+    DraftTopicEvent,
+    ReplyDoneEvent,
+    ReplyStreamEvent,
+)
+from application.capture.ports import ConfidenceAssessmentPort, ReplyGenerationPort
 from application.capture.services.vocabulary import VocabularyResolver
 from application.capture.value_objects import (
     ConfidenceAssessment,
     ConfidencePoint,
     ConfidencePointKind,
+    DraftTagChunk,
+    ReplyChunk,
     Transcript,
 )
 from domain.capture.capture_session import CaptureSession
@@ -44,13 +52,17 @@ from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
     EmptyMessageContentError,
+    SessionNoteAlreadyDraftedError,
 )
 from domain.capture.value_objects import (
     MessageContent,
+    NoteStatus,
     SessionId,
     SessionStatus,
     SessionTopic,
 )
+
+_CONFIRMATION_PHRASE = "that's all"
 
 
 async def test_guard_session_raises_not_found_for_unknown_id() -> None:
@@ -208,6 +220,96 @@ async def test_done_event_reports_zero_coverage_with_deterministic_assessment() 
     assert done.coverage_confidence == 0.0
 
 
+async def test_drafting_turn_emits_draft_events_before_done() -> None:
+    stack = _make_command_stack()
+    session = await _start_session_with_topic(stack, "TCP handshakes")
+
+    events = await _handle_confirmation_turn(stack, session)
+
+    _assert_drafting_event_sequence(events)
+
+
+async def test_drafting_turn_persists_note_and_links_session_note_id() -> None:
+    stack = _make_command_stack()
+    session = await _start_session_with_topic(stack, "TCP handshakes")
+
+    events = await _handle_confirmation_turn(stack, session)
+
+    draft_done = next(event for event in events if isinstance(event, DraftDoneEvent))
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id is not None
+
+    note = await stack.uow.notes.get(persisted_session.note_id)
+    assert note is not None
+    assert note.status == NoteStatus.DRAFT
+    assert note.id.value == draft_done.note_id
+
+    topic = await stack.uow.topics.get(note.topic_id)
+    assert topic is not None
+    assert topic.label.value == draft_done.topic
+
+    tag_labels: list[str] = []
+    for tag_id in note.tag_ids:
+        tag = await stack.uow.tags.get(tag_id)
+        assert tag is not None
+        tag_labels.append(tag.label.value)
+    assert tag_labels == draft_done.tags
+
+
+async def test_drafting_mid_stream_failure_rolls_back_draft_artifacts() -> None:
+    stack = _make_command_stack(
+        reply_generation=_FailMidDraftReplyGenerationAdapter(),
+    )
+    session = await _start_session_with_topic(stack, "TCP handshakes")
+    message_count_before = len(stack.store.list_by_session(session.id))
+
+    with pytest.raises(RuntimeError, match="simulated mid-stream failure"):
+        async for _ in stack.command.handle(
+            session.id,
+            MessageContent(value=_CONFIRMATION_PHRASE),
+        ):
+            pass
+
+    assert len(stack.uow.notes.snapshot()) == 0
+    assert len(stack.uow.topics.snapshot()) == 0
+    assert len(stack.uow.tags.snapshot()) == 0
+    assert len(stack.store.list_by_session(session.id)) == message_count_before
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.note_id is None
+
+
+async def test_second_confirmation_raises_session_note_already_drafted() -> None:
+    stack = _make_command_stack()
+    session = await _start_session_with_topic(stack, "TCP handshakes")
+    _ = await _handle_confirmation_turn(stack, session)
+
+    with pytest.raises(SessionNoteAlreadyDraftedError):
+        async for _ in stack.command.handle(
+            session.id,
+            MessageContent(value=_CONFIRMATION_PHRASE),
+        ):
+            pass
+
+
+async def test_conversational_turn_emits_only_delta_and_done_events() -> None:
+    stack = _make_command_stack()
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    content = MessageContent(value="Explain TCP handshakes")
+
+    events = [event async for event in stack.command.handle(session.id, content)]
+
+    event_types = [event.type for event in events]
+    assert event_types.count("delta") >= 1
+    assert event_types[-1] == "done"
+    assert "draft_topic" not in event_types
+    assert "draft_tag" not in event_types
+    assert "draft_delta" not in event_types
+    assert "draft_done" not in event_types
+
+
 async def test_full_coverage_does_not_close_session_or_block_follow_up_message() -> (
     None
 ):
@@ -238,6 +340,90 @@ async def test_full_coverage_does_not_close_session_or_block_follow_up_message()
         event for event in follow_up_events if isinstance(event, ReplyDoneEvent)
     )
     assert follow_up_done.content != ""
+
+
+class _FailMidDraftReplyGenerationAdapter:
+    _inner: DeterministicReplyGenerationAdapter
+
+    def __init__(self) -> None:
+        self._inner = DeterministicReplyGenerationAdapter()
+
+    async def generate(
+        self,
+        transcript: Transcript,
+        assessment: ConfidenceAssessment,
+    ) -> AsyncIterator[ReplyChunk]:
+        async for chunk in self._inner.generate(transcript, assessment):
+            yield chunk
+            if isinstance(chunk, DraftTagChunk):
+                raise RuntimeError("simulated mid-stream failure")
+
+
+def _assert_drafting_event_sequence(events: list[ReplyStreamEvent]) -> None:
+    event_types = [event.type for event in events]
+
+    draft_topic_index = event_types.index("draft_topic")
+    assert draft_topic_index >= 1
+    assert all(event_type == "delta" for event_type in event_types[:draft_topic_index])
+
+    draft_done_index = event_types.index("draft_done")
+    done_index = event_types.index("done")
+    assert done_index == len(event_types) - 1
+    assert draft_done_index < done_index
+
+    draft_delta_indices = [
+        index
+        for index, event_type in enumerate(event_types)
+        if event_type == "draft_delta"
+    ]
+    first_draft_delta_index = (
+        draft_delta_indices[0] if draft_delta_indices else draft_done_index
+    )
+    middle_types = event_types[draft_topic_index + 1 : first_draft_delta_index]
+    assert all(event_type == "draft_tag" for event_type in middle_types)
+
+    if draft_delta_indices:
+        assert all(
+            event_type == "draft_delta"
+            for event_type in event_types[first_draft_delta_index:draft_done_index]
+        )
+
+    assert isinstance(events[draft_topic_index], DraftTopicEvent)
+    assert all(
+        isinstance(event, DraftTagEvent)
+        for event in events[draft_topic_index + 1 : first_draft_delta_index]
+    )
+    assert isinstance(events[draft_done_index], DraftDoneEvent)
+    assert isinstance(events[done_index], ReplyDoneEvent)
+
+
+async def _start_session_with_topic(
+    stack: "_CommandStack",
+    topic: str,
+) -> CaptureSession:
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    _ = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value=f"Let's talk through {topic}"),
+        )
+    ]
+    return session
+
+
+async def _handle_confirmation_turn(
+    stack: "_CommandStack",
+    session: CaptureSession,
+) -> list[ReplyStreamEvent]:
+    return [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value=_CONFIRMATION_PHRASE),
+        )
+    ]
 
 
 class _AllSolidConfidenceAssessmentAdapter:
@@ -278,6 +464,7 @@ class _CommandStack:
 
 def _make_command_stack(
     confidence_assessment: ConfidenceAssessmentPort | None = None,
+    reply_generation: ReplyGenerationPort | None = None,
 ) -> _CommandStack:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
@@ -291,7 +478,7 @@ def _make_command_stack(
         topic_extraction=DeterministicTopicExtractionAdapter(),
         confidence_assessment=confidence_assessment
         or DeterministicConfidenceAssessmentAdapter(),
-        reply_generation=DeterministicReplyGenerationAdapter(),
+        reply_generation=reply_generation or DeterministicReplyGenerationAdapter(),
         vocabulary=VocabularyResolver(embedding),
     )
     return _CommandStack(store, session_repo, message_repo, uow, command)
