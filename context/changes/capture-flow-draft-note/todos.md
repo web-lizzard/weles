@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 11
-next_step: 11.1
-next_command: /implement capture-flow-draft-note phase 11
+current_phase: 12
+next_step: 12.1
+next_command: /unit-test capture-flow-draft-note phase 12
 updated: 2026-09-01
 ---
 
@@ -129,8 +129,8 @@ updated: 2026-09-01
 
 #### Automated
 
-- [ ] 11.1 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` and their `RawReplyStreamEvent` variants — `tui/src/api/stream.ts`
-- [ ] 11.2 Add the `Draft` type and `draft: Draft | null` to `ChatState` — `tui/src/store/chat.ts`
+- [x] 11.1 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` and their `RawReplyStreamEvent` variants — `tui/src/api/stream.ts`
+- [x] 11.2 Add the `Draft` type and `draft: Draft | null` to `ChatState` — `tui/src/store/chat.ts`
 
 ### Phase 12: TUI data layer — behavior
 

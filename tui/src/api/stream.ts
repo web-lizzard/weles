@@ -26,10 +26,37 @@ export type ReplyErrorEvent = {
   detail: string;
 };
 
+export type DraftTopicEvent = {
+  type: "draft_topic";
+  label: string;
+};
+
+export type DraftTagEvent = {
+  type: "draft_tag";
+  label: string;
+};
+
+export type DraftDeltaEvent = {
+  type: "draft_delta";
+  text: string;
+};
+
+export type DraftDoneEvent = {
+  type: "draft_done";
+  noteId: string;
+  topic: string;
+  content: string;
+  tags: string[];
+};
+
 export type ReplyStreamEvent =
   | ReplyDeltaEvent
   | ReplyDoneEvent
-  | ReplyErrorEvent;
+  | ReplyErrorEvent
+  | DraftTopicEvent
+  | DraftTagEvent
+  | DraftDeltaEvent
+  | DraftDoneEvent;
 
 export class SendMessageHttpError extends Error {
   constructor(
@@ -121,7 +148,17 @@ type RawReplyStreamEvent =
       topic: string;
       coverage_confidence: number;
     }
-  | { type: "error"; code: string; detail: string };
+  | { type: "error"; code: string; detail: string }
+  | { type: "draft_topic"; label: string }
+  | { type: "draft_tag"; label: string }
+  | { type: "draft_delta"; text: string }
+  | {
+      type: "draft_done";
+      note_id: string;
+      topic: string;
+      content: string;
+      tags: string[];
+    };
 
 function parseStreamEvent(json: string): ReplyStreamEvent {
   const raw = JSON.parse(json) as RawReplyStreamEvent;
@@ -131,11 +168,16 @@ function parseStreamEvent(json: string): ReplyStreamEvent {
   if (raw.type === "error") {
     return { type: "error", code: raw.code, detail: raw.detail };
   }
-  return {
-    type: "done",
-    messageId: raw.message_id,
-    content: raw.content,
-    topic: raw.topic,
-    coverageConfidence: raw.coverage_confidence,
-  };
+  if (raw.type === "done") {
+    return {
+      type: "done",
+      messageId: raw.message_id,
+      content: raw.content,
+      topic: raw.topic,
+      coverageConfidence: raw.coverage_confidence,
+    };
+  }
+  throw new Error(
+    `Unimplemented stream event type: ${(raw as { type: string }).type}`,
+  );
 }

@@ -10,6 +10,13 @@ export type TranscriptEntry = {
   content: string;
 };
 
+export type Draft = {
+  topic: string | null;
+  tags: string[];
+  content: string;
+  noteId: string | null;
+};
+
 type StreamError = { code: string; detail: string } | null;
 
 type ChatState = {
@@ -18,6 +25,7 @@ type ChatState = {
   coverageConfidence: number | null;
   transcript: TranscriptEntry[];
   currentReply: string;
+  draft: Draft | null;
   isStreaming: boolean;
   streamError: StreamError;
 };
@@ -33,6 +41,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   coverageConfidence: null,
   transcript: [],
   currentReply: "",
+  draft: null,
   isStreaming: false,
   streamError: null,
   initSession: async () => {
@@ -60,7 +69,14 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
         } else if (event.type === "error") {
           set({ streamError: { code: event.code, detail: event.detail } });
           break;
-        } else {
+        } else if (
+          event.type === "draft_topic" ||
+          event.type === "draft_tag" ||
+          event.type === "draft_delta" ||
+          event.type === "draft_done"
+        ) {
+          // stub — phase 12 wires draft reducers
+        } else if (event.type === "done") {
           set((state) => ({
             transcript: [
               ...state.transcript,
