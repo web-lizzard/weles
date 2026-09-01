@@ -2,7 +2,7 @@
 change_id: capture-flow-draft-note
 current_phase: 12
 next_step: 12.1
-next_command: /unit-test capture-flow-draft-note phase 12
+next_command: /implement capture-flow-draft-note phase 12
 updated: 2026-09-01
 ---
 
@@ -136,7 +136,7 @@ updated: 2026-09-01
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 30ed344
 
 #### Automated
 
