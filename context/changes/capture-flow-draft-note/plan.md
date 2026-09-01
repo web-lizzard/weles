@@ -258,6 +258,15 @@ Implements the validators, the three factories, and the two guards on `draft_not
 - `cd backend && uv run pytest tests/unit/test_http_error_mapping.py -v` green
 - `cd backend && uv run pytest` green
 
+### Review r2
+
+Artifact: `reviews/2026-09-01-r2-mutation-test-phase-3.md`
+
+- `R2-F1` — core_exception_handler response must include detail equal to str(exc)
+  Fix: assert `core_exception_handler` response JSON includes `detail` equal to `str(exc)`
+- `R2-F2` — unmapped exception code falls back to HTTP 500
+  Fix: assert `core_exception_handler` returns HTTP 500 when `exc.code()` is absent from `EXCEPTION_STATUS_MAP`
+
 ---
 
 ## Phase 4: Chunk protocol and SSE events — stubs
