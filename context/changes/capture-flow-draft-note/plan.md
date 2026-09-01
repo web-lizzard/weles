@@ -209,6 +209,13 @@ class Note(BaseModel):
 - `cd backend && uv run basedpyright` clean
 - `cd backend && uv run ruff check src tests` clean
 
+### Review r4
+
+Artifact: `reviews/2026-09-01-r4-impl-review.md`
+
+- `R4-F2` — EXCEPTION_STATUS_MAP entries for Phase 3 landed one phase early
+  Fix: a phase's commit touches only the files listed under that phase's own "Changes Required"; a later phase's contracted edit does not land early even when mechanically convenient — phase boundaries stay meaningful for review and bisection only if each phase's diff matches its own file list.
+
 ---
 
 ## Phase 3: Domain vocabulary and aggregates — behavior
@@ -349,6 +356,13 @@ ReplyChunk = Annotated[
 - `cd backend && uv run pytest` green
 - `cd backend && uv run basedpyright` clean
 - `cd backend && uv run pytest tests/bdd -m "capture-flow" -v` green (S-01/S-02 scenarios unaffected)
+
+### Review r4
+
+Artifact: `reviews/2026-09-01-r4-impl-review.md`
+
+- `R4-F1` — Phase 3 pytest-green claim was false through Phase 8 (fix bundled into Phase 9)
+  Fix: a phase's Automated rows are marked done only once that phase's own Success Criteria commands have actually been run and are green at that phase's own closing commit; a later phase's commit never silently absorbs an earlier phase's undelivered Contract.
 
 ---
 

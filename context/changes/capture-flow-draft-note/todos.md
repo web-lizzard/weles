@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 10
-next_step: epilogue
-next_command: /archive capture-flow-draft-note
+current_phase: 4
+next_step: 4.6
+next_command: /implement capture-flow-draft-note phase 4
 updated: 2026-09-01
 ---
 
@@ -26,6 +26,10 @@ updated: 2026-09-01
 - [x] 2.4 Add `Note` aggregate with `draft()` raising `NotImplementedError` — `domain/capture/note.py` — 2ee7327
 - [x] 2.5 Add `note_id: NoteId | None` and the `draft_note()` signature to `CaptureSession` — 2ee7327
 - [x] 2.6 Add `NoteRepository`, `TopicRepository`, `TagRepository` protocols — `domain/capture/ports.py` — 2ee7327
+
+#### Triage
+
+- [x] 2.7 R4-F2 EXCEPTION_STATUS_MAP entries for Phase 3 landed one phase early (p2)
 
 ### Phase 3: Domain vocabulary and aggregates — behavior
 
@@ -56,6 +60,10 @@ updated: 2026-09-01
 - [x] 4.3 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` to the `ReplyStreamEvent` union — `application/capture/dto.py` — d431c49
 - [x] 4.4 Wrap the deterministic adapter's output in `ReplyTextChunk` and read `chunk.text` in `GenerateReplyCommand` — d431c49
 - [x] 4.5 Update `test_reply_generation_contract.py` to join `chunk.text` — d431c49
+
+#### Triage
+
+- [ ] 4.6 R4-F1 Phase 3 pytest-green claim was false through Phase 8 (fix bundled into Phase 9)
 
 ### Phase 5: Deterministic draft adapter — behavior
 
