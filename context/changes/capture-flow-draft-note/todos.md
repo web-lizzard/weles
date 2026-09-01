@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 9
-next_step: tests
-next_command: /unit-test capture-flow-draft-note phase 9
+current_phase: 10
+next_step: 10.1
+next_command: /implement capture-flow-draft-note phase 10
 updated: 2026-09-01
 ---
 
@@ -101,15 +101,15 @@ updated: 2026-09-01
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e4b9e5a
 
 #### Automated
 
-- [ ] 9.1 Implement `VocabularyResolver.resolve_topic` and `resolve_tag` (embed, mint, persist)
-- [ ] 9.2 Implement chunk routing in `GenerateReplyCommand.handle()`, emitting `draft_topic`/`draft_tag` only after resolution
-- [ ] 9.3 Implement draft assembly: `session.draft_note()`, note and session saves, `DraftDoneEvent` built before `commit()`, draft-then-done yielded after the block
-- [ ] 9.4 Write unit tests: event sequence, persisted note shape and `session.note_id`, mid-stream rollback, second-confirmation error, unchanged conversation path
-- [ ] 9.5 `cd backend && uv run pytest` green
+- [x] 9.1 Implement `VocabularyResolver.resolve_topic` and `resolve_tag` (embed, mint, persist) — ac63e4b
+- [x] 9.2 Implement chunk routing in `GenerateReplyCommand.handle()`, emitting `draft_topic`/`draft_tag` only after resolution — ac63e4b
+- [x] 9.3 Implement draft assembly: `session.draft_note()`, note and session saves, `DraftDoneEvent` built before `commit()`, draft-then-done yielded after the block — ac63e4b
+- [x] 9.4 Write unit tests: event sequence, persisted note shape and `session.note_id`, mid-stream rollback, second-confirmation error, unchanged conversation path — ac63e4b
+- [x] 9.5 `cd backend && uv run pytest` green — ac63e4b
 
 ### Phase 10: HTTP integration and acceptance scenarios (AC-08, AC-09)
 
