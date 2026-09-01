@@ -110,8 +110,22 @@ class Label(BaseModel, frozen=True):
         return self
 
 
+class SimilarityScore(BaseModel, frozen=True):
+    value: float
+
+    @model_validator(mode="after")
+    def _validate_value(self) -> "SimilarityScore":
+        return self
+
+
 class Embedding(BaseModel, frozen=True):
     values: tuple[float, ...]
+
+    def cosine_similarity(
+        self,
+        other: "Embedding",  # pyright: ignore[reportUnusedParameter]
+    ) -> SimilarityScore:
+        raise NotImplementedError
 
     @model_validator(mode="after")
     def _validate_values(self) -> "Embedding":

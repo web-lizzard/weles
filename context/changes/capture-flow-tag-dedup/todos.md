@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-tag-dedup
-current_phase: 1
-next_step: 1.1
-next_command: /implement capture-flow-tag-dedup phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test capture-flow-tag-dedup phase 2
 updated: 2026-09-01
 ---
 
@@ -10,10 +10,10 @@ updated: 2026-09-01
 
 #### Automated
 
-- [ ] 1.1 Add `SimilarityScore` and the `Embedding.cosine_similarity` signature — `domain/capture/value_objects.py`
-- [ ] 1.2 Add `SimilarityScoreOutOfRangeError`, `EmbeddingDimensionMismatchError`, `ZeroMagnitudeEmbeddingError` — `domain/capture/exceptions.py`
-- [ ] 1.3 Add `VocabularyEntryT`, `VocabularyMatch` and `MatchCriteria` with `best_match` raising `NotImplementedError` — `domain/capture/vocabulary.py`
-- [ ] 1.4 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
+- [x] 1.1 Add `SimilarityScore` and the `Embedding.cosine_similarity` signature — `domain/capture/value_objects.py`
+- [x] 1.2 Add `SimilarityScoreOutOfRangeError`, `EmbeddingDimensionMismatchError`, `ZeroMagnitudeEmbeddingError` — `domain/capture/exceptions.py`
+- [x] 1.3 Add `VocabularyEntryT`, `VocabularyMatch` and `MatchCriteria` with `best_match` raising `NotImplementedError` — `domain/capture/vocabulary.py`
+- [x] 1.4 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
 
 ### Phase 2: Domain vocabulary matching — behavior
 
@@ -26,7 +26,7 @@ updated: 2026-09-01
 - [ ] 2.1 Implement the `SimilarityScore` range and finiteness validator
 - [ ] 2.2 Implement `Embedding.cosine_similarity`: max-abs scaling, dimension and zero-magnitude guards, clamp into `[-1.0, 1.0]`
 - [ ] 2.3 Implement `MatchCriteria.best_match`: threshold filter, highest score, `created_at` tie-break
-- [ ] 2.4 Add the three new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [x] 2.4 Add the three new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
 - [ ] 2.5 Write unit tests: score validation, cosine over identical/orthogonal/opposed/overflowing vectors, both guards, the four `best_match` cases
 - [ ] 2.6 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
 
