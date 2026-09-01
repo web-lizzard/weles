@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 10
-next_step: 10.6
-next_command: /implement capture-flow-draft-note phase 10
+current_phase: 11
+next_step: 11.1
+next_command: /implement capture-flow-draft-note phase 11
 updated: 2026-09-01
 ---
 
@@ -123,7 +123,7 @@ updated: 2026-09-01
 
 #### Manual
 
-- [ ] 10.6 Run the backend and curl one conversational turn and one confirmation turn; read the SSE frames
+- [x] 10.6 Run the backend and curl one conversational turn and one confirmation turn; read the SSE frames
 
 ### Phase 11: TUI data layer — stubs
 
