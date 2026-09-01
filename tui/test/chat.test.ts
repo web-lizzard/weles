@@ -326,7 +326,7 @@ describe("useChatStore", () => {
       },
     });
 
-    let draftWhenSendCalled: ReturnType<typeof useChatStore.getState>["draft"];
+    let draftWhenSendCalled!: ReturnType<typeof useChatStore.getState>["draft"];
 
     vi.mocked(sendMessage).mockImplementation(() => {
       draftWhenSendCalled = useChatStore.getState().draft;
@@ -348,7 +348,7 @@ describe("useChatStore", () => {
   });
 
   it("clears draft when an in-band stream error is received", async () => {
-    let draftBeforeError: ReturnType<typeof useChatStore.getState>["draft"];
+    let draftBeforeError!: ReturnType<typeof useChatStore.getState>["draft"];
 
     vi.mocked(sendMessage).mockImplementation(async function* () {
       yield { type: "draft_topic", label: "Partial topic" };
