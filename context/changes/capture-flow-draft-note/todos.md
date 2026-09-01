@@ -29,7 +29,7 @@ updated: 2026-09-01
 
 #### Triage
 
-- [x] 2.7 R4-F2 EXCEPTION_STATUS_MAP entries for Phase 3 landed one phase early (p2)
+- [x] 2.7 R4-F2 EXCEPTION_STATUS_MAP entries for Phase 3 landed one phase early (p2) — 70086bc
 
 ### Phase 3: Domain vocabulary and aggregates — behavior
 
