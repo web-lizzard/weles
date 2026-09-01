@@ -44,8 +44,8 @@ updated: 2026-09-01
 
 #### Triage
 
-- [x] 3.7 R2-F1 core_exception_handler response must include detail equal to str(exc)
-- [x] 3.8 R2-F2 unmapped exception code falls back to HTTP 500
+- [x] 3.7 R2-F1 core_exception_handler response must include detail equal to str(exc) — f2fa731
+- [x] 3.8 R2-F2 unmapped exception code falls back to HTTP 500 — f2fa731
 
 ### Phase 4: Chunk protocol and SSE events — stubs
 
