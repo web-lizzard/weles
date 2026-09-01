@@ -51,3 +51,15 @@ class NoteContentTooLongError(CoreException):
 
 class SessionNoteAlreadyDraftedError(CoreException):
     pass
+
+
+class SimilarityScoreOutOfRangeError(CoreException):
+    pass
+
+
+class EmbeddingDimensionMismatchError(CoreException):
+    pass
+
+
+class ZeroMagnitudeEmbeddingError(CoreException):
+    pass

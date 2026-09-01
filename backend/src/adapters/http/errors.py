@@ -20,6 +20,9 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "note_content_too_long": 422,
     "session_note_already_drafted": 409,
     "draft_topic_missing": 500,
+    "similarity_score_out_of_range": 422,
+    "embedding_dimension_mismatch": 422,
+    "zero_magnitude_embedding": 422,
 }
 
 
