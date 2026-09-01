@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 13
-next_step: 13.1
-next_command: /implement capture-flow-draft-note phase 13
+current_phase: 14
+next_step: tests
+next_command: /unit-test capture-flow-draft-note phase 14
 updated: 2026-09-01
 ---
 
@@ -149,7 +149,7 @@ updated: 2026-09-01
 
 #### Automated
 
-- [ ] 13.1 Add `DraftNotePanel` returning `null`, wired between the transcript `Box` and `CoverageBanner` — `tui/src/screens/CaptureScreen.tsx`
+- [x] 13.1 Add `DraftNotePanel` returning `null`, wired between the transcript `Box` and `CoverageBanner` — `tui/src/screens/CaptureScreen.tsx` — 2187180
 
 ### Phase 14: TUI screen — behavior
 
