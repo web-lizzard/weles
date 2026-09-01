@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
 current_phase: 14
-next_step: tests
-next_command: /unit-test capture-flow-draft-note phase 14
+next_step: 14.5
+next_command: /implement capture-flow-draft-note phase 14
 updated: 2026-09-01
 ---
 
@@ -155,14 +155,14 @@ updated: 2026-09-01
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8a15413
 
 #### Automated
 
-- [ ] 14.1 Implement `DraftNotePanel`: topic heading, tag line, body, each appearing as its part arrives
-- [ ] 14.2 Extend `shouldShowWelesBrand` with a `hasDraft` argument and a `draftBlock` term
-- [ ] 14.3 Write `ink-testing-library` tests for the panel states and the row budget
-- [ ] 14.4 `pnpm --dir tui test`, `pnpm --dir tui typecheck`, `pnpm --dir tui lint` all clean
+- [x] 14.1 Implement `DraftNotePanel`: topic heading, tag line, body, each appearing as its part arrives
+- [x] 14.2 Extend `shouldShowWelesBrand` with a `hasDraft` argument and a `draftBlock` term
+- [x] 14.3 Write `ink-testing-library` tests for the panel states and the row budget
+- [x] 14.4 `pnpm --dir tui test`, `pnpm --dir tui typecheck`, `pnpm --dir tui lint` all clean
 
 #### Manual
 
