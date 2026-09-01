@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-tag-dedup
-current_phase: 3
-next_step: 3.1
-next_command: /implement capture-flow-tag-dedup phase 3
+current_phase: 4
+next_step: 4.tests
+next_command: /unit-test capture-flow-tag-dedup phase 4
 updated: 2026-09-01
 ---
 
@@ -34,10 +34,10 @@ updated: 2026-09-01
 
 #### Automated
 
-- [ ] 3.1 Add `candidates()` to `TopicRepository` and `TagRepository` — `domain/capture/ports.py`
-- [ ] 3.2 Add `candidates()` raising `NotImplementedError` to both in-memory repositories
-- [ ] 3.3 Raise `_EMBEDDING_DIMENSION` from 8 to 32 — `adapters/out/in_memory/capture/embedding.py`
-- [ ] 3.4 `cd backend && uv run ruff check src tests`, `uv run basedpyright` clean
+- [x] 3.1 Add `candidates()` to `TopicRepository` and `TagRepository` — `domain/capture/ports.py`
+- [x] 3.2 Add `candidates()` raising `NotImplementedError` to both in-memory repositories
+- [x] 3.3 Raise `_EMBEDDING_DIMENSION` from 8 to 32 — `adapters/out/in_memory/capture/embedding.py`
+- [x] 3.4 `cd backend && uv run ruff check src tests`, `uv run basedpyright` clean
 
 ### Phase 4: Candidate retrieval and embedding conditioning — behavior
 
