@@ -28,6 +28,7 @@ export default function CaptureScreen() {
   const hasStreamError = streamError !== null;
   const hasCoverageBanner =
     coverageConfidence !== null && coverageConfidence >= 1;
+  const hasDraft = draft !== null;
   const showBrand = shouldShowWelesBrand(
     stdout.rows,
     transcript,
@@ -35,6 +36,7 @@ export default function CaptureScreen() {
     isStreaming,
     hasStreamError,
     hasCoverageBanner,
+    hasDraft,
   );
   const separator = "─".repeat(
     stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
@@ -113,9 +115,18 @@ function TopicHeading({ topic }: { topic: string }) {
   );
 }
 
-// biome-ignore lint/correctness/noUnusedFunctionParameters: stub panel — phase 14 renders draft
 function DraftNotePanel({ draft }: { draft: Draft | null }) {
-  return null;
+  if (draft === null) {
+    return null;
+  }
+
+  return (
+    <Box flexDirection="column" marginY={1}>
+      {draft.topic !== null && <Text bold>{draft.topic}</Text>}
+      {draft.tags.length > 0 && <Text>{draft.tags.join(", ")}</Text>}
+      {draft.content.length > 0 && <Text>{draft.content}</Text>}
+    </Box>
+  );
 }
 
 function CoverageBanner({
@@ -152,12 +163,14 @@ function shouldShowWelesBrand(
   isStreaming: boolean,
   hasError: boolean,
   hasBanner: boolean,
+  hasDraft: boolean,
 ): boolean {
   const rows = terminalRows > 0 ? terminalRows : DEFAULT_TERMINAL_ROWS;
   const inputBlock = 1;
   const topicBlock = hasTopic ? 2 : 0;
   const errorBlock = hasError ? 2 : 0;
   const bannerBlock = hasBanner ? 2 : 0;
+  const draftBlock = hasDraft ? 2 : 0;
   const brandBlock = 3;
   const streamingReserve = isStreaming ? 1 : 0;
   const padding = 1;
@@ -169,6 +182,7 @@ function shouldShowWelesBrand(
       topicBlock -
       errorBlock -
       bannerBlock -
+      draftBlock -
       brandBlock -
       streamingReserve -
       padding,
