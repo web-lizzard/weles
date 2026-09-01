@@ -40,6 +40,11 @@ markers = [
     "AC-02: acceptance criterion 02",
     "AC-03: acceptance criterion 03",
     "AC-04: acceptance criterion 04",
+    "AC-05: acceptance criterion 05",
+    "AC-06: acceptance criterion 06",
+    "AC-07: acceptance criterion 07",
+    "AC-08: acceptance criterion 08",
+    "AC-09: acceptance criterion 09",
 ]
 
 [tool.ruff]
