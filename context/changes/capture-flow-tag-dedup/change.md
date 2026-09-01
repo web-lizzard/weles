@@ -1,11 +1,14 @@
 ---
 change_id: capture-flow-tag-dedup
 title: Users' topics and tags stay deduplicated through reuse
-status: new
+status: planned
 created: 2026-09-01
 updated: 2026-09-01
 archived_at: null
 origin: overview-thougts
+adr_refs:
+  - id: capture-flow-domain-shape
+    kinds: [implements]
 effort_id: capture-flow
 slice_ref: S-05
 ---
