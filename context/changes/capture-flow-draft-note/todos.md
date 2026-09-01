@@ -118,8 +118,8 @@ updated: 2026-09-01
 
 #### Triage
 
-- [x] 9.6 R3-F1 DraftDoneEvent content must match persisted note content after NoteContent stripping
-- [x] 9.7 R3-F2 Draft stream without draft_topic must raise CoreException not AssertionError
+- [x] 9.6 R3-F1 DraftDoneEvent content must match persisted note content after NoteContent stripping — a60e941
+- [x] 9.7 R3-F2 Draft stream without draft_topic must raise CoreException not AssertionError — a60e941
 
 ### Phase 10: HTTP integration and acceptance scenarios (AC-08, AC-09)
 
