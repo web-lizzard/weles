@@ -129,8 +129,8 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 11.1 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` and their `RawReplyStreamEvent` variants — `tui/src/api/stream.ts`
-- [x] 11.2 Add the `Draft` type and `draft: Draft | null` to `ChatState` — `tui/src/store/chat.ts`
+- [x] 11.1 Add `DraftTopicEvent`, `DraftTagEvent`, `DraftDeltaEvent`, `DraftDoneEvent` and their `RawReplyStreamEvent` variants — `tui/src/api/stream.ts` — 98eb870
+- [x] 11.2 Add the `Draft` type and `draft: Draft | null` to `ChatState` — `tui/src/store/chat.ts` — 98eb870
 
 ### Phase 12: TUI data layer — behavior
 
