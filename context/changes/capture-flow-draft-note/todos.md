@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 8
-next_step: 8.1
-next_command: /implement capture-flow-draft-note phase 8
+current_phase: 9
+next_step: tests
+next_command: /unit-test capture-flow-draft-note phase 9
 updated: 2026-09-01
 ---
 
@@ -93,9 +93,9 @@ updated: 2026-09-01
 
 #### Automated
 
-- [ ] 8.1 Add `VocabularyResolver` with `resolve_topic` and `resolve_tag` signatures — `application/capture/services/vocabulary.py`
-- [ ] 8.2 Add the `vocabulary` dependency and the per-kind dispatch skeleton to `GenerateReplyCommand`
-- [ ] 8.3 Construct and inject the resolver in `adapters/compose.py` and `InMemoryCaptureComposition`
+- [x] 8.1 Add `VocabularyResolver` with `resolve_topic` and `resolve_tag` signatures — `application/capture/services/vocabulary.py`
+- [x] 8.2 Add the `vocabulary` dependency and the per-kind dispatch skeleton to `GenerateReplyCommand`
+- [x] 8.3 Construct and inject the resolver in `adapters/compose.py` and `InMemoryCaptureComposition`
 
 ### Phase 9: Vocabulary resolver and command routing — behavior
 

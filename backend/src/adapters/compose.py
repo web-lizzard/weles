@@ -29,6 +29,7 @@ from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.ports import UnitOfWork
+from application.capture.services.vocabulary import VocabularyResolver
 from domain.capture.ports import CaptureSessionRepository
 
 _store = InMemoryMessageStore()
@@ -42,6 +43,7 @@ _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
 _reply_generation = DeterministicReplyGenerationAdapter()
 _embedding = DeterministicEmbeddingAdapter()
+_vocabulary = VocabularyResolver(_embedding)
 
 
 def _unit_of_work() -> UnitOfWork:
@@ -77,4 +79,5 @@ def get_generate_reply_command() -> GenerateReplyCommand:
         topic_extraction=_topic_extraction,
         confidence_assessment=_confidence_assessment,
         reply_generation=_reply_generation,
+        vocabulary=_vocabulary,
     )

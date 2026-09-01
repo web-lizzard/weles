@@ -11,6 +11,7 @@ from adapters.out.in_memory.capture.capture_session_repository import (
 from adapters.out.in_memory.capture.confidence_assessment import (
     DeterministicConfidenceAssessmentAdapter,
 )
+from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.in_memory.capture.message_repository import (
     InMemoryMessageRepository,
 )
@@ -31,6 +32,7 @@ from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.dto import ReplyDoneEvent, ReplyStreamEvent
 from application.capture.ports import ConfidenceAssessmentPort
+from application.capture.services.vocabulary import VocabularyResolver
 from application.capture.value_objects import (
     ConfidenceAssessment,
     ConfidencePoint,
@@ -281,6 +283,7 @@ def _make_command_stack(
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
     uow = _SpyUnitOfWork(session_repo, message_repo, store)
+    embedding = DeterministicEmbeddingAdapter()
     command = GenerateReplyCommand(
         capture_sessions=session_repo,
         uow=uow,  # pyright: ignore[reportArgumentType]
@@ -289,6 +292,7 @@ def _make_command_stack(
         confidence_assessment=confidence_assessment
         or DeterministicConfidenceAssessmentAdapter(),
         reply_generation=DeterministicReplyGenerationAdapter(),
+        vocabulary=VocabularyResolver(embedding),
     )
     return _CommandStack(store, session_repo, message_repo, uow, command)
 

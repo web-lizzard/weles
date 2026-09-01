@@ -36,6 +36,7 @@ from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.ports import ConfidenceAssessmentPort, UnitOfWork
+from application.capture.services.vocabulary import VocabularyResolver
 
 
 @dataclass
@@ -51,6 +52,7 @@ class InMemoryCaptureComposition:
     confidence_assessment: ConfidenceAssessmentPort
     reply_generation: DeterministicReplyGenerationAdapter
     embedding: DeterministicEmbeddingAdapter
+    vocabulary: VocabularyResolver
 
     @classmethod
     def create(cls) -> "InMemoryCaptureComposition":
@@ -60,6 +62,7 @@ class InMemoryCaptureComposition:
         notes = InMemoryNoteRepository()
         topics = InMemoryTopicRepository()
         tags = InMemoryTagRepository()
+        embedding = DeterministicEmbeddingAdapter()
         return cls(
             store=store,
             capture_sessions=capture_sessions,
@@ -71,7 +74,8 @@ class InMemoryCaptureComposition:
             topic_extraction=DeterministicTopicExtractionAdapter(),
             confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
             reply_generation=DeterministicReplyGenerationAdapter(),
-            embedding=DeterministicEmbeddingAdapter(),
+            embedding=embedding,
+            vocabulary=VocabularyResolver(embedding),
         )
 
     def unit_of_work(self) -> InMemoryUnitOfWork:
@@ -105,6 +109,7 @@ class InMemoryCaptureComposition:
                 topic_extraction=composition.topic_extraction,
                 confidence_assessment=composition.confidence_assessment,
                 reply_generation=composition.reply_generation,
+                vocabulary=composition.vocabulary,
             )
 
         return {
