@@ -9,8 +9,14 @@ class VocabularyResolver:
     def __init__(self, embedding: EmbeddingPort) -> None:
         self._embedding: EmbeddingPort = embedding
 
-    async def resolve_topic(self, _label: Label, _topics: TopicRepository) -> Topic:
-        raise NotImplementedError
+    async def resolve_topic(self, label: Label, topics: TopicRepository) -> Topic:
+        embedding = await self._embedding.embed(label.value)
+        topic = Topic.mint(label, embedding)
+        await topics.add(topic)
+        return topic
 
-    async def resolve_tag(self, _label: Label, _tags: TagRepository) -> Tag:
-        raise NotImplementedError
+    async def resolve_tag(self, label: Label, tags: TagRepository) -> Tag:
+        embedding = await self._embedding.embed(label.value)
+        tag = Tag.mint(label, embedding)
+        await tags.add(tag)
+        return tag

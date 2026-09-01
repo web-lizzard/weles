@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
@@ -12,5 +12,10 @@ class Topic(BaseModel):
     created_at: datetime
 
     @classmethod
-    def mint(cls, _label: Label, _embedding: Embedding) -> "Topic":
-        raise NotImplementedError
+    def mint(cls, label: Label, embedding: Embedding) -> "Topic":
+        return cls(
+            id=TopicId.new(),
+            label=label,
+            embedding=embedding,
+            created_at=datetime.now(UTC),
+        )

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
@@ -27,9 +27,18 @@ class Note(BaseModel):
     @classmethod
     def draft(
         cls,
-        _session_id: SessionId,
-        _topic: Topic,
-        _content: NoteContent,
-        _tags: list[Tag],
+        session_id: SessionId,
+        topic: Topic,
+        content: NoteContent,
+        tags: list[Tag],
     ) -> "Note":
-        raise NotImplementedError
+        return cls(
+            id=NoteId.new(),
+            session_id=session_id,
+            topic_id=topic.id,
+            content=content,
+            tag_ids=[tag.id for tag in tags],
+            status=NoteStatus.DRAFT,
+            created_at=datetime.now(UTC),
+            approved_at=None,
+        )
