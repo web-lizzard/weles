@@ -3,7 +3,7 @@ import struct
 
 from domain.capture.value_objects import Embedding
 
-_EMBEDDING_DIMENSION = 8
+_EMBEDDING_DIMENSION = 32
 
 
 class DeterministicEmbeddingAdapter:
