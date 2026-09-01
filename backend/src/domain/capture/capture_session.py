@@ -2,7 +2,11 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
-from domain.capture.exceptions import SessionTopicAlreadyAssignedError
+from domain.capture.exceptions import (
+    CaptureSessionClosedError,
+    SessionNoteAlreadyDraftedError,
+    SessionTopicAlreadyAssignedError,
+)
 from domain.capture.note import Note
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
@@ -39,8 +43,14 @@ class CaptureSession(BaseModel):
 
     def draft_note(
         self,
-        _topic: Topic,
-        _content: NoteContent,
-        _tags: list[Tag],
+        topic: Topic,
+        content: NoteContent,
+        tags: list[Tag],
     ) -> Note:
-        raise NotImplementedError
+        if self.status != SessionStatus.OPEN:
+            raise CaptureSessionClosedError
+        if self.note_id is not None:
+            raise SessionNoteAlreadyDraftedError
+        note = Note.draft(self.id, topic, content, tags)
+        self.note_id = note.id
+        return note

@@ -1,6 +1,14 @@
 from collections.abc import AsyncIterator
 
-from application.capture.dto import ReplyDeltaEvent, ReplyDoneEvent, ReplyStreamEvent
+from application.capture.dto import (
+    DraftDeltaEvent,
+    DraftDoneEvent,
+    DraftTagEvent,
+    DraftTopicEvent,
+    ReplyDeltaEvent,
+    ReplyDoneEvent,
+    ReplyStreamEvent,
+)
 from application.capture.ports import (
     ConfidenceAssessmentPort,
     ReplyGenerationPort,
@@ -21,9 +29,12 @@ from domain.capture.exceptions import (
 )
 from domain.capture.message import Message
 from domain.capture.ports import CaptureSessionRepository
+from domain.capture.tag import Tag
+from domain.capture.topic import Topic
 from domain.capture.value_objects import (
     MessageContent,
     MessageRole,
+    NoteContent,
     SessionId,
     SessionStatus,
 )
@@ -77,20 +88,52 @@ class GenerateReplyCommand:
             assessment = await self._confidence_assessment.assess(transcript)
 
             full_text = ""
+            draft_text = ""
+            saw_draft = False
+            resolved_topic: Topic | None = None
+            resolved_tags: list[Tag] = []
+            draft_done_event: DraftDoneEvent | None = None
+
             async for chunk in self._reply_generation.generate(transcript, assessment):
                 if isinstance(chunk, ReplyTextChunk):
                     full_text += chunk.text
                     yield ReplyDeltaEvent(text=chunk.text)
                 elif isinstance(chunk, DraftTopicChunk):
-                    raise NotImplementedError
+                    saw_draft = True
+                    resolved_topic = await self._vocabulary.resolve_topic(
+                        chunk.label,
+                        uow.topics,
+                    )
+                    yield DraftTopicEvent(label=resolved_topic.label.value)
                 elif isinstance(chunk, DraftTagChunk):
-                    raise NotImplementedError
+                    saw_draft = True
+                    tag = await self._vocabulary.resolve_tag(chunk.label, uow.tags)
+                    resolved_tags.append(tag)
+                    yield DraftTagEvent(label=tag.label.value)
                 else:
-                    raise NotImplementedError
+                    saw_draft = True
+                    draft_text += chunk.text
+                    yield DraftDeltaEvent(text=chunk.text)
 
             reply_content = MessageContent(value=full_text)
             agent_message = Message.record(session.id, MessageRole.AGENT, reply_content)
             await uow.messages.add(agent_message)
+
+            if saw_draft:
+                assert resolved_topic is not None
+                note = session.draft_note(
+                    resolved_topic,
+                    NoteContent(value=draft_text),
+                    resolved_tags,
+                )
+                await uow.notes.add(note)
+                await uow.capture_sessions.save(session)
+                draft_done_event = DraftDoneEvent(
+                    note_id=note.id.value,
+                    topic=resolved_topic.label.value,
+                    content=draft_text,
+                    tags=[tag.label.value for tag in resolved_tags],
+                )
 
             done_event = ReplyDoneEvent(
                 message_id=agent_message.id.value,
@@ -100,6 +143,8 @@ class GenerateReplyCommand:
             )
             await uow.commit()
 
+        if draft_done_event is not None:
+            yield draft_done_event
         yield done_event
 
     async def _get_open_session(

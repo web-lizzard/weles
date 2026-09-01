@@ -4,9 +4,14 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, field_validator, model_validator
 
 from domain.capture.exceptions import (
+    EmptyEmbeddingError,
+    EmptyLabelError,
     EmptyMessageContentError,
+    EmptyNoteContentError,
     EmptySessionTopicError,
+    LabelTooLongError,
     MessageContentTooLongError,
+    NoteContentTooLongError,
     SessionTopicTooLongError,
 )
 
@@ -89,13 +94,49 @@ class MessageId(BaseModel, frozen=True):
 class Label(BaseModel, frozen=True):
     value: str
 
+    @field_validator("value", mode="before")
+    @classmethod
+    def _canonicalize_value(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+    @model_validator(mode="after")
+    def _validate_value(self) -> "Label":
+        if not self.value:
+            raise EmptyLabelError
+        if len(self.value) > LABEL_MAX_LENGTH:
+            raise LabelTooLongError
+        return self
+
 
 class Embedding(BaseModel, frozen=True):
     values: tuple[float, ...]
 
+    @model_validator(mode="after")
+    def _validate_values(self) -> "Embedding":
+        if not self.values:
+            raise EmptyEmbeddingError
+        return self
+
 
 class NoteContent(BaseModel, frozen=True):
     value: str
+
+    @field_validator("value", mode="before")
+    @classmethod
+    def _canonicalize_value(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+    @model_validator(mode="after")
+    def _validate_value(self) -> "NoteContent":
+        if not self.value:
+            raise EmptyNoteContentError
+        if len(self.value) > NOTE_CONTENT_MAX_LENGTH:
+            raise NoteContentTooLongError
+        return self
 
 
 class NoteId(BaseModel, frozen=True):
