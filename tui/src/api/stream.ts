@@ -177,6 +177,24 @@ function parseStreamEvent(json: string): ReplyStreamEvent {
       coverageConfidence: raw.coverage_confidence,
     };
   }
+  if (raw.type === "draft_topic") {
+    return { type: "draft_topic", label: raw.label };
+  }
+  if (raw.type === "draft_tag") {
+    return { type: "draft_tag", label: raw.label };
+  }
+  if (raw.type === "draft_delta") {
+    return { type: "draft_delta", text: raw.text };
+  }
+  if (raw.type === "draft_done") {
+    return {
+      type: "draft_done",
+      noteId: raw.note_id,
+      topic: raw.topic,
+      content: raw.content,
+      tags: raw.tags,
+    };
+  }
   throw new Error(
     `Unimplemented stream event type: ${(raw as { type: string }).type}`,
   );

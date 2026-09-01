@@ -58,6 +58,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       transcript: [...state.transcript, { role: "user", content: text }],
       isStreaming: true,
       streamError: null,
+      draft: null,
     }));
 
     try {
@@ -67,15 +68,51 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
             currentReply: state.currentReply + event.text,
           }));
         } else if (event.type === "error") {
-          set({ streamError: { code: event.code, detail: event.detail } });
+          set({
+            streamError: { code: event.code, detail: event.detail },
+            draft: null,
+          });
           break;
-        } else if (
-          event.type === "draft_topic" ||
-          event.type === "draft_tag" ||
-          event.type === "draft_delta" ||
-          event.type === "draft_done"
-        ) {
-          // stub — phase 12 wires draft reducers
+        } else if (event.type === "draft_topic") {
+          set({
+            draft: {
+              topic: event.label,
+              tags: [],
+              content: "",
+              noteId: null,
+            },
+          });
+        } else if (event.type === "draft_tag") {
+          set((state) => ({
+            draft: state.draft
+              ? { ...state.draft, tags: [...state.draft.tags, event.label] }
+              : {
+                  topic: null,
+                  tags: [event.label],
+                  content: "",
+                  noteId: null,
+                },
+          }));
+        } else if (event.type === "draft_delta") {
+          set((state) => ({
+            draft: state.draft
+              ? { ...state.draft, content: state.draft.content + event.text }
+              : {
+                  topic: null,
+                  tags: [],
+                  content: event.text,
+                  noteId: null,
+                },
+          }));
+        } else if (event.type === "draft_done") {
+          set({
+            draft: {
+              topic: event.topic,
+              tags: event.tags,
+              content: event.content,
+              noteId: event.noteId,
+            },
+          });
         } else if (event.type === "done") {
           set((state) => ({
             transcript: [
@@ -90,10 +127,16 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       }
     } catch (error) {
       if (error instanceof SendMessageHttpError) {
-        set({ streamError: { code: error.code, detail: error.detail } });
+        set({
+          streamError: { code: error.code, detail: error.detail },
+          draft: null,
+        });
       } else {
         const message = error instanceof Error ? error.message : String(error);
-        set({ streamError: { code: "unknown_error", detail: message } });
+        set({
+          streamError: { code: "unknown_error", detail: message },
+          draft: null,
+        });
       }
     } finally {
       set({ isStreaming: false });
