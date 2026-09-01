@@ -175,6 +175,13 @@ Implements the range validator, the overflow-resistant cosine metric, and the se
 - `cd backend && uv run basedpyright` clean
 - `cd backend && uv run ruff check src tests` clean
 
+### Review r1
+
+Artifact: `reviews/2026-09-01-r1-property-test-phase-2.md`
+
+- `R1-F1` — Self-similarity scores below 1.0 for equal non-zero components
+  Fix: `Embedding(values=(1.0, 1.0))` self-comparison must yield `SimilarityScore(value=1.0)`; an identical-embedding candidate must survive `best_match` at threshold `1.0`.
+
 ---
 
 ## Phase 3: Candidate retrieval and embedding conditioning — stubs
