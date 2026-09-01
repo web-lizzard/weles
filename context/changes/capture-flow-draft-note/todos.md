@@ -123,7 +123,7 @@ updated: 2026-09-01
 
 #### Manual
 
-- [x] 10.6 Run the backend and curl one conversational turn and one confirmation turn; read the SSE frames
+- [x] 10.6 Run the backend and curl one conversational turn and one confirmation turn; read the SSE frames — 3bbf820
 
 ### Phase 11: TUI data layer — stubs
 
