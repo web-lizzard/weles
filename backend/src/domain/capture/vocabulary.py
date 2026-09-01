@@ -17,7 +17,18 @@ class MatchCriteria(BaseModel, frozen=True):
 
     def best_match[VocabularyEntryT: (Topic, Tag)](
         self,
-        target: Embedding,  # pyright: ignore[reportUnusedParameter]
-        candidates: Sequence[VocabularyEntryT],  # pyright: ignore[reportUnusedParameter]
+        target: Embedding,
+        candidates: Sequence[VocabularyEntryT],
     ) -> VocabularyMatch[VocabularyEntryT] | None:
-        raise NotImplementedError
+        matches = [
+            VocabularyMatch(entry=candidate, score=score)
+            for candidate in candidates
+            if (score := target.cosine_similarity(candidate.embedding)).value
+            >= self.threshold.value
+        ]
+        if not matches:
+            return None
+        return min(
+            matches,
+            key=lambda match: (-match.score.value, match.entry.created_at),
+        )
