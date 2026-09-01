@@ -49,7 +49,9 @@ describe("useChatStore", () => {
       coverageConfidence: null,
       transcript: [],
       currentReply: "",
+      draft: null,
       isStreaming: false,
+      streamError: null,
     });
     vi.mocked(sendMessage).mockReset();
   });
@@ -219,6 +221,158 @@ describe("useChatStore", () => {
     expect(getStreamError()).toEqual({
       code: "unknown_error",
       detail: "network down",
+    });
+  });
+
+  it("accumulates draft topic, tags, and content as drafting events arrive", async () => {
+    const snapshots: Array<ReturnType<typeof useChatStore.getState>["draft"]> =
+      [];
+
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield { type: "draft_topic", label: "TCP congestion" };
+      snapshots.push(useChatStore.getState().draft);
+
+      yield { type: "draft_tag", label: "networking" };
+      yield { type: "draft_tag", label: "tcp" };
+      snapshots.push(useChatStore.getState().draft);
+
+      yield { type: "draft_delta", text: "Notes about " };
+      yield { type: "draft_delta", text: "TCP." };
+      snapshots.push(useChatStore.getState().draft);
+
+      yield {
+        type: "draft_done",
+        noteId: "00000000-0000-4000-8000-000000000010",
+        topic: "TCP congestion control",
+        content: "Trimmed final body.",
+        tags: ["networking", "tcp", "performance"],
+      };
+      yield {
+        type: "done",
+        messageId: "m1",
+        content: "Got it.",
+        topic: "TCP",
+        coverageConfidence: 0.5,
+      };
+    });
+
+    await useChatStore.getState().sendUserMessage("we are done");
+
+    expect(snapshots[0]).toEqual({
+      topic: "TCP congestion",
+      tags: [],
+      content: "",
+      noteId: null,
+    });
+    expect(snapshots[1]).toEqual({
+      topic: "TCP congestion",
+      tags: ["networking", "tcp"],
+      content: "",
+      noteId: null,
+    });
+    expect(snapshots[2]).toEqual({
+      topic: "TCP congestion",
+      tags: ["networking", "tcp"],
+      content: "Notes about TCP.",
+      noteId: null,
+    });
+    expect(useChatStore.getState().draft).toEqual({
+      topic: "TCP congestion control",
+      tags: ["networking", "tcp", "performance"],
+      content: "Trimmed final body.",
+      noteId: "00000000-0000-4000-8000-000000000010",
+    });
+  });
+
+  it("replaces accumulated draft fields with authoritative draft_done payload", async () => {
+    vi.mocked(sendMessage).mockImplementation(() =>
+      streamEvents([
+        { type: "draft_topic", label: "Model topic" },
+        { type: "draft_delta", text: "  partial draft  " },
+        {
+          type: "draft_done",
+          noteId: "00000000-0000-4000-8000-000000000011",
+          topic: "Resolved topic",
+          content: "Authoritative body.",
+          tags: ["alpha"],
+        },
+        {
+          type: "done",
+          messageId: "m1",
+          content: "Done.",
+          topic: "Session topic",
+          coverageConfidence: 0,
+        },
+      ]),
+    );
+
+    await useChatStore.getState().sendUserMessage("we are done");
+
+    expect(useChatStore.getState().draft).toEqual({
+      topic: "Resolved topic",
+      tags: ["alpha"],
+      content: "Authoritative body.",
+      noteId: "00000000-0000-4000-8000-000000000011",
+    });
+  });
+
+  it("clears draft when starting a new message", async () => {
+    useChatStore.setState({
+      draft: {
+        topic: "Old topic",
+        tags: ["old"],
+        content: "Old body",
+        noteId: "old-note",
+      },
+    });
+
+    let draftWhenSendCalled: ReturnType<typeof useChatStore.getState>["draft"];
+
+    vi.mocked(sendMessage).mockImplementation(() => {
+      draftWhenSendCalled = useChatStore.getState().draft;
+      return streamEvents([
+        {
+          type: "done",
+          messageId: "m1",
+          content: "Ok",
+          topic: "Topic",
+          coverageConfidence: 0,
+        },
+      ]);
+    });
+
+    await useChatStore.getState().sendUserMessage("Next question");
+
+    expect(draftWhenSendCalled).toBeNull();
+    expect(useChatStore.getState().draft).toBeNull();
+  });
+
+  it("clears draft when an in-band stream error is received", async () => {
+    let draftBeforeError: ReturnType<typeof useChatStore.getState>["draft"];
+
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield { type: "draft_topic", label: "Partial topic" };
+      yield { type: "draft_delta", text: "Partial body" };
+      draftBeforeError = useChatStore.getState().draft;
+      yield {
+        type: "error",
+        code: "session_note_already_drafted",
+        detail: "Session already has a draft",
+      };
+    });
+
+    await useChatStore.getState().sendUserMessage("we are done again");
+
+    expect(draftBeforeError).toEqual({
+      topic: "Partial topic",
+      tags: [],
+      content: "Partial body",
+      noteId: null,
+    });
+    expect(useChatStore.getState().draft).toBeNull();
+    expect(getStreamError()).toEqual({
+      code: "session_note_already_drafted",
+      detail: "Session already has a draft",
     });
   });
 });
