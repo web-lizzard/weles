@@ -159,10 +159,10 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 14.1 Implement `DraftNotePanel`: topic heading, tag line, body, each appearing as its part arrives
-- [x] 14.2 Extend `shouldShowWelesBrand` with a `hasDraft` argument and a `draftBlock` term
-- [x] 14.3 Write `ink-testing-library` tests for the panel states and the row budget
-- [x] 14.4 `pnpm --dir tui test`, `pnpm --dir tui typecheck`, `pnpm --dir tui lint` all clean
+- [x] 14.1 Implement `DraftNotePanel`: topic heading, tag line, body, each appearing as its part arrives — 8dd4ce7
+- [x] 14.2 Extend `shouldShowWelesBrand` with a `hasDraft` argument and a `draftBlock` term — 8dd4ce7
+- [x] 14.3 Write `ink-testing-library` tests for the panel states and the row budget — 8dd4ce7
+- [x] 14.4 `pnpm --dir tui test`, `pnpm --dir tui typecheck`, `pnpm --dir tui lint` all clean — 8dd4ce7
 
 #### Manual
 
