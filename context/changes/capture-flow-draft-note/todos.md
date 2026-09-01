@@ -115,11 +115,11 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 10.1 Write the SSE sequence integration test — `tests/integration/test_capture_http.py`
-- [x] 10.2 Write `tests/features/capture-flow/US-04-draft-note.feature` with the `@AC-08` and `@AC-09` scenarios
-- [x] 10.3 Write `tests/bdd/steps/draft_note.py` and register `bdd.steps.draft_note` in `pytest_plugins`
-- [x] 10.4 Add the `AC-05` through `AC-09` markers to `[tool.pytest.ini_options]` — `backend/pyproject.toml`
-- [x] 10.5 `cd backend && uv run pytest tests/bdd -m "capture-flow and (AC-08 or AC-09)" -v` green
+- [x] 10.1 Write the SSE sequence integration test — `tests/integration/test_capture_http.py` — 4fc3594
+- [x] 10.2 Write `tests/features/capture-flow/US-04-draft-note.feature` with the `@AC-08` and `@AC-09` scenarios — 4fc3594
+- [x] 10.3 Write `tests/bdd/steps/draft_note.py` and register `bdd.steps.draft_note` in `pytest_plugins` — 4fc3594
+- [x] 10.4 Add the `AC-05` through `AC-09` markers to `[tool.pytest.ini_options]` — `backend/pyproject.toml` — 4fc3594
+- [x] 10.5 `cd backend && uv run pytest tests/bdd -m "capture-flow and (AC-08 or AC-09)" -v` green — 4fc3594
 
 #### Manual
 
