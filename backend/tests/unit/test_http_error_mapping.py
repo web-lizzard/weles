@@ -1,4 +1,5 @@
 import json
+from typing import ClassVar
 
 import pytest
 from fastapi import Request
@@ -29,6 +30,37 @@ async def test_core_exception_handler_maps_not_found_error_to_404() -> None:
 
     assert response.status_code == 404
     assert json.loads(bytes(response.body))["code"] == "not_found"
+
+
+@pytest.mark.asyncio
+async def test_core_exception_handler_includes_detail_message() -> None:
+    """core_exception_handler must return detail equal to str(exc)."""
+
+    class NotFoundError(CoreException):
+        pass
+
+    request = Request(scope={"type": "http"})
+    exc = NotFoundError("missing resource")
+
+    response = await core_exception_handler(request, exc)
+
+    assert json.loads(bytes(response.body))["detail"] == "missing resource"
+
+
+@pytest.mark.asyncio
+async def test_core_exception_handler_falls_back_to_500_for_unmapped_code() -> None:
+    """Unmapped exception code falls back to HTTP 500."""
+
+    class UnmappedError(CoreException):
+        _code: ClassVar[str] = "unmapped_for_test_only"
+
+    request = Request(scope={"type": "http"})
+    exc = UnmappedError("unexpected failure")
+
+    response = await core_exception_handler(request, exc)
+
+    assert response.status_code == 500
+    assert json.loads(bytes(response.body))["code"] == "unmapped_for_test_only"
 
 
 def _all_subclasses(cls: type[CoreException]) -> set[type[CoreException]]:

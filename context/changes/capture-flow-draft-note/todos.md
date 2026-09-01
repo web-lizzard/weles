@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-draft-note
-current_phase: 14
-next_step:
+current_phase: 3
+next_step: epilogue
 next_command: /archive capture-flow-draft-note
 updated: 2026-09-01
 ---
@@ -41,6 +41,11 @@ updated: 2026-09-01
 - [x] 3.4 Add the six new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
 - [x] 3.5 Write unit tests: value-object validation, the three factories, both guards, exception-mapping exhaustiveness
 - [x] 3.6 `cd backend && uv run pytest` green
+
+#### Triage
+
+- [x] 3.7 R2-F1 core_exception_handler response must include detail equal to str(exc)
+- [x] 3.8 R2-F2 unmapped exception code falls back to HTTP 500
 
 ### Phase 4: Chunk protocol and SSE events — stubs
 
