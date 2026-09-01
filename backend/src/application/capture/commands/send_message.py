@@ -9,6 +9,7 @@ from application.capture.dto import (
     ReplyDoneEvent,
     ReplyStreamEvent,
 )
+from application.capture.exceptions import DraftTopicMissingError
 from application.capture.ports import (
     ConfidenceAssessmentPort,
     ReplyGenerationPort,
@@ -107,11 +108,15 @@ class GenerateReplyCommand:
                     yield DraftTopicEvent(label=resolved_topic.label.value)
                 elif isinstance(chunk, DraftTagChunk):
                     saw_draft = True
+                    if resolved_topic is None:
+                        raise DraftTopicMissingError
                     tag = await self._vocabulary.resolve_tag(chunk.label, uow.tags)
                     resolved_tags.append(tag)
                     yield DraftTagEvent(label=tag.label.value)
                 else:
                     saw_draft = True
+                    if resolved_topic is None:
+                        raise DraftTopicMissingError
                     draft_text += chunk.text
                     yield DraftDeltaEvent(text=chunk.text)
 
@@ -120,10 +125,12 @@ class GenerateReplyCommand:
             await uow.messages.add(agent_message)
 
             if saw_draft:
-                assert resolved_topic is not None
+                if resolved_topic is None:
+                    raise DraftTopicMissingError
+                note_content = NoteContent(value=draft_text)
                 note = session.draft_note(
                     resolved_topic,
-                    NoteContent(value=draft_text),
+                    note_content,
                     resolved_tags,
                 )
                 await uow.notes.add(note)
@@ -131,7 +138,7 @@ class GenerateReplyCommand:
                 draft_done_event = DraftDoneEvent(
                     note_id=note.id.value,
                     topic=resolved_topic.label.value,
-                    content=draft_text,
+                    content=note.content.value,
                     tags=[tag.label.value for tag in resolved_tags],
                 )
 

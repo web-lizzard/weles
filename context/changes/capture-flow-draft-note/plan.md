@@ -554,6 +554,15 @@ The drafting path end to end inside the application layer: resolve, stream, pers
 - `cd backend && uv run pytest tests/unit/capture -v` green
 - `cd backend && uv run pytest` green
 
+### Review r3
+
+Artifact: `reviews/2026-09-01-r3-property-test-phase-9.md`
+
+- `R3-F1` — DraftDoneEvent content must match persisted note content after NoteContent stripping
+  Fix: the shrunk padded body (`' 0 '` / `'  padded body  '`) must make `draft_done.content == note.content.value` in the example suite until fixed, then remain as regression
+- `R3-F2` — Draft stream without draft_topic must raise CoreException not AssertionError
+  Fix: the orphan-tag stream must raise `CoreException` (not `AssertionError`) in the example suite until fixed, then remain as regression
+
 ---
 
 ## Phase 10: HTTP integration and acceptance scenarios (AC-08, AC-09)

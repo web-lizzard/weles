@@ -43,8 +43,11 @@ from application.capture.value_objects import (
     ConfidenceAssessment,
     ConfidencePoint,
     ConfidencePointKind,
+    DraftContentChunk,
     DraftTagChunk,
+    DraftTopicChunk,
     ReplyChunk,
+    ReplyTextChunk,
     Transcript,
 )
 from domain.capture.capture_session import CaptureSession
@@ -55,12 +58,14 @@ from domain.capture.exceptions import (
     SessionNoteAlreadyDraftedError,
 )
 from domain.capture.value_objects import (
+    Label,
     MessageContent,
     NoteStatus,
     SessionId,
     SessionStatus,
     SessionTopic,
 )
+from domain.exceptions import CoreException
 
 _CONFIRMATION_PHRASE = "that's all"
 
@@ -340,6 +345,68 @@ async def test_full_coverage_does_not_close_session_or_block_follow_up_message()
         event for event in follow_up_events if isinstance(event, ReplyDoneEvent)
     )
     assert follow_up_done.content != ""
+
+
+async def test_draft_done_content_matches_persisted_note_content() -> None:
+    stack = _make_command_stack(
+        reply_generation=_FixedChunkReplyGenerationAdapter(
+            [
+                ReplyTextChunk(text="handoff"),
+                DraftTopicChunk(label=Label(value="topic")),
+                DraftContentChunk(text="  padded body  "),
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    events = await _handle_confirmation_turn(stack, session)
+
+    draft_done = next(event for event in events if isinstance(event, DraftDoneEvent))
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id is not None
+    note = await stack.uow.notes.get(persisted_session.note_id)
+    assert note is not None
+    assert draft_done.content == note.content.value
+
+
+async def test_draft_tag_without_prior_topic_raises_core_exception() -> None:
+    stack = _make_command_stack(
+        reply_generation=_FixedChunkReplyGenerationAdapter(
+            [
+                ReplyTextChunk(text="handoff"),
+                DraftTagChunk(label=Label(value="orphan-tag")),
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    with pytest.raises(CoreException):
+        async for _ in stack.command.handle(
+            session.id,
+            MessageContent(value=_CONFIRMATION_PHRASE),
+        ):
+            pass
+
+
+class _FixedChunkReplyGenerationAdapter:
+    _chunks: list[ReplyChunk]
+
+    def __init__(self, chunks: list[ReplyChunk]) -> None:
+        self._chunks = chunks
+
+    async def generate(
+        self,
+        transcript: Transcript,
+        assessment: ConfidenceAssessment,
+    ) -> AsyncIterator[ReplyChunk]:
+        _ = transcript, assessment
+        for chunk in self._chunks:
+            yield chunk
 
 
 class _FailMidDraftReplyGenerationAdapter:
