@@ -125,6 +125,34 @@ describe("sendMessage SSE parser", () => {
     );
   });
 
+  it("parses draft_topic, draft_tag, draft_delta, and draft_done SSE frames", async () => {
+    mockFetchWithSseChunks([
+      'data: {"type":"draft_topic","label":"TCP congestion"}\n\n',
+      'data: {"type":"draft_tag","label":"networking"}\n\n',
+      'data: {"type":"draft_tag","label":"tcp"}\n\n',
+      'data: {"type":"draft_delta","text":"Notes about "}\n\n',
+      'data: {"type":"draft_delta","text":"TCP."}\n\n',
+      'data: {"type":"draft_done","note_id":"00000000-0000-4000-8000-000000000010","topic":"TCP congestion control","content":"Trimmed final body.","tags":["networking","tcp"]}\n\n',
+    ]);
+
+    const events = await collectEvents("sess-1", "we are done");
+
+    expect(events).toEqual([
+      { type: "draft_topic", label: "TCP congestion" },
+      { type: "draft_tag", label: "networking" },
+      { type: "draft_tag", label: "tcp" },
+      { type: "draft_delta", text: "Notes about " },
+      { type: "draft_delta", text: "TCP." },
+      {
+        type: "draft_done",
+        noteId: "00000000-0000-4000-8000-000000000010",
+        topic: "TCP congestion control",
+        content: "Trimmed final body.",
+        tags: ["networking", "tcp"],
+      },
+    ]);
+  });
+
   it("maps coverage_confidence to coverageConfidence on done events", async () => {
     mockFetchWithSseChunks([
       'data: {"type":"done","message_id":"00000000-0000-4000-8000-000000000003","content":"Hello","topic":"TCP handshakes","coverage_confidence":1.0}\n\n',
