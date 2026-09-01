@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-draft-note
 current_phase: 14
-next_step: 14.5
-next_command: /implement capture-flow-draft-note phase 14
+next_step:
+next_command: /archive capture-flow-draft-note
 updated: 2026-09-01
 ---
 
@@ -166,4 +166,4 @@ updated: 2026-09-01
 
 #### Manual
 
-- [ ] 14.5 Run the backend and the TUI together, hold a short conversation, type a confirmation phrase and watch the panel fill with topic, then tags, then body
+- [x] 14.5 Run the backend and the TUI together, hold a short conversation, type a confirmation phrase and watch the panel fill with topic, then tags, then body
