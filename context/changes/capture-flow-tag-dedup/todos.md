@@ -34,10 +34,10 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 3.1 Add `candidates()` to `TopicRepository` and `TagRepository` — `domain/capture/ports.py`
-- [x] 3.2 Add `candidates()` raising `NotImplementedError` to both in-memory repositories
-- [x] 3.3 Raise `_EMBEDDING_DIMENSION` from 8 to 32 — `adapters/out/in_memory/capture/embedding.py`
-- [x] 3.4 `cd backend && uv run ruff check src tests`, `uv run basedpyright` clean
+- [x] 3.1 Add `candidates()` to `TopicRepository` and `TagRepository` — `domain/capture/ports.py` — 0334482
+- [x] 3.2 Add `candidates()` raising `NotImplementedError` to both in-memory repositories — 0334482
+- [x] 3.3 Raise `_EMBEDDING_DIMENSION` from 8 to 32 — `adapters/out/in_memory/capture/embedding.py` — 0334482
+- [x] 3.4 `cd backend && uv run ruff check src tests`, `uv run basedpyright` clean — 0334482
 
 ### Phase 4: Candidate retrieval and embedding conditioning — behavior
 
