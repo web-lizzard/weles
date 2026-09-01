@@ -1,9 +1,10 @@
 ---
 change_id: capture-flow-draft-note
 title: Users receive a drafted note and topic synthesized from the conversation
-status: implementing
+status: archived
 created: 2026-08-31
 updated: 2026-09-01
+archived_at: 2026-09-01T14:16:29Z
 origin: overview-thougts
 effort_id: capture-flow
 slice_ref: S-04

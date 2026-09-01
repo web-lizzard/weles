@@ -1,7 +1,7 @@
 ---
 effort_id: capture-flow
 created: 2026-08-29
-updated: 2026-08-31
+updated: 2026-09-01
 ---
 
 ## At a glance
@@ -11,7 +11,7 @@ updated: 2026-08-31
 | S-01 | Users can talk through a topic and have the agent probe understanding gaps | capture-flow-socratic-conversation | done |
 | S-02 | Users control when the conversation ends, even when the agent thinks it's done | capture-flow-coverage-wrapup | done |
 | S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | in_progress |
-| S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | in_progress |
+| S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | done |
 | S-05 | Users' topics and tags stay deduplicated through reuse | capture-flow-tag-dedup | pending |
 | S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | pending |
 
@@ -58,7 +58,7 @@ flowchart LR
 - **Outcome:** Users receive a drafted note and topic synthesized from the conversation
 - **Acceptance criteria:** AC-08, AC-09
 - **Change ID:** capture-flow-draft-note
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-02
 
 ### S-05: Users' topics and tags stay deduplicated through reuse
@@ -83,3 +83,4 @@ flowchart LR
 
 - **S-01: Users can talk through a topic and have the agent probe understanding gaps** — Archived 2026-08-31 → `context/archive/changes/2026-08-29-capture-flow-socratic-conversation/`. Lesson: —.
 - **S-02: Users control when the conversation ends, even when the agent thinks it's done** — Archived 2026-08-31 → `context/archive/changes/2026-08-31-capture-flow-coverage-wrapup/`. Lesson: —.
+- **S-04: Users receive a drafted note and topic synthesized from the conversation** — Archived 2026-09-01 → `context/archive/changes/2026-08-31-capture-flow-draft-note/`. Lesson: —.
