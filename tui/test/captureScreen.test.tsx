@@ -379,7 +379,9 @@ describe("CaptureScreen", () => {
     const { lastFrame } = render(<CaptureScreen />);
     const frame = lastFrame() ?? "";
 
+    expect(frame).toContain("Topic:");
     expect(frame).toContain("draft-panel-topic");
+    expect(frame).toContain("Tags:");
     expect(frame).toContain("draft-panel-tag-a");
     expect(frame).toContain("draft-panel-tag-b");
     expect(frame).not.toContain("draft-panel-body");
