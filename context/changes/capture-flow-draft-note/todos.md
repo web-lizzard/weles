@@ -93,9 +93,9 @@ updated: 2026-09-01
 
 #### Automated
 
-- [x] 8.1 Add `VocabularyResolver` with `resolve_topic` and `resolve_tag` signatures — `application/capture/services/vocabulary.py`
-- [x] 8.2 Add the `vocabulary` dependency and the per-kind dispatch skeleton to `GenerateReplyCommand`
-- [x] 8.3 Construct and inject the resolver in `adapters/compose.py` and `InMemoryCaptureComposition`
+- [x] 8.1 Add `VocabularyResolver` with `resolve_topic` and `resolve_tag` signatures — `application/capture/services/vocabulary.py` — b348b1a
+- [x] 8.2 Add the `vocabulary` dependency and the per-kind dispatch skeleton to `GenerateReplyCommand` — b348b1a
+- [x] 8.3 Construct and inject the resolver in `adapters/compose.py` and `InMemoryCaptureComposition` — b348b1a
 
 ### Phase 9: Vocabulary resolver and command routing — behavior
 
