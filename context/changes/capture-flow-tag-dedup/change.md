@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-tag-dedup
 title: Users' topics and tags stay deduplicated through reuse
-status: planned
+status: implementing
 created: 2026-09-01
 updated: 2026-09-01
 archived_at: null
