@@ -134,6 +134,9 @@ class Embedding(BaseModel, frozen=True):
     def cosine_similarity(self, other: "Embedding") -> SimilarityScore:
         if len(self.values) != len(other.values):
             raise EmbeddingDimensionMismatchError
+        if self.values == other.values:
+            _ = _scaled_to_largest_component(self.values)
+            return SimilarityScore(value=SIMILARITY_SCORE_MAX)
         left = _scaled_to_largest_component(self.values)
         right = _scaled_to_largest_component(other.values)
         dot = sum(a * b for a, b in zip(left, right, strict=True))

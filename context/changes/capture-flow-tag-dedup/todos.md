@@ -30,6 +30,10 @@ updated: 2026-09-01
 - [x] 2.5 Write unit tests: score validation, cosine over identical/orthogonal/opposed/overflowing vectors, both guards, the four `best_match` cases — 1d2e753
 - [x] 2.6 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean — 9f57af8
 
+#### Triage
+
+- [x] 2.7 R1-F1 Self-similarity scores below 1.0 for equal non-zero components
+
 ### Phase 3: Candidate retrieval and embedding conditioning — stubs
 
 #### Automated
