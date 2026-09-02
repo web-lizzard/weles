@@ -8,6 +8,9 @@ from adapters.out.in_memory.capture.message_repository import (
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
 from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
@@ -124,6 +127,7 @@ def _make_approve_stack() -> _ApproveStack:
     tags_repo = InMemoryTagRepository()
     outbox_store = InMemoryOutboxStore()
     outbox = InMemoryOutboxAppender(outbox_store)
+    note_vocabulary = InMemoryNoteVocabularyRepository(topics_repo, tags_repo)
     uow = InMemoryUnitOfWork(
         session_repo,
         message_repo,
@@ -131,6 +135,7 @@ def _make_approve_stack() -> _ApproveStack:
         notes_repo,
         topics_repo,
         tags_repo,
+        note_vocabulary,
         outbox_store,
         outbox,
     )

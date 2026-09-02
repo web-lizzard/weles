@@ -8,6 +8,9 @@ from adapters.out.in_memory.capture.message_repository import (
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
 from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
@@ -26,6 +29,7 @@ class InMemoryUnitOfWork:
     notes: InMemoryNoteRepository
     topics: InMemoryTopicRepository
     tags: InMemoryTagRepository
+    note_vocabulary: InMemoryNoteVocabularyRepository
     outbox: InMemoryOutboxAppender
 
     def __init__(
@@ -36,6 +40,7 @@ class InMemoryUnitOfWork:
         notes: InMemoryNoteRepository,
         topics: InMemoryTopicRepository,
         tags: InMemoryTagRepository,
+        note_vocabulary: InMemoryNoteVocabularyRepository,
         outbox_store: InMemoryOutboxStore,
         outbox: InMemoryOutboxAppender,
     ) -> None:
@@ -44,6 +49,7 @@ class InMemoryUnitOfWork:
         self.notes = notes
         self.topics = topics
         self.tags = tags
+        self.note_vocabulary = note_vocabulary
         self.outbox = outbox
         self._message_store: InMemoryMessageStore = message_store
         self._outbox_store: InMemoryOutboxStore = outbox_store

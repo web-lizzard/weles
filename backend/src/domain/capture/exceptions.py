@@ -73,6 +73,10 @@ class TagNotOnNoteError(CoreException):
     pass
 
 
+class NoteVocabularyIncompleteError(CoreException):
+    pass
+
+
 class SimilarityScoreOutOfRangeError(CoreException):
     pass
 

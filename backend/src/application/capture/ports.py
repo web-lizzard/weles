@@ -10,6 +10,7 @@ from domain.capture.ports import (
     CaptureSessionRepository,
     MessageRepository,
     NoteRepository,
+    NoteVocabularyRepository,
     TagRepository,
     TopicRepository,
 )
@@ -41,6 +42,7 @@ class UnitOfWork(Protocol):
     notes: NoteRepository
     topics: TopicRepository
     tags: TagRepository
+    note_vocabulary: NoteVocabularyRepository
     outbox: OutboxAppender
 
     async def __aenter__(self) -> "UnitOfWork": ...

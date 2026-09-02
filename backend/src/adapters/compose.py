@@ -12,6 +12,9 @@ from adapters.out.in_memory.capture.message_repository import (
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
 from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
 from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
@@ -52,6 +55,7 @@ _message_repository = InMemoryMessageRepository(_store)
 _note_repository = InMemoryNoteRepository()
 _topic_repository = InMemoryTopicRepository()
 _tag_repository = InMemoryTagRepository()
+_note_vocabulary = InMemoryNoteVocabularyRepository(_topic_repository, _tag_repository)
 _outbox_store = InMemoryOutboxStore()
 _outbox_appender = InMemoryOutboxAppender(_outbox_store)
 _outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
@@ -89,6 +93,7 @@ def _unit_of_work() -> UnitOfWork:
                 _note_repository,
                 _topic_repository,
                 _tag_repository,
+                _note_vocabulary,
                 _outbox_store,
                 _outbox_appender,
             ),

@@ -3,6 +3,7 @@ from typing import Protocol
 from domain.capture.capture_session import CaptureSession
 from domain.capture.message import Message
 from domain.capture.note import Note
+from domain.capture.note_vocabulary import NoteVocabulary
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import NoteId, SessionId, TagId, TopicId
@@ -38,3 +39,7 @@ class TagRepository(Protocol):
     async def get(self, tag_id: TagId) -> Tag | None: ...
 
     async def candidates(self) -> list[Tag]: ...
+
+
+class NoteVocabularyRepository(Protocol):
+    async def resolve(self, note: Note) -> NoteVocabulary: ...
