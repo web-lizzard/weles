@@ -8,6 +8,7 @@ pytest_plugins = [
     "bdd.steps.capture",
     "bdd.steps.coverage_wrapup",
     "bdd.steps.draft_note",
+    "bdd.steps.vocabulary_reuse",
 ]
 
 _features_dir = Path(__file__).parent.parent / "features"

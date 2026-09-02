@@ -172,12 +172,10 @@ def _assert_drafting_sse_sequence(events: list[dict[str, object]]) -> None:
         )
 
 
-def test_confirmation_turn_streams_draft_events_then_done(
-    capture_client: TestClient,
-) -> None:
-    session_id = _create_session(capture_client)
+def _run_confirmation_turn(client: TestClient) -> list[dict[str, object]]:
+    session_id = _create_session(client)
 
-    with capture_client.stream(
+    with client.stream(
         "POST",
         f"/capture-sessions/{session_id}/messages",
         json={"content": "How TCP handshakes work"},
@@ -185,7 +183,7 @@ def test_confirmation_turn_streams_draft_events_then_done(
         assert first_response.status_code == 200
         _ = _collect_sse_events(cast(SseResponse, first_response))
 
-    with capture_client.stream(
+    with client.stream(
         "POST",
         f"/capture-sessions/{session_id}/messages",
         json={"content": "The client sends SYN and the server replies SYN-ACK"},
@@ -193,15 +191,34 @@ def test_confirmation_turn_streams_draft_events_then_done(
         assert second_response.status_code == 200
         _ = _collect_sse_events(cast(SseResponse, second_response))
 
-    with capture_client.stream(
+    with client.stream(
         "POST",
         f"/capture-sessions/{session_id}/messages",
         json={"content": "that's all"},
     ) as draft_response:
         assert draft_response.status_code == 200
-        events = _collect_sse_events(cast(SseResponse, draft_response))
+        return _collect_sse_events(cast(SseResponse, draft_response))
+
+
+def _draft_topic_and_tag_events(
+    events: list[dict[str, object]],
+) -> tuple[dict[str, object], list[dict[str, object]]]:
+    draft_topic = next(event for event in events if event["type"] == "draft_topic")
+    draft_tags = [event for event in events if event["type"] == "draft_tag"]
+    return draft_topic, draft_tags
+
+
+def test_confirmation_turn_streams_draft_events_then_done(
+    capture_client: TestClient,
+) -> None:
+    events = _run_confirmation_turn(capture_client)
 
     _assert_drafting_sse_sequence(events)
+
+    draft_topic, draft_tags = _draft_topic_and_tag_events(events)
+    assert draft_topic["reused"] is False
+    assert draft_tags
+    assert all(tag["reused"] is False for tag in draft_tags)
 
     draft_done = next(event for event in events if event["type"] == "draft_done")
     assert draft_done["note_id"]
@@ -209,6 +226,18 @@ def test_confirmation_turn_streams_draft_events_then_done(
     assert str(draft_done["content"]).strip() != ""
     tags = draft_done["tags"]
     assert isinstance(tags, list) and tags
+
+
+def test_second_confirmation_turn_marks_topic_and_tags_as_reused(
+    capture_client: TestClient,
+) -> None:
+    _ = _run_confirmation_turn(capture_client)
+    second_events = _run_confirmation_turn(capture_client)
+
+    draft_topic, draft_tags = _draft_topic_and_tag_events(second_events)
+    assert draft_topic["reused"] is True
+    assert draft_tags
+    assert all(tag["reused"] is True for tag in draft_tags)
 
 
 def test_core_exception_during_generation_yields_in_band_error_event() -> None:
