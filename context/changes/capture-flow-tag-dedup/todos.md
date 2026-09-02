@@ -90,7 +90,7 @@ updated: 2026-09-02
 
 #### Triage
 
-- [x] 6.9 R3-F1 DraftTagEvent.reused not asserted against resolver outcome
+- [x] 6.9 R3-F1 DraftTagEvent.reused not asserted against resolver outcome — 9ad0f10
 
 ### Phase 7: HTTP integration and acceptance scenarios (AC-10, AC-11)
 
