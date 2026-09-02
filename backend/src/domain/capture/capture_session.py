@@ -54,3 +54,9 @@ class CaptureSession(BaseModel):
         note = Note.draft(self.id, topic, content, tags)
         self.note_id = note.id
         return note
+
+    def approve(self, note: Note) -> None:
+        del note
+        ...
+
+    def close(self) -> None: ...
