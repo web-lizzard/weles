@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-tag-dedup
 current_phase: 7
-next_step: 7.1
+next_step: 7.6
 next_command: /implement capture-flow-tag-dedup phase 7
 updated: 2026-09-02
 ---
@@ -100,15 +100,15 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 7.1 Assert `reused` on `draft_topic`/`draft_tag` frames across two sessions — `tests/integration/test_capture_http.py`
-- [ ] 7.2 Write `US-05-vocabulary-reuse.feature` with the `@AC-10` and `@AC-11` scenarios
-- [ ] 7.3 Write `tests/bdd/steps/vocabulary_reuse.py` and register it in `pytest_plugins`
-- [ ] 7.4 Add the `AC-10` and `AC-11` markers — `pyproject.toml`
-- [ ] 7.5 `cd backend && uv run pytest tests/bdd -m "capture-flow" -v` and `uv run pytest` green
+- [x] 7.1 Assert `reused` on `draft_topic`/`draft_tag` frames across two sessions — `tests/integration/test_capture_http.py` — 5025628
+- [x] 7.2 Write `US-05-vocabulary-reuse.feature` with the `@AC-10` and `@AC-11` scenarios — 5025628
+- [x] 7.3 Write `tests/bdd/steps/vocabulary_reuse.py` and register it in `pytest_plugins` — 5025628
+- [x] 7.4 Add the `AC-10` and `AC-11` markers — `pyproject.toml`
+- [x] 7.5 `cd backend && uv run pytest tests/bdd -m "capture-flow" -v` and `uv run pytest` green
 
 #### Manual
 
-- [ ] 7.6 `cd backend && uv run pytest tests/bdd --collect-only` lists both new scenarios with no unmatched step
+- [x] 7.6 `cd backend && uv run pytest tests/bdd --collect-only` lists both new scenarios with no unmatched step
 
 ### Phase 8: TUI reused-tag surfacing — stubs
 
