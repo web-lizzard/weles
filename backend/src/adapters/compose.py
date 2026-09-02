@@ -31,6 +31,8 @@ from application.capture.commands.start_capture_session import (
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
 from domain.capture.ports import CaptureSessionRepository
+from domain.capture.value_objects import SimilarityScore
+from domain.capture.vocabulary import MatchCriteria
 
 _store = InMemoryMessageStore()
 _capture_session_repository = InMemoryCaptureSessionRepository()
@@ -43,7 +45,9 @@ _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
 _reply_generation = DeterministicReplyGenerationAdapter()
 _embedding = DeterministicEmbeddingAdapter()
-_vocabulary = VocabularyResolver(_embedding)
+_vocabulary = VocabularyResolver(
+    _embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+)
 
 
 def _unit_of_work() -> UnitOfWork:

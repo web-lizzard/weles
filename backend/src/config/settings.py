@@ -12,3 +12,4 @@ class Settings(BaseSettings):
 
     database_url: str
     notion_api_token: str | None = None
+    vocabulary_match_threshold: float = 0.85

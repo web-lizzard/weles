@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from application.capture.exceptions import EmptyConfidencePointError
+from domain.capture.tag import Tag
+from domain.capture.topic import Topic
 from domain.capture.value_objects import Label, MessageContent, MessageRole
 
 
@@ -48,6 +50,16 @@ class ConfidenceAssessment(BaseModel, frozen=True):
             "0.0-1.0; 1.0 means fully covered."
         ),
     )
+
+
+class ResolvedTopic(BaseModel, frozen=True):
+    topic: Topic
+    reused: bool
+
+
+class ResolvedTag(BaseModel, frozen=True):
+    tag: Tag
+    reused: bool
 
 
 class ReplyChunkKind(StrEnum):
