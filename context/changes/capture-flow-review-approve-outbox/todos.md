@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 13
-next_step: 13.6
-next_command: /implement capture-flow-review-approve-outbox phase 13
+current_phase: 15
+next_step: 15.1
+next_command: /unit-test capture-flow-review-approve-outbox phase 15
 updated: 2026-09-02
 ---
 
@@ -175,10 +175,10 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 14.1 Regenerate `src/api/generated/schema.d.ts` with `pnpm generate:api` against the running backend
-- [ ] 14.2 Add `approveNote(sessionId)` — `tui/src/api/stream.ts`
-- [ ] 14.3 Add `approved` state and the `approveDraft` action signature — `tui/src/store/chat.ts`
-- [ ] 14.4 `cd tui && pnpm typecheck && pnpm lint` clean
+- [x] 14.1 Regenerate `src/api/generated/schema.d.ts` with `pnpm generate:api` against the running backend — 1adebc0
+- [x] 14.2 Add `approveNote(sessionId)` — `tui/src/api/stream.ts` — 1adebc0
+- [x] 14.3 Add `approved` state and the `approveDraft` action signature — `tui/src/store/chat.ts` — 1adebc0
+- [x] 14.4 `cd tui && pnpm typecheck && pnpm lint` clean — 1adebc0
 
 ### Phase 15: TUI approval — behavior
 
