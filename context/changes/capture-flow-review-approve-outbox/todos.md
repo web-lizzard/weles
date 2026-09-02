@@ -160,11 +160,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 13.1 Wire one `InMemoryOutboxStore` behind the appender, claimer and query in `adapters/compose.py`
-- [x] 13.2 Add `get_approve_note_command()`, `get_outbox_envelope_query()` and `get_outbox_worker()`
-- [x] 13.3 Add the lifespan handler starting and cancelling the `run_forever` task — `main.py`
-- [x] 13.4 Add INFO/WARNING/ERROR logging in the worker and the stub handler
-- [x] 13.5 `cd backend && uv run pytest` and `uv run ruff check src` green
+- [x] 13.1 Wire one `InMemoryOutboxStore` behind the appender, claimer and query in `adapters/compose.py` — 32abd44
+- [x] 13.2 Add `get_approve_note_command()`, `get_outbox_envelope_query()` and `get_outbox_worker()` — 32abd44
+- [x] 13.3 Add the lifespan handler starting and cancelling the `run_forever` task — `main.py` — 32abd44
+- [x] 13.4 Add INFO/WARNING/ERROR logging in the worker and the stub handler — 32abd44
+- [x] 13.5 `cd backend && uv run pytest` and `uv run ruff check src` green — 32abd44
 
 #### Manual
 
