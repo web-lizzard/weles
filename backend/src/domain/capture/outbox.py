@@ -25,8 +25,19 @@ class NoteApprovedPayload(BaseModel, frozen=True):
     approved_at: datetime
 
     @classmethod
-    def of(cls, _note: Note, _topic: Topic, _tags: list[Tag]) -> "NoteApprovedPayload":
-        raise NotImplementedError
+    def of(cls, note: Note, topic: Topic, tags: list[Tag]) -> "NoteApprovedPayload":
+        assert note.approved_at is not None
+        return cls(
+            note_id=note.id.value,
+            session_id=note.session_id.value,
+            topic=VocabularySnapshot(id=topic.id.value, label=topic.label.value),
+            content=note.content.value,
+            tags=[
+                VocabularySnapshot(id=tag.id.value, label=tag.label.value)
+                for tag in tags
+            ],
+            approved_at=note.approved_at,
+        )
 
     def to_envelope(self) -> OutboxEnvelope:
-        raise NotImplementedError
+        return OutboxEnvelope.pending(NOTE_APPROVED, self.model_dump(mode="json"))
