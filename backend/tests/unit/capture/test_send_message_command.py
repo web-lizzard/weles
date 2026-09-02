@@ -57,7 +57,6 @@ from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
     EmptyMessageContentError,
-    SessionNoteAlreadyDraftedError,
 )
 from domain.capture.value_objects import (
     Label,
@@ -313,17 +312,81 @@ async def test_drafting_mid_stream_failure_rolls_back_draft_artifacts() -> None:
     assert persisted.note_id is None
 
 
-async def test_second_confirmation_raises_session_note_already_drafted() -> None:
+async def test_second_confirmation_turn_redrafts_note_keeping_same_id() -> None:
     stack = _make_command_stack()
     session = await _start_session_with_topic(stack, "TCP handshakes")
-    _ = await _handle_confirmation_turn(stack, session)
+    first_events = await _handle_confirmation_turn(stack, session)
+    first_draft_done = next(
+        event for event in first_events if isinstance(event, DraftDoneEvent)
+    )
 
-    with pytest.raises(SessionNoteAlreadyDraftedError):
-        async for _ in stack.command.handle(
+    second_events = await _handle_confirmation_turn(stack, session)
+
+    second_draft_done = next(
+        event for event in second_events if isinstance(event, DraftDoneEvent)
+    )
+    assert second_draft_done.note_id == first_draft_done.note_id
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id == first_draft_done.note_id
+
+
+async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id() -> (
+    None
+):
+    stack = _make_command_stack(
+        reply_generation=_SequencedChunksReplyGenerationAdapter(
+            [
+                [
+                    ReplyTextChunk(text="handoff"),
+                    DraftTopicChunk(label=Label(value="TCP handshakes")),
+                    DraftTagChunk(label=Label(value="networking")),
+                    DraftContentChunk(text="original body"),
+                ],
+                [
+                    ReplyTextChunk(text="handoff"),
+                    DraftTopicChunk(label=Label(value="congestion control")),
+                    DraftTagChunk(label=Label(value="performance")),
+                    DraftContentChunk(text="revised body"),
+                ],
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    first_events = await _handle_confirmation_turn(stack, session)
+    first_draft_done = next(
+        event for event in first_events if isinstance(event, DraftDoneEvent)
+    )
+
+    second_events = [
+        event
+        async for event in stack.command.handle(
             session.id,
-            MessageContent(value=_CONFIRMATION_PHRASE),
-        ):
-            pass
+            MessageContent(value="Make it about congestion control instead"),
+        )
+    ]
+    second_draft_done = next(
+        event for event in second_events if isinstance(event, DraftDoneEvent)
+    )
+
+    assert second_draft_done.note_id == first_draft_done.note_id
+    assert second_draft_done.topic == "congestion control"
+    assert second_draft_done.content == "revised body"
+    assert second_draft_done.tags == ["performance"]
+
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id == first_draft_done.note_id
+    assert persisted_session.note_id is not None
+    note = await stack.uow.notes.get(persisted_session.note_id)
+    assert note is not None
+    assert note.status == NoteStatus.DRAFT
+    topic = await stack.uow.topics.get(note.topic_id)
+    assert topic is not None
+    assert topic.label.value == "congestion control"
 
 
 async def test_conversational_turn_emits_only_delta_and_done_events() -> None:
@@ -434,6 +497,23 @@ class _FixedChunkReplyGenerationAdapter:
     ) -> AsyncIterator[ReplyChunk]:
         _ = transcript, assessment
         for chunk in self._chunks:
+            yield chunk
+
+
+class _SequencedChunksReplyGenerationAdapter:
+    _turns: list[list[ReplyChunk]]
+
+    def __init__(self, turns: list[list[ReplyChunk]]) -> None:
+        self._turns = list(turns)
+
+    async def generate(
+        self,
+        transcript: Transcript,
+        assessment: ConfidenceAssessment,
+    ) -> AsyncIterator[ReplyChunk]:
+        _ = transcript, assessment
+        chunks = self._turns.pop(0)
+        for chunk in chunks:
             yield chunk
 
 
