@@ -30,10 +30,12 @@ from application.capture.commands.start_capture_session import (
 )
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from config.settings import Settings
 from domain.capture.ports import CaptureSessionRepository
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 
+_settings = Settings()  # pyright: ignore[reportCallIssue]
 _store = InMemoryMessageStore()
 _capture_session_repository = InMemoryCaptureSessionRepository()
 _message_repository = InMemoryMessageRepository(_store)
@@ -46,7 +48,10 @@ _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
 _reply_generation = DeterministicReplyGenerationAdapter()
 _embedding = DeterministicEmbeddingAdapter()
 _vocabulary = VocabularyResolver(
-    _embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+    _embedding,
+    MatchCriteria(
+        threshold=SimilarityScore(value=_settings.vocabulary_match_threshold)
+    ),
 )
 
 
