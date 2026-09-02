@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-tag-dedup
 current_phase: 4
-next_step: 4.tests
-next_command: /unit-test capture-flow-tag-dedup phase 4
-updated: 2026-09-01
+next_step: 4.1
+next_command: /implement capture-flow-tag-dedup phase 4
+updated: 2026-09-02
 ---
 
 ### Phase 1: Domain vocabulary matching — stubs
@@ -47,16 +47,16 @@ updated: 2026-09-01
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1925b9d
 
 #### Automated
 
-- [ ] 4.1 Implement `candidates()` on both in-memory repositories
-- [ ] 4.2 Replace the `struct.unpack` reinterpretation with byte scaling into `[-1.0, 1.0]` — `adapters/out/in_memory/capture/embedding.py`
-- [ ] 4.3 Extend both repository contract suites with `candidates()` cases: empty store, every added row, overwrite
-- [ ] 4.4 Extend the `EmbeddingPort` contract with a finiteness and range case
-- [ ] 4.5 Add a rollback case asserting uncommitted rows are absent from `candidates()` — `tests/unit/capture/test_unit_of_work.py`
-- [ ] 4.6 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
+- [x] 4.1 Implement `candidates()` on both in-memory repositories
+- [x] 4.2 Replace the `struct.unpack` reinterpretation with byte scaling into `[-1.0, 1.0]` — `adapters/out/in_memory/capture/embedding.py`
+- [x] 4.3 Extend both repository contract suites with `candidates()` cases: empty store, every added row, overwrite
+- [x] 4.4 Extend the `EmbeddingPort` contract with a finiteness and range case
+- [x] 4.5 Add a rollback case asserting uncommitted rows are absent from `candidates()` — `tests/unit/capture/test_unit_of_work.py`
+- [x] 4.6 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
 
 ### Phase 5: Reuse-or-mint, stream contract and configuration — stubs
 

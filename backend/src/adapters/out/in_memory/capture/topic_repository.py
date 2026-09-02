@@ -16,7 +16,7 @@ class InMemoryTopicRepository:
         return self._topics.get(topic_id.value)
 
     async def candidates(self) -> list[Topic]:
-        raise NotImplementedError
+        return list(self._topics.values())
 
     def snapshot(self) -> dict[UUID, Topic]:
         return copy.deepcopy(self._topics)
