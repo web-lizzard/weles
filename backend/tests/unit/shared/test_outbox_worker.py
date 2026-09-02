@@ -30,6 +30,20 @@ class _FlakyHandler:
         self.handled.append(envelope.id)
 
 
+class _ConcurrencyProbeHandler:
+    def __init__(self, envelope_type: EnvelopeType) -> None:
+        self.envelope_type: EnvelopeType = envelope_type
+        self._started: int = 0
+        self._both_started: asyncio.Event = asyncio.Event()
+
+    async def handle(self, envelope: OutboxEnvelope) -> None:
+        del envelope
+        self._started += 1
+        if self._started == 2:
+            self._both_started.set()
+        _ = await asyncio.wait_for(self._both_started.wait(), timeout=1)
+
+
 class _RaisingThenCancellingClaimer:
     def __init__(self) -> None:
         self.calls: int = 0
@@ -111,6 +125,29 @@ async def test_run_once_leaves_envelope_pending_when_no_handler_claims_its_type(
     assert acked == 0
     assert store.all()[0].status == EnvelopeStatus.PENDING
     assert handler.handled == []
+
+
+async def test_run_once_handles_claimed_envelopes_concurrently_not_sequentially() -> (
+    None
+):
+    store = InMemoryOutboxStore()
+    appender = InMemoryOutboxAppender(store)
+    claimer = InMemoryOutboxClaimer(store)
+    envelopes = [OutboxEnvelope.pending(_NOTE_APPROVED, {"n": i}) for i in range(2)]
+    for envelope in envelopes:
+        await appender.append(envelope)
+    handler = _ConcurrencyProbeHandler(_NOTE_APPROVED)
+    worker = OutboxWorker(
+        claimer, [handler], worker_id="w1", batch_size=10, max_attempts=3
+    )
+
+    acked = await asyncio.wait_for(worker.run_once(), timeout=2)
+
+    assert acked == 2
+    assert [e.status for e in store.all()] == [
+        EnvelopeStatus.CONSUMED,
+        EnvelopeStatus.CONSUMED,
+    ]
 
 
 async def test_two_workers_gather_processes_each_envelope_exactly_once() -> None:
