@@ -87,10 +87,10 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 7.1 Add `ApproveNoteCommand` with an unimplemented `handle()` — `application/capture/commands/approve_note.py`
-- [x] 7.2 Add `ApproveNoteResponseDTO` — `application/capture/dto.py`
-- [x] 7.3 Add the `_apply_redraft` seam and the `session.note_id` branch point — `application/capture/commands/send_message.py`
-- [x] 7.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 7.1 Add `ApproveNoteCommand` with an unimplemented `handle()` — `application/capture/commands/approve_note.py` — 6ef26ee
+- [x] 7.2 Add `ApproveNoteResponseDTO` — `application/capture/dto.py` — 6ef26ee
+- [x] 7.3 Add the `_apply_redraft` seam and the `session.note_id` branch point — `application/capture/commands/send_message.py` — 6ef26ee
+- [x] 7.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 6ef26ee
 
 ### Phase 8: Redraft and approval command — behavior
 
