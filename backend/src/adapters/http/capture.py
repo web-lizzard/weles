@@ -64,7 +64,7 @@ async def send_message(
 
 @router.post("/capture-sessions/{session_id}/approval")
 async def approve_note(
-    session_id: UUID,  # pyright: ignore[reportUnusedParameter]
-    _command: Annotated[ApproveNoteCommand, Depends(get_approve_note_command)],
+    session_id: UUID,
+    command: Annotated[ApproveNoteCommand, Depends(get_approve_note_command)],
 ) -> ApproveNoteResponseDTO:
-    raise NotImplementedError
+    return await command.handle(SessionId(value=session_id))
