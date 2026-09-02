@@ -23,6 +23,8 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "similarity_score_out_of_range": 422,
     "embedding_dimension_mismatch": 422,
     "zero_magnitude_embedding": 422,
+    "envelope_not_pending": 409,
+    "envelope_not_processing": 409,
 }
 
 

@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 2
-next_step: 2.tests
-next_command: /unit-test capture-flow-review-approve-outbox phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement capture-flow-review-approve-outbox phase 3
 updated: 2026-09-02
 ---
 
@@ -21,15 +21,15 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 371d1f5
 
 #### Automated
 
-- [ ] 2.1 Implement `OutboxEnvelope.pending()` with `PENDING`, zero attempts and null claim fields
-- [ ] 2.2 Implement `claim()`, `consume()` and `fail(max_attempts)` with their status guards and the retry cut-off
-- [ ] 2.3 Implement `NoteApprovedPayload.of()` snapshotting topic and tag labels, and `to_envelope()`
-- [ ] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [ ] 2.5 `cd backend && uv run pytest` green
+- [x] 2.1 Implement `OutboxEnvelope.pending()` with `PENDING`, zero attempts and null claim fields
+- [x] 2.2 Implement `claim()`, `consume()` and `fail(max_attempts)` with their status guards and the retry cut-off
+- [x] 2.3 Implement `NoteApprovedPayload.of()` snapshotting topic and tag labels, and `to_envelope()`
+- [x] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [x] 2.5 `cd backend && uv run pytest` green
 
 ### Phase 3: In-memory outbox adapters and UnitOfWork — stubs
 

@@ -1,8 +1,13 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
+
+from domain.shared.outbox.exceptions import (
+    EnvelopeNotPendingError,
+    EnvelopeNotProcessingError,
+)
 
 
 class EnvelopeStatus(StrEnum):
@@ -31,14 +36,37 @@ class OutboxEnvelope(BaseModel):
     claimed_by: str | None
 
     @classmethod
-    def pending(cls, _type: str, _payload: dict[str, object]) -> "OutboxEnvelope":
-        raise NotImplementedError
+    def pending(cls, type: str, payload: dict[str, object]) -> "OutboxEnvelope":
+        return cls(
+            id=EnvelopeId.new(),
+            type=type,
+            payload=payload,
+            status=EnvelopeStatus.PENDING,
+            attempts=0,
+            created_at=datetime.now(UTC),
+            claimed_at=None,
+            claimed_by=None,
+        )
 
-    def claim(self, _worker_id: str) -> None:
-        raise NotImplementedError
+    def claim(self, worker_id: str) -> None:
+        if self.status != EnvelopeStatus.PENDING:
+            raise EnvelopeNotPendingError
+        self.status = EnvelopeStatus.PROCESSING
+        self.claimed_by = worker_id
+        self.claimed_at = datetime.now(UTC)
+        self.attempts += 1
 
     def consume(self) -> None:
-        raise NotImplementedError
+        if self.status != EnvelopeStatus.PROCESSING:
+            raise EnvelopeNotProcessingError
+        self.status = EnvelopeStatus.CONSUMED
 
-    def fail(self, _max_attempts: int) -> None:
-        raise NotImplementedError
+    def fail(self, max_attempts: int) -> None:
+        if self.status != EnvelopeStatus.PROCESSING:
+            raise EnvelopeNotProcessingError
+        if self.attempts < max_attempts:
+            self.status = EnvelopeStatus.PENDING
+            self.claimed_at = None
+            self.claimed_by = None
+        else:
+            self.status = EnvelopeStatus.FAILED
