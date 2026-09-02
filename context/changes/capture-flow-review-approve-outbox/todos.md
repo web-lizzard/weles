@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
 current_phase: 19
-next_step: 19.1
-next_command: /unit-test capture-flow-review-approve-outbox phase 19
+next_step: 19.5
+next_command: /implement capture-flow-review-approve-outbox phase 19
 updated: 2026-09-02
 ---
 
@@ -245,14 +245,14 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 63ab186
 
 #### Automated
 
-- [ ] 19.1 On approve success: record thick-rule receipt, clear capture fields, start a new session via `startCaptureSession` — `tui/src/store/chat.ts`
-- [ ] 19.2 Render full-width `═` rule + `✓ Approved — queued for saving`; keep `TextInput` focused after approve — `tui/src/screens/CaptureScreen.tsx`
-- [ ] 19.3 Rewrite store/screen tests for auto-reset, new `sessionId`, and focused input — `tui/test/chat.test.ts`, `tui/test/captureScreen.test.tsx`
-- [ ] 19.4 `cd tui && pnpm test && pnpm typecheck && pnpm lint` green
+- [x] 19.1 On approve success: record thick-rule receipt, clear capture fields, start a new session via `startCaptureSession` — `tui/src/store/chat.ts`
+- [x] 19.2 Render full-width `═` rule + `✓ Approved — queued for saving`; keep `TextInput` focused after approve — `tui/src/screens/CaptureScreen.tsx`
+- [x] 19.3 Rewrite store/screen tests for auto-reset, new `sessionId`, and focused input — `tui/test/chat.test.ts`, `tui/test/captureScreen.test.tsx`
+- [x] 19.4 `cd tui && pnpm test && pnpm typecheck && pnpm lint` green
 
 #### Manual
 

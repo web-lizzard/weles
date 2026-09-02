@@ -24,14 +24,15 @@ export default function CaptureScreen() {
   const coverageConfidence = useChatStore((state) => state.coverageConfidence);
   const streamError = useChatStore((state) => state.streamError);
   const draft = useChatStore((state) => state.draft);
-  const approved = useChatStore((state) => state.approved);
+  const approvalReceipt = useChatStore((state) => state.approvalReceipt);
 
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
   const hasStreamError = streamError !== null;
   const hasCoverageBanner =
     coverageConfidence !== null && coverageConfidence >= 1;
-  const hasDraft = draft !== null || approved;
+  const hasDraft = draft !== null;
+  const hasApprovalReceipt = approvalReceipt;
   const showBrand = shouldShowWelesBrand(
     stdout.rows,
     transcript,
@@ -40,6 +41,7 @@ export default function CaptureScreen() {
     hasStreamError,
     hasCoverageBanner,
     hasDraft,
+    hasApprovalReceipt,
   );
   const separator = "─".repeat(
     stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS,
@@ -67,6 +69,7 @@ export default function CaptureScreen() {
     <Box flexDirection="column">
       {showBrand && <WelesBrand separator={separator} />}
       {hasTopic && <TopicHeading topic={topic} />}
+      {hasApprovalReceipt && <ApprovalReceiptPanel separator={separator} />}
       <Box flexDirection="column" flexGrow={1}>
         {transcript.map((entry, index) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: append-only transcript entries have no stable id
@@ -79,11 +82,7 @@ export default function CaptureScreen() {
           </Text>
         )}
       </Box>
-      {approved ? (
-        <ApprovedPanel />
-      ) : (
-        <DraftNotePanel draft={draft} separator={separator} />
-      )}
+      <DraftNotePanel draft={draft} separator={separator} />
       <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
@@ -93,7 +92,7 @@ export default function CaptureScreen() {
             value={inputValue}
             onChange={setInputValue}
             onSubmit={handleSubmit}
-            focus={!isStreaming && !approved}
+            focus={!isStreaming}
           />
         </Text>
       </Box>
@@ -179,9 +178,14 @@ function DraftTags({ tags }: { tags: { label: string; reused: boolean }[] }) {
   );
 }
 
-function ApprovedPanel() {
+function ApprovalReceiptPanel({ separator }: { separator: string }) {
+  const thickRule = "═".repeat(
+    separator.length > 0 ? separator.length : DEFAULT_TERMINAL_COLUMNS,
+  );
+
   return (
-    <Box marginY={1}>
+    <Box flexDirection="column" marginY={1}>
+      <Text>{thickRule}</Text>
       <Text color="green">✓ Approved — queued for saving</Text>
     </Box>
   );
@@ -222,6 +226,7 @@ function shouldShowWelesBrand(
   hasError: boolean,
   hasBanner: boolean,
   hasDraft: boolean,
+  hasApprovalReceipt: boolean,
 ): boolean {
   const rows = terminalRows > 0 ? terminalRows : DEFAULT_TERMINAL_ROWS;
   const inputBlock = 1;
@@ -229,6 +234,7 @@ function shouldShowWelesBrand(
   const errorBlock = hasError ? 2 : 0;
   const bannerBlock = hasBanner ? 2 : 0;
   const draftBlock = hasDraft ? 2 : 0;
+  const receiptBlock = hasApprovalReceipt ? 3 : 0;
   const brandBlock = 3;
   const streamingReserve = isStreaming ? 1 : 0;
   const padding = 1;
@@ -241,6 +247,7 @@ function shouldShowWelesBrand(
       errorBlock -
       bannerBlock -
       draftBlock -
+      receiptBlock -
       brandBlock -
       streamingReserve -
       padding,
