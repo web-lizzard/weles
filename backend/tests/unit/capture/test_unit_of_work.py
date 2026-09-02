@@ -111,3 +111,18 @@ async def test_commit_persists_notes_topics_and_tags() -> None:
     assert await note_repo.get(note.id) == note
     assert await topic_repo.get(topic.id) == topic
     assert await tag_repo.get(tag.id) == tag
+
+
+async def test_rollback_without_commit_excludes_topics_and_tags_from_candidates() -> (
+    None
+):
+    uow, _, topic_repo, tag_repo = _make_unit_of_work()
+    topic = _sample_topic()
+    tag = _sample_tag()
+
+    async with uow:
+        await topic_repo.add(topic)
+        await tag_repo.add(tag)
+
+    assert await topic_repo.candidates() == []
+    assert await tag_repo.candidates() == []

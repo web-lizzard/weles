@@ -1,3 +1,4 @@
+import math
 from collections.abc import Callable
 from typing import cast
 
@@ -45,3 +46,15 @@ async def test_different_texts_yield_different_embeddings(
     second = await adapter.embed("UDP datagrams")
 
     assert first != second
+
+
+@pytest.mark.parametrize("make_adapter", _IMPLEMENTATIONS, ids=["deterministic"])
+async def test_embedding_components_are_finite_and_within_unit_range(
+    make_adapter: Callable[[], EmbeddingPort],
+) -> None:
+    adapter = make_adapter()
+
+    embedding = await adapter.embed("TCP handshakes")
+
+    assert all(math.isfinite(value) for value in embedding.values)
+    assert all(-1.0 <= value <= 1.0 for value in embedding.values)
