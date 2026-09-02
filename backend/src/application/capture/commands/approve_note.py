@@ -6,7 +6,6 @@ from domain.capture.exceptions import (
     SessionNoteMissingError,
 )
 from domain.capture.outbox import NoteApprovedPayload
-from domain.capture.tag import Tag
 from domain.capture.value_objects import SessionId
 
 
@@ -30,15 +29,9 @@ class ApproveNoteCommand:
             await uow.notes.add(note)
             await uow.capture_sessions.save(session)
 
-            topic = await uow.topics.get(note.topic_id)
-            assert topic is not None
-            tags: list[Tag] = []
-            for tag_id in note.tag_ids:
-                tag = await uow.tags.get(tag_id)
-                assert tag is not None
-                tags.append(tag)
+            vocabulary = await uow.note_vocabulary.resolve(note)
 
-            payload = NoteApprovedPayload.of(note, topic, tags)
+            payload = NoteApprovedPayload.of(note, vocabulary.topic, vocabulary.tags)
             await uow.outbox.append(payload.to_envelope())
 
             response = ApproveNoteResponseDTO(

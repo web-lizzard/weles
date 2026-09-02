@@ -180,18 +180,18 @@ class GenerateReplyCommand:
         tags: list[Tag],
         content: NoteContent,
     ) -> None:
+        current = await uow.note_vocabulary.resolve(note)
+
         note.change_topic(topic)
 
         resolved_ids = {tag.id for tag in tags}
-        for tag_id in list(note.tag_ids):
-            if tag_id not in resolved_ids:
-                dropped_tag = await uow.tags.get(tag_id)
-                assert dropped_tag is not None
-                note.remove_tag(dropped_tag)
+        current_ids = {tag.id for tag in current.tags}
+        for tag in current.tags:
+            if tag.id not in resolved_ids:
+                note.remove_tag(tag)
 
-        existing_ids = set(note.tag_ids)
         for tag in tags:
-            if tag.id not in existing_ids:
+            if tag.id not in current_ids:
                 note.add_tag(tag)
 
         note.update_content(content)

@@ -30,6 +30,7 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "session_note_missing": 409,
     "note_not_found": 404,
     "tag_not_on_note": 409,
+    "note_vocabulary_incomplete": 500,
 }
 
 
