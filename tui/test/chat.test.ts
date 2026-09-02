@@ -4,6 +4,7 @@ import {
   approveNote,
   SendMessageHttpError,
   sendMessage,
+  startCaptureSession,
 } from "../src/api/stream";
 import { useChatStore } from "../src/store/chat";
 
@@ -61,6 +62,7 @@ describe("useChatStore", () => {
     });
     vi.mocked(sendMessage).mockReset();
     vi.mocked(approveNote).mockReset();
+    vi.mocked(startCaptureSession).mockReset();
   });
 
   afterEach(() => {
@@ -393,8 +395,15 @@ describe("useChatStore", () => {
     });
   });
 
-  it("calls approveNote and sets approved when a draft is ready", async () => {
+  it("starts a new capture session and clears fields after approve succeeds", async () => {
     useChatStore.setState({
+      topic: "TCP congestion control",
+      coverageConfidence: 0.9,
+      transcript: [
+        { role: "user", content: "we are done" },
+        { role: "agent", content: "Draft ready." },
+      ],
+      currentReply: "partial",
       draft: {
         topic: "TCP congestion control",
         tags: [{ label: "networking", reused: true }],
@@ -407,11 +416,20 @@ describe("useChatStore", () => {
       topic: "TCP congestion control",
       tags: ["networking"],
     });
+    vi.mocked(startCaptureSession).mockResolvedValue({ sessionId: "sess-2" });
 
     await useChatStore.getState().approveDraft();
 
     expect(approveNote).toHaveBeenCalledWith("sess-1");
-    expect(useChatStore.getState().approved).toBe(true);
+    expect(startCaptureSession).toHaveBeenCalledTimes(1);
+    const state = useChatStore.getState();
+    expect(state.sessionId).toBe("sess-2");
+    expect(state.approved).toBe(false);
+    expect(state.draft).toBeNull();
+    expect(state.topic).toBeNull();
+    expect(state.transcript).toEqual([]);
+    expect(state.currentReply).toBe("");
+    expect(state.coverageConfidence).toBeNull();
     expect(getStreamError()).toBeNull();
   });
 
@@ -429,14 +447,13 @@ describe("useChatStore", () => {
   });
 
   it("leaves approved false and sets streamError when approveNote fails", async () => {
-    useChatStore.setState({
-      draft: {
-        topic: "TCP congestion control",
-        tags: [],
-        content: "Final body.",
-        noteId: "00000000-0000-4000-8000-000000000010",
-      },
-    });
+    const draft = {
+      topic: "TCP congestion control",
+      tags: [],
+      content: "Final body.",
+      noteId: "00000000-0000-4000-8000-000000000010",
+    };
+    useChatStore.setState({ draft });
     vi.mocked(approveNote).mockRejectedValue(
       new SendMessageHttpError(
         "capture_session_closed",
@@ -447,7 +464,9 @@ describe("useChatStore", () => {
 
     await useChatStore.getState().approveDraft();
 
+    expect(startCaptureSession).not.toHaveBeenCalled();
     expect(useChatStore.getState().approved).toBe(false);
+    expect(useChatStore.getState().draft).toEqual(draft);
     expect(getStreamError()).toEqual({
       code: "capture_session_closed",
       detail: "Session is closed",
