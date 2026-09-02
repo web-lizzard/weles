@@ -76,12 +76,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 6.1 Rewrite `resolve_topic`/`resolve_tag` into reuse-or-mint over `candidates()` and `MatchCriteria.best_match`
-- [x] 6.2 Unwrap `ResolvedTopic`/`ResolvedTag` and forward `reused` into the draft events — `application/capture/commands/send_message.py`
-- [x] 6.3 Build `MatchCriteria` from `Settings` in the composition root — `adapters/compose.py`
-- [x] 6.4 Pass an explicit `MatchCriteria` at both test composition sites
-- [x] 6.5 Write unit tests: resolver reuse/mint/flag/within-stream reuse, `Settings` default and override, draft-event `reused`
-- [x] 6.6 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean
+- [x] 6.1 Rewrite `resolve_topic`/`resolve_tag` into reuse-or-mint over `candidates()` and `MatchCriteria.best_match` — 3805f07
+- [x] 6.2 Unwrap `ResolvedTopic`/`ResolvedTag` and forward `reused` into the draft events — `application/capture/commands/send_message.py` — 3805f07
+- [x] 6.3 Build `MatchCriteria` from `Settings` in the composition root — `adapters/compose.py` — 3805f07
+- [x] 6.4 Pass an explicit `MatchCriteria` at both test composition sites — 3805f07
+- [x] 6.5 Write unit tests: resolver reuse/mint/flag/within-stream reuse, `Settings` default and override, draft-event `reused` — 3805f07
+- [x] 6.6 `cd backend && uv run pytest`, `uv run ruff check src tests`, `uv run basedpyright` all clean — 3805f07
 
 #### Manual
 
