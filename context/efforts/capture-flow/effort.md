@@ -3,7 +3,7 @@ effort_id: capture-flow
 title: Capture flow
 status: active
 created: 2026-08-29
-updated: 2026-09-01
+updated: 2026-09-02
 archived_at: null
 origin: overview-thougts
 adr_refs:
