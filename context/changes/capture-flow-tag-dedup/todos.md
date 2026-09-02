@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-tag-dedup
-current_phase: 6
-next_step: 6.7
-next_command: /implement capture-flow-tag-dedup phase 6
+current_phase: 7
+next_step: 7.1
+next_command: /unit-test capture-flow-tag-dedup phase 7
 updated: 2026-09-02
 ---
 
@@ -85,8 +85,8 @@ updated: 2026-09-02
 
 #### Manual
 
-- [ ] 6.7 Boot the backend and confirm the new module-level `Settings()` call in `compose.py` does not break startup
-- [ ] 6.8 Confirm `VOCABULARY_MATCH_THRESHOLD=5` fails loudly at import instead of starting with a broken threshold
+- [x] 6.7 Boot the backend and confirm the new module-level `Settings()` call in `compose.py` does not break startup
+- [x] 6.8 Confirm `VOCABULARY_MATCH_THRESHOLD=5` fails loudly at import instead of starting with a broken threshold
 
 ### Phase 7: HTTP integration and acceptance scenarios (AC-10, AC-11)
 
