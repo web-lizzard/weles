@@ -8,6 +8,22 @@ from adapters.http.errors import EXCEPTION_STATUS_MAP, core_exception_handler
 from domain.exceptions import CoreException
 
 
+@pytest.mark.parametrize(
+    ("code", "expected_status"),
+    [
+        ("note_not_draft", 409),
+        ("note_session_mismatch", 409),
+        ("session_note_missing", 409),
+        ("note_not_found", 404),
+        ("tag_not_on_note", 409),
+    ],
+)
+def test_capture_approval_exception_codes_map_to_contract_status(
+    code: str, expected_status: int
+) -> None:
+    assert EXCEPTION_STATUS_MAP.get(code) == expected_status
+
+
 def test_every_core_exception_code_is_mapped_to_a_status() -> None:
     for subclass in _all_subclasses(CoreException):
         assert subclass.code() in EXCEPTION_STATUS_MAP
