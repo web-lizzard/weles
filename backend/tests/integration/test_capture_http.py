@@ -200,6 +200,36 @@ def _run_confirmation_turn(client: TestClient) -> list[dict[str, object]]:
         return _collect_sse_events(cast(SseResponse, draft_response))
 
 
+def _draft_note_in_new_session(
+    client: TestClient,
+) -> tuple[UUID, list[dict[str, object]]]:
+    session_id = _create_session(client)
+
+    with client.stream(
+        "POST",
+        f"/capture-sessions/{session_id}/messages",
+        json={"content": "How TCP handshakes work"},
+    ) as first_response:
+        assert first_response.status_code == 200
+        _ = _collect_sse_events(cast(SseResponse, first_response))
+
+    with client.stream(
+        "POST",
+        f"/capture-sessions/{session_id}/messages",
+        json={"content": "The client sends SYN and the server replies SYN-ACK"},
+    ) as second_response:
+        assert second_response.status_code == 200
+        _ = _collect_sse_events(cast(SseResponse, second_response))
+
+    with client.stream(
+        "POST",
+        f"/capture-sessions/{session_id}/messages",
+        json={"content": "that's all"},
+    ) as draft_response:
+        assert draft_response.status_code == 200
+        return session_id, _collect_sse_events(cast(SseResponse, draft_response))
+
+
 def _draft_topic_and_tag_events(
     events: list[dict[str, object]],
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
@@ -238,6 +268,63 @@ def test_second_confirmation_turn_marks_topic_and_tags_as_reused(
     assert draft_topic["reused"] is True
     assert draft_tags
     assert all(tag["reused"] is True for tag in draft_tags)
+
+
+def test_approve_note_endpoint_returns_topic_and_tags_on_success(
+    capture_client: TestClient,
+) -> None:
+    session_id, events = _draft_note_in_new_session(capture_client)
+    draft_done = next(event for event in events if event["type"] == "draft_done")
+
+    response = capture_client.post(
+        f"/capture-sessions/{session_id}/approval",
+    )
+
+    assert response.status_code == 200
+    payload = cast(dict[str, object], response.json())
+    assert payload["note_id"] == draft_done["note_id"]
+    assert payload["topic"]
+    assert isinstance(payload["tags"], list) and payload["tags"]
+    assert payload["approved_at"]
+
+
+def test_approve_note_endpoint_returns_404_for_unknown_session(
+    capture_client: TestClient,
+) -> None:
+    unknown_session_id = UUID("00000000-0000-4000-8000-000000000002")
+
+    response = capture_client.post(
+        f"/capture-sessions/{unknown_session_id}/approval",
+    )
+
+    assert response.status_code == 404
+    assert response.json()["code"] == "capture_session_not_found"
+
+
+def test_approve_note_endpoint_returns_409_when_no_draft_exists(
+    capture_client: TestClient,
+) -> None:
+    session_id = _create_session(capture_client)
+
+    response = capture_client.post(
+        f"/capture-sessions/{session_id}/approval",
+    )
+
+    assert response.status_code == 409
+    assert response.json()["code"] == "session_note_missing"
+
+
+def test_approve_note_endpoint_returns_409_on_second_approval(
+    capture_client: TestClient,
+) -> None:
+    session_id, _events = _draft_note_in_new_session(capture_client)
+    first_response = capture_client.post(f"/capture-sessions/{session_id}/approval")
+    assert first_response.status_code == 200
+
+    second_response = capture_client.post(f"/capture-sessions/{session_id}/approval")
+
+    assert second_response.status_code == 409
+    assert second_response.json()["code"] == "capture_session_closed"
 
 
 def test_core_exception_during_generation_yields_in_band_error_event() -> None:
