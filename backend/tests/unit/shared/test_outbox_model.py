@@ -26,6 +26,16 @@ def _envelope(status: EnvelopeStatus, attempts: int = 0) -> OutboxEnvelope:
     )
 
 
+def test_envelope_type_equality_matches_name_and_version() -> None:
+    note_approved = EnvelopeType(name="note_approved")
+    note_approved_v2 = EnvelopeType(name="note_approved", version=2)
+
+    assert note_approved == EnvelopeType(name="note_approved")
+    assert note_approved == EnvelopeType(name="note_approved", version=1)
+    assert note_approved != note_approved_v2
+    assert note_approved != EnvelopeType(name="other_event")
+
+
 def test_pending_builds_envelope_with_zero_attempts_and_no_claim_fields() -> None:
     envelope = OutboxEnvelope.pending(_NOTE_APPROVED, {"note_id": "abc"})
 

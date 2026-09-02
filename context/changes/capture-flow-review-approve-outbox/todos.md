@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
 current_phase: 4
-next_step: tests
-next_command: /unit-test capture-flow-review-approve-outbox phase 4
+next_step: 4.1
+next_command: /implement capture-flow-review-approve-outbox phase 4
 updated: 2026-09-02
 ---
 
@@ -49,7 +49,7 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 35a8f55
 
 #### Automated
 
