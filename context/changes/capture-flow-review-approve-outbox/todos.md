@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 15
-next_step: 15.6
-next_command: /implement capture-flow-review-approve-outbox phase 15
+current_phase: 19
+next_step: 19.1
+next_command: /unit-test capture-flow-review-approve-outbox phase 19
 updated: 2026-09-02
 ---
 
@@ -196,8 +196,8 @@ updated: 2026-09-02
 
 #### Manual
 
-- [ ] 15.6 Converse, wrap up, request a change and confirm the panel updates while `note_id` stays the same
-- [ ] 15.7 Type `/approve` and confirm the confirmation renders, input locks, and the worker log shows claim and handle
+- [x] 15.6 Converse, wrap up, request a change and confirm the panel updates while `note_id` stays the same
+- [x] 15.7 Type `/approve` and confirm the confirmation renders, input locks, and the worker log shows claim and handle
 
 ### Phase 16: Acceptance scenarios for US-06 and US-07
 
