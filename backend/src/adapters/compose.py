@@ -25,10 +25,13 @@ from adapters.out.in_memory.capture.transcript_query import (
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.claimer import InMemoryOutboxClaimer
 from adapters.out.in_memory.shared.outbox.envelope_query import (
     InMemoryOutboxEnvelopeQueryAdapter,
 )
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from adapters.out.worker.handlers.note_save import LoggingNoteSaveHandler
+from adapters.out.worker.outbox_worker import OutboxWorker
 from application.capture.commands.approve_note import ApproveNoteCommand
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
@@ -51,7 +54,16 @@ _topic_repository = InMemoryTopicRepository()
 _tag_repository = InMemoryTagRepository()
 _outbox_store = InMemoryOutboxStore()
 _outbox_appender = InMemoryOutboxAppender(_outbox_store)
+_outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
 _outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
+_note_save_handler = LoggingNoteSaveHandler()
+_outbox_worker = OutboxWorker(
+    _outbox_claimer,
+    [_note_save_handler],
+    worker_id=_settings.outbox_worker_id,
+    batch_size=_settings.outbox_batch_size,
+    max_attempts=_settings.outbox_max_attempts,
+)
 _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
@@ -110,3 +122,7 @@ def get_approve_note_command() -> ApproveNoteCommand:
 
 def get_outbox_envelope_query() -> OutboxEnvelopeQueryPort:
     return _outbox_query
+
+
+def get_outbox_worker() -> OutboxWorker:
+    return _outbox_worker

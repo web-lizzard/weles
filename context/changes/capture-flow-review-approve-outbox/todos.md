@@ -1,7 +1,7 @@
 ---
 change_id: capture-flow-review-approve-outbox
 current_phase: 13
-next_step: 13.1
+next_step: 13.6
 next_command: /implement capture-flow-review-approve-outbox phase 13
 updated: 2026-09-02
 ---
@@ -160,11 +160,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 13.1 Wire one `InMemoryOutboxStore` behind the appender, claimer and query in `adapters/compose.py`
-- [ ] 13.2 Add `get_approve_note_command()`, `get_outbox_envelope_query()` and `get_outbox_worker()`
-- [ ] 13.3 Add the lifespan handler starting and cancelling the `run_forever` task — `main.py`
-- [ ] 13.4 Add INFO/WARNING/ERROR logging in the worker and the stub handler
-- [ ] 13.5 `cd backend && uv run pytest` and `uv run ruff check src` green
+- [x] 13.1 Wire one `InMemoryOutboxStore` behind the appender, claimer and query in `adapters/compose.py`
+- [x] 13.2 Add `get_approve_note_command()`, `get_outbox_envelope_query()` and `get_outbox_worker()`
+- [x] 13.3 Add the lifespan handler starting and cancelling the `run_forever` task — `main.py`
+- [x] 13.4 Add INFO/WARNING/ERROR logging in the worker and the stub handler
+- [x] 13.5 `cd backend && uv run pytest` and `uv run ruff check src` green
 
 #### Manual
 

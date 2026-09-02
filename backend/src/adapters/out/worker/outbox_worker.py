@@ -30,6 +30,13 @@ class OutboxWorker:
             envelopes = await self._claimer.claim(
                 handler.envelope_type, self._batch_size, self._worker_id
             )
+            for envelope in envelopes:
+                logger.info(
+                    "outbox worker %s claimed envelope %s type=%s",
+                    self._worker_id,
+                    envelope.id,
+                    handler.envelope_type,
+                )
             results = await asyncio.gather(
                 *(self._process(handler, envelope) for envelope in envelopes)
             )
@@ -69,4 +76,5 @@ class OutboxWorker:
             return False
         envelope.consume()
         await self._claimer.ack(envelope)
+        logger.info("outbox envelope %s acked", envelope.id)
         return True
