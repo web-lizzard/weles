@@ -21,6 +21,9 @@ from adapters.out.in_memory.capture.message_repository import (
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
 from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
 from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
@@ -108,6 +111,7 @@ class InMemoryCaptureComposition:
             self.notes,
             self.topics,
             self.tags,
+            InMemoryNoteVocabularyRepository(self.topics, self.tags),
             self.outbox_store,
             self.outbox,
         )

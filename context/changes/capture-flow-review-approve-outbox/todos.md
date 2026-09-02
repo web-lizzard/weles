@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 17
-next_step: 17.1
-next_command: /implement capture-flow-review-approve-outbox phase 17
-updated: 2026-09-02T19:15:00Z
+current_phase: 18
+next_step: tests
+next_command: /unit-test capture-flow-review-approve-outbox phase 18
+updated: 2026-09-02T19:00:00Z
 ---
 
 ### Phase 1: Outbox model and ports — stubs
@@ -217,13 +217,13 @@ updated: 2026-09-02T19:15:00Z
 
 #### Automated
 
-- [ ] 17.1 Add `NoteVocabulary` and `NoteVocabularyRepository` — `domain/capture/ports.py`
-- [ ] 17.2 Add `NoteVocabularyIncompleteError` — `domain/capture/exceptions.py`
-- [ ] 17.3 Add `InMemoryNoteVocabularyRepository` with unimplemented `resolve()` — `adapters/out/in_memory/capture/note_vocabulary_repository.py`
-- [ ] 17.4 Add `note_vocabulary: NoteVocabularyRepository` to `UnitOfWork` — `application/capture/ports.py`
-- [ ] 17.5 Widen `InMemoryUnitOfWork`'s constructor with `note_vocabulary` — `adapters/out/in_memory/capture/unit_of_work.py`
-- [ ] 17.6 Wire `_note_vocabulary` into `compose.py`'s `_unit_of_work()`
-- [ ] 17.7 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 17.1 Add `NoteVocabulary` and `NoteVocabularyRepository` — `domain/capture/ports.py`
+- [x] 17.2 Add `NoteVocabularyIncompleteError` — `domain/capture/exceptions.py`
+- [x] 17.3 Add `InMemoryNoteVocabularyRepository` with unimplemented `resolve()` — `adapters/out/in_memory/capture/note_vocabulary_repository.py`
+- [x] 17.4 Add `note_vocabulary: NoteVocabularyRepository` to `UnitOfWork` — `application/capture/ports.py`
+- [x] 17.5 Widen `InMemoryUnitOfWork`'s constructor with `note_vocabulary` — `adapters/out/in_memory/capture/unit_of_work.py`
+- [x] 17.6 Wire `_note_vocabulary` into `compose.py`'s `_unit_of_work()`
+- [x] 17.7 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 18: Note vocabulary composition — behavior
 

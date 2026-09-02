@@ -8,6 +8,9 @@ from adapters.out.in_memory.capture.message_repository import (
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
 from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
@@ -24,13 +27,16 @@ async def test_handle_creates_and_persists_bare_session() -> None:
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
     outbox_store = InMemoryOutboxStore()
+    topics = InMemoryTopicRepository()
+    tags = InMemoryTagRepository()
     uow = InMemoryUnitOfWork(
         session_repo,
         message_repo,
         store,
         InMemoryNoteRepository(),
-        InMemoryTopicRepository(),
-        InMemoryTagRepository(),
+        topics,
+        tags,
+        InMemoryNoteVocabularyRepository(topics, tags),
         outbox_store,
         InMemoryOutboxAppender(outbox_store),
     )

@@ -17,6 +17,9 @@ from adapters.out.in_memory.capture.message_repository import (
 )
 from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
 from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
 from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
@@ -677,13 +680,16 @@ class _SpyUnitOfWork(InMemoryUnitOfWork):
         outbox: InMemoryOutboxAppender | None = None,
     ) -> None:
         resolved_outbox_store = outbox_store or InMemoryOutboxStore()
+        resolved_topics = topics or InMemoryTopicRepository()
+        resolved_tags = tags or InMemoryTagRepository()
         super().__init__(
             capture_sessions,
             messages,
             message_store,
             notes or InMemoryNoteRepository(),
-            topics or InMemoryTopicRepository(),
-            tags or InMemoryTagRepository(),
+            resolved_topics,
+            resolved_tags,
+            InMemoryNoteVocabularyRepository(resolved_topics, resolved_tags),
             resolved_outbox_store,
             outbox or InMemoryOutboxAppender(resolved_outbox_store),
         )
