@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-tag-dedup
-current_phase: 5
-next_step: 5.5
-next_command: /implement capture-flow-tag-dedup phase 5
+current_phase: 6
+next_step: tests
+next_command: /unit-test capture-flow-tag-dedup phase 6
 updated: 2026-09-02
 ---
 
@@ -62,11 +62,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 5.1 Add `ResolvedTopic` and `ResolvedTag` — `application/capture/value_objects.py`
-- [x] 5.2 Take `MatchCriteria` in `VocabularyResolver.__init__` and retype both `resolve_*` returns
-- [x] 5.3 Add `reused: bool` to `DraftTopicEvent` and `DraftTagEvent` — `application/capture/dto.py`
-- [x] 5.4 Add `vocabulary_match_threshold: float = 0.85` — `config/settings.py`
-- [x] 5.5 `cd backend && uv run ruff check src tests`, `uv run basedpyright` clean
+- [x] 5.1 Add `ResolvedTopic` and `ResolvedTag` — `application/capture/value_objects.py` — 7592ce9
+- [x] 5.2 Take `MatchCriteria` in `VocabularyResolver.__init__` and retype both `resolve_*` returns — 7592ce9
+- [x] 5.3 Add `reused: bool` to `DraftTopicEvent` and `DraftTagEvent` — `application/capture/dto.py` — 7592ce9
+- [x] 5.4 Add `vocabulary_match_threshold: float = 0.85` — `config/settings.py` — 7592ce9
+- [x] 5.5 `cd backend && uv run ruff check src tests`, `uv run basedpyright` clean — 7592ce9
 
 ### Phase 6: Reuse-or-mint, stream contract and configuration — behavior
 
