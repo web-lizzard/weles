@@ -16,6 +16,7 @@ from domain.exceptions import CoreException
         ("session_note_missing", 409),
         ("note_not_found", 404),
         ("tag_not_on_note", 409),
+        ("note_vocabulary_incomplete", 500),
     ],
 )
 def test_capture_approval_exception_codes_map_to_contract_status(
