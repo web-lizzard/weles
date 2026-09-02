@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 15
-next_step: 15.6
-next_command: /implement capture-flow-review-approve-outbox phase 15
-updated: 2026-09-02T18:40:00Z
+current_phase: 16
+next_step: 16.6
+next_command: /implement capture-flow-review-approve-outbox phase 16
+updated: 2026-09-02T19:05:00Z
 ---
 
 ### Phase 1: Outbox model and ports — stubs
@@ -203,15 +203,15 @@ updated: 2026-09-02T18:40:00Z
 
 #### Automated
 
-- [ ] 16.1 Register the `AC-12`–`AC-15` markers — `backend/pyproject.toml`
-- [ ] 16.2 Write `US-06-reshape-draft.feature` covering AC-12 and AC-13 — `tests/features/capture-flow/`
-- [ ] 16.3 Write `US-07-approve-to-outbox.feature` covering AC-14 and AC-15 — `tests/features/capture-flow/`
-- [ ] 16.4 Write the step module and register it in `pytest_plugins` — `tests/bdd/steps/approve_outbox.py`, `tests/bdd/test_features.py`
-- [ ] 16.5 `cd backend && uv run pytest tests/bdd -v` green and `-m "capture-flow and AC-14"` selects a scenario
+- [x] 16.1 Register the `AC-12`–`AC-15` markers — `backend/pyproject.toml`
+- [x] 16.2 Write `US-06-reshape-draft.feature` covering AC-12 and AC-13 — `tests/features/capture-flow/`
+- [x] 16.3 Write `US-07-approve-to-outbox.feature` covering AC-14 and AC-15 — `tests/features/capture-flow/`
+- [x] 16.4 Write the step module and register it in `pytest_plugins` — `tests/bdd/steps/approve_outbox.py`, `tests/bdd/test_features.py`
+- [x] 16.5 `cd backend && uv run pytest tests/bdd -v` green and `-m "capture-flow and AC-14"` selects a scenario
 
 #### Manual
 
-- [ ] 16.6 `cd backend && uv run pytest tests/bdd --collect-only` lists the new scenarios with no undefined steps
+- [x] 16.6 `cd backend && uv run pytest tests/bdd --collect-only` lists the new scenarios with no undefined steps
 
 ### Phase 17: Note vocabulary composition — stubs
 
