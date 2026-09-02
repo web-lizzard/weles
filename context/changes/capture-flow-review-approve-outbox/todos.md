@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 13
-next_step: 13.6
-next_command: /implement capture-flow-review-approve-outbox phase 13
+current_phase: 15
+next_step: 15.6
+next_command: /implement capture-flow-review-approve-outbox phase 15
 updated: 2026-09-02
 ---
 
@@ -168,8 +168,8 @@ updated: 2026-09-02
 
 #### Manual
 
-- [ ] 13.6 Start `uv run fastapi dev src/main.py` and confirm the idle worker logs no errors
-- [ ] 13.7 `curl http://localhost:8000/_outbox` returns `[]`
+- [x] 13.6 Start `uv run fastapi dev src/main.py` and confirm the idle worker logs no errors
+- [x] 13.7 `curl http://localhost:8000/_outbox` returns `[]`
 
 ### Phase 14: TUI approval — stubs
 
