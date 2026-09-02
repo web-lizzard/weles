@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 1
-next_step: 1.1
-next_command: /implement capture-flow-review-approve-outbox phase 1
+current_phase: 2
+next_step: 2.tests
+next_command: /unit-test capture-flow-review-approve-outbox phase 2
 updated: 2026-09-02
 ---
 
@@ -10,12 +10,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 1.1 Create the `domain/shared/` and `domain/shared/outbox/` package markers
-- [ ] 1.2 Add `EnvelopeStatus`, `EnvelopeId`, `OutboxEnvelope` with unimplemented transitions — `domain/shared/outbox/model.py`
-- [ ] 1.3 Add `EnvelopeNotPendingError`, `EnvelopeNotProcessingError` — `domain/shared/outbox/exceptions.py`
-- [ ] 1.4 Add the `OutboxAppender` and `OutboxClaimer` protocols — `domain/shared/outbox/ports.py`
-- [ ] 1.5 Add `NOTE_APPROVED`, `VocabularySnapshot`, `NoteApprovedPayload` with unimplemented `of()`/`to_envelope()` — `domain/capture/outbox.py`
-- [ ] 1.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable
+- [x] 1.1 Create the `domain/shared/` and `domain/shared/outbox/` package markers
+- [x] 1.2 Add `EnvelopeStatus`, `EnvelopeId`, `OutboxEnvelope` with unimplemented transitions — `domain/shared/outbox/model.py`
+- [x] 1.3 Add `EnvelopeNotPendingError`, `EnvelopeNotProcessingError` — `domain/shared/outbox/exceptions.py`
+- [x] 1.4 Add the `OutboxAppender` and `OutboxClaimer` protocols — `domain/shared/outbox/ports.py`
+- [x] 1.5 Add `NOTE_APPROVED`, `VocabularySnapshot`, `NoteApprovedPayload` with unimplemented `of()`/`to_envelope()` — `domain/capture/outbox.py`
+- [x] 1.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable
 
 ### Phase 2: Outbox model and ports — behavior
 
