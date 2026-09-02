@@ -110,11 +110,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 9.1 Create the `application/shared/` and `application/shared/outbox/` package markers
-- [x] 9.2 Add the `OutboxHandler` protocol — `application/shared/outbox/ports.py`
-- [x] 9.3 Add `OutboxWorker` with unimplemented `run_once()`/`run_forever()` — `adapters/out/worker/outbox_worker.py`
-- [x] 9.4 Add `LoggingNoteSaveHandler` bound to `NOTE_APPROVED` — `adapters/out/worker/handlers/note_save.py`
-- [x] 9.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 9.1 Create the `application/shared/` and `application/shared/outbox/` package markers — 8c289bc
+- [x] 9.2 Add the `OutboxHandler` protocol — `application/shared/outbox/ports.py` — 8c289bc
+- [x] 9.3 Add `OutboxWorker` with unimplemented `run_once()`/`run_forever()` — `adapters/out/worker/outbox_worker.py` — 8c289bc
+- [x] 9.4 Add `LoggingNoteSaveHandler` bound to `NOTE_APPROVED` — `adapters/out/worker/handlers/note_save.py` — 8c289bc
+- [x] 9.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 8c289bc
 
 ### Phase 10: Outbox worker — behavior
 
