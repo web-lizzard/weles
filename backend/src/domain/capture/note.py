@@ -2,6 +2,11 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
+from domain.capture.exceptions import (
+    NoteNotDraftError,
+    NoteSessionMismatchError,
+    TagNotOnNoteError,
+)
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import (
@@ -44,21 +49,31 @@ class Note(BaseModel):
         )
 
     def update_content(self, content: NoteContent) -> None:
-        del content
-        ...
+        self._ensure_draft()
+        self.content = content
 
     def change_topic(self, topic: Topic) -> None:
-        del topic
-        ...
+        self._ensure_draft()
+        self.topic_id = topic.id
 
     def add_tag(self, tag: Tag) -> None:
-        del tag
-        ...
+        self._ensure_draft()
+        if tag.id not in self.tag_ids:
+            self.tag_ids.append(tag.id)
 
     def remove_tag(self, tag: Tag) -> None:
-        del tag
-        ...
+        self._ensure_draft()
+        if tag.id not in self.tag_ids:
+            raise TagNotOnNoteError
+        self.tag_ids.remove(tag.id)
 
     def approve(self, session_id: SessionId) -> None:
-        del session_id
-        ...
+        if session_id != self.session_id:
+            raise NoteSessionMismatchError
+        self._ensure_draft()
+        self.status = NoteStatus.APPROVED
+        self.approved_at = datetime.now(UTC)
+
+    def _ensure_draft(self) -> None:
+        if self.status != NoteStatus.DRAFT:
+            raise NoteNotDraftError

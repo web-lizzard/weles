@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 6
-next_step: 6.0
-next_command: /unit-test capture-flow-review-approve-outbox phase 6
+current_phase: 7
+next_step: 7.1
+next_command: /implement capture-flow-review-approve-outbox phase 7
 updated: 2026-09-02
 ---
 
@@ -73,15 +73,15 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — fed160c
 
 #### Automated
 
-- [ ] 6.1 Implement the four `Note` mutators under the draft-only guard, incl. duplicate-add and missing-tag handling
-- [ ] 6.2 Implement `Note.approve()` with the session-match sanity check and the one-way status transition
-- [ ] 6.3 Implement `CaptureSession.approve()` and `close()` so approval always closes the session
-- [ ] 6.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [ ] 6.5 `cd backend && uv run pytest` green
+- [x] 6.1 Implement the four `Note` mutators under the draft-only guard, incl. duplicate-add and missing-tag handling
+- [x] 6.2 Implement `Note.approve()` with the session-match sanity check and the one-way status transition
+- [x] 6.3 Implement `CaptureSession.approve()` and `close()` so approval always closes the session
+- [x] 6.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [x] 6.5 `cd backend && uv run pytest` green
 
 ### Phase 7: Redraft and approval command — stubs
 
