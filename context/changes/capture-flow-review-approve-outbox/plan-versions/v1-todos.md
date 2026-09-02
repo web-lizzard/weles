@@ -31,21 +31,18 @@ updated: 2026-09-02
 - [x] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py` — 53509c2
 - [x] 2.5 `cd backend && uv run pytest` green — 53509c2
 
-### Phase 3: Envelope type VO and in-memory outbox adapters — stubs
+### Phase 3: In-memory outbox adapters and UnitOfWork — stubs
 
 #### Automated
 
-- [ ] 3.1 Add the `EnvelopeType` VO (`name`, `version=1`, `__str__` as `name@version`) — `domain/shared/outbox/model.py`
-- [ ] 3.2 Change `OutboxEnvelope.type` and `pending()`'s `type` param from `str` to `EnvelopeType` — `domain/shared/outbox/model.py`
-- [ ] 3.3 Migrate `NOTE_APPROVED` to an `EnvelopeType` instance — `domain/capture/outbox.py`
-- [ ] 3.4 Create the `adapters/out/in_memory/shared/` and `.../shared/outbox/` package markers
-- [ ] 3.5 Add `InMemoryOutboxStore` with `snapshot`/`restore`/`put`/`select_pending`/`lock`/`all`, `select_pending` typed on `EnvelopeType` — `.../shared/outbox/store.py`
-- [ ] 3.6 Add `InMemoryOutboxAppender` and `InMemoryOutboxClaimer` with unimplemented bodies, `claim` typed on `EnvelopeType` — `.../appender.py`, `.../claimer.py`
-- [ ] 3.7 Add `outbox: OutboxAppender` to the `UnitOfWork` protocol — `application/capture/ports.py`
-- [ ] 3.8 Widen `InMemoryUnitOfWork`'s constructor and snapshot set with the outbox store — `adapters/out/in_memory/capture/unit_of_work.py`
-- [ ] 3.9 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [ ] 3.1 Create the `adapters/out/in_memory/shared/` and `.../shared/outbox/` package markers
+- [ ] 3.2 Add `InMemoryOutboxStore` with `snapshot`/`restore`/`put`/`select_pending`/`lock`/`all` — `.../shared/outbox/store.py`
+- [ ] 3.3 Add `InMemoryOutboxAppender` and `InMemoryOutboxClaimer` with unimplemented bodies — `.../appender.py`, `.../claimer.py`
+- [ ] 3.4 Add `outbox: OutboxAppender` to the `UnitOfWork` protocol — `application/capture/ports.py`
+- [ ] 3.5 Widen `InMemoryUnitOfWork`'s constructor and snapshot set with the outbox store — `adapters/out/in_memory/capture/unit_of_work.py`
+- [ ] 3.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
-### Phase 4: Envelope type VO and in-memory outbox adapters — behavior
+### Phase 4: In-memory outbox adapters and UnitOfWork — behavior
 
 #### Tests
 
@@ -54,9 +51,9 @@ updated: 2026-09-02
 #### Automated
 
 - [ ] 4.1 Implement `InMemoryOutboxAppender.append()` and the store's put/select
-- [ ] 4.2 Implement `InMemoryOutboxClaimer.claim()` holding the store lock across select-and-mutate, matching `EnvelopeType` by `name` and `version`
+- [ ] 4.2 Implement `InMemoryOutboxClaimer.claim()` holding the store lock across select-and-mutate
 - [ ] 4.3 Implement `ack()` and `fail()` persisting the caller's already-applied transition
-- [ ] 4.4 Write the port contract suite incl. the `asyncio.gather` disjoint-claim case and the version cross-match case — `tests/unit/shared/test_outbox_contract.py`
+- [ ] 4.4 Write the port contract suite incl. the `asyncio.gather` disjoint-claim case — `tests/unit/shared/test_outbox_contract.py`
 - [ ] 4.5 Extend the UnitOfWork tests to cover outbox rollback — `tests/unit/capture/test_unit_of_work.py`
 - [ ] 4.6 `cd backend && uv run pytest` green
 

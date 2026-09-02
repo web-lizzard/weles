@@ -1,7 +1,5 @@
 # Reshape and Approve the Draft into the Outbox — Implementation Plan
 
-> Revision 1 (2026-09-02): Envelope `type` becomes an `EnvelopeType` VO (`name` + `version`, default `1`) instead of a bare `str`, folded into the still-unstarted Phases 3/4/9/10/11/12 rather than appended as a new phase. Prior version: plan-versions/v1-plan.md
-
 ## Overview
 
 Slice S-06 of the `capture-flow` effort. The draft note that S-04 produces becomes something the user can push back on and then deliberately hand over: a conversational redraft loop mutates the single draft in place, an explicit `/approve` closes the session and drops a `note_approved` envelope into a shared outbox, and a background worker running in the same event loop claims that envelope and processes it. This realizes AC-12 (the draft is shown before anything is saved), AC-13 (conversational redraft, no direct text editing), AC-14 (nothing reaches the outbox without explicit approval) and AC-15 (approval sends the note and ends the session).
@@ -249,40 +247,15 @@ The envelope's status lifecycle and the payload snapshot become real.
 
 ---
 
-## Phase 3: Envelope type VO and in-memory outbox adapters — stubs
+## Phase 3: In-memory outbox adapters and UnitOfWork — stubs
 
 ### Overview
 
-Wraps the envelope's `type` in a versioned `EnvelopeType` VO before any adapter or the worker gets a chance to consume it as a bare string, then materializes the in-memory store and both adapters, and widens `UnitOfWork` with its sixth member. The VO change lands here — the earliest still-unstarted phase — precisely so every phase after it (adapters, worker, HTTP) is written once against the final shape instead of against `str` and then redone.
+Materializes the in-memory store and both adapters, and widens `UnitOfWork` with its sixth member.
 
 ### Changes Required:
 
-#### 1. Envelope type VO
-
-**File**: `backend/src/domain/shared/outbox/model.py`
-
-**Intent**: The Implementation Approach already commits schema drift to "minting a new `type`, not mutating a payload shape in place" — this makes that identity structured instead of a bare-string convention. `version` defaults to `1` so every type declared today costs nothing beyond the name.
-
-**Contract**: `OutboxEnvelope.type` and `pending()`'s `type` parameter change from `str` to `EnvelopeType`. `claim`/`consume`/`fail`, already implemented in Phase 1/2, are untouched — none of them inspect `type`.
-
-```python
-class EnvelopeType(BaseModel, frozen=True):
-    name: str
-    version: int = 1
-
-    def __str__(self) -> str:
-        return f"{self.name}@{self.version}"
-```
-
-#### 2. Capture's constant migrates to the VO
-
-**File**: `backend/src/domain/capture/outbox.py`
-
-**Intent**: `NOTE_APPROVED` is the only concrete type today; it becomes the first `EnvelopeType` instance instead of a raw string.
-
-**Contract**: `NOTE_APPROVED: EnvelopeType = EnvelopeType(name="note_approved")` (version defaults to `1`). `to_envelope()`, already implemented in Phase 2, needs no further change — it already just forwards `NOTE_APPROVED` through.
-
-#### 3. Shared in-memory package
+#### 1. Shared in-memory package
 
 **File**: `backend/src/adapters/out/in_memory/shared/__init__.py`, `backend/src/adapters/out/in_memory/shared/outbox/__init__.py`
 
@@ -290,7 +263,7 @@ class EnvelopeType(BaseModel, frozen=True):
 
 **Contract**: Empty package markers.
 
-#### 4. Store and adapters
+#### 2. Store and adapters
 
 **File**: `backend/src/adapters/out/in_memory/shared/outbox/store.py`, `.../appender.py`, `.../claimer.py`
 
@@ -304,7 +277,7 @@ class InMemoryOutboxStore:
     def snapshot(self) -> dict[UUID, OutboxEnvelope]: ...
     def restore(self, snapshot: dict[UUID, OutboxEnvelope]) -> None: ...
     async def put(self, envelope: OutboxEnvelope) -> None: ...
-    async def select_pending(self, envelope_type: EnvelopeType, limit: int) -> list[OutboxEnvelope]: ...
+    async def select_pending(self, envelope_type: str, limit: int) -> list[OutboxEnvelope]: ...
     def lock(self) -> asyncio.Lock: ...
     def all(self) -> list[OutboxEnvelope]: ...
 
@@ -316,12 +289,12 @@ class InMemoryOutboxAppender:
 
 class InMemoryOutboxClaimer:
     def __init__(self, store: InMemoryOutboxStore) -> None: ...
-    async def claim(self, envelope_type: EnvelopeType, limit: int, worker_id: str) -> list[OutboxEnvelope]: ...
+    async def claim(self, envelope_type: str, limit: int, worker_id: str) -> list[OutboxEnvelope]: ...
     async def ack(self, envelope: OutboxEnvelope) -> None: ...
     async def fail(self, envelope: OutboxEnvelope) -> None: ...
 ```
 
-#### 5. UnitOfWork gains `outbox`
+#### 3. UnitOfWork gains `outbox`
 
 **File**: `backend/src/application/capture/ports.py`
 
@@ -329,7 +302,7 @@ class InMemoryOutboxClaimer:
 
 **Contract**: `UnitOfWork` Protocol adds `outbox: OutboxAppender`.
 
-#### 6. InMemoryUnitOfWork joins the snapshot set
+#### 4. InMemoryUnitOfWork joins the snapshot set
 
 **File**: `backend/src/adapters/out/in_memory/capture/unit_of_work.py`
 
@@ -345,11 +318,11 @@ class InMemoryOutboxClaimer:
 
 ---
 
-## Phase 4: Envelope type VO and in-memory outbox adapters — behavior
+## Phase 4: In-memory outbox adapters and UnitOfWork — behavior
 
 ### Overview
 
-The contract both ports must satisfy, including the atomicity two parallel workers depend on, plus the VO's identity semantics: two types sharing a `name` but not a `version` must never cross-match.
+The contract both ports must satisfy, including the atomicity two parallel workers depend on.
 
 ### Changes Required:
 
@@ -367,7 +340,7 @@ The contract both ports must satisfy, including the atomicity two parallel worke
 
 **Intent**: Two workers polling the same store never receive the same envelope.
 
-**Contract**: `claim()` holds the store's single `asyncio.Lock` across select-and-mutate: selects up to `limit` `PENDING` envelopes whose `type` equals the given `EnvelopeType` (both `name` and `version`) in `created_at` order, calls `envelope.claim(worker_id)` on each, writes them back, releases the lock, returns them. `ack()` calls nothing itself — the caller has already invoked `consume()`/`fail(...)` — and persists the envelope. `fail()` persists likewise.
+**Contract**: `claim()` holds the store's single `asyncio.Lock` across select-and-mutate: selects up to `limit` `PENDING` envelopes of the given `type` in `created_at` order, calls `envelope.claim(worker_id)` on each, writes them back, releases the lock, returns them. `ack()` calls nothing itself — the caller has already invoked `consume()`/`fail(...)` — and persists the envelope. `fail()` persists likewise.
 
 #### 3. Contract test suite
 
@@ -375,7 +348,7 @@ The contract both ports must satisfy, including the atomicity two parallel worke
 
 **Intent**: One behavioral contract per port, parametrized over implementations, per the contract-testing rule.
 
-**Contract**: Covers append-then-visible, rollback-then-absent, claim filters by `type`, claim respects `limit`, a claimed envelope is invisible to a second claim, `asyncio.gather` of two claims returns disjoint sets, ack settles `CONSUMED`, fail below the limit returns to `PENDING` and above it settles `FAILED`, plus a case proving a claim for `EnvelopeType(name="x", version=1)` never returns an envelope minted with `EnvelopeType(name="x", version=2)`.
+**Contract**: Covers append-then-visible, rollback-then-absent, claim filters by `type`, claim respects `limit`, a claimed envelope is invisible to a second claim, `asyncio.gather` of two claims returns disjoint sets, ack settles `CONSUMED`, fail below the limit returns to `PENDING` and above it settles `FAILED`.
 
 ### Success Criteria:
 
@@ -579,7 +552,7 @@ Materializes the handler protocol, the worker, and the placeholder note-save han
 
 ```python
 class OutboxHandler(Protocol):
-    envelope_type: EnvelopeType
+    envelope_type: str
 
     async def handle(self, envelope: OutboxEnvelope) -> None: ...
 ```
@@ -706,9 +679,9 @@ outbox_worker_id: str = "note-save-worker"
 
 **File**: `backend/src/adapters/http/outbox.py`, `backend/src/application/shared/outbox/dto.py`, `backend/src/application/shared/outbox/queries/envelopes.py`, `backend/src/adapters/out/in_memory/shared/outbox/envelope_query.py`
 
-**Intent**: An ops/debug view of the queue that never exists in production. Read side follows CQRS-lite: a query handler reading straight into a DTO, with no `UnitOfWork`. `type` stays a plain `str` on the DTO — the adapter formats the `EnvelopeType` VO to its wire form rather than the DTO shape growing a nested object, keeping this a no-op change for `/openapi.json` consumers.
+**Intent**: An ops/debug view of the queue that never exists in production. Read side follows CQRS-lite: a query handler reading straight into a DTO, with no `UnitOfWork`.
 
-**Contract**: `OutboxEnvelopeDTO(id, type, status, attempts, created_at, claimed_at, claimed_by)`; `OutboxEnvelopeQueryPort.list_envelopes() -> list[OutboxEnvelopeDTO]`; `InMemoryOutboxEnvelopeQueryAdapter` over `InMemoryOutboxStore`, populating `type` as `str(envelope.type)` (e.g. `"note_approved@1"`); router exposing `GET /_outbox`.
+**Contract**: `OutboxEnvelopeDTO(id, type, status, attempts, created_at, claimed_at, claimed_by)`; `OutboxEnvelopeQueryPort.list_envelopes() -> list[OutboxEnvelopeDTO]`; `InMemoryOutboxEnvelopeQueryAdapter` over `InMemoryOutboxStore`; router exposing `GET /_outbox`.
 
 ### Success Criteria:
 
@@ -748,7 +721,7 @@ The endpoints' status codes, shapes and gating.
 
 **Intent**: Prove both contracts through the real app.
 
-**Contract**: Approval happy path plus all three error codes; `/_outbox` lists an appended envelope with `type == "note_approved@1"` and reflects its status after a `run_once()`; an app built with `environment_name=prod` returns 404 for `/_outbox` and omits it from `/openapi.json`.
+**Contract**: Approval happy path plus all three error codes; `/_outbox` lists an appended envelope and reflects its status after a `run_once()`; an app built with `environment_name=prod` returns 404 for `/_outbox` and omits it from `/openapi.json`.
 
 ### Success Criteria:
 
