@@ -29,11 +29,13 @@ export type ReplyErrorEvent = {
 export type DraftTopicEvent = {
   type: "draft_topic";
   label: string;
+  reused: boolean;
 };
 
 export type DraftTagEvent = {
   type: "draft_tag";
   label: string;
+  reused: boolean;
 };
 
 export type DraftDeltaEvent = {
@@ -149,8 +151,8 @@ type RawReplyStreamEvent =
       coverage_confidence: number;
     }
   | { type: "error"; code: string; detail: string }
-  | { type: "draft_topic"; label: string }
-  | { type: "draft_tag"; label: string }
+  | { type: "draft_topic"; label: string; reused: boolean }
+  | { type: "draft_tag"; label: string; reused: boolean }
   | { type: "draft_delta"; text: string }
   | {
       type: "draft_done";
