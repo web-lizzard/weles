@@ -29,6 +29,8 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.dto import (
     DraftDoneEvent,
@@ -590,7 +592,10 @@ class _SpyUnitOfWork(InMemoryUnitOfWork):
         notes: InMemoryNoteRepository | None = None,
         topics: InMemoryTopicRepository | None = None,
         tags: InMemoryTagRepository | None = None,
+        outbox_store: InMemoryOutboxStore | None = None,
+        outbox: InMemoryOutboxAppender | None = None,
     ) -> None:
+        resolved_outbox_store = outbox_store or InMemoryOutboxStore()
         super().__init__(
             capture_sessions,
             messages,
@@ -598,6 +603,8 @@ class _SpyUnitOfWork(InMemoryUnitOfWork):
             notes or InMemoryNoteRepository(),
             topics or InMemoryTopicRepository(),
             tags or InMemoryTagRepository(),
+            resolved_outbox_store,
+            outbox or InMemoryOutboxAppender(resolved_outbox_store),
         )
         self.commit_count = 0
 

@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from enum import StrEnum
+from typing import override
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
@@ -25,9 +26,18 @@ class EnvelopeId(BaseModel, frozen=True):
         return cls(value=uuid4())
 
 
+class EnvelopeType(BaseModel, frozen=True):
+    name: str
+    version: int = 1
+
+    @override
+    def __str__(self) -> str:
+        return f"{self.name}@{self.version}"
+
+
 class OutboxEnvelope(BaseModel):
     id: EnvelopeId
-    type: str
+    type: EnvelopeType
     payload: dict[str, object]
     status: EnvelopeStatus
     attempts: int
@@ -36,7 +46,9 @@ class OutboxEnvelope(BaseModel):
     claimed_by: str | None
 
     @classmethod
-    def pending(cls, type: str, payload: dict[str, object]) -> "OutboxEnvelope":
+    def pending(
+        cls, type: EnvelopeType, payload: dict[str, object]
+    ) -> "OutboxEnvelope":
         return cls(
             id=EnvelopeId.new(),
             type=type,

@@ -31,6 +31,8 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
@@ -49,6 +51,8 @@ class InMemoryCaptureComposition:
     notes: InMemoryNoteRepository
     topics: InMemoryTopicRepository
     tags: InMemoryTagRepository
+    outbox_store: InMemoryOutboxStore
+    outbox: InMemoryOutboxAppender
     transcript_query: InMemoryTranscriptQueryAdapter
     topic_extraction: DeterministicTopicExtractionAdapter
     confidence_assessment: ConfidenceAssessmentPort
@@ -64,6 +68,8 @@ class InMemoryCaptureComposition:
         notes = InMemoryNoteRepository()
         topics = InMemoryTopicRepository()
         tags = InMemoryTagRepository()
+        outbox_store = InMemoryOutboxStore()
+        outbox = InMemoryOutboxAppender(outbox_store)
         embedding = DeterministicEmbeddingAdapter()
         return cls(
             store=store,
@@ -72,6 +78,8 @@ class InMemoryCaptureComposition:
             notes=notes,
             topics=topics,
             tags=tags,
+            outbox_store=outbox_store,
+            outbox=outbox,
             transcript_query=InMemoryTranscriptQueryAdapter(store),
             topic_extraction=DeterministicTopicExtractionAdapter(),
             confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
@@ -90,6 +98,8 @@ class InMemoryCaptureComposition:
             self.notes,
             self.topics,
             self.tags,
+            self.outbox_store,
+            self.outbox,
         )
 
     def dependency_overrides(

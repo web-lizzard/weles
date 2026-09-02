@@ -11,6 +11,8 @@ from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepositor
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
@@ -21,6 +23,7 @@ async def test_handle_creates_and_persists_bare_session() -> None:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
+    outbox_store = InMemoryOutboxStore()
     uow = InMemoryUnitOfWork(
         session_repo,
         message_repo,
@@ -28,6 +31,8 @@ async def test_handle_creates_and_persists_bare_session() -> None:
         InMemoryNoteRepository(),
         InMemoryTopicRepository(),
         InMemoryTagRepository(),
+        outbox_store,
+        InMemoryOutboxAppender(outbox_store),
     )
     command = StartCaptureSessionCommand(uow)  # pyright: ignore[reportArgumentType]
 

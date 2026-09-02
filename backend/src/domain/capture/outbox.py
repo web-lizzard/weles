@@ -6,9 +6,9 @@ from pydantic import BaseModel
 from domain.capture.note import Note
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
-from domain.shared.outbox.model import OutboxEnvelope
+from domain.shared.outbox.model import EnvelopeType, OutboxEnvelope
 
-NOTE_APPROVED = "note_approved"
+NOTE_APPROVED = EnvelopeType(name="note_approved")
 
 
 class VocabularySnapshot(BaseModel, frozen=True):
