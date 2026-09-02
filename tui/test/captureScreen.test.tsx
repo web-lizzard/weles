@@ -1,6 +1,10 @@
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { sendMessage, startCaptureSession } from "../src/api/stream";
+import {
+  approveNote,
+  sendMessage,
+  startCaptureSession,
+} from "../src/api/stream";
 import CaptureScreen from "../src/screens/CaptureScreen";
 import { useChatStore } from "../src/store/chat";
 
@@ -14,6 +18,7 @@ vi.mock("../src/api/stream", async (importOriginal) => {
     ...actual,
     sendMessage: vi.fn(),
     startCaptureSession: vi.fn(),
+    approveNote: vi.fn(),
   };
 });
 
@@ -64,9 +69,11 @@ describe("CaptureScreen", () => {
       isStreaming: false,
       streamError: null,
       draft: null,
+      approved: false,
     });
     vi.mocked(startCaptureSession).mockResolvedValue({ sessionId: "sess-1" });
     vi.mocked(sendMessage).mockReset();
+    vi.mocked(approveNote).mockReset();
   });
 
   afterEach(() => {
@@ -452,5 +459,74 @@ describe("CaptureScreen", () => {
     expect(frame).toContain("draft-panel-tag-reused");
     expect(frame).not.toContain("draft-panel-tag-reused (new)");
     expect(frame).toContain("draft-panel-tag-new (new)");
+  });
+
+  it("renders the confirmation and locks input after /approve succeeds with a ready draft", async () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-panel-topic",
+        tags: [{ label: "draft-panel-tag-a", reused: true }],
+        content: "draft-panel-body",
+        noteId: "00000000-0000-4000-8000-000000000010",
+      },
+    });
+    vi.mocked(approveNote).mockResolvedValue({
+      noteId: "00000000-0000-4000-8000-000000000010",
+      topic: "draft-panel-topic",
+      tags: ["draft-panel-tag-a"],
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    await submitMessage(stdin, "/approve");
+
+    const frame = await waitForFrame(lastFrame, (f) =>
+      f.includes("✓ Approved — queued for saving"),
+    );
+    expect(frame).toContain("✓ Approved — queued for saving");
+    expect(frame).not.toContain("draft-panel-body");
+    expect(sendMessage).not.toHaveBeenCalled();
+
+    stdin.write("still typing");
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(lastFrame()).not.toContain("still typing");
+  });
+
+  it("makes no request when /approve is submitted with no draft", async () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: null,
+    });
+
+    const { stdin } = render(<CaptureScreen />);
+    await submitMessage(stdin, "/approve");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(approveNote).not.toHaveBeenCalled();
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("sends prose containing the word approve as a normal turn instead of intercepting it", async () => {
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield {
+        type: "done",
+        messageId: "m1",
+        content: "Ok",
+        topic: "Session topic",
+        coverageConfidence: 0,
+      };
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    await submitMessage(stdin, "I think we should approve this plan");
+
+    const frame = await waitForFrame(lastFrame, (f) =>
+      f.includes("I think we should approve this plan"),
+    );
+    expect(frame).toContain("I think we should approve this plan");
+    expect(sendMessage).toHaveBeenCalled();
+    expect(approveNote).not.toHaveBeenCalled();
   });
 });
