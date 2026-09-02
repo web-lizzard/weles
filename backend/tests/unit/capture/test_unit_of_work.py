@@ -26,6 +26,7 @@ from domain.capture.value_objects import (
     TagId,
     TopicId,
 )
+from domain.shared.outbox.model import EnvelopeType, OutboxEnvelope
 
 
 def _make_unit_of_work() -> tuple[
@@ -33,6 +34,7 @@ def _make_unit_of_work() -> tuple[
     InMemoryNoteRepository,
     InMemoryTopicRepository,
     InMemoryTagRepository,
+    InMemoryOutboxStore,
 ]:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
@@ -52,7 +54,7 @@ def _make_unit_of_work() -> tuple[
         outbox_store,
         outbox,
     )
-    return uow, note_repo, topic_repo, tag_repo
+    return uow, note_repo, topic_repo, tag_repo, outbox_store
 
 
 def _sample_topic() -> Topic:
@@ -87,7 +89,7 @@ def _sample_note(topic: Topic, tag: Tag) -> Note:
 
 
 async def test_rollback_without_commit_discards_notes_topics_and_tags() -> None:
-    uow, note_repo, topic_repo, tag_repo = _make_unit_of_work()
+    uow, note_repo, topic_repo, tag_repo, _ = _make_unit_of_work()
     note = _sample_note(_sample_topic(), _sample_tag())
     topic = _sample_topic()
     tag = _sample_tag()
@@ -103,7 +105,7 @@ async def test_rollback_without_commit_discards_notes_topics_and_tags() -> None:
 
 
 async def test_commit_persists_notes_topics_and_tags() -> None:
-    uow, note_repo, topic_repo, tag_repo = _make_unit_of_work()
+    uow, note_repo, topic_repo, tag_repo, _ = _make_unit_of_work()
     topic = _sample_topic()
     tag = _sample_tag()
     note = _sample_note(topic, tag)
@@ -122,7 +124,7 @@ async def test_commit_persists_notes_topics_and_tags() -> None:
 async def test_rollback_without_commit_excludes_topics_and_tags_from_candidates() -> (
     None
 ):
-    uow, _, topic_repo, tag_repo = _make_unit_of_work()
+    uow, _, topic_repo, tag_repo, _ = _make_unit_of_work()
     topic = _sample_topic()
     tag = _sample_tag()
 
@@ -132,3 +134,16 @@ async def test_rollback_without_commit_excludes_topics_and_tags_from_candidates(
 
     assert await topic_repo.candidates() == []
     assert await tag_repo.candidates() == []
+
+
+async def test_rollback_without_commit_discards_outbox_envelopes() -> None:
+    uow, _, _, _, outbox_store = _make_unit_of_work()
+    envelope = OutboxEnvelope.pending(
+        EnvelopeType(name="note_approved"),
+        {"note_id": "abc"},
+    )
+
+    async with uow:
+        await uow.outbox.append(envelope)
+
+    assert outbox_store.all() == []
