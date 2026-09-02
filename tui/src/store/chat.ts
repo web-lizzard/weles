@@ -83,12 +83,13 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
             },
           });
         } else if (event.type === "draft_tag") {
+          const tag = { label: event.label, reused: event.reused };
           set((state) => ({
             draft: state.draft
-              ? { ...state.draft, tags: [...state.draft.tags, event.label] }
+              ? { ...state.draft, tags: [...state.draft.tags, tag] }
               : {
                   topic: null,
-                  tags: [event.label],
+                  tags: [tag],
                   content: "",
                   noteId: null,
                 },
@@ -105,13 +106,21 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
                 },
           }));
         } else if (event.type === "draft_done") {
-          set({
-            draft: {
-              topic: event.topic,
-              tags: event.tags,
-              content: event.content,
-              noteId: event.noteId,
-            },
+          set((state) => {
+            const seen = new Map(
+              (state.draft?.tags ?? []).map((tag) => [tag.label, tag.reused]),
+            );
+            return {
+              draft: {
+                topic: event.topic,
+                tags: event.tags.map((label) => ({
+                  label,
+                  reused: seen.get(label) ?? true,
+                })),
+                content: event.content,
+                noteId: event.noteId,
+              },
+            };
           });
         } else if (event.type === "done") {
           set((state) => ({

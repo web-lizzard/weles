@@ -297,7 +297,7 @@ describe("useChatStore", () => {
   it("replaces accumulated draft fields with authoritative draft_done payload", async () => {
     vi.mocked(sendMessage).mockImplementation(() =>
       streamEvents([
-        { type: "draft_topic", label: "Model topic" },
+        { type: "draft_topic", label: "Model topic", reused: false },
         { type: "draft_delta", text: "  partial draft  " },
         {
           type: "draft_done",
@@ -330,7 +330,7 @@ describe("useChatStore", () => {
     useChatStore.setState({
       draft: {
         topic: "Old topic",
-        tags: ["old"],
+        tags: [{ label: "old", reused: true }],
         content: "Old body",
         noteId: "old-note",
       },
@@ -361,7 +361,7 @@ describe("useChatStore", () => {
     let draftBeforeError!: ReturnType<typeof useChatStore.getState>["draft"];
 
     vi.mocked(sendMessage).mockImplementation(async function* () {
-      yield { type: "draft_topic", label: "Partial topic" };
+      yield { type: "draft_topic", label: "Partial topic", reused: false };
       yield { type: "draft_delta", text: "Partial body" };
       draftBeforeError = useChatStore.getState().draft;
       yield {

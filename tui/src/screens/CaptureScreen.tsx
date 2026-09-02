@@ -147,7 +147,7 @@ function DraftNotePanel({
   );
 }
 
-function DraftTags({ tags }: { tags: string[] }) {
+function DraftTags({ tags }: { tags: { label: string; reused: boolean }[] }) {
   return (
     <Box marginTop={1}>
       <Text>
@@ -156,7 +156,8 @@ function DraftTags({ tags }: { tags: string[] }) {
           // biome-ignore lint/suspicious/noArrayIndexKey: tags have no stable id
           <Text key={index}>
             {index > 0 && <Text dimColor> · </Text>}
-            <Text color="cyan">{tag}</Text>
+            <Text color="cyan">{tag.label}</Text>
+            {!tag.reused && <Text dimColor> (new)</Text>}
           </Text>
         ))}
       </Text>

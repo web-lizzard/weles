@@ -180,10 +180,10 @@ function parseStreamEvent(json: string): ReplyStreamEvent {
     };
   }
   if (raw.type === "draft_topic") {
-    return { type: "draft_topic", label: raw.label };
+    return { type: "draft_topic", label: raw.label, reused: raw.reused };
   }
   if (raw.type === "draft_tag") {
-    return { type: "draft_tag", label: raw.label };
+    return { type: "draft_tag", label: raw.label, reused: raw.reused };
   }
   if (raw.type === "draft_delta") {
     return { type: "draft_delta", text: raw.text };
