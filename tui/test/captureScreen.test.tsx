@@ -461,7 +461,7 @@ describe("CaptureScreen", () => {
     expect(frame).toContain("draft-panel-tag-new (new)");
   });
 
-  it("renders the confirmation and locks input after /approve succeeds with a ready draft", async () => {
+  it("renders a thick approval receipt and keeps input focused after /approve succeeds", async () => {
     useChatStore.setState({
       topic: "Session topic",
       transcript: [{ role: "user", content: "Transcript line" }],
@@ -477,6 +477,9 @@ describe("CaptureScreen", () => {
       topic: "draft-panel-topic",
       tags: ["draft-panel-tag-a"],
     });
+    vi.mocked(startCaptureSession)
+      .mockResolvedValueOnce({ sessionId: "sess-1" })
+      .mockResolvedValueOnce({ sessionId: "sess-2" });
 
     const { lastFrame, stdin } = render(<CaptureScreen />);
     await submitMessage(stdin, "/approve");
@@ -484,13 +487,54 @@ describe("CaptureScreen", () => {
     const frame = await waitForFrame(lastFrame, (f) =>
       f.includes("✓ Approved — queued for saving"),
     );
+    expect(frame).toContain("═".repeat(80));
     expect(frame).toContain("✓ Approved — queued for saving");
     expect(frame).not.toContain("draft-panel-body");
     expect(sendMessage).not.toHaveBeenCalled();
+    expect(startCaptureSession).toHaveBeenCalledTimes(2);
 
-    stdin.write("still typing");
-    await new Promise((resolve) => setTimeout(resolve, 30));
-    expect(lastFrame()).not.toContain("still typing");
+    await submitMessage(stdin, "Next topic opener");
+    const afterInput = await waitForFrame(lastFrame, (f) =>
+      f.includes("Next topic opener"),
+    );
+    expect(afterInput).toContain("Next topic opener");
+  });
+
+  it("hides Weles brand when the approval receipt consumes remaining row budget", async () => {
+    const transcript = Array.from({ length: 16 }, (_, index) => ({
+      role: "user" as const,
+      content: `line ${index}`,
+    }));
+
+    useChatStore.setState({
+      topic: "TCP handshakes",
+      transcript,
+      draft: {
+        topic: "draft-panel-topic",
+        tags: [{ label: "draft-panel-tag-a", reused: true }],
+        content: "draft-panel-body",
+        noteId: "00000000-0000-4000-8000-000000000010",
+      },
+    });
+    vi.mocked(approveNote).mockResolvedValue({
+      noteId: "00000000-0000-4000-8000-000000000010",
+      topic: "draft-panel-topic",
+      tags: ["draft-panel-tag-a"],
+    });
+    vi.mocked(startCaptureSession)
+      .mockResolvedValueOnce({ sessionId: "sess-1" })
+      .mockResolvedValueOnce({ sessionId: "sess-2" });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    await submitMessage(stdin, "/approve");
+
+    const frame = await waitForFrame(
+      lastFrame,
+      (f) =>
+        f.includes("✓ Approved — queued for saving") &&
+        f.includes("═".repeat(80)),
+    );
+    expect(frame).not.toContain(WELES_TAGLINE);
   });
 
   it("makes no request when /approve is submitted with no draft", async () => {
