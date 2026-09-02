@@ -10,12 +10,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 1.1 Create the `domain/shared/` and `domain/shared/outbox/` package markers
-- [x] 1.2 Add `EnvelopeStatus`, `EnvelopeId`, `OutboxEnvelope` with unimplemented transitions — `domain/shared/outbox/model.py`
-- [x] 1.3 Add `EnvelopeNotPendingError`, `EnvelopeNotProcessingError` — `domain/shared/outbox/exceptions.py`
-- [x] 1.4 Add the `OutboxAppender` and `OutboxClaimer` protocols — `domain/shared/outbox/ports.py`
-- [x] 1.5 Add `NOTE_APPROVED`, `VocabularySnapshot`, `NoteApprovedPayload` with unimplemented `of()`/`to_envelope()` — `domain/capture/outbox.py`
-- [x] 1.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable
+- [x] 1.1 Create the `domain/shared/` and `domain/shared/outbox/` package markers — 0fb5563
+- [x] 1.2 Add `EnvelopeStatus`, `EnvelopeId`, `OutboxEnvelope` with unimplemented transitions — `domain/shared/outbox/model.py` — 0fb5563
+- [x] 1.3 Add `EnvelopeNotPendingError`, `EnvelopeNotProcessingError` — `domain/shared/outbox/exceptions.py` — 0fb5563
+- [x] 1.4 Add the `OutboxAppender` and `OutboxClaimer` protocols — `domain/shared/outbox/ports.py` — 0fb5563
+- [x] 1.5 Add `NOTE_APPROVED`, `VocabularySnapshot`, `NoteApprovedPayload` with unimplemented `of()`/`to_envelope()` — `domain/capture/outbox.py` — 0fb5563
+- [x] 1.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable — 0fb5563
 
 ### Phase 2: Outbox model and ports — behavior
 
