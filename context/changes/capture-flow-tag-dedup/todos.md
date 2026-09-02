@@ -114,9 +114,9 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 8.1 Add `reused` to the draft event types and their raw counterparts — `tui/src/api/stream.ts`
-- [x] 8.2 Widen the draft state's `tags` to `{ label, reused }[]` — `tui/src/store/chat.ts`
-- [x] 8.3 `cd tui && pnpm lint` clean
+- [x] 8.1 Add `reused` to the draft event types and their raw counterparts — `tui/src/api/stream.ts` — cbb7086
+- [x] 8.2 Widen the draft state's `tags` to `{ label, reused }[]` — `tui/src/store/chat.ts` — cbb7086
+- [x] 8.3 `cd tui && pnpm lint` clean — cbb7086
 
 ### Phase 9: TUI reused-tag surfacing — behavior
 
