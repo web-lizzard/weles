@@ -464,7 +464,7 @@ The guards and transitions become real and are proven against pure objects.
 
 **Intent**: AC-15 as one assertion on a pure object.
 
-**Contract**: `approve(note)` raises `CaptureSessionClosedError` unless status is `OPEN`, raises `SessionNoteMissingError` when `self.note_id` is None or does not equal `note.id`, then calls `note.approve(self.id)` and `self.close()`. `close()` raises `CaptureSessionClosedError` when already closed, else sets `status = CLOSED`.
+**Contract**: `approve(note)` raises `CaptureSessionClosedError` unless status is `OPEN`, raises `SessionNoteMissingError` when `self.note_id` is None or does not equal `note.id`, then calls `note.approve(self.id)` and the private `_close()`. `_close()` raises `CaptureSessionClosedError` when already closed, else sets `status = CLOSED`. `close`/`_close` is not public surface — the already-closed guard is provable only by calling `approve()` a second time.
 
 #### 4. Error mapping entries
 
