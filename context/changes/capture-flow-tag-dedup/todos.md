@@ -85,8 +85,8 @@ updated: 2026-09-02
 
 #### Manual
 
-- [x] 6.7 Boot the backend and confirm the new module-level `Settings()` call in `compose.py` does not break startup
-- [x] 6.8 Confirm `VOCABULARY_MATCH_THRESHOLD=5` fails loudly at import instead of starting with a broken threshold
+- [x] 6.7 Boot the backend and confirm the new module-level `Settings()` call in `compose.py` does not break startup — 7f83e0f
+- [x] 6.8 Confirm `VOCABULARY_MATCH_THRESHOLD=5` fails loudly at import instead of starting with a broken threshold — 7f83e0f
 
 ### Phase 7: HTTP integration and acceptance scenarios (AC-10, AC-11)
 
