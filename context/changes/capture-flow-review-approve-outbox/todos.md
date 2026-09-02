@@ -150,11 +150,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 12.1 Wire the approval route to `ApproveNoteCommand` so all four outcomes surface their codes
-- [x] 12.2 Implement the envelope query adapter over the store
-- [x] 12.3 Include the `/_outbox` router only when `environment_name != prod` — `main.py`
-- [x] 12.4 Write the integration tests for approval, `/_outbox` content, and the production 404 plus OpenAPI absence
-- [x] 12.5 `cd backend && uv run pytest` green
+- [x] 12.1 Wire the approval route to `ApproveNoteCommand` so all four outcomes surface their codes — b2dfeb9
+- [x] 12.2 Implement the envelope query adapter over the store — b2dfeb9
+- [x] 12.3 Include the `/_outbox` router only when `environment_name != prod` — `main.py` — b2dfeb9
+- [x] 12.4 Write the integration tests for approval, `/_outbox` content, and the production 404 plus OpenAPI absence — b2dfeb9
+- [x] 12.5 `cd backend && uv run pytest` green — b2dfeb9
 
 ### Phase 13: Composition and worker lifecycle
 

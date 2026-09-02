@@ -3,7 +3,7 @@ change_id: capture-flow-review-approve-outbox
 title: Users can reshape and approve the draft before it reaches the outbox
 status: implementing
 created: 2026-09-02
-updated: 2026-09-02T17:54:24Z
+updated: 2026-09-02T18:20:00Z
 archived_at: null
 origin: overview-thougts
 effort_id: capture-flow
