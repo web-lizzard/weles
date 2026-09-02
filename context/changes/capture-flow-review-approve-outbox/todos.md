@@ -1,0 +1,211 @@
+---
+change_id: capture-flow-review-approve-outbox
+current_phase: 1
+next_step: 1.1
+next_command: /implement capture-flow-review-approve-outbox phase 1
+updated: 2026-09-02
+---
+
+### Phase 1: Outbox model and ports — stubs
+
+#### Automated
+
+- [ ] 1.1 Create the `domain/shared/` and `domain/shared/outbox/` package markers
+- [ ] 1.2 Add `EnvelopeStatus`, `EnvelopeId`, `OutboxEnvelope` with unimplemented transitions — `domain/shared/outbox/model.py`
+- [ ] 1.3 Add `EnvelopeNotPendingError`, `EnvelopeNotProcessingError` — `domain/shared/outbox/exceptions.py`
+- [ ] 1.4 Add the `OutboxAppender` and `OutboxClaimer` protocols — `domain/shared/outbox/ports.py`
+- [ ] 1.5 Add `NOTE_APPROVED`, `VocabularySnapshot`, `NoteApprovedPayload` with unimplemented `of()`/`to_envelope()` — `domain/capture/outbox.py`
+- [ ] 1.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable
+
+### Phase 2: Outbox model and ports — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 2.1 Implement `OutboxEnvelope.pending()` with `PENDING`, zero attempts and null claim fields
+- [ ] 2.2 Implement `claim()`, `consume()` and `fail(max_attempts)` with their status guards and the retry cut-off
+- [ ] 2.3 Implement `NoteApprovedPayload.of()` snapshotting topic and tag labels, and `to_envelope()`
+- [ ] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [ ] 2.5 `cd backend && uv run pytest` green
+
+### Phase 3: In-memory outbox adapters and UnitOfWork — stubs
+
+#### Automated
+
+- [ ] 3.1 Create the `adapters/out/in_memory/shared/` and `.../shared/outbox/` package markers
+- [ ] 3.2 Add `InMemoryOutboxStore` with `snapshot`/`restore`/`put`/`select_pending`/`lock`/`all` — `.../shared/outbox/store.py`
+- [ ] 3.3 Add `InMemoryOutboxAppender` and `InMemoryOutboxClaimer` with unimplemented bodies — `.../appender.py`, `.../claimer.py`
+- [ ] 3.4 Add `outbox: OutboxAppender` to the `UnitOfWork` protocol — `application/capture/ports.py`
+- [ ] 3.5 Widen `InMemoryUnitOfWork`'s constructor and snapshot set with the outbox store — `adapters/out/in_memory/capture/unit_of_work.py`
+- [ ] 3.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+
+### Phase 4: In-memory outbox adapters and UnitOfWork — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 4.1 Implement `InMemoryOutboxAppender.append()` and the store's put/select
+- [ ] 4.2 Implement `InMemoryOutboxClaimer.claim()` holding the store lock across select-and-mutate
+- [ ] 4.3 Implement `ack()` and `fail()` persisting the caller's already-applied transition
+- [ ] 4.4 Write the port contract suite incl. the `asyncio.gather` disjoint-claim case — `tests/unit/shared/test_outbox_contract.py`
+- [ ] 4.5 Extend the UnitOfWork tests to cover outbox rollback — `tests/unit/capture/test_unit_of_work.py`
+- [ ] 4.6 `cd backend && uv run pytest` green
+
+### Phase 5: Capture domain approval and mutators — stubs
+
+#### Automated
+
+- [ ] 5.1 Add `update_content`, `change_topic`, `add_tag`, `remove_tag`, `approve` signatures to `Note` — `domain/capture/note.py`
+- [ ] 5.2 Add `approve(note)` and `close()` signatures to `CaptureSession` — `domain/capture/capture_session.py`
+- [ ] 5.3 Add `NoteNotDraftError`, `NoteSessionMismatchError`, `SessionNoteMissingError`, `NoteNotFoundError`, `TagNotOnNoteError` — `domain/capture/exceptions.py`
+- [ ] 5.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+
+### Phase 6: Capture domain approval and mutators — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 6.1 Implement the four `Note` mutators under the draft-only guard, incl. duplicate-add and missing-tag handling
+- [ ] 6.2 Implement `Note.approve()` with the session-match sanity check and the one-way status transition
+- [ ] 6.3 Implement `CaptureSession.approve()` and `close()` so approval always closes the session
+- [ ] 6.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [ ] 6.5 `cd backend && uv run pytest` green
+
+### Phase 7: Redraft and approval command — stubs
+
+#### Automated
+
+- [ ] 7.1 Add `ApproveNoteCommand` with an unimplemented `handle()` — `application/capture/commands/approve_note.py`
+- [ ] 7.2 Add `ApproveNoteResponseDTO` — `application/capture/dto.py`
+- [ ] 7.3 Add the `_apply_redraft` seam and the `session.note_id` branch point — `application/capture/commands/send_message.py`
+- [ ] 7.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+
+### Phase 8: Redraft and approval command — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 8.1 Implement the redraft branch: load the note, `change_topic`, reconcile tags, `update_content`, re-save
+- [ ] 8.2 Keep `draft_done` carrying the original `note_id` across every redraft turn
+- [ ] 8.3 Implement `ApproveNoteCommand.handle()`: approve, save both aggregates, load topic and tags, append the envelope, commit
+- [ ] 8.4 Write the command unit tests, incl. the rollback case leaving zero envelopes
+- [ ] 8.5 `cd backend && uv run pytest` green
+
+### Phase 9: Outbox worker — stubs
+
+#### Automated
+
+- [ ] 9.1 Create the `application/shared/` and `application/shared/outbox/` package markers
+- [ ] 9.2 Add the `OutboxHandler` protocol — `application/shared/outbox/ports.py`
+- [ ] 9.3 Add `OutboxWorker` with unimplemented `run_once()`/`run_forever()` — `adapters/out/worker/outbox_worker.py`
+- [ ] 9.4 Add `LoggingNoteSaveHandler` bound to `NOTE_APPROVED` — `adapters/out/worker/handlers/note_save.py`
+- [ ] 9.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+
+### Phase 10: Outbox worker — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 10.1 Implement `run_once()`: claim per handler, handle, consume and ack
+- [ ] 10.2 Implement the failure path: `fail(max_attempts)`, persist, log, continue to the next envelope
+- [ ] 10.3 Implement `run_forever()` swallowing every exception except `CancelledError`
+- [ ] 10.4 Implement `LoggingNoteSaveHandler.handle()` validating the payload back into `NoteApprovedPayload`
+- [ ] 10.5 Write the worker tests incl. two concurrent workers over one claimer — `tests/unit/shared/test_outbox_worker.py`
+- [ ] 10.6 `cd backend && uv run pytest` green
+
+### Phase 11: HTTP surface and settings — stubs
+
+#### Automated
+
+- [ ] 11.1 Add `Environment` and the four outbox settings fields — `config/settings.py`
+- [ ] 11.2 Add the `POST /capture-sessions/{session_id}/approval` route signature — `adapters/http/capture.py`
+- [ ] 11.3 Add `OutboxEnvelopeDTO` and the `OutboxEnvelopeQueryPort` — `application/shared/outbox/{dto.py,queries/envelopes.py}`
+- [ ] 11.4 Add `InMemoryOutboxEnvelopeQueryAdapter` — `adapters/out/in_memory/shared/outbox/envelope_query.py`
+- [ ] 11.5 Add the `GET /_outbox` router — `adapters/http/outbox.py`
+- [ ] 11.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+
+### Phase 12: HTTP surface and settings — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 12.1 Wire the approval route to `ApproveNoteCommand` so all four outcomes surface their codes
+- [ ] 12.2 Implement the envelope query adapter over the store
+- [ ] 12.3 Include the `/_outbox` router only when `environment_name != prod` — `main.py`
+- [ ] 12.4 Write the integration tests for approval, `/_outbox` content, and the production 404 plus OpenAPI absence
+- [ ] 12.5 `cd backend && uv run pytest` green
+
+### Phase 13: Composition and worker lifecycle
+
+#### Automated
+
+- [ ] 13.1 Wire one `InMemoryOutboxStore` behind the appender, claimer and query in `adapters/compose.py`
+- [ ] 13.2 Add `get_approve_note_command()`, `get_outbox_envelope_query()` and `get_outbox_worker()`
+- [ ] 13.3 Add the lifespan handler starting and cancelling the `run_forever` task — `main.py`
+- [ ] 13.4 Add INFO/WARNING/ERROR logging in the worker and the stub handler
+- [ ] 13.5 `cd backend && uv run pytest` and `uv run ruff check src` green
+
+#### Manual
+
+- [ ] 13.6 Start `uv run fastapi dev src/main.py` and confirm the idle worker logs no errors
+- [ ] 13.7 `curl http://localhost:8000/_outbox` returns `[]`
+
+### Phase 14: TUI approval — stubs
+
+#### Automated
+
+- [ ] 14.1 Regenerate `src/api/generated/schema.d.ts` with `pnpm generate:api` against the running backend
+- [ ] 14.2 Add `approveNote(sessionId)` — `tui/src/api/stream.ts`
+- [ ] 14.3 Add `approved` state and the `approveDraft` action signature — `tui/src/store/chat.ts`
+- [ ] 14.4 `cd tui && pnpm typecheck && pnpm lint` clean
+
+### Phase 15: TUI approval — behavior
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 15.1 Intercept the exact literal `/approve` in `handleSubmit` — `tui/src/screens/CaptureScreen.tsx`
+- [ ] 15.2 Implement `approveDraft()` with the local no-draft guard and the error path leaving `approved` false
+- [ ] 15.3 Replace the draft panel with the confirmation and unfocus the input when `approved` — incl. the row-budget heuristic
+- [ ] 15.4 Write the store and screen tests, incl. prose containing "approve" going out as a normal turn
+- [ ] 15.5 `cd tui && pnpm test && pnpm typecheck && pnpm lint` green
+
+#### Manual
+
+- [ ] 15.6 Converse, wrap up, request a change and confirm the panel updates while `note_id` stays the same
+- [ ] 15.7 Type `/approve` and confirm the confirmation renders, input locks, and the worker log shows claim and handle
+
+### Phase 16: Acceptance scenarios for US-06 and US-07
+
+#### Automated
+
+- [ ] 16.1 Register the `AC-12`–`AC-15` markers — `backend/pyproject.toml`
+- [ ] 16.2 Write `US-06-reshape-draft.feature` covering AC-12 and AC-13 — `tests/features/capture-flow/`
+- [ ] 16.3 Write `US-07-approve-to-outbox.feature` covering AC-14 and AC-15 — `tests/features/capture-flow/`
+- [ ] 16.4 Write the step module and register it in `pytest_plugins` — `tests/bdd/steps/approve_outbox.py`, `tests/bdd/test_features.py`
+- [ ] 16.5 `cd backend && uv run pytest tests/bdd -v` green and `-m "capture-flow and AC-14"` selects a scenario
+
+#### Manual
+
+- [ ] 16.6 `cd backend && uv run pytest tests/bdd --collect-only` lists the new scenarios with no undefined steps
