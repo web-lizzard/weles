@@ -60,3 +60,44 @@ async def test_second_add_with_same_id_overwrites(
     result = await repository.get(original.id)
 
     assert result == updated
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_candidates_returns_empty_list_for_empty_store(
+    make_repository: Callable[[], TagRepository],
+) -> None:
+    repository = make_repository()
+
+    result = await repository.candidates()
+
+    assert result == []
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_candidates_includes_every_added_tag(
+    make_repository: Callable[[], TagRepository],
+) -> None:
+    repository = make_repository()
+    first = _sample_tag()
+    second = _sample_tag()
+
+    await repository.add(first)
+    await repository.add(second)
+    result = await repository.candidates()
+
+    assert {tag.id for tag in result} == {first.id, second.id}
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_candidates_reflects_an_overwrite_as_a_single_entry(
+    make_repository: Callable[[], TagRepository],
+) -> None:
+    repository = make_repository()
+    original = _sample_tag()
+    updated = original.model_copy(update={"label": Label(value="protocols")})
+
+    await repository.add(original)
+    await repository.add(updated)
+    result = await repository.candidates()
+
+    assert result == [updated]
