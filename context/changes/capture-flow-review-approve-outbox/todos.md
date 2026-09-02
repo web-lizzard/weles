@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 18
-next_step: tests
-next_command: /unit-test capture-flow-review-approve-outbox phase 18
-updated: 2026-09-02T19:05:00Z
+current_phase: 13
+next_step: 13.6
+next_command: /implement capture-flow-review-approve-outbox phase 13
+updated: 2026-09-02
 ---
 
 ### Phase 1: Outbox model and ports — stubs
@@ -229,14 +229,14 @@ updated: 2026-09-02T19:05:00Z
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a78b521
 
 #### Automated
 
-- [ ] 18.1 Implement `InMemoryNoteVocabularyRepository.resolve()` incl. `NoteVocabularyIncompleteError` guards
-- [ ] 18.2 Add `note_vocabulary_incomplete` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [ ] 18.3 Replace `ApproveNoteCommand`'s inline topic/tag loop with `uow.note_vocabulary.resolve(note)`
-- [ ] 18.4 Replace `_apply_redraft`'s per-dropped-tag loop with one `resolve()` call and an in-memory diff
-- [ ] 18.5 Write the port contract suite — `tests/unit/capture/contracts/test_note_vocabulary_repository_contract.py`
-- [ ] 18.6 Widen `_make_approve_stack()`/`_make_command_stack()` with the new collaborator
-- [ ] 18.7 `cd backend && uv run pytest` green
+- [x] 18.1 Implement `InMemoryNoteVocabularyRepository.resolve()` incl. `NoteVocabularyIncompleteError` guards — cdc2a02
+- [x] 18.2 Add `note_vocabulary_incomplete` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py` — cdc2a02
+- [x] 18.3 Replace `ApproveNoteCommand`'s inline topic/tag loop with `uow.note_vocabulary.resolve(note)` — cdc2a02
+- [x] 18.4 Replace `_apply_redraft`'s per-dropped-tag loop with one `resolve()` call and an in-memory diff — cdc2a02
+- [x] 18.5 Write the port contract suite — `tests/unit/capture/contracts/test_note_vocabulary_repository_contract.py` — a78b521
+- [x] 18.6 Widen `_make_approve_stack()`/`_make_command_stack()` with the new collaborator — 0c8400e
+- [x] 18.7 `cd backend && uv run pytest` green — cdc2a02
