@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 9
-next_step: 9.1
-next_command: /implement capture-flow-review-approve-outbox phase 9
+current_phase: 10
+next_step: 10.1
+next_command: /unit-test capture-flow-review-approve-outbox phase 10
 updated: 2026-09-02
 ---
 
@@ -110,11 +110,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 9.1 Create the `application/shared/` and `application/shared/outbox/` package markers
-- [ ] 9.2 Add the `OutboxHandler` protocol — `application/shared/outbox/ports.py`
-- [ ] 9.3 Add `OutboxWorker` with unimplemented `run_once()`/`run_forever()` — `adapters/out/worker/outbox_worker.py`
-- [ ] 9.4 Add `LoggingNoteSaveHandler` bound to `NOTE_APPROVED` — `adapters/out/worker/handlers/note_save.py`
-- [ ] 9.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 9.1 Create the `application/shared/` and `application/shared/outbox/` package markers
+- [x] 9.2 Add the `OutboxHandler` protocol — `application/shared/outbox/ports.py`
+- [x] 9.3 Add `OutboxWorker` with unimplemented `run_once()`/`run_forever()` — `adapters/out/worker/outbox_worker.py`
+- [x] 9.4 Add `LoggingNoteSaveHandler` bound to `NOTE_APPROVED` — `adapters/out/worker/handlers/note_save.py`
+- [x] 9.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 10: Outbox worker — behavior
 
