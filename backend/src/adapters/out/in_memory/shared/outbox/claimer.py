@@ -7,12 +7,19 @@ class InMemoryOutboxClaimer:
         self._store: InMemoryOutboxStore = store
 
     async def claim(
-        self, _envelope_type: EnvelopeType, _limit: int, _worker_id: str
+        self, envelope_type: EnvelopeType, limit: int, worker_id: str
     ) -> list[OutboxEnvelope]:
-        raise NotImplementedError
+        async with self._store.lock():
+            pending = await self._store.select_pending(envelope_type, limit)
+            claimed: list[OutboxEnvelope] = []
+            for envelope in pending:
+                envelope.claim(worker_id)
+                await self._store.put(envelope)
+                claimed.append(envelope)
+            return claimed
 
-    async def ack(self, _envelope: OutboxEnvelope) -> None:
-        raise NotImplementedError
+    async def ack(self, envelope: OutboxEnvelope) -> None:
+        await self._store.put(envelope)
 
-    async def fail(self, _envelope: OutboxEnvelope) -> None:
-        raise NotImplementedError
+    async def fail(self, envelope: OutboxEnvelope) -> None:
+        await self._store.put(envelope)

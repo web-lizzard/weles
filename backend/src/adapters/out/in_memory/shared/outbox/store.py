@@ -2,7 +2,7 @@ import asyncio
 import copy
 from uuid import UUID
 
-from domain.shared.outbox.model import EnvelopeType, OutboxEnvelope
+from domain.shared.outbox.model import EnvelopeStatus, EnvelopeType, OutboxEnvelope
 
 
 class InMemoryOutboxStore:
@@ -16,13 +16,20 @@ class InMemoryOutboxStore:
     def restore(self, snapshot: dict[UUID, OutboxEnvelope]) -> None:
         self._envelopes = copy.deepcopy(snapshot)
 
-    async def put(self, _envelope: OutboxEnvelope) -> None:
-        raise NotImplementedError
+    async def put(self, envelope: OutboxEnvelope) -> None:
+        self._envelopes[envelope.id.value] = envelope
 
     async def select_pending(
-        self, _envelope_type: EnvelopeType, _limit: int
+        self, envelope_type: EnvelopeType, limit: int
     ) -> list[OutboxEnvelope]:
-        raise NotImplementedError
+        matching = [
+            envelope
+            for envelope in self._envelopes.values()
+            if envelope.status == EnvelopeStatus.PENDING
+            and envelope.type == envelope_type
+        ]
+        matching.sort(key=lambda envelope: envelope.created_at)
+        return matching[:limit]
 
     def lock(self) -> asyncio.Lock:
         return self._lock
