@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  approveNote,
   SendMessageHttpError,
   sendMessage,
   startCaptureSession,
@@ -155,6 +156,30 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     }
   },
   approveDraft: async () => {
-    throw new Error("Not implemented");
+    const { sessionId, draft } = get();
+    if (!draft?.noteId) {
+      set({
+        streamError: {
+          code: "no_draft_to_approve",
+          detail: "There is no draft ready to approve yet.",
+        },
+      });
+      return;
+    }
+    if (!sessionId) {
+      throw new Error("No active session");
+    }
+
+    try {
+      await approveNote(sessionId);
+      set({ approved: true, streamError: null });
+    } catch (error) {
+      if (error instanceof SendMessageHttpError) {
+        set({ streamError: { code: error.code, detail: error.detail } });
+      } else {
+        const message = error instanceof Error ? error.message : String(error);
+        set({ streamError: { code: "unknown_error", detail: message } });
+      }
+    }
   },
 }));

@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-review-approve-outbox
 current_phase: 15
-next_step: 15.1
-next_command: /unit-test capture-flow-review-approve-outbox phase 15
-updated: 2026-09-02
+next_step: 15.6
+next_command: /implement capture-flow-review-approve-outbox phase 15
+updated: 2026-09-02T18:26:00Z
 ---
 
 ### Phase 1: Outbox model and ports — stubs
@@ -184,15 +184,15 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — b4f5757
 
 #### Automated
 
-- [ ] 15.1 Intercept the exact literal `/approve` in `handleSubmit` — `tui/src/screens/CaptureScreen.tsx`
-- [ ] 15.2 Implement `approveDraft()` with the local no-draft guard and the error path leaving `approved` false
-- [ ] 15.3 Replace the draft panel with the confirmation and unfocus the input when `approved` — incl. the row-budget heuristic
-- [ ] 15.4 Write the store and screen tests, incl. prose containing "approve" going out as a normal turn
-- [ ] 15.5 `cd tui && pnpm test && pnpm typecheck && pnpm lint` green
+- [x] 15.1 Intercept the exact literal `/approve` in `handleSubmit` — `tui/src/screens/CaptureScreen.tsx`
+- [x] 15.2 Implement `approveDraft()` with the local no-draft guard and the error path leaving `approved` false
+- [x] 15.3 Replace the draft panel with the confirmation and unfocus the input when `approved` — incl. the row-budget heuristic
+- [x] 15.4 Write the store and screen tests, incl. prose containing "approve" going out as a normal turn
+- [x] 15.5 `cd tui && pnpm test && pnpm typecheck && pnpm lint` green
 
 #### Manual
 

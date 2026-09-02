@@ -10,11 +10,13 @@ import {
 const WELES_TAGLINE = "wisdom through questions";
 const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
+const APPROVE_COMMAND = "/approve";
 
 export default function CaptureScreen() {
   const { stdout } = useStdout();
   const initSession = useChatStore((state) => state.initSession);
   const sendUserMessage = useChatStore((state) => state.sendUserMessage);
+  const approveDraft = useChatStore((state) => state.approveDraft);
   const transcript = useChatStore((state) => state.transcript);
   const currentReply = useChatStore((state) => state.currentReply);
   const isStreaming = useChatStore((state) => state.isStreaming);
@@ -22,13 +24,14 @@ export default function CaptureScreen() {
   const coverageConfidence = useChatStore((state) => state.coverageConfidence);
   const streamError = useChatStore((state) => state.streamError);
   const draft = useChatStore((state) => state.draft);
+  const approved = useChatStore((state) => state.approved);
 
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
   const hasStreamError = streamError !== null;
   const hasCoverageBanner =
     coverageConfidence !== null && coverageConfidence >= 1;
-  const hasDraft = draft !== null;
+  const hasDraft = draft !== null || approved;
   const showBrand = shouldShowWelesBrand(
     stdout.rows,
     transcript,
@@ -52,8 +55,13 @@ export default function CaptureScreen() {
       return;
     }
     setInputValue("");
+    if (trimmed === APPROVE_COMMAND) {
+      void approveDraft();
+      return;
+    }
     void sendUserMessage(trimmed);
   };
+  const isApproveCommand = inputValue.trim() === APPROVE_COMMAND;
 
   return (
     <Box flexDirection="column">
@@ -71,17 +79,23 @@ export default function CaptureScreen() {
           </Text>
         )}
       </Box>
-      <DraftNotePanel draft={draft} separator={separator} />
+      {approved ? (
+        <ApprovedPanel />
+      ) : (
+        <DraftNotePanel draft={draft} separator={separator} />
+      )}
       <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
         <UserLabel />
-        <TextInput
-          value={inputValue}
-          onChange={setInputValue}
-          onSubmit={handleSubmit}
-          focus={!isStreaming}
-        />
+        <Text color={isApproveCommand ? "green" : undefined}>
+          <TextInput
+            value={inputValue}
+            onChange={setInputValue}
+            onSubmit={handleSubmit}
+            focus={!isStreaming && !approved}
+          />
+        </Text>
       </Box>
     </Box>
   );
@@ -161,6 +175,14 @@ function DraftTags({ tags }: { tags: { label: string; reused: boolean }[] }) {
           </Text>
         ))}
       </Text>
+    </Box>
+  );
+}
+
+function ApprovedPanel() {
+  return (
+    <Box marginY={1}>
+      <Text color="green">✓ Approved — queued for saving</Text>
     </Box>
   );
 }
