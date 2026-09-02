@@ -100,11 +100,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 8.1 Implement the redraft branch: load the note, `change_topic`, reconcile tags, `update_content`, re-save
-- [x] 8.2 Keep `draft_done` carrying the original `note_id` across every redraft turn
-- [x] 8.3 Implement `ApproveNoteCommand.handle()`: approve, save both aggregates, load topic and tags, append the envelope, commit
-- [x] 8.4 Write the command unit tests, incl. the rollback case leaving zero envelopes
-- [x] 8.5 `cd backend && uv run pytest` green
+- [x] 8.1 Implement the redraft branch: load the note, `change_topic`, reconcile tags, `update_content`, re-save — 41725d6
+- [x] 8.2 Keep `draft_done` carrying the original `note_id` across every redraft turn — 41725d6
+- [x] 8.3 Implement `ApproveNoteCommand.handle()`: approve, save both aggregates, load topic and tags, append the envelope, commit — 41725d6
+- [x] 8.4 Write the command unit tests, incl. the rollback case leaving zero envelopes — 41725d6
+- [x] 8.5 `cd backend && uv run pytest` green — 41725d6
 
 ### Phase 9: Outbox worker — stubs
 
