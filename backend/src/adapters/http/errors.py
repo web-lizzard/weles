@@ -25,6 +25,11 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "zero_magnitude_embedding": 422,
     "envelope_not_pending": 409,
     "envelope_not_processing": 409,
+    "note_not_draft": 409,
+    "note_session_mismatch": 409,
+    "session_note_missing": 409,
+    "note_not_found": 404,
+    "tag_not_on_note": 409,
 }
 
 

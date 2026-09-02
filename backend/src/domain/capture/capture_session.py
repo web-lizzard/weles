@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
     SessionNoteAlreadyDraftedError,
+    SessionNoteMissingError,
     SessionTopicAlreadyAssignedError,
 )
 from domain.capture.note import Note
@@ -56,7 +57,14 @@ class CaptureSession(BaseModel):
         return note
 
     def approve(self, note: Note) -> None:
-        del note
-        ...
+        if self.status != SessionStatus.OPEN:
+            raise CaptureSessionClosedError
+        if self.note_id is None or self.note_id != note.id:
+            raise SessionNoteMissingError
+        note.approve(self.id)
+        self._close()
 
-    def close(self) -> None: ...
+    def _close(self) -> None:
+        if self.status != SessionStatus.OPEN:
+            raise CaptureSessionClosedError
+        self.status = SessionStatus.CLOSED
