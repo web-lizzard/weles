@@ -196,8 +196,8 @@ updated: 2026-09-02
 
 #### Manual
 
-- [x] 15.6 Converse, wrap up, request a change and confirm the panel updates while `note_id` stays the same
-- [x] 15.7 Type `/approve` and confirm the confirmation renders, input locks, and the worker log shows claim and handle
+- [x] 15.6 Converse, wrap up, request a change and confirm the panel updates while `note_id` stays the same — 5154da0
+- [x] 15.7 Type `/approve` and confirm the confirmation renders, input locks, and the worker log shows claim and handle — 5154da0
 
 ### Phase 16: Acceptance scenarios for US-06 and US-07
 
