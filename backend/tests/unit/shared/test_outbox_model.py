@@ -3,13 +3,20 @@ from datetime import UTC, datetime
 import pytest
 
 from domain.shared.outbox.exceptions import EnvelopeNotPendingError
-from domain.shared.outbox.model import EnvelopeId, EnvelopeStatus, OutboxEnvelope
+from domain.shared.outbox.model import (
+    EnvelopeId,
+    EnvelopeStatus,
+    EnvelopeType,
+    OutboxEnvelope,
+)
+
+_NOTE_APPROVED = EnvelopeType(name="note_approved")
 
 
 def _envelope(status: EnvelopeStatus, attempts: int = 0) -> OutboxEnvelope:
     return OutboxEnvelope(
         id=EnvelopeId.new(),
-        type="note_approved",
+        type=_NOTE_APPROVED,
         payload={"note_id": "abc"},
         status=status,
         attempts=attempts,
@@ -20,10 +27,10 @@ def _envelope(status: EnvelopeStatus, attempts: int = 0) -> OutboxEnvelope:
 
 
 def test_pending_builds_envelope_with_zero_attempts_and_no_claim_fields() -> None:
-    envelope = OutboxEnvelope.pending("note_approved", {"note_id": "abc"})
+    envelope = OutboxEnvelope.pending(_NOTE_APPROVED, {"note_id": "abc"})
 
     assert envelope.status == EnvelopeStatus.PENDING
-    assert envelope.type == "note_approved"
+    assert envelope.type == _NOTE_APPROVED
     assert envelope.payload == {"note_id": "abc"}
     assert envelope.attempts == 0
     assert envelope.claimed_at is None

@@ -24,6 +24,8 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
@@ -42,6 +44,8 @@ _message_repository = InMemoryMessageRepository(_store)
 _note_repository = InMemoryNoteRepository()
 _topic_repository = InMemoryTopicRepository()
 _tag_repository = InMemoryTagRepository()
+_outbox_store = InMemoryOutboxStore()
+_outbox_appender = InMemoryOutboxAppender(_outbox_store)
 _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
@@ -67,6 +71,8 @@ def _unit_of_work() -> UnitOfWork:
                 _note_repository,
                 _topic_repository,
                 _tag_repository,
+                _outbox_store,
+                _outbox_appender,
             ),
         ),
     )

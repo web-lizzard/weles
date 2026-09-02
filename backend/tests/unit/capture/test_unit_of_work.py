@@ -11,6 +11,8 @@ from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepositor
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from domain.capture.note import Note
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
@@ -38,6 +40,8 @@ def _make_unit_of_work() -> tuple[
     note_repo = InMemoryNoteRepository()
     topic_repo = InMemoryTopicRepository()
     tag_repo = InMemoryTagRepository()
+    outbox_store = InMemoryOutboxStore()
+    outbox = InMemoryOutboxAppender(outbox_store)
     uow = InMemoryUnitOfWork(
         session_repo,
         message_repo,
@@ -45,6 +49,8 @@ def _make_unit_of_work() -> tuple[
         note_repo,
         topic_repo,
         tag_repo,
+        outbox_store,
+        outbox,
     )
     return uow, note_repo, topic_repo, tag_repo
 

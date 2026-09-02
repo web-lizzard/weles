@@ -14,6 +14,7 @@ from domain.capture.ports import (
     TopicRepository,
 )
 from domain.capture.value_objects import Embedding, MessageContent, SessionTopic
+from domain.shared.outbox.ports import OutboxAppender
 
 
 class TopicExtractionPort(Protocol):
@@ -40,6 +41,7 @@ class UnitOfWork(Protocol):
     notes: NoteRepository
     topics: TopicRepository
     tags: TagRepository
+    outbox: OutboxAppender
 
     async def __aenter__(self) -> "UnitOfWork": ...
 
