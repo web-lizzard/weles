@@ -30,7 +30,6 @@ The user reshapes the draft by describing changes in plain language — the same
 | Failure policy | Retry to `max_attempts`, then `failed` | Gives the already-settled `attempts` field its purpose and cuts off poison envelopes. | Plan |
 | Debug endpoint | `GET /_outbox`, absent on production | On prod the route does not exist rather than being merely undocumented; on local/staging it is a normal documented route. | Plan |
 | Handler for now | `LoggingNoteSaveHandler` | Proves claim → handle → ack end to end; deliberately trivial and expected to be replaced by `distill`. | Plan |
-| Envelope `type` shape | `EnvelopeType` VO (`name` + `version`, default `1`) | Structures the "mint a new type" schema-drift story instead of leaving it a bare-string convention; costs nothing extra for today's version-1 types. | Revision 1 |
 
 ## Scope
 
@@ -60,8 +59,8 @@ lifespan asyncio.Task ──► OutboxWorker.run_forever
 | --- | --- | --- |
 | 1. Outbox model & ports — stubs | `domain/shared/outbox/`, `NoteApprovedPayload` signatures | Package layout sets a precedent for every future shared concern |
 | 2. Outbox model & ports — behavior | Envelope transitions, payload snapshot | Illegal-transition guards must be total or the lifecycle silently corrupts |
-| 3. `EnvelopeType` VO & in-memory adapters — stubs | `EnvelopeType`, store, appender, claimer, `uow.outbox` | Missing the snapshot set silently drops rollback coverage |
-| 4. `EnvelopeType` VO & in-memory adapters — behavior | Contract suite incl. parallel claim and version cross-match | Getting the lock scope wrong hands two workers one envelope |
+| 3. In-memory adapters & UoW — stubs | Store, appender, claimer, `uow.outbox` | Missing the snapshot set silently drops rollback coverage |
+| 4. In-memory adapters & UoW — behavior | Contract suite incl. parallel claim | Getting the lock scope wrong hands two workers one envelope |
 | 5. Capture domain — stubs | `Note` mutators, `approve()`, `close()` | — |
 | 6. Capture domain — behavior | Guards, one-way approval, session close | Approval must be irreversible under every path |
 | 7. Redraft & approval command — stubs | `ApproveNoteCommand`, redraft seam, DTO | — |
