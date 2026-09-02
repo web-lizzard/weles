@@ -2,7 +2,6 @@
 
 > Revision 1 (2026-09-02): Envelope `type` becomes an `EnvelopeType` VO (`name` + `version`, default `1`) instead of a bare `str`, folded into the still-unstarted Phases 3/4/9/10/11/12 rather than appended as a new phase. Prior version: plan-versions/v1-plan.md
 > Revision 2 (2026-09-02): `ApproveNoteCommand` and the redraft branch resolved a `Note`'s `Topic`/`Tags` with an inline N+1 loop over `uow.topics.get()`/`uow.tags.get()` — cross-aggregate composition living in application code instead of behind a port an adapter can later optimize. Phases 3/4/8, which that code touches, are already done and immutable, so the fix lands as new Phases 17-18 rather than a rewrite. Prior version: plan-versions/v2-plan.md
-> Revision 3 (2026-09-02): Phase 15's permanent post-approve unfocus exits the Ink TUI (no focused input). Appended Phase 19 auto-resets into a fresh capture session after `/approve`, keeping a thick-rule + `✓ Approved — queued for saving` receipt on screen and the input focused. Prior version: plan-versions/v3-plan.md
 
 ## Overview
 
@@ -42,7 +41,7 @@ Key constraints discovered:
 
 ## Desired End State
 
-The user talks through a topic, confirms they are done, and the draft panel fills in. They type a plain-language change ("make it shorter, and drop the second tag"); the agent redrafts, and the same `Note` row — same `note_id` — comes back mutated. They repeat that as often as they like. When satisfied they type `/approve`. The TUI does not send that as a conversational turn; it calls the approval endpoint. The note flips to `approved`, the session flips to `closed`, and a `note_approved` envelope lands in the outbox in the same transaction. The TUI then auto-resets into a fresh capture session: a full-width thick rule (`═`) followed by `✓ Approved — queued for saving` stays as a receipt above an empty transcript, capture fields clear, a new `sessionId` is obtained, and the input stays focused for the next topic. Within a poll interval the worker task claims the envelope, the stub handler logs the payload, and the envelope reaches `consumed` — visible at `GET /_outbox` outside production.
+The user talks through a topic, confirms they are done, and the draft panel fills in. They type a plain-language change ("make it shorter, and drop the second tag"); the agent redrafts, and the same `Note` row — same `note_id` — comes back mutated. They repeat that as often as they like. When satisfied they type `/approve`. The TUI does not send that as a conversational turn; it calls the approval endpoint. The note flips to `approved`, the session flips to `closed`, a `note_approved` envelope lands in the outbox in the same transaction, and the draft panel is replaced by `✓ Approved — queued for saving` with the input permanently unfocused. Within a poll interval the worker task claims the envelope, the stub handler logs the payload, and the envelope reaches `consumed` — visible at `GET /_outbox` outside production.
 
 Verify by running the backend and the TUI and walking that path, watching the worker log line appear in the backend console. Automated verification is the AC-12–AC-15 acceptance scenarios plus the unit and integration suites.
 
@@ -64,7 +63,7 @@ Verify by running the backend and the TUI and walking that path, watching the wo
 - **Reading notes back.** No `GET /notes/{id}`, no note DTO. The approved note reaches the client through the approval response and nowhere else.
 - **An ADR amendment for the `domain/shared/` bucket.** The duck session recorded this debt against `hexagonal-arch-shape`, whose directory convention still shows no shared bucket. It was deliberately left out of this slice's scope — see `## Open Risks` in `plan-brief.md`.
 - **A `discarded` transition.** `NoteStatus.DISCARDED` remains the ADR's unreachable extension point.
-- **Keeping the prior conversation transcript after approval.** Auto-reset clears the capture surface (topic, draft, prior turns) and leaves only the thick-rule approval receipt; browsing earlier turns after approve stays out of scope.
+- **Starting a new session from the TUI after approval.** The screen ends on a confirmation; a new topic means restarting the TUI.
 
 ## Implementation Approach
 
@@ -1086,54 +1085,11 @@ class InMemoryNoteVocabularyRepository:
 
 ---
 
-## Phase 19: TUI post-approve — next capture session
-
-### Overview
-
-After a successful `/approve`, the TUI no longer ends on a permanently unfocused confirmation (which exits Ink). It records a thick-rule approval receipt and auto-starts the next capture session with the input still focused. Supersedes Phase 15's terminal-lock UX only; backend approval semantics (AC-15) are unchanged.
-
-### Changes Required:
-
-#### 1. Approval receipt + next-session reset
-
-**File**: `tui/src/store/chat.ts`
-
-**Intent**: Keep the process alive and ready for another topic without discarding the "queued for saving" signal.
-
-**Contract**: On `approveNote` success, `approveDraft()` does not leave the store in a permanent `approved: true` lock. It records an approval receipt (so the screen can render a full-width thick rule and `✓ Approved — queued for saving`), clears capture fields (`topic`, `draft`, `transcript`, `currentReply`, `coverageConfidence`, `streamError`, `approved: false`), and obtains a new `sessionId` via `startCaptureSession()` (same path as `initSession`). A failed approve still leaves `approved` false and the existing draft/session untouched. Phase 15's store tests that assert a lasting `approved: true` after success are rewritten to match this contract.
-
-#### 2. Receipt render and focused input
-
-**File**: `tui/src/screens/CaptureScreen.tsx`
-
-**Intent**: Visually separate the closed session from the next one, and keep Ink from exiting.
-
-**Contract**: When an approval receipt is present, render it above the transcript as a full-width thick horizontal rule using `═` (distinct from the existing thin `─` separators) immediately followed by the green `✓ Approved — queued for saving` line. Do not replace the draft panel with a terminal-only `ApprovedPanel` that unfocuses input. `TextInput` receives `focus={!isStreaming}` — approval never clears focus. The row-budget heuristic counts the receipt block when deciding whether to show the brand.
-
-#### 3. Tests
-
-**File**: `tui/test/chat.test.ts`, `tui/test/captureScreen.test.tsx`
-
-**Intent**: Prove auto-reset and the non-exiting focused surface.
-
-**Contract**: Successful `/approve` calls `approveNote` then `startCaptureSession` again, yields a new `sessionId`, clears draft/topic/transcript, and leaves `approved` false; failure still makes no second session call; the screen shows the `═` rule plus confirmation and keeps the input focused after approve.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd tui && pnpm test` passes
-- `cd tui && pnpm typecheck && pnpm lint` pass
-
-#### Manual Verification:
-- Start the backend, run `cd tui && pnpm build && pnpm start`, converse to a draft, type `/approve`, and confirm the TUI stays open with a thick `═` rule and `✓ Approved — queued for saving`, the input accepts a new message, and a second topic can be drafted on a new session
-
----
-
 ## Testing Strategy
 
 ### Unit Tests:
 
-`OutboxEnvelope`'s transition table including every illegal transition; `NoteApprovedPayload.of()` snapshotting labels rather than ids; `Note`'s four mutators and `approve()` under the draft-only and session-match guards; `CaptureSession.approve()` closing the session in one act; the redraft branch reconciling tags to the turn's set via `NoteVocabularyRepository.resolve()`; `ApproveNoteCommand` writing note, session and envelope in one transaction and leaving nothing behind on failure; `OutboxWorker`'s dispatch, retry and dead-letter behavior; the TUI store's post-approve auto-reset into a fresh `sessionId` with an approval receipt.
+`OutboxEnvelope`'s transition table including every illegal transition; `NoteApprovedPayload.of()` snapshotting labels rather than ids; `Note`'s four mutators and `approve()` under the draft-only and session-match guards; `CaptureSession.approve()` closing the session in one act; the redraft branch reconciling tags to the turn's set via `NoteVocabularyRepository.resolve()`; `ApproveNoteCommand` writing note, session and envelope in one transaction and leaving nothing behind on failure; `OutboxWorker`'s dispatch, retry and dead-letter behavior.
 
 ### Integration Tests:
 
@@ -1145,10 +1101,9 @@ One behavioral contract suite for `OutboxAppender` and `OutboxClaimer`, and one 
 2. `cd tui && pnpm build && pnpm start`
 3. Converse, then type `we're done` — the draft panel fills.
 4. Type a change request in plain language — the panel updates and `note_id` is unchanged.
-5. Type `/approve` — a thick `═` rule and `✓ Approved — queued for saving` appear, the input stays focused, and a new capture session is ready.
-6. Type a new opening message — a fresh conversation starts on the new session.
-7. Watch the backend console for the worker's claim and handle lines.
-8. `curl http://localhost:8000/_outbox` — the envelope reads `consumed`.
+5. Type `/approve` — the panel is replaced by the confirmation and input stops accepting text.
+6. Watch the backend console for the worker's claim and handle lines.
+7. `curl http://localhost:8000/_outbox` — the envelope reads `consumed`.
 
 ## Performance Considerations
 

@@ -17,4 +17,4 @@ slice_ref: S-06
 
 ## Notes
 
-<!-- Materialized from effort `capture-flow`, slice S-06. Run /plan capture-flow-review-approve-outbox to write the plan. -->
+<!-- Materialized from effort `capture-flow`, slice S-06. Revision 3 adds Phase 19 (TUI post-approve auto-reset). -->
