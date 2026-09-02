@@ -28,11 +28,13 @@ type ChatState = {
   draft: Draft | null;
   isStreaming: boolean;
   streamError: StreamError;
+  approved: boolean;
 };
 
 type ChatActions = {
   initSession: () => Promise<void>;
   sendUserMessage: (text: string) => Promise<void>;
+  approveDraft: () => Promise<void>;
 };
 
 export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
@@ -44,6 +46,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   draft: null,
   isStreaming: false,
   streamError: null,
+  approved: false,
   initSession: async () => {
     const { sessionId } = await startCaptureSession();
     set({ sessionId });
@@ -150,5 +153,8 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     } finally {
       set({ isStreaming: false });
     }
+  },
+  approveDraft: async () => {
+    throw new Error("Not implemented");
   },
 }));

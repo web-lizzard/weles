@@ -78,6 +78,27 @@ export async function startCaptureSession(): Promise<{ sessionId: string }> {
   return { sessionId: data.session_id };
 }
 
+export async function approveNote(
+  sessionId: string,
+): Promise<{ noteId: string; topic: string; tags: string[] }> {
+  const { data, error, response } = await client.POST(
+    "/capture-sessions/{session_id}/approval",
+    { params: { path: { session_id: sessionId } } },
+  );
+  if (error || !data) {
+    const body = error as { code?: string; detail?: string } | undefined;
+    if (
+      body &&
+      typeof body.code === "string" &&
+      typeof body.detail === "string"
+    ) {
+      throw new SendMessageHttpError(body.code, body.detail, response.status);
+    }
+    throw new Error(`approveNote failed: ${response.status}`);
+  }
+  return { noteId: data.note_id, topic: data.topic, tags: data.tags };
+}
+
 export async function* sendMessage(
   sessionId: string,
   content: string,
