@@ -13,7 +13,7 @@ updated: 2026-09-02
 | S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | in_progress |
 | S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | done |
 | S-05 | Users' topics and tags stay deduplicated through reuse | capture-flow-tag-dedup | done |
-| S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | pending |
+| S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | in_progress |
 
 ## Dependencies
 
@@ -75,7 +75,7 @@ flowchart LR
 - **Outcome:** Users can reshape and approve the draft before it reaches the outbox
 - **Acceptance criteria:** AC-12, AC-13, AC-14, AC-15
 - **Change ID:** capture-flow-review-approve-outbox
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-04
 - **Parallel with:** S-05
 
