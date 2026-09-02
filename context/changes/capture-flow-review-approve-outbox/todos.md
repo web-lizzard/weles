@@ -135,12 +135,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 11.1 Add `Environment` and the four outbox settings fields — `config/settings.py`
-- [x] 11.2 Add the `POST /capture-sessions/{session_id}/approval` route signature — `adapters/http/capture.py`
-- [x] 11.3 Add `OutboxEnvelopeDTO` and the `OutboxEnvelopeQueryPort` — `application/shared/outbox/{dto.py,queries/envelopes.py}`
-- [x] 11.4 Add `InMemoryOutboxEnvelopeQueryAdapter` — `adapters/out/in_memory/shared/outbox/envelope_query.py`
-- [x] 11.5 Add the `GET /_outbox` router — `adapters/http/outbox.py`
-- [x] 11.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 11.1 Add `Environment` and the four outbox settings fields — `config/settings.py` — 9cf6099
+- [x] 11.2 Add the `POST /capture-sessions/{session_id}/approval` route signature — `adapters/http/capture.py` — 9cf6099
+- [x] 11.3 Add `OutboxEnvelopeDTO` and the `OutboxEnvelopeQueryPort` — `application/shared/outbox/{dto.py,queries/envelopes.py}` — 9cf6099
+- [x] 11.4 Add `InMemoryOutboxEnvelopeQueryAdapter` — `adapters/out/in_memory/shared/outbox/envelope_query.py` — 9cf6099
+- [x] 11.5 Add the `GET /_outbox` router — `adapters/http/outbox.py` — 9cf6099
+- [x] 11.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 9cf6099
 
 ### Phase 12: HTTP surface and settings — behavior
 
