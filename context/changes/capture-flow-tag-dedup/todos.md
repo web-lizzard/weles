@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-tag-dedup
 current_phase: 6
-next_step: tests
-next_command: /unit-test capture-flow-tag-dedup phase 6
+next_step: 6.1
+next_command: /implement capture-flow-tag-dedup phase 6
 updated: 2026-09-02
 ---
 
@@ -72,7 +72,7 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 7dd39d5
 
 #### Automated
 
