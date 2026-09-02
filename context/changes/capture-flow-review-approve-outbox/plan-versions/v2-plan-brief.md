@@ -31,11 +31,10 @@ The user reshapes the draft by describing changes in plain language — the same
 | Debug endpoint | `GET /_outbox`, absent on production | On prod the route does not exist rather than being merely undocumented; on local/staging it is a normal documented route. | Plan |
 | Handler for now | `LoggingNoteSaveHandler` | Proves claim → handle → ack end to end; deliberately trivial and expected to be replaced by `distill`. | Plan |
 | Envelope `type` shape | `EnvelopeType` VO (`name` + `version`, default `1`) | Structures the "mint a new type" schema-drift story instead of leaving it a bare-string convention; costs nothing extra for today's version-1 types. | Revision 1 |
-| Note vocabulary resolution | `NoteVocabularyRepository` port on `UnitOfWork` | Cross-aggregate composition (`Note`'s `Topic`/`Tag`s by id) belongs behind a repository-style contract an adapter can optimize, not inline in the command handler. | Revision 2 |
 
 ## Scope
 
-**In scope:** `domain/shared/outbox/` (model, exceptions, both ports); `NoteApprovedPayload` in `domain/capture/`; in-memory store, appender, claimer and their contract suite; `UnitOfWork` gaining `outbox` with rollback coverage; `Note` mutators and `approve()`; `CaptureSession.approve()`/`close()`; the redraft branch; `ApproveNoteCommand`; approval endpoint; private `/_outbox` with its query side; `OutboxWorker`, `OutboxHandler`, stub handler, lifespan task and logging; TUI `/approve` and terminal state; acceptance scenarios for AC-12–AC-15; `NoteVocabularyRepository` and its in-memory adapter, consumed by both `ApproveNoteCommand` and the redraft branch.
+**In scope:** `domain/shared/outbox/` (model, exceptions, both ports); `NoteApprovedPayload` in `domain/capture/`; in-memory store, appender, claimer and their contract suite; `UnitOfWork` gaining `outbox` with rollback coverage; `Note` mutators and `approve()`; `CaptureSession.approve()`/`close()`; the redraft branch; `ApproveNoteCommand`; approval endpoint; private `/_outbox` with its query side; `OutboxWorker`, `OutboxHandler`, stub handler, lifespan task and logging; TUI `/approve` and terminal state; acceptance scenarios for AC-12–AC-15.
 
 **Out of scope:** SQL/Postgres adapter; lease and reclaim; a real `distill` consumer; a second envelope producer; reading notes back; starting a new session from the TUI after approval; the `hexagonal-arch-shape` ADR amendment for the `domain/shared/` bucket; the `discarded` transition.
 
@@ -75,11 +74,9 @@ lifespan asyncio.Task ──► OutboxWorker.run_forever
 | 14. TUI approval — stubs | Regenerated schema, client fn, store field | — |
 | 15. TUI approval — behavior | `/approve` interception, terminal render | A loose match would send prose containing "approve" as an approval |
 | 16. Acceptance scenarios | US-06/US-07 features, steps, markers | Unregistered step module never loads |
-| 17. Note vocabulary composition — stubs | `NoteVocabularyRepository`, `NoteVocabulary`, in-memory adapter, `uow.note_vocabulary` | — |
-| 18. Note vocabulary composition — behavior | `resolve()`, both call sites refactored off inline N+1, contract suite | A missed call site keeps one of the two N+1 loops alive |
 
 **Prerequisites:** S-04 (`capture-flow-draft-note`, archived). No dependency on S-03 or S-05.
-**Estimated effort:** Large — 18 phases across four layers plus the TUI; nine of them are stub phases that add signatures only.
+**Estimated effort:** Large — 16 phases across four layers plus the TUI; eight of them are stub phases that add signatures only.
 
 ## Open Risks & Assumptions
 
