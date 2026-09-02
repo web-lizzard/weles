@@ -16,7 +16,7 @@ class InMemoryTagRepository:
         return self._tags.get(tag_id.value)
 
     async def candidates(self) -> list[Tag]:
-        raise NotImplementedError
+        return list(self._tags.values())
 
     def snapshot(self) -> dict[UUID, Tag]:
         return copy.deepcopy(self._tags)
