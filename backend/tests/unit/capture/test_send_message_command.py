@@ -236,6 +236,30 @@ async def test_drafting_turn_emits_draft_events_before_done() -> None:
     _assert_drafting_event_sequence(events)
 
 
+async def test_drafting_turn_forwards_tag_reused_flag_from_resolver() -> None:
+    stack = _make_command_stack(
+        reply_generation=_FixedChunkReplyGenerationAdapter(
+            [
+                ReplyTextChunk(text="handoff"),
+                DraftTopicChunk(label=Label(value="topic")),
+                DraftTagChunk(label=Label(value="networking")),
+                DraftTagChunk(label=Label(value="networking")),
+                DraftContentChunk(text="note body"),
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    events = await _handle_confirmation_turn(stack, session)
+
+    draft_tag_events = [event for event in events if isinstance(event, DraftTagEvent)]
+    assert len(draft_tag_events) == 2
+    assert draft_tag_events[0].reused is False
+    assert draft_tag_events[1].reused is True
+
+
 async def test_drafting_turn_persists_note_and_links_session_note_id() -> None:
     stack = _make_command_stack()
     session = await _start_session_with_topic(stack, "TCP handshakes")

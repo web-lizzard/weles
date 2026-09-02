@@ -390,6 +390,13 @@ Rewrites the resolver into reuse-or-mint, forwards the flag into the stream, and
 - `cd backend && DATABASE_URL=postgresql+asyncpg://weles:weles@postgres:5432/weles uv run fastapi dev src/main.py` starts without error, confirming the new module-level `Settings()` call in `compose.py` does not break boot
 - `cd backend && VOCABULARY_MATCH_THRESHOLD=5 uv run python -c "import adapters.compose"` fails loudly rather than starting with a broken threshold
 
+### Review r3
+
+Artifact: `reviews/2026-09-02-r3-mutation-test-phase-6.md`
+
+- `R3-F1` — DraftTagEvent.reused not asserted against resolver outcome
+  Fix: A drafting-turn command test must assert each emitted `DraftTagEvent.reused` matches the resolver (`False` on first mint in a stream, `True` when the tag row already exists); structural pydantic failures on `DraftTopicEvent` are already killed, but tag-frame forwarding is not oracle-tested.
+
 ---
 
 ## Phase 7: HTTP integration and acceptance scenarios (AC-10, AC-11)
