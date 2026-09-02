@@ -77,11 +77,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 6.1 Implement the four `Note` mutators under the draft-only guard, incl. duplicate-add and missing-tag handling
-- [x] 6.2 Implement `Note.approve()` with the session-match sanity check and the one-way status transition
-- [x] 6.3 Implement `CaptureSession.approve()` and `close()` so approval always closes the session
-- [x] 6.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [x] 6.5 `cd backend && uv run pytest` green
+- [x] 6.1 Implement the four `Note` mutators under the draft-only guard, incl. duplicate-add and missing-tag handling — af7d117
+- [x] 6.2 Implement `Note.approve()` with the session-match sanity check and the one-way status transition — af7d117
+- [x] 6.3 Implement `CaptureSession.approve()` and `close()` so approval always closes the session — af7d117
+- [x] 6.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py` — af7d117
+- [x] 6.5 `cd backend && uv run pytest` green — af7d117
 
 ### Phase 7: Redraft and approval command — stubs
 
