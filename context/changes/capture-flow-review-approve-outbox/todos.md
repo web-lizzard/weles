@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 8
-next_step: 8-tests
-next_command: /unit-test capture-flow-review-approve-outbox phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /implement capture-flow-review-approve-outbox phase 9
 updated: 2026-09-02
 ---
 
@@ -96,15 +96,15 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 4e9352c
 
 #### Automated
 
-- [ ] 8.1 Implement the redraft branch: load the note, `change_topic`, reconcile tags, `update_content`, re-save
-- [ ] 8.2 Keep `draft_done` carrying the original `note_id` across every redraft turn
-- [ ] 8.3 Implement `ApproveNoteCommand.handle()`: approve, save both aggregates, load topic and tags, append the envelope, commit
-- [ ] 8.4 Write the command unit tests, incl. the rollback case leaving zero envelopes
-- [ ] 8.5 `cd backend && uv run pytest` green
+- [x] 8.1 Implement the redraft branch: load the note, `change_topic`, reconcile tags, `update_content`, re-save
+- [x] 8.2 Keep `draft_done` carrying the original `note_id` across every redraft turn
+- [x] 8.3 Implement `ApproveNoteCommand.handle()`: approve, save both aggregates, load topic and tags, append the envelope, commit
+- [x] 8.4 Write the command unit tests, incl. the rollback case leaving zero envelopes
+- [x] 8.5 `cd backend && uv run pytest` green
 
 ### Phase 9: Outbox worker — stubs
 

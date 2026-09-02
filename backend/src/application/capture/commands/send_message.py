@@ -174,13 +174,28 @@ class GenerateReplyCommand:
 
     async def _apply_redraft(
         self,
-        _uow: UnitOfWork,
-        _note: Note,
-        _topic: Topic,
-        _tags: list[Tag],
-        _content: NoteContent,
+        uow: UnitOfWork,
+        note: Note,
+        topic: Topic,
+        tags: list[Tag],
+        content: NoteContent,
     ) -> None:
-        raise NotImplementedError
+        note.change_topic(topic)
+
+        resolved_ids = {tag.id for tag in tags}
+        for tag_id in list(note.tag_ids):
+            if tag_id not in resolved_ids:
+                dropped_tag = await uow.tags.get(tag_id)
+                assert dropped_tag is not None
+                note.remove_tag(dropped_tag)
+
+        existing_ids = set(note.tag_ids)
+        for tag in tags:
+            if tag.id not in existing_ids:
+                note.add_tag(tag)
+
+        note.update_content(content)
+        await uow.notes.add(note)
 
     async def _get_open_session(
         self,
