@@ -27,8 +27,10 @@ from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
+    NoteNotFoundError,
 )
 from domain.capture.message import Message
+from domain.capture.note import Note
 from domain.capture.ports import CaptureSessionRepository
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
@@ -136,13 +138,21 @@ class GenerateReplyCommand:
                 if resolved_topic is None:
                     raise DraftTopicMissingError
                 note_content = NoteContent(value=draft_text)
-                note = session.draft_note(
-                    resolved_topic,
-                    note_content,
-                    resolved_tags,
-                )
-                await uow.notes.add(note)
-                await uow.capture_sessions.save(session)
+                if session.note_id is not None:
+                    note = await uow.notes.get(session.note_id)
+                    if note is None:
+                        raise NoteNotFoundError
+                    await self._apply_redraft(
+                        uow, note, resolved_topic, resolved_tags, note_content
+                    )
+                else:
+                    note = session.draft_note(
+                        resolved_topic,
+                        note_content,
+                        resolved_tags,
+                    )
+                    await uow.notes.add(note)
+                    await uow.capture_sessions.save(session)
                 draft_done_event = DraftDoneEvent(
                     note_id=note.id.value,
                     topic=resolved_topic.label.value,
@@ -161,6 +171,16 @@ class GenerateReplyCommand:
         if draft_done_event is not None:
             yield draft_done_event
         yield done_event
+
+    async def _apply_redraft(
+        self,
+        _uow: UnitOfWork,
+        _note: Note,
+        _topic: Topic,
+        _tags: list[Tag],
+        _content: NoteContent,
+    ) -> None:
+        raise NotImplementedError
 
     async def _get_open_session(
         self,
