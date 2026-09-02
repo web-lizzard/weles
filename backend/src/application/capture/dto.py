@@ -37,11 +37,13 @@ class ReplyErrorEvent(BaseModel):
 class DraftTopicEvent(BaseModel):
     type: Literal["draft_topic"] = "draft_topic"
     label: str
+    reused: bool
 
 
 class DraftTagEvent(BaseModel):
     type: Literal["draft_tag"] = "draft_tag"
     label: str
+    reused: bool
 
 
 class DraftDeltaEvent(BaseModel):

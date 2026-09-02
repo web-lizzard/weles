@@ -37,6 +37,8 @@ from application.capture.commands.start_capture_session import (
 )
 from application.capture.ports import ConfidenceAssessmentPort, UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from domain.capture.value_objects import SimilarityScore
+from domain.capture.vocabulary import MatchCriteria
 
 
 @dataclass
@@ -75,7 +77,9 @@ class InMemoryCaptureComposition:
             confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
             reply_generation=DeterministicReplyGenerationAdapter(),
             embedding=embedding,
-            vocabulary=VocabularyResolver(embedding),
+            vocabulary=VocabularyResolver(
+                embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+            ),
         )
 
     def unit_of_work(self) -> InMemoryUnitOfWork:

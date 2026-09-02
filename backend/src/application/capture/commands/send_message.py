@@ -101,18 +101,26 @@ class GenerateReplyCommand:
                     yield ReplyDeltaEvent(text=chunk.text)
                 elif isinstance(chunk, DraftTopicChunk):
                     saw_draft = True
-                    resolved_topic = await self._vocabulary.resolve_topic(
+                    resolution = await self._vocabulary.resolve_topic(
                         chunk.label,
                         uow.topics,
                     )
-                    yield DraftTopicEvent(label=resolved_topic.label.value)
+                    resolved_topic = resolution.topic
+                    yield DraftTopicEvent(
+                        label=resolved_topic.label.value, reused=resolution.reused
+                    )
                 elif isinstance(chunk, DraftTagChunk):
                     saw_draft = True
                     if resolved_topic is None:
                         raise DraftTopicMissingError
-                    tag = await self._vocabulary.resolve_tag(chunk.label, uow.tags)
+                    tag_resolution = await self._vocabulary.resolve_tag(
+                        chunk.label, uow.tags
+                    )
+                    tag = tag_resolution.tag
                     resolved_tags.append(tag)
-                    yield DraftTagEvent(label=tag.label.value)
+                    yield DraftTagEvent(
+                        label=tag.label.value, reused=tag_resolution.reused
+                    )
                 else:
                     saw_draft = True
                     if resolved_topic is None:

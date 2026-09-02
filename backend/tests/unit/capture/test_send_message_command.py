@@ -64,7 +64,9 @@ from domain.capture.value_objects import (
     SessionId,
     SessionStatus,
     SessionTopic,
+    SimilarityScore,
 )
+from domain.capture.vocabulary import MatchCriteria
 from domain.exceptions import CoreException
 
 _CONFIRMATION_PHRASE = "that's all"
@@ -546,7 +548,9 @@ def _make_command_stack(
         confidence_assessment=confidence_assessment
         or DeterministicConfidenceAssessmentAdapter(),
         reply_generation=reply_generation or DeterministicReplyGenerationAdapter(),
-        vocabulary=VocabularyResolver(embedding),
+        vocabulary=VocabularyResolver(
+            embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+        ),
     )
     return _CommandStack(store, session_repo, message_repo, uow, command)
 
