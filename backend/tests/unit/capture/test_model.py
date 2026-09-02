@@ -264,7 +264,7 @@ def test_session_approve_closes_session_and_validates_note() -> None:
     assert note.approved_at is not None
 
     with pytest.raises(CaptureSessionClosedError):
-        session.close()
+        session.approve(note)
 
     empty_session = CaptureSession.start()
     other_session, other_note, _, _ = _drafted_session_with_note()
