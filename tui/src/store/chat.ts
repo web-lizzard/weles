@@ -30,6 +30,7 @@ type ChatState = {
   isStreaming: boolean;
   streamError: StreamError;
   approved: boolean;
+  approvalReceipt: boolean;
 };
 
 type ChatActions = {
@@ -48,6 +49,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   isStreaming: false,
   streamError: null,
   approved: false,
+  approvalReceipt: false,
   initSession: async () => {
     const { sessionId } = await startCaptureSession();
     set({ sessionId });
@@ -172,7 +174,18 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
 
     try {
       await approveNote(sessionId);
-      set({ approved: true, streamError: null });
+      const { sessionId: newSessionId } = await startCaptureSession();
+      set({
+        approvalReceipt: true,
+        approved: false,
+        topic: null,
+        draft: null,
+        transcript: [],
+        currentReply: "",
+        coverageConfidence: null,
+        streamError: null,
+        sessionId: newSessionId,
+      });
     } catch (error) {
       if (error instanceof SendMessageHttpError) {
         set({ streamError: { code: error.code, detail: error.detail } });
