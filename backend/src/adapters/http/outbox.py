@@ -11,6 +11,6 @@ router = APIRouter()
 
 @router.get("/_outbox")
 async def list_outbox_envelopes(
-    _query: Annotated[OutboxEnvelopeQueryPort, Depends(get_outbox_envelope_query)],
+    query: Annotated[OutboxEnvelopeQueryPort, Depends(get_outbox_envelope_query)],
 ) -> list[OutboxEnvelopeDTO]:
-    raise NotImplementedError
+    return await query.list_envelopes()

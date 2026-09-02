@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 12
-next_step: 12.1
-next_command: /unit-test capture-flow-review-approve-outbox phase 12
+current_phase: 13
+next_step: 13.1
+next_command: /implement capture-flow-review-approve-outbox phase 13
 updated: 2026-09-02
 ---
 
@@ -146,15 +146,15 @@ updated: 2026-09-02
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1f236d5
 
 #### Automated
 
-- [ ] 12.1 Wire the approval route to `ApproveNoteCommand` so all four outcomes surface their codes
-- [ ] 12.2 Implement the envelope query adapter over the store
-- [ ] 12.3 Include the `/_outbox` router only when `environment_name != prod` — `main.py`
-- [ ] 12.4 Write the integration tests for approval, `/_outbox` content, and the production 404 plus OpenAPI absence
-- [ ] 12.5 `cd backend && uv run pytest` green
+- [x] 12.1 Wire the approval route to `ApproveNoteCommand` so all four outcomes surface their codes
+- [x] 12.2 Implement the envelope query adapter over the store
+- [x] 12.3 Include the `/_outbox` router only when `environment_name != prod` — `main.py`
+- [x] 12.4 Write the integration tests for approval, `/_outbox` content, and the production 404 plus OpenAPI absence
+- [x] 12.5 `cd backend && uv run pytest` green
 
 ### Phase 13: Composition and worker lifecycle
 
