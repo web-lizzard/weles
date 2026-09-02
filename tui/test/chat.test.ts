@@ -229,11 +229,11 @@ describe("useChatStore", () => {
       [];
 
     vi.mocked(sendMessage).mockImplementation(async function* () {
-      yield { type: "draft_topic", label: "TCP congestion" };
+      yield { type: "draft_topic", label: "TCP congestion", reused: false };
       snapshots.push(useChatStore.getState().draft);
 
-      yield { type: "draft_tag", label: "networking" };
-      yield { type: "draft_tag", label: "tcp" };
+      yield { type: "draft_tag", label: "networking", reused: true };
+      yield { type: "draft_tag", label: "tcp", reused: false };
       snapshots.push(useChatStore.getState().draft);
 
       yield { type: "draft_delta", text: "Notes about " };
@@ -266,19 +266,29 @@ describe("useChatStore", () => {
     });
     expect(snapshots[1]).toEqual({
       topic: "TCP congestion",
-      tags: ["networking", "tcp"],
+      tags: [
+        { label: "networking", reused: true },
+        { label: "tcp", reused: false },
+      ],
       content: "",
       noteId: null,
     });
     expect(snapshots[2]).toEqual({
       topic: "TCP congestion",
-      tags: ["networking", "tcp"],
+      tags: [
+        { label: "networking", reused: true },
+        { label: "tcp", reused: false },
+      ],
       content: "Notes about TCP.",
       noteId: null,
     });
     expect(useChatStore.getState().draft).toEqual({
       topic: "TCP congestion control",
-      tags: ["networking", "tcp", "performance"],
+      tags: [
+        { label: "networking", reused: true },
+        { label: "tcp", reused: false },
+        { label: "performance", reused: true },
+      ],
       content: "Trimmed final body.",
       noteId: "00000000-0000-4000-8000-000000000010",
     });
@@ -310,7 +320,7 @@ describe("useChatStore", () => {
 
     expect(useChatStore.getState().draft).toEqual({
       topic: "Resolved topic",
-      tags: ["alpha"],
+      tags: [{ label: "alpha", reused: true }],
       content: "Authoritative body.",
       noteId: "00000000-0000-4000-8000-000000000011",
     });

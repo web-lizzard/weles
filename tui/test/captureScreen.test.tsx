@@ -370,7 +370,10 @@ describe("CaptureScreen", () => {
       transcript: [{ role: "user", content: "Transcript line" }],
       draft: {
         topic: "draft-panel-topic",
-        tags: ["draft-panel-tag-a", "draft-panel-tag-b"],
+        tags: [
+          { label: "draft-panel-tag-a", reused: true },
+          { label: "draft-panel-tag-b", reused: true },
+        ],
         content: "",
         noteId: null,
       },
@@ -393,7 +396,7 @@ describe("CaptureScreen", () => {
       transcript: [{ role: "user", content: "Transcript line" }],
       draft: {
         topic: "draft-panel-topic",
-        tags: ["draft-panel-tag-a"],
+        tags: [{ label: "draft-panel-tag-a", reused: true }],
         content: "draft-panel-body",
         noteId: "00000000-0000-4000-8000-000000000010",
       },
@@ -415,7 +418,7 @@ describe("CaptureScreen", () => {
       transcript,
       draft: {
         topic: "draft-panel-topic",
-        tags: ["draft-panel-tag-a"],
+        tags: [{ label: "draft-panel-tag-a", reused: true }],
         content: "draft-panel-body",
         noteId: "00000000-0000-4000-8000-000000000010",
       },
@@ -426,5 +429,28 @@ describe("CaptureScreen", () => {
 
     expect(frame).toContain("draft-panel-topic");
     expect(frame).not.toContain(WELES_TAGLINE);
+  });
+
+  it("marks a newly minted tag distinctly from a reused one", () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-panel-topic",
+        tags: [
+          { label: "draft-panel-tag-reused", reused: true },
+          { label: "draft-panel-tag-new", reused: false },
+        ],
+        content: "",
+        noteId: null,
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain("draft-panel-tag-reused");
+    expect(frame).not.toContain("draft-panel-tag-reused (new)");
+    expect(frame).toContain("draft-panel-tag-new (new)");
   });
 });

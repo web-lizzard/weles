@@ -127,9 +127,9 @@ describe("sendMessage SSE parser", () => {
 
   it("parses draft_topic, draft_tag, draft_delta, and draft_done SSE frames", async () => {
     mockFetchWithSseChunks([
-      'data: {"type":"draft_topic","label":"TCP congestion"}\n\n',
-      'data: {"type":"draft_tag","label":"networking"}\n\n',
-      'data: {"type":"draft_tag","label":"tcp"}\n\n',
+      'data: {"type":"draft_topic","label":"TCP congestion","reused":false}\n\n',
+      'data: {"type":"draft_tag","label":"networking","reused":true}\n\n',
+      'data: {"type":"draft_tag","label":"tcp","reused":false}\n\n',
       'data: {"type":"draft_delta","text":"Notes about "}\n\n',
       'data: {"type":"draft_delta","text":"TCP."}\n\n',
       'data: {"type":"draft_done","note_id":"00000000-0000-4000-8000-000000000010","topic":"TCP congestion control","content":"Trimmed final body.","tags":["networking","tcp"]}\n\n',
@@ -138,9 +138,9 @@ describe("sendMessage SSE parser", () => {
     const events = await collectEvents("sess-1", "we are done");
 
     expect(events).toEqual([
-      { type: "draft_topic", label: "TCP congestion" },
-      { type: "draft_tag", label: "networking" },
-      { type: "draft_tag", label: "tcp" },
+      { type: "draft_topic", label: "TCP congestion", reused: false },
+      { type: "draft_tag", label: "networking", reused: true },
+      { type: "draft_tag", label: "tcp", reused: false },
       { type: "draft_delta", text: "Notes about " },
       { type: "draft_delta", text: "TCP." },
       {
