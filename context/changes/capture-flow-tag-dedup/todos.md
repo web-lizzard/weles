@@ -126,12 +126,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 9.1 Propagate `reused` through `parseStreamEvent`'s two draft branches
-- [x] 9.2 Append `{ label, reused }` on `draft_tag` and merge recorded flags on `draft_done` — `tui/src/store/chat.ts`
-- [x] 9.3 Render newly minted tags distinctly in `DraftTags` — `tui/src/screens/CaptureScreen.tsx`
-- [x] 9.4 Write tests: parsing the flag, survival across `draft_done`, the unseen-label default
-- [x] 9.5 `cd tui && pnpm test`, `pnpm typecheck`, `pnpm lint` all clean
+- [x] 9.1 Propagate `reused` through `parseStreamEvent`'s two draft branches — 06ca4e1
+- [x] 9.2 Append `{ label, reused }` on `draft_tag` and merge recorded flags on `draft_done` — `tui/src/store/chat.ts` — 06ca4e1
+- [x] 9.3 Render newly minted tags distinctly in `DraftTags` — `tui/src/screens/CaptureScreen.tsx` — 06ca4e1
+- [x] 9.4 Write tests: parsing the flag, survival across `draft_done`, the unseen-label default — 06ca4e1
+- [x] 9.5 `cd tui && pnpm test`, `pnpm typecheck`, `pnpm lint` all clean — 06ca4e1
 
 #### Manual
 
-- [x] 9.6 Run backend and TUI, hold the same conversation in two sessions, confirm the second renders its tags as reused
+- [x] 9.6 Run backend and TUI, hold the same conversation in two sessions, confirm the second renders its tags as reused — 06ca4e1
