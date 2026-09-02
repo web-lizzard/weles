@@ -42,3 +42,23 @@ class Note(BaseModel):
             created_at=datetime.now(UTC),
             approved_at=None,
         )
+
+    def update_content(self, content: NoteContent) -> None:
+        del content
+        ...
+
+    def change_topic(self, topic: Topic) -> None:
+        del topic
+        ...
+
+    def add_tag(self, tag: Tag) -> None:
+        del tag
+        ...
+
+    def remove_tag(self, tag: Tag) -> None:
+        del tag
+        ...
+
+    def approve(self, session_id: SessionId) -> None:
+        del session_id
+        ...

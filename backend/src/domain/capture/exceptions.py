@@ -53,6 +53,26 @@ class SessionNoteAlreadyDraftedError(CoreException):
     pass
 
 
+class NoteNotDraftError(CoreException):
+    pass
+
+
+class NoteSessionMismatchError(CoreException):
+    pass
+
+
+class SessionNoteMissingError(CoreException):
+    pass
+
+
+class NoteNotFoundError(CoreException):
+    pass
+
+
+class TagNotOnNoteError(CoreException):
+    pass
+
+
 class SimilarityScoreOutOfRangeError(CoreException):
     pass
 
