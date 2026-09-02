@@ -120,7 +120,7 @@ Overlay over capture view, slash-command dispatcher, Zustand notification state,
 - `context/duck-sessions/distill-pillar/log.md:1-49` — Current State: settled structural decisions
 - `context/duck-sessions/distill-pillar/log.md:75-186` — Log entries: ACCEPTED domain-shape decisions
 - `context/adrs/distill-domain-shape/adr.md:8` — `origin: distill-pillar` edge to duck session
-- `context/adrs/distill-domain-shape/decision.md:27-109` — Formalized domain shape (aggregates, invariant, handlers, ports, queries)
+- `context/adrs/distill-domain-shape/frame.md:27-109` — Preliminary shape as first distilled from the duck session; demoted from `decision.md` to framing input on 2026-09-02 for over-reach (see the current `decision.md`)
 - `context/duck-sessions/outbox-shared/log.md:10` — `note_approved` envelope payload shape
 - `backend/src/domain/capture/note.py:23-75` — Capture `Note` aggregate (frozen post-approval)
 - `backend/src/domain/capture/outbox.py:19-43` — `NoteApprovedPayload` construction
