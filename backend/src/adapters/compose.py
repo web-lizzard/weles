@@ -25,13 +25,18 @@ from adapters.out.in_memory.capture.transcript_query import (
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.envelope_query import (
+    InMemoryOutboxEnvelopeQueryAdapter,
+)
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from application.capture.commands.approve_note import ApproveNoteCommand
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import Settings
 from domain.capture.ports import CaptureSessionRepository
 from domain.capture.value_objects import SimilarityScore
@@ -46,6 +51,7 @@ _topic_repository = InMemoryTopicRepository()
 _tag_repository = InMemoryTagRepository()
 _outbox_store = InMemoryOutboxStore()
 _outbox_appender = InMemoryOutboxAppender(_outbox_store)
+_outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
 _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
@@ -96,3 +102,11 @@ def get_generate_reply_command() -> GenerateReplyCommand:
         reply_generation=_reply_generation,
         vocabulary=_vocabulary,
     )
+
+
+def get_approve_note_command() -> ApproveNoteCommand:
+    return ApproveNoteCommand(uow=_unit_of_work())
+
+
+def get_outbox_envelope_query() -> OutboxEnvelopeQueryPort:
+    return _outbox_query
