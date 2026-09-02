@@ -64,10 +64,10 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 5.1 Add `update_content`, `change_topic`, `add_tag`, `remove_tag`, `approve` signatures to `Note` — `domain/capture/note.py`
-- [x] 5.2 Add `approve(note)` and `close()` signatures to `CaptureSession` — `domain/capture/capture_session.py`
-- [x] 5.3 Add `NoteNotDraftError`, `NoteSessionMismatchError`, `SessionNoteMissingError`, `NoteNotFoundError`, `TagNotOnNoteError` — `domain/capture/exceptions.py`
-- [x] 5.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 5.1 Add `update_content`, `change_topic`, `add_tag`, `remove_tag`, `approve` signatures to `Note` — `domain/capture/note.py` — 52c4d84
+- [x] 5.2 Add `approve(note)` and `close()` signatures to `CaptureSession` — `domain/capture/capture_session.py` — 52c4d84
+- [x] 5.3 Add `NoteNotDraftError`, `NoteSessionMismatchError`, `SessionNoteMissingError`, `NoteNotFoundError`, `TagNotOnNoteError` — `domain/capture/exceptions.py` — 52c4d84
+- [x] 5.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 52c4d84
 
 ### Phase 6: Capture domain approval and mutators — behavior
 
