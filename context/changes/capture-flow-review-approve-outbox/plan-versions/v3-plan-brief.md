@@ -12,7 +12,7 @@ Capture runs end to end up to a persisted `draft` note with a reconciled topic a
 
 ## Desired End State
 
-The user reshapes the draft by describing changes in plain language — the same `Note` row comes back mutated, as often as they like. Typing `/approve` flips the note to `approved` and the session to `closed`, enqueues the envelope atomically, then the TUI auto-resets into a fresh capture session behind a thick-rule `✓ Approved — queued for saving` receipt with the input still focused. The worker claims the envelope within a poll interval, the stub handler logs it, and it settles as `consumed` — visible at `GET /_outbox` outside production.
+The user reshapes the draft by describing changes in plain language — the same `Note` row comes back mutated, as often as they like. Typing `/approve` flips the note to `approved` and the session to `closed`, enqueues the envelope atomically, and replaces the draft panel with a confirmation the user cannot type past. The worker claims the envelope within a poll interval, the stub handler logs it, and it settles as `consumed` — visible at `GET /_outbox` outside production.
 
 ## Key Decisions Made
 
@@ -32,13 +32,12 @@ The user reshapes the draft by describing changes in plain language — the same
 | Handler for now | `LoggingNoteSaveHandler` | Proves claim → handle → ack end to end; deliberately trivial and expected to be replaced by `distill`. | Plan |
 | Envelope `type` shape | `EnvelopeType` VO (`name` + `version`, default `1`) | Structures the "mint a new type" schema-drift story instead of leaving it a bare-string convention; costs nothing extra for today's version-1 types. | Revision 1 |
 | Note vocabulary resolution | `NoteVocabularyRepository` port on `UnitOfWork` | Cross-aggregate composition (`Note`'s `Topic`/`Tag`s by id) belongs behind a repository-style contract an adapter can optimize, not inline in the command handler. | Revision 2 |
-| Post-approve TUI | Auto-reset into next capture session | Permanent unfocus exits Ink; a thick-rule receipt keeps the "queued" signal without ending the process. | Revision 3 |
 
 ## Scope
 
-**In scope:** `domain/shared/outbox/` (model, exceptions, both ports); `NoteApprovedPayload` in `domain/capture/`; in-memory store, appender, claimer and their contract suite; `UnitOfWork` gaining `outbox` with rollback coverage; `Note` mutators and `approve()`; `CaptureSession.approve()`/`close()`; the redraft branch; `ApproveNoteCommand`; approval endpoint; private `/_outbox` with its query side; `OutboxWorker`, `OutboxHandler`, stub handler, lifespan task and logging; TUI `/approve`, thick-rule approval receipt, and auto-start of the next capture session; acceptance scenarios for AC-12–AC-15; `NoteVocabularyRepository` and its in-memory adapter, consumed by both `ApproveNoteCommand` and the redraft branch.
+**In scope:** `domain/shared/outbox/` (model, exceptions, both ports); `NoteApprovedPayload` in `domain/capture/`; in-memory store, appender, claimer and their contract suite; `UnitOfWork` gaining `outbox` with rollback coverage; `Note` mutators and `approve()`; `CaptureSession.approve()`/`close()`; the redraft branch; `ApproveNoteCommand`; approval endpoint; private `/_outbox` with its query side; `OutboxWorker`, `OutboxHandler`, stub handler, lifespan task and logging; TUI `/approve` and terminal state; acceptance scenarios for AC-12–AC-15; `NoteVocabularyRepository` and its in-memory adapter, consumed by both `ApproveNoteCommand` and the redraft branch.
 
-**Out of scope:** SQL/Postgres adapter; lease and reclaim; a real `distill` consumer; a second envelope producer; reading notes back; keeping the prior conversation transcript after approval; the `hexagonal-arch-shape` ADR amendment for the `domain/shared/` bucket; the `discarded` transition.
+**Out of scope:** SQL/Postgres adapter; lease and reclaim; a real `distill` consumer; a second envelope producer; reading notes back; starting a new session from the TUI after approval; the `hexagonal-arch-shape` ADR amendment for the `domain/shared/` bucket; the `discarded` transition.
 
 ## Architecture / Approach
 
@@ -78,10 +77,9 @@ lifespan asyncio.Task ──► OutboxWorker.run_forever
 | 16. Acceptance scenarios | US-06/US-07 features, steps, markers | Unregistered step module never loads |
 | 17. Note vocabulary composition — stubs | `NoteVocabularyRepository`, `NoteVocabulary`, in-memory adapter, `uow.note_vocabulary` | — |
 | 18. Note vocabulary composition — behavior | `resolve()`, both call sites refactored off inline N+1, contract suite | A missed call site keeps one of the two N+1 loops alive |
-| 19. TUI post-approve — next session | Thick-rule receipt + auto-reset + focused input | Leaving `focus={false}` exits Ink immediately |
 
 **Prerequisites:** S-04 (`capture-flow-draft-note`, archived). No dependency on S-03 or S-05.
-**Estimated effort:** Large — 19 phases across four layers plus the TUI; nine of them are stub phases that add signatures only.
+**Estimated effort:** Large — 18 phases across four layers plus the TUI; nine of them are stub phases that add signatures only.
 
 ## Open Risks & Assumptions
 
@@ -96,4 +94,3 @@ lifespan asyncio.Task ──► OutboxWorker.run_forever
 - A drafting turn followed by a change request leaves one `Note` — same id — reshaped to the latest turn's topic, tags and body, with no direct text editing anywhere in the flow.
 - No envelope exists in the outbox until the approval endpoint succeeds; that call approves the note, closes the session and appends the envelope in one transaction, or does none of it.
 - The worker running beside the API claims each envelope exactly once even under two concurrent workers, retries a failing handler up to `max_attempts`, and settles the envelope as `consumed` or `failed`.
-- After `/approve`, the TUI stays open: a thick-rule receipt shows `✓ Approved — queued for saving`, a new capture session starts, and the input remains focused for the next topic.
