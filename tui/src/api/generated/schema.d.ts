@@ -55,14 +55,141 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/capture-sessions/{session_id}/approval": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Approve Note */
+    post: operations["approve_note_capture_sessions__session_id__approval_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/_outbox": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Outbox Envelopes */
+    get: operations["list_outbox_envelopes__outbox_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** ApproveNoteResponseDTO */
+    ApproveNoteResponseDTO: {
+      /**
+       * Note Id
+       * Format: uuid
+       */
+      note_id: string;
+      /** Topic */
+      topic: string;
+      /** Tags */
+      tags: string[];
+      /**
+       * Approved At
+       * Format: date-time
+       */
+      approved_at: string;
+    };
+    /** DraftDeltaEvent */
+    DraftDeltaEvent: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "draft_delta";
+      /** Text */
+      text: string;
+    };
+    /** DraftDoneEvent */
+    DraftDoneEvent: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "draft_done";
+      /**
+       * Note Id
+       * Format: uuid
+       */
+      note_id: string;
+      /** Topic */
+      topic: string;
+      /** Content */
+      content: string;
+      /** Tags */
+      tags: string[];
+    };
+    /** DraftTagEvent */
+    DraftTagEvent: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "draft_tag";
+      /** Label */
+      label: string;
+      /** Reused */
+      reused: boolean;
+    };
+    /** DraftTopicEvent */
+    DraftTopicEvent: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "draft_topic";
+      /** Label */
+      label: string;
+      /** Reused */
+      reused: boolean;
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** OutboxEnvelopeDTO */
+    OutboxEnvelopeDTO: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Type */
+      type: string;
+      /** Status */
+      status: string;
+      /** Attempts */
+      attempts: number;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /** Claimed At */
+      claimed_at: string | null;
+      /** Claimed By */
+      claimed_by: string | null;
     };
     /** ReplyDeltaEvent */
     ReplyDeltaEvent: {
@@ -90,6 +217,20 @@ export interface components {
       content: string;
       /** Topic */
       topic: string;
+      /** Coverage Confidence */
+      coverage_confidence: number;
+    };
+    /** ReplyErrorEvent */
+    ReplyErrorEvent: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: "error";
+      /** Code */
+      code: string;
+      /** Detail */
+      detail: string;
     };
     /** SendMessageRequestDTO */
     SendMessageRequestDTO: {
@@ -199,6 +340,57 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  approve_note_capture_sessions__session_id__approval_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ApproveNoteResponseDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_outbox_envelopes__outbox_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OutboxEnvelopeDTO"][];
         };
       };
     };
