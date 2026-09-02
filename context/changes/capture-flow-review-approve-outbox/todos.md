@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 10
-next_step: 10.1
-next_command: /implement capture-flow-review-approve-outbox phase 10
+current_phase: 11
+next_step: 11.1
+next_command: /implement capture-flow-review-approve-outbox phase 11
 updated: 2026-09-02
 ---
 
@@ -124,12 +124,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 10.1 Implement `run_once()`: claim per handler, handle, consume and ack
-- [x] 10.2 Implement the failure path: `fail(max_attempts)`, persist, log, continue to the next envelope
-- [x] 10.3 Implement `run_forever()` swallowing every exception except `CancelledError`
-- [x] 10.4 Implement `LoggingNoteSaveHandler.handle()` validating the payload back into `NoteApprovedPayload`
+- [x] 10.1 Implement `run_once()`: claim per handler, handle, consume and ack — 4af9a46
+- [x] 10.2 Implement the failure path: `fail(max_attempts)`, persist, log, continue to the next envelope — 4af9a46
+- [x] 10.3 Implement `run_forever()` swallowing every exception except `CancelledError` — 4af9a46
+- [x] 10.4 Implement `LoggingNoteSaveHandler.handle()` validating the payload back into `NoteApprovedPayload` — 4af9a46
 - [x] 10.5 Write the worker tests incl. two concurrent workers over one claimer — `tests/unit/shared/test_outbox_worker.py` — 39190b3
-- [x] 10.6 `cd backend && uv run pytest` green
+- [x] 10.6 `cd backend && uv run pytest` green — 4af9a46
 
 ### Phase 11: HTTP surface and settings — stubs
 
