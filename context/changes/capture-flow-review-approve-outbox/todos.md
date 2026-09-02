@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 4
-next_step: 4.1
-next_command: /implement capture-flow-review-approve-outbox phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement capture-flow-review-approve-outbox phase 5
 updated: 2026-09-02
 ---
 
@@ -53,12 +53,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 4.1 Implement `InMemoryOutboxAppender.append()` and the store's put/select
-- [ ] 4.2 Implement `InMemoryOutboxClaimer.claim()` holding the store lock across select-and-mutate, matching `EnvelopeType` by `name` and `version`
-- [ ] 4.3 Implement `ack()` and `fail()` persisting the caller's already-applied transition
-- [ ] 4.4 Write the port contract suite incl. the `asyncio.gather` disjoint-claim case and the version cross-match case — `tests/unit/shared/test_outbox_contract.py`
-- [ ] 4.5 Extend the UnitOfWork tests to cover outbox rollback — `tests/unit/capture/test_unit_of_work.py`
-- [ ] 4.6 `cd backend && uv run pytest` green
+- [x] 4.1 Implement `InMemoryOutboxAppender.append()` and the store's put/select — a55719a
+- [x] 4.2 Implement `InMemoryOutboxClaimer.claim()` holding the store lock across select-and-mutate, matching `EnvelopeType` by `name` and `version` — a55719a
+- [x] 4.3 Implement `ack()` and `fail()` persisting the caller's already-applied transition — a55719a
+- [x] 4.4 Write the port contract suite incl. the `asyncio.gather` disjoint-claim case and the version cross-match case — `tests/unit/shared/test_outbox_contract.py` — a55719a
+- [x] 4.5 Extend the UnitOfWork tests to cover outbox rollback — `tests/unit/capture/test_unit_of_work.py` — a55719a
+- [x] 4.6 `cd backend && uv run pytest` green — a55719a
 
 ### Phase 5: Capture domain approval and mutators — stubs
 
