@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 3
-next_step: 3.1
-next_command: /implement capture-flow-review-approve-outbox phase 3
+current_phase: 4
+next_step: tests
+next_command: /unit-test capture-flow-review-approve-outbox phase 4
 updated: 2026-09-02
 ---
 
@@ -35,15 +35,15 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 3.1 Add the `EnvelopeType` VO (`name`, `version=1`, `__str__` as `name@version`) — `domain/shared/outbox/model.py`
-- [x] 3.2 Change `OutboxEnvelope.type` and `pending()`'s `type` param from `str` to `EnvelopeType` — `domain/shared/outbox/model.py`
-- [x] 3.3 Migrate `NOTE_APPROVED` to an `EnvelopeType` instance — `domain/capture/outbox.py`
-- [x] 3.4 Create the `adapters/out/in_memory/shared/` and `.../shared/outbox/` package markers
-- [x] 3.5 Add `InMemoryOutboxStore` with `snapshot`/`restore`/`put`/`select_pending`/`lock`/`all`, `select_pending` typed on `EnvelopeType` — `.../shared/outbox/store.py`
-- [x] 3.6 Add `InMemoryOutboxAppender` and `InMemoryOutboxClaimer` with unimplemented bodies, `claim` typed on `EnvelopeType` — `.../appender.py`, `.../claimer.py`
-- [x] 3.7 Add `outbox: OutboxAppender` to the `UnitOfWork` protocol — `application/capture/ports.py`
-- [x] 3.8 Widen `InMemoryUnitOfWork`'s constructor and snapshot set with the outbox store — `adapters/out/in_memory/capture/unit_of_work.py`
-- [x] 3.9 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 3.1 Add the `EnvelopeType` VO (`name`, `version=1`, `__str__` as `name@version`) — `domain/shared/outbox/model.py` — 7a9445b
+- [x] 3.2 Change `OutboxEnvelope.type` and `pending()`'s `type` param from `str` to `EnvelopeType` — `domain/shared/outbox/model.py` — 7a9445b
+- [x] 3.3 Migrate `NOTE_APPROVED` to an `EnvelopeType` instance — `domain/capture/outbox.py` — 7a9445b
+- [x] 3.4 Create the `adapters/out/in_memory/shared/` and `.../shared/outbox/` package markers — 7a9445b
+- [x] 3.5 Add `InMemoryOutboxStore` with `snapshot`/`restore`/`put`/`select_pending`/`lock`/`all`, `select_pending` typed on `EnvelopeType` — `.../shared/outbox/store.py` — 7a9445b
+- [x] 3.6 Add `InMemoryOutboxAppender` and `InMemoryOutboxClaimer` with unimplemented bodies, `claim` typed on `EnvelopeType` — `.../appender.py`, `.../claimer.py` — 7a9445b
+- [x] 3.7 Add `outbox: OutboxAppender` to the `UnitOfWork` protocol — `application/capture/ports.py` — 7a9445b
+- [x] 3.8 Widen `InMemoryUnitOfWork`'s constructor and snapshot set with the outbox store — `adapters/out/in_memory/capture/unit_of_work.py` — 7a9445b
+- [x] 3.9 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 7a9445b
 
 ### Phase 4: Envelope type VO and in-memory outbox adapters — behavior
 
