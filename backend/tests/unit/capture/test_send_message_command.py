@@ -328,7 +328,8 @@ async def test_second_confirmation_turn_redrafts_note_keeping_same_id() -> None:
     assert second_draft_done.note_id == first_draft_done.note_id
     persisted_session = await stack.session_repo.get(session.id)
     assert persisted_session is not None
-    assert persisted_session.note_id == first_draft_done.note_id
+    assert persisted_session.note_id is not None
+    assert persisted_session.note_id.value == first_draft_done.note_id
 
 
 async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id() -> (
@@ -379,8 +380,8 @@ async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id(
 
     persisted_session = await stack.session_repo.get(session.id)
     assert persisted_session is not None
-    assert persisted_session.note_id == first_draft_done.note_id
     assert persisted_session.note_id is not None
+    assert persisted_session.note_id.value == first_draft_done.note_id
     note = await stack.uow.notes.get(persisted_session.note_id)
     assert note is not None
     assert note.status == NoteStatus.DRAFT
