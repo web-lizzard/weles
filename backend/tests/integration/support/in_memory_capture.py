@@ -3,8 +3,10 @@ from dataclasses import dataclass
 from typing import cast
 
 from adapters.compose import (
+    get_approve_note_command,
     get_capture_session_repository,
     get_generate_reply_command,
+    get_outbox_envelope_query,
     get_start_capture_session_command,
 )
 from adapters.out.in_memory.capture.capture_session_repository import (
@@ -32,13 +34,18 @@ from adapters.out.in_memory.capture.transcript_query import (
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.envelope_query import (
+    InMemoryOutboxEnvelopeQueryAdapter,
+)
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from application.capture.commands.approve_note import ApproveNoteCommand
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.ports import ConfidenceAssessmentPort, UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 
@@ -53,6 +60,7 @@ class InMemoryCaptureComposition:
     tags: InMemoryTagRepository
     outbox_store: InMemoryOutboxStore
     outbox: InMemoryOutboxAppender
+    outbox_query: InMemoryOutboxEnvelopeQueryAdapter
     transcript_query: InMemoryTranscriptQueryAdapter
     topic_extraction: DeterministicTopicExtractionAdapter
     confidence_assessment: ConfidenceAssessmentPort
@@ -70,6 +78,7 @@ class InMemoryCaptureComposition:
         tags = InMemoryTagRepository()
         outbox_store = InMemoryOutboxStore()
         outbox = InMemoryOutboxAppender(outbox_store)
+        outbox_query = InMemoryOutboxEnvelopeQueryAdapter(outbox_store)
         embedding = DeterministicEmbeddingAdapter()
         return cls(
             store=store,
@@ -80,6 +89,7 @@ class InMemoryCaptureComposition:
             tags=tags,
             outbox_store=outbox_store,
             outbox=outbox,
+            outbox_query=outbox_query,
             transcript_query=InMemoryTranscriptQueryAdapter(store),
             topic_extraction=DeterministicTopicExtractionAdapter(),
             confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
@@ -126,8 +136,18 @@ class InMemoryCaptureComposition:
                 vocabulary=composition.vocabulary,
             )
 
+        def override_approve_note_command() -> ApproveNoteCommand:
+            return ApproveNoteCommand(
+                uow=cast(UnitOfWork, cast(object, composition.unit_of_work()))
+            )
+
+        def override_outbox_envelope_query() -> OutboxEnvelopeQueryPort:
+            return composition.outbox_query
+
         return {
             get_capture_session_repository: override_capture_session_repository,
             get_start_capture_session_command: override_start_capture_session_command,
             get_generate_reply_command: override_generate_reply_command,
+            get_approve_note_command: override_approve_note_command,
+            get_outbox_envelope_query: override_outbox_envelope_query,
         }
