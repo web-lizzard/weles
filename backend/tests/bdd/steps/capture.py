@@ -23,6 +23,7 @@ class CaptureFlowContext:
     latest_user_message: str | None = None
     reply_events: list[dict[str, object]] = field(default_factory=list)
     reply_text: str = ""
+    draft_done_history: list[dict[str, object]] = field(default_factory=list)
 
 
 @pytest.fixture
@@ -120,6 +121,9 @@ def user_says_message(capture_flow_context: CaptureFlowContext, message: str) ->
     capture_flow_context.latest_user_message = message
     capture_flow_context.reply_events = events
     capture_flow_context.reply_text = _reply_text_from_events(events)
+    capture_flow_context.draft_done_history.extend(
+        event for event in events if event["type"] == "draft_done"
+    )
 
 
 @then(parsers.parse('the session topic is set to "{expected_topic}"'))
