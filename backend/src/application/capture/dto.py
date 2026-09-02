@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -6,6 +7,13 @@ from pydantic import BaseModel, Field
 
 class StartCaptureSessionResponseDTO(BaseModel):
     session_id: UUID
+
+
+class ApproveNoteResponseDTO(BaseModel):
+    note_id: UUID
+    topic: str
+    tags: list[str]
+    approved_at: datetime
 
 
 class SendMessageRequestDTO(BaseModel):

@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 7
-next_step: 7.1
-next_command: /implement capture-flow-review-approve-outbox phase 7
+current_phase: 8
+next_step: 8-tests
+next_command: /unit-test capture-flow-review-approve-outbox phase 8
 updated: 2026-09-02
 ---
 
@@ -87,10 +87,10 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 7.1 Add `ApproveNoteCommand` with an unimplemented `handle()` — `application/capture/commands/approve_note.py`
-- [ ] 7.2 Add `ApproveNoteResponseDTO` — `application/capture/dto.py`
-- [ ] 7.3 Add the `_apply_redraft` seam and the `session.note_id` branch point — `application/capture/commands/send_message.py`
-- [ ] 7.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 7.1 Add `ApproveNoteCommand` with an unimplemented `handle()` — `application/capture/commands/approve_note.py`
+- [x] 7.2 Add `ApproveNoteResponseDTO` — `application/capture/dto.py`
+- [x] 7.3 Add the `_apply_redraft` seam and the `session.note_id` branch point — `application/capture/commands/send_message.py`
+- [x] 7.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 8: Redraft and approval command — behavior
 
