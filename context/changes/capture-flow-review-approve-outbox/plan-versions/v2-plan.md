@@ -1,7 +1,6 @@
 # Reshape and Approve the Draft into the Outbox — Implementation Plan
 
 > Revision 1 (2026-09-02): Envelope `type` becomes an `EnvelopeType` VO (`name` + `version`, default `1`) instead of a bare `str`, folded into the still-unstarted Phases 3/4/9/10/11/12 rather than appended as a new phase. Prior version: plan-versions/v1-plan.md
-> Revision 2 (2026-09-02): `ApproveNoteCommand` and the redraft branch resolved a `Note`'s `Topic`/`Tags` with an inline N+1 loop over `uow.topics.get()`/`uow.tags.get()` — cross-aggregate composition living in application code instead of behind a port an adapter can later optimize. Phases 3/4/8, which that code touches, are already done and immutable, so the fix lands as new Phases 17-18 rather than a rewrite. Prior version: plan-versions/v2-plan.md
 
 ## Overview
 
@@ -939,161 +938,15 @@ Gherkin coverage for AC-12–AC-15. This phase authors tests, so it does not go 
 
 ---
 
-## Phase 17: Note vocabulary composition — stubs
-
-### Overview
-
-`ApproveNoteCommand` and the redraft branch each reconstruct a `Note`'s referenced `Topic` and `Tag`s from stored ids — a cross-aggregate read composition that today sits inline in application code as N+1 port calls. This phase materializes a dedicated port for that composition, mirroring the `OutboxAppender`/`OutboxClaimer` split: the interface and its adapter's shape are named now, so an adapter change (e.g. a future SQL join) never touches the two call sites that consume it. No behavior.
-
-### Changes Required:
-
-#### 1. Vocabulary value and port
-
-**File**: `backend/src/domain/capture/ports.py`
-
-**Intent**: `Note` references `Topic`/`Tag` by id, per the small-aggregate-boundary convention; resolving those references into full objects for a snapshot or a diff is a distinct capability from either aggregate's own repository, so it gets its own port rather than growing `NoteRepository`.
-
-**Contract**:
-
-```python
-class NoteVocabulary(BaseModel, frozen=True):
-    topic: Topic
-    tags: list[Tag]
-
-
-class NoteVocabularyRepository(Protocol):
-    async def resolve(self, note: Note) -> NoteVocabulary: ...
-```
-
-#### 2. Incomplete-reference exception
-
-**File**: `backend/src/domain/capture/exceptions.py`
-
-**Intent**: A `Note` whose `topic_id`/`tag_ids` no longer resolve is a corrupted-state invariant violation, not a normal not-found case — it gets its own code rather than reusing `NoteNotFoundError` or an unmapped `AssertionError`.
-
-**Contract**: `NoteVocabularyIncompleteError(CoreException)`.
-
-#### 3. In-memory adapter
-
-**File**: `backend/src/adapters/out/in_memory/capture/note_vocabulary_repository.py`
-
-**Intent**: Composes the existing topic and tag stores; today's body is the same N+1 the call sites used to do inline, but it now lives behind a contract a SQL adapter can satisfy with one join.
-
-**Contract**:
-
-```python
-class InMemoryNoteVocabularyRepository:
-    def __init__(self, topics: InMemoryTopicRepository, tags: InMemoryTagRepository) -> None: ...
-    async def resolve(self, note: Note) -> NoteVocabulary: ...
-```
-
-#### 4. `UnitOfWork` gains `note_vocabulary`
-
-**File**: `backend/src/application/capture/ports.py`
-
-**Intent**: Reached the same way `notes`/`topics`/`tags`/`outbox` already are — one collaborator per `uow`, no second style of dependency access inside a command.
-
-**Contract**: `UnitOfWork` Protocol adds `note_vocabulary: NoteVocabularyRepository`.
-
-#### 5. `InMemoryUnitOfWork` widens
-
-**File**: `backend/src/adapters/out/in_memory/capture/unit_of_work.py`
-
-**Intent**: Plumbing only — `note_vocabulary` never mutates state, so unlike `outbox` it needs no snapshot/restore entry.
-
-**Contract**: Constructor takes `note_vocabulary: InMemoryNoteVocabularyRepository` and assigns it.
-
-#### 6. Composition root
-
-**File**: `backend/src/adapters/compose.py`
-
-**Intent**: One instance, reached the same way the other in-memory repositories already are.
-
-**Contract**: Module-level `_note_vocabulary = InMemoryNoteVocabularyRepository(_topic_repository, _tag_repository)`, passed into `InMemoryUnitOfWork(...)` inside `_unit_of_work()`.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run ruff check src` passes
-- `cd backend && uv run basedpyright` reports no new errors
-
----
-
-## Phase 18: Note vocabulary composition — behavior
-
-### Overview
-
-`resolve()` becomes real, both call sites stop doing their own reconstruction, and a dangling reference raises rather than asserts.
-
-### Changes Required:
-
-#### 1. `resolve()` implementation
-
-**File**: `backend/src/adapters/out/in_memory/capture/note_vocabulary_repository.py`
-
-**Intent**: The composition itself, plus the integrity guard neither call site owned explicitly before.
-
-**Contract**: Fetches `topics.get(note.topic_id)`; raises `NoteVocabularyIncompleteError` when `None`. Fetches `tags.get(tag_id)` for each id in `note.tag_ids`, in order; raises the same error on the first missing one. Returns `NoteVocabulary(topic=topic, tags=tags)`; an empty `tag_ids` resolves to `tags=[]`.
-
-#### 2. Error mapping entry
-
-**File**: `backend/src/adapters/http/errors.py`
-
-**Intent**: Exhaustiveness.
-
-**Contract**: `"note_vocabulary_incomplete": 500` — an unreachable-in-practice invariant, mapped the same way `draft_topic_missing` already is.
-
-#### 3. `ApproveNoteCommand` stops reconstructing inline
-
-**File**: `backend/src/application/capture/commands/approve_note.py`
-
-**Intent**: The command asks for what it needs; the adapter decides how to fetch it.
-
-**Contract**: The topic/tag `.get()` loop is replaced by `vocabulary = await uow.note_vocabulary.resolve(note)`; `NoteApprovedPayload.of(note, vocabulary.topic, vocabulary.tags)` is built from it.
-
-#### 4. Redraft branch reuses the same composition
-
-**File**: `backend/src/application/capture/commands/send_message.py`
-
-**Intent**: `_apply_redraft`'s per-dropped-tag `.get()` loop was the same shape of problem as approval's; one `resolve()` call up front replaces it, and the tag diff is computed in memory against the result.
-
-**Contract**: `_apply_redraft` calls `current = await uow.note_vocabulary.resolve(note)` before mutating. `change_topic(topic)` as before. For each tag in `current.tags` whose id is absent from the turn's resolved tag ids, `remove_tag(tag)`; for each tag in the turn's resolved set whose id is absent from `current.tags`, `add_tag(tag)`. `update_content(content)` and `uow.notes.add(note)` unchanged.
-
-#### 5. Contract test suite
-
-**File**: `backend/tests/unit/capture/contracts/test_note_vocabulary_repository_contract.py`
-
-**Intent**: One behavioral contract per port, parametrized over implementations, per the contract-testing rule — matching the existing `NoteRepository`/`TopicRepository` suites' shape.
-
-**Contract**: Covers resolving a note whose `topic_id` and every `tag_id` exist; raising `NoteVocabularyIncompleteError` when the topic is missing; raising it when a tag is missing; an empty `tag_ids` resolving to `tags=[]`.
-
-#### 6. Existing test fixtures widen
-
-**File**: `backend/tests/unit/capture/test_approve_note_command.py`, `backend/tests/unit/capture/test_send_message_command.py`
-
-**Intent**: `_make_approve_stack()` and `_make_command_stack()` construct `InMemoryUnitOfWork(...)` positionally; the widened constructor needs a `note_vocabulary` collaborator wired through both, or neither stack compiles.
-
-**Contract**: Both helpers construct an `InMemoryNoteVocabularyRepository` from their existing topic/tag repositories and pass it to `InMemoryUnitOfWork(...)`. No assertion in either file changes.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run pytest tests/unit/capture/contracts/test_note_vocabulary_repository_contract.py -v` passes
-- `cd backend && uv run pytest tests/unit/capture/test_approve_note_command.py tests/unit/capture/test_send_message_command.py -v` passes
-- `cd backend && uv run pytest tests/unit/test_http_error_mapping.py -v` passes
-- `cd backend && uv run pytest` passes
-
----
-
 ## Testing Strategy
 
 ### Unit Tests:
 
-`OutboxEnvelope`'s transition table including every illegal transition; `NoteApprovedPayload.of()` snapshotting labels rather than ids; `Note`'s four mutators and `approve()` under the draft-only and session-match guards; `CaptureSession.approve()` closing the session in one act; the redraft branch reconciling tags to the turn's set via `NoteVocabularyRepository.resolve()`; `ApproveNoteCommand` writing note, session and envelope in one transaction and leaving nothing behind on failure; `OutboxWorker`'s dispatch, retry and dead-letter behavior.
+`OutboxEnvelope`'s transition table including every illegal transition; `NoteApprovedPayload.of()` snapshotting labels rather than ids; `Note`'s four mutators and `approve()` under the draft-only and session-match guards; `CaptureSession.approve()` closing the session in one act; the redraft branch reconciling tags to the turn's set; `ApproveNoteCommand` writing note, session and envelope in one transaction and leaving nothing behind on failure; `OutboxWorker`'s dispatch, retry and dead-letter behavior.
 
 ### Integration Tests:
 
-One behavioral contract suite for `OutboxAppender` and `OutboxClaimer`, and one for `NoteVocabularyRepository`, all parametrized over implementations — in-memory runs on every CI invocation. HTTP tests for the approval endpoint's four outcomes and for `/_outbox`'s presence, content and production absence.
+One behavioral contract suite for `OutboxAppender` and `OutboxClaimer`, parametrized over implementations — in-memory runs on every CI invocation. HTTP tests for the approval endpoint's four outcomes and for `/_outbox`'s presence, content and production absence.
 
 ### Manual Testing Steps:
 
@@ -1107,13 +960,13 @@ One behavioral contract suite for `OutboxAppender` and `OutboxClaimer`, and one 
 
 ## Performance Considerations
 
-The worker polls on a fixed interval with no backoff, so an idle system does constant small work — negligible at one user, and the interval is configurable. `claim()` serializes every consumer through one `asyncio.Lock`; with one worker and one handler there is no contention worth measuring, and the lock disappears when a SQL claimer takes over. `InMemoryNoteVocabularyRepository.resolve()` is N+1 by construction, bounded by the tag count of a single note and executed once per approval and once per redraft turn; negligible in-memory, and the port exists precisely so a SQL adapter can collapse it into one join without either call site changing.
+The worker polls on a fixed interval with no backoff, so an idle system does constant small work — negligible at one user, and the interval is configurable. `claim()` serializes every consumer through one `asyncio.Lock`; with one worker and one handler there is no contention worth measuring, and the lock disappears when a SQL claimer takes over. Loading `Topic` and each `Tag` at approve time is N+1 by construction, bounded by the tag count of a single note and executed once per session.
 
 ## Migration Notes
 
 **Lease and reclaim are deliberately absent.** An envelope claimed by a worker that then crashes stays `processing` forever, because nothing reclaims it. The duck session `outbox-shared` parked the claim algorithm until `distill` exists, and this slice unparks only the atomic-claim half. `claimed_at` and `claimed_by` are populated now specifically so a reclaim loop can be added later without touching the schema or the payload: the future change adds a clock port, a `lease_seconds` setting, and a select that also returns `processing` envelopes older than the lease. The contract test written in Phase 4 is the one that must grow a case at that point.
 
-**The SQL adapter inherits the contract, not the code.** `claim()`'s in-memory lock exists to reproduce `SELECT ... FOR UPDATE SKIP LOCKED`; when the Postgres adapter lands it should be parametrized into the same contract suite rather than getting its own. The same holds for `NoteVocabularyRepository`: a SQL implementation satisfies `resolve()`'s contract with one join instead of N+1 selects, and `ApproveNoteCommand`/`_apply_redraft` need no change either way.
+**The SQL adapter inherits the contract, not the code.** `claim()`'s in-memory lock exists to reproduce `SELECT ... FOR UPDATE SKIP LOCKED`; when the Postgres adapter lands it should be parametrized into the same contract suite rather than getting its own.
 
 ## References
 
