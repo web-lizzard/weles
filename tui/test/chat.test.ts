@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReplyStreamEvent } from "../src/api/stream";
-import { SendMessageHttpError, sendMessage } from "../src/api/stream";
+import {
+  approveNote,
+  SendMessageHttpError,
+  sendMessage,
+} from "../src/api/stream";
 import { useChatStore } from "../src/store/chat";
 
 type StreamError = { code: string; detail: string } | null;
@@ -18,6 +22,7 @@ vi.mock("../src/api/stream", async (importOriginal) => {
     ...actual,
     sendMessage: vi.fn(),
     startCaptureSession: vi.fn(),
+    approveNote: vi.fn(),
   };
 });
 
@@ -52,8 +57,10 @@ describe("useChatStore", () => {
       draft: null,
       isStreaming: false,
       streamError: null,
+      approved: false,
     });
     vi.mocked(sendMessage).mockReset();
+    vi.mocked(approveNote).mockReset();
   });
 
   afterEach(() => {
@@ -383,6 +390,67 @@ describe("useChatStore", () => {
     expect(getStreamError()).toEqual({
       code: "session_note_already_drafted",
       detail: "Session already has a draft",
+    });
+  });
+
+  it("calls approveNote and sets approved when a draft is ready", async () => {
+    useChatStore.setState({
+      draft: {
+        topic: "TCP congestion control",
+        tags: [{ label: "networking", reused: true }],
+        content: "Final body.",
+        noteId: "00000000-0000-4000-8000-000000000010",
+      },
+    });
+    vi.mocked(approveNote).mockResolvedValue({
+      noteId: "00000000-0000-4000-8000-000000000010",
+      topic: "TCP congestion control",
+      tags: ["networking"],
+    });
+
+    await useChatStore.getState().approveDraft();
+
+    expect(approveNote).toHaveBeenCalledWith("sess-1");
+    expect(useChatStore.getState().approved).toBe(true);
+    expect(getStreamError()).toBeNull();
+  });
+
+  it("does not call approveNote and reports no_draft_to_approve when there is no draft", async () => {
+    useChatStore.setState({ draft: null });
+
+    await useChatStore.getState().approveDraft();
+
+    expect(approveNote).not.toHaveBeenCalled();
+    expect(getStreamError()).toEqual({
+      code: "no_draft_to_approve",
+      detail: expect.any(String),
+    });
+    expect(useChatStore.getState().approved).toBe(false);
+  });
+
+  it("leaves approved false and sets streamError when approveNote fails", async () => {
+    useChatStore.setState({
+      draft: {
+        topic: "TCP congestion control",
+        tags: [],
+        content: "Final body.",
+        noteId: "00000000-0000-4000-8000-000000000010",
+      },
+    });
+    vi.mocked(approveNote).mockRejectedValue(
+      new SendMessageHttpError(
+        "capture_session_closed",
+        "Session is closed",
+        409,
+      ),
+    );
+
+    await useChatStore.getState().approveDraft();
+
+    expect(useChatStore.getState().approved).toBe(false);
+    expect(getStreamError()).toEqual({
+      code: "capture_session_closed",
+      detail: "Session is closed",
     });
   });
 });
