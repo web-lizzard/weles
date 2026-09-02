@@ -31,19 +31,33 @@ Distill lives at `domain/distill/` and `application/distill/` per `hexagonal-arc
 - The aggregate carries **no immutability guard**. Capture's `Note` is frozen after approval — every mutator routes through `_ensure_draft` — because it is the terminal output of a session. Distill's note is the living knowledge artifact and is deliberately not given the mirror-image invariant, so amendment can land later without unpicking a rule.
 - `distillation_status` is `generating | ready | failed`. A note exists in distill only once saved, so there is no "unsaved" rung. **`ready` with zero cards is a success.**
 
-**Card** — `id`, `note_id`, `question`, `answer`, `anchor: Anchor`, `status`, `discard_reason`, `created_at`.
+**Card** — `id`, `note_id`, `front`, `back`, `anchor: Anchor`, `discard: Discard | None`, `created_at`.
 
-- `status` is `active | discarded`. A proposal whose anchor does not resolve is persisted as a `discarded` card carrying its `discard_reason`, not dropped and not given an aggregate of its own.
+- A card has a **front and a back, both non-empty**, and the aggregate enforces it. `front`/`back` rather than `question`/`answer`: a flashcard is not always a question — term to definition, prompt to completion, cloze deletion are all the same two-sided artifact, and the domain should not presume the rhetorical form the generator happened to pick. This is the one invariant `Card` can hold up on its own; grounding it cannot, because grounding needs the parser.
 - `Anchor` is a value object holding a **verbatim quote** from the note. How a quote is matched against note content is an adapter concern and is deliberately not decided here.
+- `discard` carries the card's whole removal state and there is no status field beside it — see below.
 - The card carries **no scheduling state of any kind** — see the boundary rules.
 
 ### The grounding invariant
 
-Every card carries an anchor into the note it came from. **A card is `active` only if its anchor resolves within the note's content; an anchor that does not resolve yields a `discarded` card.** The note is the source of truth for its cards.
+Every card carries an anchor into the note it came from. **A card is live only while it carries no discard; a proposal whose anchor does not resolve within the note's content is persisted as a card discarded for `ungrounded`.** The note is the source of truth for its cards.
 
 Resolution needs the parser, which is an adapter, so the `Card` aggregate cannot self-validate. An application service resolves each proposal's quote through the parser port and constructs cards from the outcome — the same shape `capture-flow-domain-shape` used for vocabulary reconciliation, where the aggregates never see candidate strings or similarity scores, only already-resolved objects.
 
 A run that loses proposals to grounding is a **success with fewer cards**, not a failure, and rejection never triggers automatic regeneration: re-rolling a model on identical input is not a retry.
+
+### One discard mechanism
+
+A card is removed one way, whoever removes it. `Discard` is a value object — `reason: DiscardReason`, `detail: str | None`, `discarded_at` — and `Card.discard` either holds one or holds nothing. **Its presence is the discarded state.** There is no status field beside it, because two representations of one fact can disagree, and a card recorded as removed with no reason is a state the model should not be able to express.
+
+`DiscardReason` has two values and both are settable today:
+
+- **`ungrounded`** — the system removed it: the anchor did not resolve, so the note does not support the card.
+- **`user_audit`** — the person removed it while reviewing their own cards, through a `DiscardCard` command handler in `application/distill/commands/`.
+
+The distinction is load-bearing rather than decorative, because the two feed opposite corrections. A rising `ungrounded` rate says the generator is fabricating and the prompt or the port is wrong. A rising `user_audit` rate says the generator is grounded but producing cards the person does not want, and `overview-thougts` keeps exactly that signal so a later generation avoids near-duplicates of what was already turned down. An undifferentiated "removed" would destroy the only thing the record is for.
+
+A discard is **terminal**: nothing in this version restores a card.
 
 ### Two consumers, chained through the outbox
 
@@ -74,11 +88,11 @@ Stated as prohibitions, so they are checkable rather than merely intended:
 - Distill defines **no scheduling port**. When one exists it belongs to remember, and it must hide the algorithm's *state model* rather than rename it: a port exposing FSRS's stability/difficulty/retrievability would still break the domain on a swap to SM-2 or a Leitner box.
 - Distill emits **no envelope announcing that cards were generated**. Remember wraps a card lazily on first encounter — a card with no remember-side record simply *is* a new card — which is what makes the deferral free rather than merely postponed, with no backfill left behind.
 - **Notes are born only in capture.** Remember does not author notes; it opens capture mode and the ordinary approve → `note_approved` path runs. `note_approved` stays distill's only input.
-- Remember's one write back is a card **rejection**, arriving as a *command into distill* rather than as a write into its stores, because the consumer of that negative signal is generation. It will add a value to `Card.status` at that point; none is reserved now.
+- Remember's one write back is a card **rejection**, arriving as a *command into distill* rather than as a write into its stores, because the consumer of that negative signal is generation. It needs no new vocabulary: turning a card down during a review is a `user_audit` discard through the same command the audit surface already uses.
 
 ### Deliberately not decided here
 
-The quote-matching rule; query DTOs and list ordering; note versioning and amendment; regeneration; Notion publication; the scheduling port; the TUI shell (`tui-stack` territory — dispatcher, overlay behaviour, notifications).
+The quote-matching rule; restoring a discarded card; query DTOs and list ordering; note versioning and amendment; regeneration; Notion publication; the scheduling port; the TUI shell (`tui-stack` territory — dispatcher, overlay behaviour, notifications).
 
 ### Naming
 
@@ -86,7 +100,10 @@ Capture's `Note` and distill's `Note` keep the same class name, disambiguated by
 
 ## Consequences
 
-- **The grounding invariant is no longer enforced by construction.** It moved from "a card that exists is grounded" to "a card in `active` status is grounded", which the type system cannot hold up. Every query over cards must filter on status, and a forgotten filter surfaces a fabricated card to the user during review — silently. This is the accepted cost of one relation and one repository port instead of two.
+- **The grounding invariant is no longer enforced by construction.** It moved from "a card that exists is grounded" to "a card carrying no discard is grounded", which the type system cannot hold up. Every read over cards must exclude discarded ones, and a forgotten exclusion surfaces a fabricated card to the user during review — silently. This is the accepted cost of one relation and one repository port instead of two.
+- A discard is terminal, so a card the person removes by mistake is gone. Restoring it would have to be conditional on the reason — an `ungrounded` card cannot come back without breaking the invariant — which is machinery bought against a mistake there is not yet a surface to make.
+- The two-sided invariant is enforced at construction, so a proposal arriving with an empty side never becomes a card at all and leaves no discarded row behind. The audit trail therefore covers ungrounded proposals but not structurally malformed ones, which fail earlier and are visible only in whatever the generation adapter logs.
+- `discard` being a nullable value object rather than a status column pushes the filtering concern into every adapter: an in-memory store checks a field, a SQL store needs the mapping and index chosen so that "not discarded" stays a cheap predicate.
 - A note's content exists in two rows in one store. With Notion deferred, module isolation is the sole justification; capture's row is the historical record of what a session produced, distill's is the artifact. They are not maintained against each other and nothing detects a divergence.
 - Reusing capture's note id couples identity across modules. A future split into separate databases cannot renumber, and any change to how capture mints note ids propagates into distill silently.
 - **A note can be stranded in `generating`.** The outbox retries a failed flashcard-gen until `max_attempts`, after which the envelope goes to `failed` and nothing moves the note's status. There is no timeout and no sweeper, so a permanently failing note reads as "in flight" forever in any surface that shows the status.
@@ -105,7 +122,7 @@ Capture's `Note` and distill's `Note` keep the same class name, disambiguated by
 3. **A second, non-superseding ADR** holding the port contract and the boundary rules while the original kept the aggregate shapes. Rejected: it would leave two records disagreeing about how much is settled, and force every reader of the domain to reconcile them.
 4. **`DiscardedProposal` as a third aggregate** with its own repository port — the earlier record's choice. Rejected: an aggregate and a port built for a reader that does not exist, since the duck session itself recorded the inspection endpoint as wanted "eventually, not now".
 5. **Discarded proposals written only to a log.** The recommendation put to the user, on the grounds that a prototype does not need a queryable discard rate. Rejected by the user: the adapter writes to the database regardless, so the row exists either way and the question is only which relation holds it.
-6. **A `rejected` status value reserved now** for remember's future user-rejection. Cut as dead vocabulary: nothing can set it, every exhaustiveness check gains a branch that cannot be exercised, and remember adds the value when it has something to set it with.
+6. **A `rejected` status value reserved now** for remember's future user-rejection. Cut as dead vocabulary — nothing could set it, and every exhaustiveness check would gain a branch that cannot be exercised. The user then removed the need for it entirely: manual card removal is in scope today, so a review-time rejection is not a new state but the same `user_audit` discard arriving through the same command.
 7. **`Note.version` pinned at `1`, with `Card.note_version` alongside it.** Insurance against a future amendment. Cut on the same grounds — the earlier record admitted it was "dead data until amendment exists", and its removal simplifies the generation idempotency key to `note_id` alone.
 8. **One handler performing both the save and the generation.** The heaviest available cut, and defensible while only one branch exists. Rejected by the user: a redelivery after a failed model call would re-run the save, and a slow, expensive generation would be coupled to a fast local write.
 9. **Capture enqueuing both envelopes up front.** Raised in the duck session. Rejected there: flashcard-gen would have nothing to read when its envelope arrives, creating an ordering problem the chain does not have.
@@ -118,3 +135,8 @@ Capture's `Note` and distill's `Note` keep the same class name, disambiguated by
 16. **Cards born into remember's domain, or wrapped by distill at generation time.** Rejected in favour of lazy wrapping: a card with no remember-side record already means "new", so eager wrapping would require an envelope with no consumer today or a backfill tomorrow.
 17. **Query DTOs and list ordering decided here.** Rejected as read-model design driven by a shell this decision places out of scope; the aggregates above are what a query handler will read, and that is the whole of what the backend owes at this point.
 18. **Renaming capture's `Note`** to remove the collision. Rejected: it churns a shipped, tested aggregate and its test suite for a readability gain module paths already mostly deliver.
+19. **Keeping `status: active | discarded` alongside the `Discard` value object.** The shape this decision was first written with, and the one a reader expects. Rejected once the VO existed: the status is derivable from the VO's presence, so keeping both lets a card be discarded with no reason or reasoned with no status. An enum is easier to index; that cost is real and is recorded above, and it is an adapter's problem rather than the model's.
+20. **Separate mechanisms for the two removals** — the system dropping an ungrounded proposal, the person deleting a card they do not want. The obvious reading, since one is validation and the other is a user gesture. Rejected on the user's own requirement that removal be one coherent mechanism: two paths would mean two places to get soft-deletion right, two shapes for the audit surface to merge, and a standing question about which one a review-time rejection uses.
+21. **One undifferentiated discard, with no reason vocabulary.** Simplest, and enough to keep a card out of a review. Rejected: the two removals imply opposite corrections to generation, so a record that cannot tell them apart preserves the row and destroys the signal.
+22. **`question` / `answer` as the card's two sides.** The vocabulary the generation port naturally produces, and more concrete than `front` / `back`. Rejected: it bakes one rhetorical form into the aggregate, and a term-to-definition or cloze card is the same two-sided artifact with no question in it. Nothing is built yet, so the rename costs nothing now and would be churn later.
+23. **Restoring a discarded card.** Raised against the terminal-discard rule: a person who deletes by mistake has no way back. Rejected for this version — restore has to be conditional on the reason, since an `ungrounded` card cannot return without breaking the invariant, and that is machinery for a mistake there is not yet a surface to make. Recorded as an accepted cost rather than resolved.
