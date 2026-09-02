@@ -25,11 +25,11 @@ updated: 2026-09-02
 
 #### Automated
 
-- [x] 2.1 Implement `OutboxEnvelope.pending()` with `PENDING`, zero attempts and null claim fields
-- [x] 2.2 Implement `claim()`, `consume()` and `fail(max_attempts)` with their status guards and the retry cut-off
-- [x] 2.3 Implement `NoteApprovedPayload.of()` snapshotting topic and tag labels, and `to_envelope()`
-- [x] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [x] 2.5 `cd backend && uv run pytest` green
+- [x] 2.1 Implement `OutboxEnvelope.pending()` with `PENDING`, zero attempts and null claim fields — 53509c2
+- [x] 2.2 Implement `claim()`, `consume()` and `fail(max_attempts)` with their status guards and the retry cut-off — 53509c2
+- [x] 2.3 Implement `NoteApprovedPayload.of()` snapshotting topic and tag labels, and `to_envelope()` — 53509c2
+- [x] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py` — 53509c2
+- [x] 2.5 `cd backend && uv run pytest` green — 53509c2
 
 ### Phase 3: In-memory outbox adapters and UnitOfWork — stubs
 
