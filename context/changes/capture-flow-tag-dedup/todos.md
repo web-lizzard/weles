@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-tag-dedup
-current_phase: 8
-next_step: 8.1
-next_command: /implement capture-flow-tag-dedup phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /unit-test capture-flow-tag-dedup phase 9
 updated: 2026-09-02
 ---
 
@@ -114,9 +114,9 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 8.1 Add `reused` to the draft event types and their raw counterparts — `tui/src/api/stream.ts`
-- [ ] 8.2 Widen the draft state's `tags` to `{ label, reused }[]` — `tui/src/store/chat.ts`
-- [ ] 8.3 `cd tui && pnpm lint` clean
+- [x] 8.1 Add `reused` to the draft event types and their raw counterparts — `tui/src/api/stream.ts`
+- [x] 8.2 Widen the draft state's `tags` to `{ label, reused }[]` — `tui/src/store/chat.ts`
+- [x] 8.3 `cd tui && pnpm lint` clean
 
 ### Phase 9: TUI reused-tag surfacing — behavior
 

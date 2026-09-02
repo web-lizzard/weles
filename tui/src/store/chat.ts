@@ -12,7 +12,7 @@ export type TranscriptEntry = {
 
 export type Draft = {
   topic: string | null;
-  tags: string[];
+  tags: { label: string; reused: boolean }[];
   content: string;
   noteId: string | null;
 };
