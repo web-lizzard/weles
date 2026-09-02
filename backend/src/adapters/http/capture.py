@@ -6,14 +6,17 @@ from fastapi import APIRouter, Depends
 from fastapi.sse import EventSourceResponse
 
 from adapters.compose import (
+    get_approve_note_command,
     get_generate_reply_command,
     get_start_capture_session_command,
 )
+from application.capture.commands.approve_note import ApproveNoteCommand
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.dto import (
+    ApproveNoteResponseDTO,
     ReplyErrorEvent,
     ReplyStreamEvent,
     SendMessageRequestDTO,
@@ -57,3 +60,11 @@ async def send_message(
     except CoreException as exc:
         yield ReplyErrorEvent(code=exc.code(), detail=str(exc))
         return
+
+
+@router.post("/capture-sessions/{session_id}/approval")
+async def approve_note(
+    session_id: UUID,  # pyright: ignore[reportUnusedParameter]
+    _command: Annotated[ApproveNoteCommand, Depends(get_approve_note_command)],
+) -> ApproveNoteResponseDTO:
+    raise NotImplementedError

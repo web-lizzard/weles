@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 11
-next_step: 11.1
-next_command: /implement capture-flow-review-approve-outbox phase 11
+current_phase: 12
+next_step: 12.1
+next_command: /unit-test capture-flow-review-approve-outbox phase 12
 updated: 2026-09-02
 ---
 
@@ -135,12 +135,12 @@ updated: 2026-09-02
 
 #### Automated
 
-- [ ] 11.1 Add `Environment` and the four outbox settings fields — `config/settings.py`
-- [ ] 11.2 Add the `POST /capture-sessions/{session_id}/approval` route signature — `adapters/http/capture.py`
-- [ ] 11.3 Add `OutboxEnvelopeDTO` and the `OutboxEnvelopeQueryPort` — `application/shared/outbox/{dto.py,queries/envelopes.py}`
-- [ ] 11.4 Add `InMemoryOutboxEnvelopeQueryAdapter` — `adapters/out/in_memory/shared/outbox/envelope_query.py`
-- [ ] 11.5 Add the `GET /_outbox` router — `adapters/http/outbox.py`
-- [ ] 11.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 11.1 Add `Environment` and the four outbox settings fields — `config/settings.py`
+- [x] 11.2 Add the `POST /capture-sessions/{session_id}/approval` route signature — `adapters/http/capture.py`
+- [x] 11.3 Add `OutboxEnvelopeDTO` and the `OutboxEnvelopeQueryPort` — `application/shared/outbox/{dto.py,queries/envelopes.py}`
+- [x] 11.4 Add `InMemoryOutboxEnvelopeQueryAdapter` — `adapters/out/in_memory/shared/outbox/envelope_query.py`
+- [x] 11.5 Add the `GET /_outbox` router — `adapters/http/outbox.py`
+- [x] 11.6 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 12: HTTP surface and settings — behavior
 
