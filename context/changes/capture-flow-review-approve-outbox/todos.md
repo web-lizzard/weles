@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 19
-next_step: null
-next_command: /archive capture-flow-review-approve-outbox
+current_phase: 4
+next_step: 4.7
+next_command: /implement capture-flow-review-approve-outbox phase 4
 updated: 2026-09-03
 ---
 
@@ -30,6 +30,10 @@ updated: 2026-09-03
 - [x] 2.3 Implement `NoteApprovedPayload.of()` snapshotting topic and tag labels, and `to_envelope()` — 53509c2
 - [x] 2.4 Add `envelope_not_pending` and `envelope_not_processing` to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py` — 53509c2
 - [x] 2.5 `cd backend && uv run pytest` green — 53509c2
+
+#### Triage
+
+- [x] 2.6 R2-F1 claim must stamp UTC on claimed_at
 
 ### Phase 3: Envelope type VO and in-memory outbox adapters — stubs
 
@@ -59,6 +63,11 @@ updated: 2026-09-03
 - [x] 4.4 Write the port contract suite incl. the `asyncio.gather` disjoint-claim case and the version cross-match case — `tests/unit/shared/test_outbox_contract.py` — a55719a
 - [x] 4.5 Extend the UnitOfWork tests to cover outbox rollback — `tests/unit/capture/test_unit_of_work.py` — a55719a
 - [x] 4.6 `cd backend && uv run pytest` green — a55719a
+
+#### Triage
+
+- [ ] 4.7 R2-F2 outbox snapshot/restore must deep-copy envelopes
+- [ ] 4.8 R2-F3 claimer must forward worker_id to envelope.claim
 
 ### Phase 5: Capture domain approval and mutators — stubs
 
@@ -105,6 +114,12 @@ updated: 2026-09-03
 - [x] 8.3 Implement `ApproveNoteCommand.handle()`: approve, save both aggregates, load topic and tags, append the envelope, commit — 41725d6
 - [x] 8.4 Write the command unit tests, incl. the rollback case leaving zero envelopes — 41725d6
 - [x] 8.5 `cd backend && uv run pytest` green — 41725d6
+
+#### Triage
+
+- [ ] 8.6 R2-F4 redraft must remove dropped tags from the persisted note
+- [ ] 8.7 R2-F5 redraft must add new tags to the persisted note
+- [ ] 8.8 R2-F6 draft content must accumulate across multiple DraftContentChunks
 
 ### Phase 9: Outbox worker — stubs
 
