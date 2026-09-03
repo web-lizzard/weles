@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-lands
 current_phase: 4
-next_step: 4.tests
-next_command: /unit-test distill-flow-note-lands phase 4
+next_step: 4.automated
+next_command: /implement distill-flow-note-lands phase 4
 updated: 2026-09-03
 ---
 
@@ -42,7 +42,7 @@ updated: 2026-09-03
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1cf5245
 
 #### Automated
 
