@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
@@ -24,10 +24,20 @@ class Note(BaseModel):
 
 
 def mint_note(
-    _note_id: NoteId,
-    _session_id: SessionId,
-    _topic: TopicSnapshot,
-    _content: NoteContent,
-    _tags: list[TagSnapshot],
-    _approved_at: datetime,
-) -> Note: ...
+    note_id: NoteId,
+    session_id: SessionId,
+    topic: TopicSnapshot,
+    content: NoteContent,
+    tags: list[TagSnapshot],
+    approved_at: datetime,
+) -> Note:
+    return Note(
+        id=note_id,
+        session_id=session_id,
+        topic=topic,
+        content=content,
+        tags=tags,
+        distillation_status=DistillationStatus.GENERATING,
+        approved_at=approved_at,
+        created_at=datetime.now(UTC),
+    )

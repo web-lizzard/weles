@@ -31,6 +31,8 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "note_not_found": 404,
     "tag_not_on_note": 409,
     "note_vocabulary_incomplete": 500,
+    "distill_empty_note_content": 422,
+    "distill_note_content_too_long": 422,
 }
 
 
