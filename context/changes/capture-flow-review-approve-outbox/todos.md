@@ -33,7 +33,7 @@ updated: 2026-09-03
 
 #### Triage
 
-- [x] 2.6 R2-F1 claim must stamp UTC on claimed_at
+- [x] 2.6 R2-F1 claim must stamp UTC on claimed_at — 29fec94
 
 ### Phase 3: Envelope type VO and in-memory outbox adapters — stubs
 
