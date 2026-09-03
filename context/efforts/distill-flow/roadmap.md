@@ -8,7 +8,7 @@ updated: 2026-09-03
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | Users' approved notes arrive in Weles automatically | distill-flow-note-lands | pending |
+| S-01 | Users' approved notes arrive in Weles automatically | distill-flow-note-lands | in_progress |
 | S-02 | Weles generates grounded flashcards from a held note automatically, and zero cards is a valid outcome | distill-flow-grounded-generation | pending |
 | S-03 | Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session | distill-flow-note-list | pending |
 | S-04 | Users can open a note and read what it produced | distill-flow-note-detail | pending |
@@ -33,7 +33,7 @@ flowchart LR
 - **Outcome:** Users' approved notes arrive in Weles automatically
 - **Acceptance criteria:** AC-01, AC-02
 - **Change ID:** distill-flow-note-lands
-- **Status:** pending
+- **Status:** in_progress
 
 ### S-02: Weles generates grounded flashcards from a held note automatically, and zero cards is a valid outcome
 
