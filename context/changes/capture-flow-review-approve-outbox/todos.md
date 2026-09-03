@@ -66,8 +66,8 @@ updated: 2026-09-03
 
 #### Triage
 
-- [x] 4.7 R2-F2 outbox snapshot/restore must deep-copy envelopes
-- [x] 4.8 R2-F3 claimer must forward worker_id to envelope.claim
+- [x] 4.7 R2-F2 outbox snapshot/restore must deep-copy envelopes — 81914aa
+- [x] 4.8 R2-F3 claimer must forward worker_id to envelope.claim — 81914aa
 
 ### Phase 5: Capture domain approval and mutators — stubs
 
