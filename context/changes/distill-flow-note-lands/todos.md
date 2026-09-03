@@ -46,9 +46,9 @@ updated: 2026-09-03
 
 #### Automated
 
-- [x] 4.1 Implement `InMemoryNoteRepository`'s `add`/`get`/`snapshot`/`restore` over a dict keyed by note id — `adapters/out/in_memory/distill/note_repository.py`
+- [x] 4.1 Implement `InMemoryNoteRepository`'s `add`/`get`/`snapshot`/`restore` over a dict keyed by note id — `adapters/out/in_memory/distill/note_repository.py` — 66d1e8f
 - [x] 4.2 Write the port contract suite — `tests/unit/distill/contracts/test_note_repository_contract.py` — 1cf5245
-- [x] 4.3 `cd backend && uv run pytest` green
+- [x] 4.3 `cd backend && uv run pytest` green — 66d1e8f
 
 ### Phase 5: Application layer and outbound envelope — stubs
 
