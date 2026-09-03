@@ -10,11 +10,11 @@ updated: 2026-09-03
 
 #### Automated
 
-- [x] 1.1 Create the `domain/distill/` package marker
-- [x] 1.2 Add `NoteId`, `SessionId`, `TopicSnapshot`, `TagSnapshot`, `NoteContent` (fields only), `DistillationStatus` — `domain/distill/value_objects.py`
-- [x] 1.3 Add `DistillEmptyNoteContentError`, `DistillNoteContentTooLongError` — `domain/distill/exceptions.py` (renamed from the plan's `EmptyNoteContentError`/`NoteContentTooLongError`: those names collide on `CoreException.code()` with capture's identically-named exceptions in `domain/capture/exceptions.py:44,48`, which `tests/unit/test_http_error_mapping.py:33-35` forbids — user chose the rename option over pinning an explicit `_code` override)
-- [x] 1.4 Add `Note` (fields) and `mint_note` with an unimplemented signature — `domain/distill/note.py`
-- [x] 1.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable
+- [x] 1.1 Create the `domain/distill/` package marker — 7672baa
+- [x] 1.2 Add `NoteId`, `SessionId`, `TopicSnapshot`, `TagSnapshot`, `NoteContent` (fields only), `DistillationStatus` — `domain/distill/value_objects.py` — 7672baa
+- [x] 1.3 Add `DistillEmptyNoteContentError`, `DistillNoteContentTooLongError` — `domain/distill/exceptions.py` (renamed from the plan's `EmptyNoteContentError`/`NoteContentTooLongError`: those names collide on `CoreException.code()` with capture's identically-named exceptions in `domain/capture/exceptions.py:44,48`, which `tests/unit/test_http_error_mapping.py:33-35` forbids — user chose the rename option over pinning an explicit `_code` override) — 7672baa
+- [x] 1.4 Add `Note` (fields) and `mint_note` with an unimplemented signature — `domain/distill/note.py` — 7672baa
+- [x] 1.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean and every new symbol importable — 7672baa
 
 ### Phase 2: Note domain model — behavior
 
