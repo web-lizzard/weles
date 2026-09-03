@@ -29,7 +29,7 @@ from domain.capture.value_objects import (
     TagId,
     TopicId,
 )
-from domain.shared.outbox.model import EnvelopeType, OutboxEnvelope
+from domain.shared.outbox.model import EnvelopeStatus, EnvelopeType, OutboxEnvelope
 
 
 def _make_unit_of_work() -> tuple[
@@ -139,6 +139,23 @@ async def test_rollback_without_commit_excludes_topics_and_tags_from_candidates(
 
     assert await topic_repo.candidates() == []
     assert await tag_repo.candidates() == []
+
+
+async def test_outbox_snapshot_restore_isolates_envelope_mutations_R2_F2() -> None:
+    outbox_store = InMemoryOutboxStore()
+    envelope = OutboxEnvelope.pending(
+        EnvelopeType(name="note_approved"),
+        {"note_id": "abc"},
+    )
+    await outbox_store.put(envelope)
+
+    snapshot = outbox_store.snapshot()
+    envelope.status = EnvelopeStatus.CONSUMED
+    outbox_store.restore(snapshot)
+
+    restored = outbox_store.all()[0]
+    assert restored.status == EnvelopeStatus.PENDING
+    assert restored is not envelope
 
 
 async def test_rollback_without_commit_discards_outbox_envelopes() -> None:

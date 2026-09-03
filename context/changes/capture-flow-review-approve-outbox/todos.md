@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
-current_phase: 4
-next_step: 4.7
-next_command: /implement capture-flow-review-approve-outbox phase 4
+current_phase: 8
+next_step: 8.6
+next_command: /implement capture-flow-review-approve-outbox phase 8
 updated: 2026-09-03
 ---
 
@@ -66,8 +66,8 @@ updated: 2026-09-03
 
 #### Triage
 
-- [ ] 4.7 R2-F2 outbox snapshot/restore must deep-copy envelopes
-- [ ] 4.8 R2-F3 claimer must forward worker_id to envelope.claim
+- [x] 4.7 R2-F2 outbox snapshot/restore must deep-copy envelopes
+- [x] 4.8 R2-F3 claimer must forward worker_id to envelope.claim
 
 ### Phase 5: Capture domain approval and mutators — stubs
 
