@@ -1,8 +1,8 @@
 ---
 change_id: capture-flow-review-approve-outbox
 current_phase: 8
-next_step: 8.6
-next_command: /implement capture-flow-review-approve-outbox phase 8
+next_step: epilogue
+next_command: /archive capture-flow-review-approve-outbox
 updated: 2026-09-03
 ---
 
@@ -117,9 +117,9 @@ updated: 2026-09-03
 
 #### Triage
 
-- [ ] 8.6 R2-F4 redraft must remove dropped tags from the persisted note
-- [ ] 8.7 R2-F5 redraft must add new tags to the persisted note
-- [ ] 8.8 R2-F6 draft content must accumulate across multiple DraftContentChunks
+- [x] 8.6 R2-F4 redraft must remove dropped tags from the persisted note — be2be4f
+- [x] 8.7 R2-F5 redraft must add new tags to the persisted note — be2be4f
+- [x] 8.8 R2-F6 draft content must accumulate across multiple DraftContentChunks — be2be4f
 
 ### Phase 9: Outbox worker — stubs
 
