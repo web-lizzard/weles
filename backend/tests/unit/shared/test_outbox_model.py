@@ -48,6 +48,15 @@ def test_pending_builds_envelope_with_zero_attempts_and_no_claim_fields() -> Non
     assert envelope.created_at.tzinfo is UTC
 
 
+def test_claim_stamps_claimed_at_with_utc() -> None:
+    envelope = _envelope(EnvelopeStatus.PENDING)
+
+    envelope.claim("worker-1")
+
+    assert envelope.claimed_at is not None
+    assert envelope.claimed_at.tzinfo is UTC
+
+
 def test_claim_then_consume_moves_pending_through_processing_to_consumed() -> None:
     envelope = _envelope(EnvelopeStatus.PENDING)
 
