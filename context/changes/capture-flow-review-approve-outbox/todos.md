@@ -1,9 +1,9 @@
 ---
 change_id: capture-flow-review-approve-outbox
 current_phase: 19
-next_step: 19.5
-next_command: /implement capture-flow-review-approve-outbox phase 19
-updated: 2026-09-02
+next_step: null
+next_command: /archive capture-flow-review-approve-outbox
+updated: 2026-09-03
 ---
 
 ### Phase 1: Outbox model and ports — stubs
@@ -256,4 +256,4 @@ updated: 2026-09-02
 
 #### Manual
 
-- [ ] 19.5 Approve a draft and confirm the TUI stays open with the thick-rule receipt and accepts input for a new topic on a new session
+- [x] 19.5 Approve a draft and confirm the TUI stays open with the thick-rule receipt and accepts input for a new topic on a new session
