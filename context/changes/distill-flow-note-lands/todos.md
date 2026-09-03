@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-lands
-current_phase: 3
-next_step: 3.1
-next_command: /implement distill-flow-note-lands phase 3
+current_phase: 4
+next_step: 4.tests
+next_command: /unit-test distill-flow-note-lands phase 4
 updated: 2026-09-03
 ---
 
@@ -33,10 +33,10 @@ updated: 2026-09-03
 
 #### Automated
 
-- [x] 3.1 Add the `NoteRepository` protocol — `domain/distill/ports.py`
-- [x] 3.2 Create the `adapters/out/in_memory/distill/` package marker
-- [x] 3.3 Add `InMemoryNoteRepository` with unimplemented `add`/`get`/`snapshot`/`restore` — `adapters/out/in_memory/distill/note_repository.py`
-- [x] 3.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 3.1 Add the `NoteRepository` protocol — `domain/distill/ports.py` — e50923e
+- [x] 3.2 Create the `adapters/out/in_memory/distill/` package marker — e50923e
+- [x] 3.3 Add `InMemoryNoteRepository` with unimplemented `add`/`get`/`snapshot`/`restore` — `adapters/out/in_memory/distill/note_repository.py` — e50923e
+- [x] 3.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — e50923e
 
 ### Phase 4: NoteRepository — behavior
 
