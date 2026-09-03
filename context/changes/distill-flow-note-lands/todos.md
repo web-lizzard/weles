@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-lands
-current_phase: 2
-next_step: 2.1
-next_command: /implement distill-flow-note-lands phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement distill-flow-note-lands phase 3
 updated: 2026-09-03
 ---
 
@@ -24,10 +24,10 @@ updated: 2026-09-03
 
 #### Automated
 
-- [x] 2.1 Implement `NoteContent`'s strip + non-empty + bound validation — `domain/distill/value_objects.py`
-- [x] 2.2 Implement `mint_note`'s field mapping and `generating`/`created_at` stamping — `domain/distill/note.py`
+- [x] 2.1 Implement `NoteContent`'s strip + non-empty + bound validation — `domain/distill/value_objects.py` — 97e1079
+- [x] 2.2 Implement `mint_note`'s field mapping and `generating`/`created_at` stamping — `domain/distill/note.py` — 97e1079
 - [x] 2.3 Write the value-object and `mint_note` tests — `tests/unit/distill/test_value_objects.py`, `tests/unit/distill/test_note.py` — 4db1c7c
-- [x] 2.4 `cd backend && uv run pytest` green (required adding `distill_empty_note_content`/`distill_note_content_too_long` to `adapters/http/errors.py`'s `EXCEPTION_STATUS_MAP` — unplanned, resolved via Adapt-and-continue: the repo-wide exhaustiveness test requires every `CoreException` subclass mapped regardless of HTTP reachability)
+- [x] 2.4 `cd backend && uv run pytest` green (required adding `distill_empty_note_content`/`distill_note_content_too_long` to `adapters/http/errors.py`'s `EXCEPTION_STATUS_MAP` — unplanned, resolved via Adapt-and-continue: the repo-wide exhaustiveness test requires every `CoreException` subclass mapped regardless of HTTP reachability) — 97e1079
 
 ### Phase 3: NoteRepository — stubs
 
