@@ -33,10 +33,10 @@ updated: 2026-09-03
 
 #### Automated
 
-- [ ] 3.1 Add the `NoteRepository` protocol — `domain/distill/ports.py`
-- [ ] 3.2 Create the `adapters/out/in_memory/distill/` package marker
-- [ ] 3.3 Add `InMemoryNoteRepository` with unimplemented `add`/`get`/`snapshot`/`restore` — `adapters/out/in_memory/distill/note_repository.py`
-- [ ] 3.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 3.1 Add the `NoteRepository` protocol — `domain/distill/ports.py`
+- [x] 3.2 Create the `adapters/out/in_memory/distill/` package marker
+- [x] 3.3 Add `InMemoryNoteRepository` with unimplemented `add`/`get`/`snapshot`/`restore` — `adapters/out/in_memory/distill/note_repository.py`
+- [x] 3.4 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 4: NoteRepository — behavior
 
