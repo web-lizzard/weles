@@ -393,6 +393,132 @@ async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id(
     assert topic.label.value == "congestion control"
 
 
+async def test_redraft_removes_dropped_tags_from_persisted_note_R2_F4() -> None:
+    """R2-F4: redraft must remove tags absent from the turn's resolved set."""
+    stack = _make_command_stack(
+        reply_generation=_SequencedChunksReplyGenerationAdapter(
+            [
+                [
+                    ReplyTextChunk(text="handoff"),
+                    DraftTopicChunk(label=Label(value="TCP handshakes")),
+                    DraftTagChunk(label=Label(value="networking")),
+                    DraftContentChunk(text="original body"),
+                ],
+                [
+                    ReplyTextChunk(text="handoff"),
+                    DraftTopicChunk(label=Label(value="congestion control")),
+                    DraftTagChunk(label=Label(value="performance")),
+                    DraftContentChunk(text="revised body"),
+                ],
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    _ = await _handle_confirmation_turn(stack, session)
+    second_events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Make it about congestion control instead"),
+        )
+    ]
+    second_draft_done = next(
+        event for event in second_events if isinstance(event, DraftDoneEvent)
+    )
+
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id is not None
+    note = await stack.uow.notes.get(persisted_session.note_id)
+    assert note is not None
+    assert len(note.tag_ids) == len(second_draft_done.tags)
+    persisted_tags: list[str] = []
+    for tag_id in note.tag_ids:
+        tag = await stack.uow.tags.get(tag_id)
+        assert tag is not None
+        persisted_tags.append(tag.label.value)
+    assert persisted_tags == second_draft_done.tags
+
+
+async def test_draft_content_accumulates_across_multiple_chunks() -> None:
+    """R2-F6: two DraftContentChunk values in one turn concatenate on note and event."""
+    stack = _make_command_stack(
+        reply_generation=_FixedChunkReplyGenerationAdapter(
+            [
+                ReplyTextChunk(text="handoff"),
+                DraftTopicChunk(label=Label(value="topic")),
+                DraftContentChunk(text="first part "),
+                DraftContentChunk(text="second part"),
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    events = await _handle_confirmation_turn(stack, session)
+
+    draft_done = next(event for event in events if isinstance(event, DraftDoneEvent))
+    expected_content = "first part second part"
+    assert draft_done.content == expected_content
+
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id is not None
+    note = await stack.uow.notes.get(persisted_session.note_id)
+    assert note is not None
+    assert note.content.value == expected_content
+
+
+async def test_redraft_adds_new_tags_to_persisted_note_R2_F5() -> None:
+    """R2-F5: redraft must add tags present in the turn but missing on the note."""
+    stack = _make_command_stack(
+        reply_generation=_SequencedChunksReplyGenerationAdapter(
+            [
+                [
+                    ReplyTextChunk(text="handoff"),
+                    DraftTopicChunk(label=Label(value="TCP handshakes")),
+                    DraftContentChunk(text="original body"),
+                ],
+                [
+                    ReplyTextChunk(text="handoff"),
+                    DraftTopicChunk(label=Label(value="TCP handshakes")),
+                    DraftTagChunk(label=Label(value="performance")),
+                    DraftContentChunk(text="revised body"),
+                ],
+            ]
+        ),
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    _ = await _handle_confirmation_turn(stack, session)
+    second_events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Add a performance tag"),
+        )
+    ]
+    second_draft_done = next(
+        event for event in second_events if isinstance(event, DraftDoneEvent)
+    )
+
+    persisted_session = await stack.session_repo.get(session.id)
+    assert persisted_session is not None
+    assert persisted_session.note_id is not None
+    note = await stack.uow.notes.get(persisted_session.note_id)
+    assert note is not None
+    assert len(note.tag_ids) == 1
+    tag = await stack.uow.tags.get(note.tag_ids[0])
+    assert tag is not None
+    assert tag.label.value == second_draft_done.tags[0]
+
+
 async def test_conversational_turn_emits_only_delta_and_done_events() -> None:
     stack = _make_command_stack()
     session = CaptureSession.start()

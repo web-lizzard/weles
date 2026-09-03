@@ -249,6 +249,13 @@ The envelope's status lifecycle and the payload snapshot become real.
 - `cd backend && uv run pytest tests/unit/test_http_error_mapping.py -v` passes
 - `cd backend && uv run pytest` passes
 
+### Review r2
+
+Artifact: `reviews/2026-09-03-r2-mutation-test-phases-2-4-8-.md`
+
+- `R2-F1` — claim must stamp UTC on claimed_at
+  Fix: assert `claim()` sets `claimed_at.tzinfo is UTC`
+
 ---
 
 ## Phase 3: Envelope type VO and in-memory outbox adapters — stubs
@@ -385,6 +392,15 @@ The contract both ports must satisfy, including the atomicity two parallel worke
 - `cd backend && uv run pytest tests/unit/shared -v` passes
 - `cd backend && uv run pytest tests/unit/capture/test_unit_of_work.py -v` passes
 - `cd backend && uv run pytest` passes
+
+### Review r2
+
+Artifact: `reviews/2026-09-03-r2-mutation-test-phases-2-4-8-.md`
+
+- `R2-F2` — outbox snapshot/restore must deep-copy envelopes
+  Fix: assert mutating an envelope after `snapshot()` does not alter the restored store state
+- `R2-F3` — claimer must forward worker_id to envelope.claim
+  Fix: assert every envelope returned from `InMemoryOutboxClaimer.claim(..., worker_id="w1")` has `claimed_by == "w1"`
 
 ---
 
@@ -560,6 +576,17 @@ The redraft branch mutates in place, and approval writes note, session and envel
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/capture/test_send_message_command.py tests/unit/capture/test_approve_note_command.py -v` passes
 - `cd backend && uv run pytest` passes
+
+### Review r2
+
+Artifact: `reviews/2026-09-03-r2-mutation-test-phases-2-4-8-.md`
+
+- `R2-F4` — redraft must remove dropped tags from the persisted note
+  Fix: assert a redraft turn whose resolved tag set drops a prior tag leaves `note.tag_ids` matching only the new labels (not merely `DraftDoneEvent.tags`)
+- `R2-F5` — redraft must add new tags to the persisted note
+  Fix: assert a redraft turn that introduces a tag absent from the note persists that tag on `note.tag_ids`
+- `R2-F6` — draft content must accumulate across multiple DraftContentChunks
+  Fix: assert a turn with two `DraftContentChunk` values persists concatenated content on the note and in `DraftDoneEvent`
 
 ---
 
