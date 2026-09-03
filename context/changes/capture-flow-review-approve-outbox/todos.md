@@ -256,4 +256,4 @@ updated: 2026-09-03
 
 #### Manual
 
-- [x] 19.5 Approve a draft and confirm the TUI stays open with the thick-rule receipt and accepts input for a new topic on a new session
+- [x] 19.5 Approve a draft and confirm the TUI stays open with the thick-rule receipt and accepts input for a new topic on a new session — 174bfb7
