@@ -1,7 +1,7 @@
 ---
 effort_id: capture-flow
 created: 2026-08-29
-updated: 2026-09-02
+updated: 2026-09-03
 ---
 
 ## At a glance
@@ -13,7 +13,7 @@ updated: 2026-09-02
 | S-03 | Users can abandon a capture session and leave no trace | capture-flow-abandon-session | in_progress |
 | S-04 | Users receive a drafted note and topic synthesized from the conversation | capture-flow-draft-note | done |
 | S-05 | Users' topics and tags stay deduplicated through reuse | capture-flow-tag-dedup | done |
-| S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | in_progress |
+| S-06 | Users can reshape and approve the draft before it reaches the outbox | capture-flow-review-approve-outbox | done |
 
 ## Dependencies
 
@@ -75,7 +75,7 @@ flowchart LR
 - **Outcome:** Users can reshape and approve the draft before it reaches the outbox
 - **Acceptance criteria:** AC-12, AC-13, AC-14, AC-15
 - **Change ID:** capture-flow-review-approve-outbox
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-04
 - **Parallel with:** S-05
 
@@ -85,3 +85,4 @@ flowchart LR
 - **S-02: Users control when the conversation ends, even when the agent thinks it's done** — Archived 2026-08-31 → `context/archive/changes/2026-08-31-capture-flow-coverage-wrapup/`. Lesson: —.
 - **S-04: Users receive a drafted note and topic synthesized from the conversation** — Archived 2026-09-01 → `context/archive/changes/2026-08-31-capture-flow-draft-note/`. Lesson: —.
 - **S-05: Users' topics and tags stay deduplicated through reuse** — Archived 2026-09-02 → `context/archive/changes/2026-09-01-capture-flow-tag-dedup/`. Lesson: —.
+- **S-06: Users can reshape and approve the draft before it reaches the outbox** — Archived 2026-09-03 → `context/archive/changes/2026-09-02-capture-flow-review-approve-outbox/`. Lesson: —.
