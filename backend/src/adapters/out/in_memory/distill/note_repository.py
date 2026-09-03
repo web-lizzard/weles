@@ -9,11 +9,11 @@ class InMemoryNoteRepository:
     def __init__(self) -> None:
         self._notes: dict[UUID, Note] = {}
 
-    async def add(self, _note: Note) -> None:
-        raise NotImplementedError
+    async def add(self, note: Note) -> None:
+        self._notes[note.id.value] = note
 
-    async def get(self, _note_id: NoteId) -> Note | None:
-        raise NotImplementedError
+    async def get(self, note_id: NoteId) -> Note | None:
+        return self._notes.get(note_id.value)
 
     def snapshot(self) -> dict[UUID, Note]:
         return copy.deepcopy(self._notes)
