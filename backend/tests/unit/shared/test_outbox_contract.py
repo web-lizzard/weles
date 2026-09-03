@@ -7,7 +7,7 @@ import pytest
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.claimer import InMemoryOutboxClaimer
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
-from domain.shared.outbox.model import EnvelopeType, OutboxEnvelope
+from domain.shared.outbox.model import EnvelopeStatus, EnvelopeType, OutboxEnvelope
 from domain.shared.outbox.ports import OutboxAppender, OutboxClaimer
 
 _NOTE_APPROVED = EnvelopeType(name="note_approved")
@@ -27,6 +27,21 @@ _IMPLEMENTATIONS: list[Callable[[], tuple[OutboxAppender, OutboxClaimer]]] = [
 
 def _pending(envelope_type: EnvelopeType = _NOTE_APPROVED) -> OutboxEnvelope:
     return OutboxEnvelope.pending(envelope_type, {"note_id": "abc"})
+
+
+@pytest.mark.parametrize("make_ports", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_claim_stamps_claimed_by_with_worker(
+    make_ports: Callable[[], tuple[OutboxAppender, OutboxClaimer]],
+) -> None:
+    appender, claimer = make_ports()
+    for _ in range(2):
+        await appender.append(_pending())
+
+    claimed = await claimer.claim(_NOTE_APPROVED, limit=10, worker_id="w1")
+
+    assert len(claimed) == 2
+    assert all(envelope.claimed_by == "w1" for envelope in claimed)
+    assert all(envelope.status == EnvelopeStatus.PROCESSING for envelope in claimed)
 
 
 @pytest.mark.parametrize("make_ports", _IMPLEMENTATIONS, ids=["in_memory"])
