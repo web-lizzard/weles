@@ -2,7 +2,7 @@
 change_id: distill-flow-grounded-generation
 current_phase: 8
 next_step: 8.1
-next_command: /unit-test distill-flow-grounded-generation phase 8
+next_command: /implement distill-flow-grounded-generation phase 8
 updated: 2026-09-04
 ---
 
@@ -115,7 +115,7 @@ updated: 2026-09-04
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — de38479
 
 #### Automated
 
