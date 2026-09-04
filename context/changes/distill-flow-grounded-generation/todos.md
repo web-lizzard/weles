@@ -55,10 +55,10 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 4.1 Implement the differing-sides invariant with casefold canonicalization — `domain/distill/card.py`
-- [x] 4.2 Implement `mint`'s fixed order: construct, grounding, length policy, first violation wins — `domain/distill/card_factory.py`
-- [x] 4.3 Write the aggregate and factory tests — `tests/unit/distill/test_card.py`, `tests/unit/distill/test_card_factory.py`
-- [x] 4.4 `cd backend && uv run pytest` green
+- [x] 4.1 Implement the differing-sides invariant with casefold canonicalization — `domain/distill/card.py` — 0a898c6
+- [x] 4.2 Implement `mint`'s fixed order: construct, grounding, length policy, first violation wins — `domain/distill/card_factory.py` — 0a898c6
+- [x] 4.3 Write the aggregate and factory tests — `tests/unit/distill/test_card.py`, `tests/unit/distill/test_card_factory.py` — 0a898c6
+- [x] 4.4 `cd backend && uv run pytest` green — 0a898c6
 
 #### Manual
 
