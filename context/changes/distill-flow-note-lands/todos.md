@@ -2,7 +2,7 @@
 change_id: distill-flow-note-lands
 current_phase: 6
 next_step: 6.1
-next_command: /unit-test distill-flow-note-lands phase 6
+next_command: /implement distill-flow-note-lands phase 6
 updated: 2026-09-04
 ---
 
@@ -64,13 +64,13 @@ updated: 2026-09-04
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 9065b79
 
 #### Automated
 
-- [ ] 6.1 Implement `SaveNoteCommand.handle()`: idempotency check, `mint_note`, persist, enqueue `note_saved`, commit, no-op log on redelivery — `application/distill/commands/save_note.py`
-- [ ] 6.2 Write the command tests incl. the redelivery no-op case — `tests/unit/distill/test_save_note_command.py`
-- [ ] 6.3 `cd backend && uv run pytest` green
+- [x] 6.1 Implement `SaveNoteCommand.handle()`: idempotency check, `mint_note`, persist, enqueue `note_saved`, commit, no-op log on redelivery — `application/distill/commands/save_note.py`
+- [x] 6.2 Write the command tests incl. the redelivery no-op case — `tests/unit/distill/test_save_note_command.py`
+- [x] 6.3 `cd backend && uv run pytest` green
 
 ### Phase 7: Handler adapter — stubs
 
