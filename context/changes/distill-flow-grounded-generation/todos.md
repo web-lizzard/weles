@@ -68,15 +68,15 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 5.1 Add `mark_ready`, `mark_failed` and `_ensure_generating` with unimplemented bodies — `domain/distill/note.py`
-- [x] 5.2 Rename `NoteRepository.add` to `save` and add `CardRepository` with `save` / `list_by_note` — `domain/distill/ports.py`
-- [x] 5.3 Carry the rename to the adapter and the one call site — `adapters/out/in_memory/distill/note_repository.py`, `application/distill/commands/save_note.py`
-- [x] 5.4 Add the `InMemoryCardRepository` skeleton with `save`, `list_by_note`, `snapshot`, `restore` — `adapters/out/in_memory/distill/card_repository.py`
-- [x] 5.5 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, `tests/unit/distill/test_save_note_command.py` still green
+- [x] 5.1 Add `mark_ready`, `mark_failed` and `_ensure_generating` with unimplemented bodies — `domain/distill/note.py` — 3f6bbd4
+- [x] 5.2 Rename `NoteRepository.add` to `save` and add `CardRepository` with `save` / `list_by_note` — `domain/distill/ports.py` — 3f6bbd4
+- [x] 5.3 Carry the rename to the adapter and the one call site — `adapters/out/in_memory/distill/note_repository.py`, `application/distill/commands/save_note.py` — 3f6bbd4
+- [x] 5.4 Add the `InMemoryCardRepository` skeleton with `save`, `list_by_note`, `snapshot`, `restore` — `adapters/out/in_memory/distill/card_repository.py` — 3f6bbd4
+- [x] 5.5 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, `tests/unit/distill/test_save_note_command.py` still green — 3f6bbd4
 
 #### Manual
 
-- [x] 5.6 Grep `src` for `notes.add` and confirm no call site remains
+- [x] 5.6 Grep `src` for `notes.add` and confirm no call site remains — 3f6bbd4
 
 ### Phase 6: Note transitions and repository ports — behavior
 
