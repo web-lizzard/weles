@@ -96,10 +96,10 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 9.1 Wire distill's repository, `UnitOfWork` factory, command and handler, sharing capture's outbox store instances — `adapters/compose.py`
-- [x] 9.2 Register `SaveNoteHandler` in the `OutboxWorker`'s handler list in place of `LoggingNoteSaveHandler` — `adapters/compose.py`
-- [x] 9.3 Delete `LoggingNoteSaveHandler` and its now-unused imports — `adapters/out/worker/handlers/note_save.py`
-- [x] 9.4 `cd backend && uv run pytest` and `uv run ruff check src` green
+- [x] 9.1 Wire distill's repository, `UnitOfWork` factory, command and handler, sharing capture's outbox store instances — `adapters/compose.py` — 64ac6b0
+- [x] 9.2 Register `SaveNoteHandler` in the `OutboxWorker`'s handler list in place of `LoggingNoteSaveHandler` — `adapters/compose.py` — 64ac6b0
+- [x] 9.3 Delete `LoggingNoteSaveHandler` and its now-unused imports — `adapters/out/worker/handlers/note_save.py` — 64ac6b0
+- [x] 9.4 `cd backend && uv run pytest` and `uv run ruff check src` green — 64ac6b0
 
 #### Manual
 
