@@ -7,3 +7,23 @@ class DistillEmptyNoteContentError(CoreException):
 
 class DistillNoteContentTooLongError(CoreException):
     pass
+
+
+class EmptyCardSideError(CoreException):
+    pass
+
+
+class CardSideTooLongError(CoreException):
+    pass
+
+
+class EmptyAnchorError(CoreException):
+    pass
+
+
+class IdenticalCardSidesError(CoreException):
+    pass
+
+
+class InvalidDistillationTransitionError(CoreException):
+    pass
