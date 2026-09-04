@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 1
-next_step: 1.4
-next_command: /implement distill-flow-grounded-generation phase 1
+current_phase: 2
+next_step: 2.5
+next_command: /implement distill-flow-grounded-generation phase 2
 updated: 2026-09-04
 ---
 
@@ -16,20 +16,20 @@ updated: 2026-09-04
 
 #### Manual
 
-- [ ] 1.4 Import every new card symbol in a one-liner and confirm it resolves
+- [x] 1.4 Import every new card symbol in a one-liner and confirm it resolves — 984263e
 
 ### Phase 2: Card value objects and exceptions — behavior
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8d82bb7
 
 #### Automated
 
-- [ ] 2.1 Implement `CardSide` and `Anchor` strip, non-empty and absolute-bound validation — `domain/distill/value_objects.py`
-- [ ] 2.2 Implement `CardLengthPolicy.breach` with front-then-back ordering and the side-naming detail string — `domain/distill/value_objects.py`
-- [ ] 2.3 Write the card value-object and policy tests — `tests/unit/distill/test_card_value_objects.py`
-- [ ] 2.4 `cd backend && uv run pytest` green and `uv run ruff check src tests` clean
+- [x] 2.1 Implement `CardSide` and `Anchor` strip, non-empty and absolute-bound validation — `domain/distill/value_objects.py`
+- [x] 2.2 Implement `CardLengthPolicy.breach` with front-then-back ordering and the side-naming detail string — `domain/distill/value_objects.py`
+- [x] 2.3 Write the card value-object and policy tests — `tests/unit/distill/test_card_value_objects.py`
+- [x] 2.4 `cd backend && uv run pytest` green and `uv run ruff check src tests` clean
 
 #### Manual
 

@@ -33,6 +33,11 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "note_vocabulary_incomplete": 500,
     "distill_empty_note_content": 422,
     "distill_note_content_too_long": 422,
+    "empty_card_side": 422,
+    "card_side_too_long": 422,
+    "empty_anchor": 422,
+    "identical_card_sides": 422,
+    "invalid_distillation_transition": 409,
 }
 
 
