@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 3
-next_step: 3.4
-next_command: /implement distill-flow-grounded-generation phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test distill-flow-grounded-generation phase 4
 updated: 2026-09-04
 ---
 
@@ -39,13 +39,13 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 3.1 Add `Card` with its fields and an unimplemented `_validate_sides_differ` — `domain/distill/card.py`
-- [x] 3.2 Add `CardFactory` with an unimplemented `mint` taking an `AnchorResolution` — `domain/distill/card_factory.py`
-- [x] 3.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, both symbols importable
+- [x] 3.1 Add `Card` with its fields and an unimplemented `_validate_sides_differ` — `domain/distill/card.py` — 15f8d7a
+- [x] 3.2 Add `CardFactory` with an unimplemented `mint` taking an `AnchorResolution` — `domain/distill/card_factory.py` — 15f8d7a
+- [x] 3.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, both symbols importable — 15f8d7a
 
 #### Manual
 
-- [ ] 3.4 Print `CardFactory.mint.__annotations__` and confirm the signature
+- [x] 3.4 Print `CardFactory.mint.__annotations__` and confirm the signature — 15f8d7a
 
 ### Phase 4: Card aggregate and CardFactory — behavior
 
