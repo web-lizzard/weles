@@ -27,6 +27,7 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
@@ -69,6 +70,7 @@ _outbox_appender = InMemoryOutboxAppender(_outbox_store)
 _outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
 _outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
 _distill_note_repository = InMemoryDistillNoteRepository()
+_distill_card_repository = InMemoryCardRepository()
 _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
@@ -109,6 +111,7 @@ def _distill_unit_of_work() -> DistillUnitOfWork:
             object,
             InMemoryDistillUnitOfWork(
                 _distill_note_repository,
+                _distill_card_repository,
                 _outbox_store,
                 _outbox_appender,
             ),
