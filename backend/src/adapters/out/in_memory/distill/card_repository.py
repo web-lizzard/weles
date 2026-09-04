@@ -1,3 +1,4 @@
+import copy
 from uuid import UUID
 
 from domain.distill.card import Card
@@ -8,10 +9,14 @@ class InMemoryCardRepository:
     def __init__(self) -> None:
         self._cards: dict[UUID, Card] = {}
 
-    async def save(self, _card: Card) -> None: ...
+    async def save(self, card: Card) -> None:
+        self._cards[card.id.value] = card
 
-    async def list_by_note(self, _note_id: NoteId) -> list[Card]: ...
+    async def list_by_note(self, note_id: NoteId) -> list[Card]:
+        return [card for card in self._cards.values() if card.note_id == note_id]
 
-    def snapshot(self) -> dict[UUID, Card]: ...
+    def snapshot(self) -> dict[UUID, Card]:
+        return copy.deepcopy(self._cards)
 
-    def restore(self, _snapshot: dict[UUID, Card]) -> None: ...
+    def restore(self, snapshot: dict[UUID, Card]) -> None:
+        self._cards = copy.deepcopy(snapshot)
