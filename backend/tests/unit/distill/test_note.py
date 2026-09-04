@@ -1,7 +1,11 @@
+from collections.abc import Callable
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from domain.distill.note import mint_note
+import pytest
+
+from domain.distill.exceptions import InvalidDistillationTransitionError
+from domain.distill.note import Note, mint_note
 from domain.distill.value_objects import (
     DistillationStatus,
     NoteContent,
@@ -47,3 +51,57 @@ def test_mint_note_stamps_created_at_in_utc_near_now() -> None:
 
     assert note.created_at.tzinfo is UTC
     assert before <= note.created_at <= after
+
+
+def _note_in(status: DistillationStatus) -> Note:
+    note = mint_note(
+        NoteId(value=uuid4()),
+        SessionId(value=uuid4()),
+        TopicSnapshot(id=uuid4(), label="TCP handshakes"),
+        NoteContent(value="We discussed how connections are established."),
+        [],
+        datetime.now(UTC),
+    )
+    return note.model_copy(update={"distillation_status": status})
+
+
+def test_mark_ready_moves_a_generating_note_to_ready() -> None:
+    note = _note_in(DistillationStatus.GENERATING)
+
+    note.mark_ready()
+
+    assert note.distillation_status is DistillationStatus.READY
+
+
+def test_mark_failed_moves_a_generating_note_to_failed() -> None:
+    note = _note_in(DistillationStatus.GENERATING)
+
+    note.mark_failed()
+
+    assert note.distillation_status is DistillationStatus.FAILED
+
+
+@pytest.mark.parametrize(
+    "transition",
+    [
+        pytest.param(Note.mark_ready, id="mark_ready"),
+        pytest.param(Note.mark_failed, id="mark_failed"),
+    ],
+)
+@pytest.mark.parametrize(
+    "status",
+    [
+        pytest.param(DistillationStatus.READY, id="from_ready"),
+        pytest.param(DistillationStatus.FAILED, id="from_failed"),
+    ],
+)
+def test_a_note_that_is_no_longer_generating_refuses_a_transition(
+    status: DistillationStatus,
+    transition: Callable[[Note], None],
+) -> None:
+    note = _note_in(status)
+
+    with pytest.raises(InvalidDistillationTransitionError):
+        transition(note)
+
+    assert note.distillation_status is status
