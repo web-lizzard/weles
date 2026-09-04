@@ -2,7 +2,7 @@
 change_id: distill-flow-note-lands
 current_phase: 8
 next_step: 8.1
-next_command: /unit-test distill-flow-note-lands phase 8
+next_command: /implement distill-flow-note-lands phase 8
 updated: 2026-09-04
 ---
 
@@ -83,14 +83,14 @@ updated: 2026-09-04
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8f8fb94
 
 #### Automated
 
-- [ ] 8.1 Implement `SaveNoteHandler.handle()`: validate via `NoteApprovedPayload`, unpack to distill VOs, dispatch to `SaveNoteCommand` — `adapters/out/worker/handlers/note_save.py`
-- [ ] 8.2 Implement the malformed-payload path: catch `ValidationError`, log, return without raising — `adapters/out/worker/handlers/note_save.py`
-- [ ] 8.3 Write the handler tests incl. the malformed-payload case — `tests/unit/distill/test_save_note_handler.py`
-- [ ] 8.4 `cd backend && uv run pytest` green
+- [x] 8.1 Implement `SaveNoteHandler.handle()`: validate via `NoteApprovedPayload`, unpack to distill VOs, dispatch to `SaveNoteCommand` — `adapters/out/worker/handlers/note_save.py`
+- [x] 8.2 Implement the malformed-payload path: catch `ValidationError`, log, return without raising — `adapters/out/worker/handlers/note_save.py`
+- [x] 8.3 Write the handler tests incl. the malformed-payload case — `tests/unit/distill/test_save_note_handler.py` — 8f8fb94
+- [x] 8.4 `cd backend && uv run pytest` green
 
 ### Phase 9: Composition
 
