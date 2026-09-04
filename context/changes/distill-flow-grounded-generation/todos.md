@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 2
-next_step: 2.5
-next_command: /implement distill-flow-grounded-generation phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement distill-flow-grounded-generation phase 3
 updated: 2026-09-04
 ---
 
@@ -26,14 +26,14 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 2.1 Implement `CardSide` and `Anchor` strip, non-empty and absolute-bound validation — `domain/distill/value_objects.py`
-- [x] 2.2 Implement `CardLengthPolicy.breach` with front-then-back ordering and the side-naming detail string — `domain/distill/value_objects.py`
-- [x] 2.3 Write the card value-object and policy tests — `tests/unit/distill/test_card_value_objects.py`
-- [x] 2.4 `cd backend && uv run pytest` green and `uv run ruff check src tests` clean
+- [x] 2.1 Implement `CardSide` and `Anchor` strip, non-empty and absolute-bound validation — `domain/distill/value_objects.py` — f7920f1
+- [x] 2.2 Implement `CardLengthPolicy.breach` with front-then-back ordering and the side-naming detail string — `domain/distill/value_objects.py` — f7920f1
+- [x] 2.3 Write the card value-object and policy tests — `tests/unit/distill/test_card_value_objects.py` — f7920f1
+- [x] 2.4 `cd backend && uv run pytest` green and `uv run ruff check src tests` clean — f7920f1
 
 #### Manual
 
-- [ ] 2.5 Read `uv run pytest tests/unit/distill -v` names as a statement of the card-side rules
+- [x] 2.5 Read `uv run pytest tests/unit/distill -v` names as a statement of the card-side rules — f7920f1
 
 ### Phase 3: Card aggregate and CardFactory — stubs
 
