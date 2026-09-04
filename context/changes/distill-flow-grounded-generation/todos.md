@@ -10,9 +10,9 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 1.1 Add `EmptyCardSideError`, `CardSideTooLongError`, `EmptyAnchorError`, `IdenticalCardSidesError`, `InvalidDistillationTransitionError` — `domain/distill/exceptions.py`
-- [x] 1.2 Add `CardId`, `CardSide`, `Anchor`, `DiscardReason`, `AnchorResolution`, `Discard`, `CardLengthPolicy` (fields and constants only) — `domain/distill/value_objects.py`
-- [x] 1.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, every new symbol importable
+- [x] 1.1 Add `EmptyCardSideError`, `CardSideTooLongError`, `EmptyAnchorError`, `IdenticalCardSidesError`, `InvalidDistillationTransitionError` — `domain/distill/exceptions.py` — 984263e
+- [x] 1.2 Add `CardId`, `CardSide`, `Anchor`, `DiscardReason`, `AnchorResolution`, `Discard`, `CardLengthPolicy` (fields and constants only) — `domain/distill/value_objects.py` — 984263e
+- [x] 1.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, every new symbol importable — 984263e
 
 #### Manual
 
