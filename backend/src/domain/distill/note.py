@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 from pydantic import BaseModel
 
+from domain.distill.exceptions import InvalidDistillationTransitionError
 from domain.distill.value_objects import (
     DistillationStatus,
     NoteContent,
@@ -22,11 +23,17 @@ class Note(BaseModel):
     approved_at: datetime
     created_at: datetime
 
-    def mark_ready(self) -> None: ...
+    def mark_ready(self) -> None:
+        self._ensure_generating()
+        self.distillation_status = DistillationStatus.READY
 
-    def mark_failed(self) -> None: ...
+    def mark_failed(self) -> None:
+        self._ensure_generating()
+        self.distillation_status = DistillationStatus.FAILED
 
-    def _ensure_generating(self) -> None: ...
+    def _ensure_generating(self) -> None:
+        if self.distillation_status is not DistillationStatus.GENERATING:
+            raise InvalidDistillationTransitionError
 
 
 def mint_note(
