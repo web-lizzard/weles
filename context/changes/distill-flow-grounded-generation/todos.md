@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 7
-next_step: 7.6
-next_command: /implement distill-flow-grounded-generation phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test distill-flow-grounded-generation phase 8
 updated: 2026-09-04
 ---
 
@@ -101,15 +101,15 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 7.1 Add `CardProposal` carrying raw `front` / `back` / `quote` — `application/distill/value_objects.py`
-- [x] 7.2 Add the `CardGeneration` and `NoteDocumentParser` ports and `UnitOfWork.cards` — `application/distill/ports.py`
-- [x] 7.3 Bring the card repository under snapshot and restore — `adapters/out/in_memory/distill/unit_of_work.py`
-- [x] 7.4 Add the parser and generation adapter skeletons — `adapters/out/in_memory/distill/note_document_parser.py`, `adapters/out/in_memory/distill/card_generation.py`
-- [x] 7.5 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, `uv run pytest` green
+- [x] 7.1 Add `CardProposal` carrying raw `front` / `back` / `quote` — `application/distill/value_objects.py` — 9f6581b
+- [x] 7.2 Add the `CardGeneration` and `NoteDocumentParser` ports and `UnitOfWork.cards` — `application/distill/ports.py` — 9f6581b
+- [x] 7.3 Bring the card repository under snapshot and restore — `adapters/out/in_memory/distill/unit_of_work.py` — 9f6581b
+- [x] 7.4 Add the parser and generation adapter skeletons — `adapters/out/in_memory/distill/note_document_parser.py`, `adapters/out/in_memory/distill/card_generation.py` — 9f6581b
+- [x] 7.5 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, `uv run pytest` green — 9f6581b
 
 #### Manual
 
-- [x] 7.6 Import both ports and the extended `UnitOfWork` in a one-liner
+- [x] 7.6 Import both ports and the extended `UnitOfWork` in a one-liner — 9f6581b
 
 ### Phase 8: NoteDocumentParser — behavior
 
