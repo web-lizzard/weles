@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 
+from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
 from adapters.out.in_memory.distill.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
@@ -85,11 +86,12 @@ class _HandlerStack:
 
 def _make_handler_stack() -> _HandlerStack:
     notes_repo = InMemoryNoteRepository()
+    cards_repo = InMemoryCardRepository()
     outbox_store = InMemoryOutboxStore()
     outbox = InMemoryOutboxAppender(outbox_store)
 
     def uow_factory() -> InMemoryUnitOfWork:
-        return InMemoryUnitOfWork(notes_repo, outbox_store, outbox)
+        return InMemoryUnitOfWork(notes_repo, cards_repo, outbox_store, outbox)
 
     command = SaveNoteCommand(uow_factory)  # pyright: ignore[reportArgumentType]
     handler = SaveNoteHandler(command)
