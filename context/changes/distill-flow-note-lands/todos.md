@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-lands
-current_phase: 7
-next_step: 7.1
-next_command: /implement distill-flow-note-lands phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test distill-flow-note-lands phase 8
 updated: 2026-09-04
 ---
 
@@ -76,8 +76,8 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 7.1 Add `SaveNoteHandler` with an unimplemented `handle()`, alongside the existing `LoggingNoteSaveHandler` — `adapters/out/worker/handlers/note_save.py`
-- [x] 7.2 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 7.1 Add `SaveNoteHandler` with an unimplemented `handle()`, alongside the existing `LoggingNoteSaveHandler` — `adapters/out/worker/handlers/note_save.py` — 3e4e5ab
+- [x] 7.2 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 3e4e5ab
 
 ### Phase 8: Handler adapter — behavior
 
