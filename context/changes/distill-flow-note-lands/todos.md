@@ -54,11 +54,11 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 5.1 Add the `UnitOfWork` protocol (`notes` + `outbox` only) — `application/distill/ports.py`
-- [x] 5.2 Implement `InMemoryUnitOfWork` (snapshot/restore/commit, no independent test) — `adapters/out/in_memory/distill/unit_of_work.py`
-- [x] 5.3 Implement `NOTE_SAVED` and `NoteSavedPayload` with `to_envelope()` (no independent test) — `domain/distill/outbox.py`
-- [x] 5.4 Add `SaveNoteCommand` with an unimplemented `handle()` taking a `UnitOfWork` factory — `application/distill/commands/save_note.py`
-- [x] 5.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 5.1 Add the `UnitOfWork` protocol (`notes` + `outbox` only) — `application/distill/ports.py` — 0a2dded
+- [x] 5.2 Implement `InMemoryUnitOfWork` (snapshot/restore/commit, no independent test) — `adapters/out/in_memory/distill/unit_of_work.py` — 0a2dded
+- [x] 5.3 Implement `NOTE_SAVED` and `NoteSavedPayload` with `to_envelope()` (no independent test) — `domain/distill/outbox.py` — 0a2dded
+- [x] 5.4 Add `SaveNoteCommand` with an unimplemented `handle()` taking a `UnitOfWork` factory — `application/distill/commands/save_note.py` — 0a2dded
+- [x] 5.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean — 0a2dded
 
 ### Phase 6: SaveNoteCommand — behavior
 
