@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 3
-next_step: 3.1
+next_step: 3.4
 next_command: /implement distill-flow-grounded-generation phase 3
 updated: 2026-09-04
 ---
@@ -39,9 +39,9 @@ updated: 2026-09-04
 
 #### Automated
 
-- [ ] 3.1 Add `Card` with its fields and an unimplemented `_validate_sides_differ` — `domain/distill/card.py`
-- [ ] 3.2 Add `CardFactory` with an unimplemented `mint` taking an `AnchorResolution` — `domain/distill/card_factory.py`
-- [ ] 3.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, both symbols importable
+- [x] 3.1 Add `Card` with its fields and an unimplemented `_validate_sides_differ` — `domain/distill/card.py`
+- [x] 3.2 Add `CardFactory` with an unimplemented `mint` taking an `AnchorResolution` — `domain/distill/card_factory.py`
+- [x] 3.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, both symbols importable
 
 #### Manual
 
