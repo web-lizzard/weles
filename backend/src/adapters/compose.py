@@ -27,13 +27,19 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.distill.note_repository import (
+    InMemoryNoteRepository as InMemoryDistillNoteRepository,
+)
+from adapters.out.in_memory.distill.unit_of_work import (
+    InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
+)
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.claimer import InMemoryOutboxClaimer
 from adapters.out.in_memory.shared.outbox.envelope_query import (
     InMemoryOutboxEnvelopeQueryAdapter,
 )
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
-from adapters.out.worker.handlers.note_save import LoggingNoteSaveHandler
+from adapters.out.worker.handlers.note_save import SaveNoteHandler
 from adapters.out.worker.outbox_worker import OutboxWorker
 from application.capture.commands.approve_note import ApproveNoteCommand
 from application.capture.commands.send_message import GenerateReplyCommand
@@ -42,6 +48,8 @@ from application.capture.commands.start_capture_session import (
 )
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from application.distill.commands.save_note import SaveNoteCommand
+from application.distill.ports import UnitOfWork as DistillUnitOfWork
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import Settings
 from domain.capture.ports import CaptureSessionRepository
@@ -60,14 +68,7 @@ _outbox_store = InMemoryOutboxStore()
 _outbox_appender = InMemoryOutboxAppender(_outbox_store)
 _outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
 _outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
-_note_save_handler = LoggingNoteSaveHandler()
-_outbox_worker = OutboxWorker(
-    _outbox_claimer,
-    [_note_save_handler],
-    worker_id=_settings.outbox_worker_id,
-    batch_size=_settings.outbox_batch_size,
-    max_attempts=_settings.outbox_max_attempts,
-)
+_distill_note_repository = InMemoryDistillNoteRepository()
 _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
@@ -99,6 +100,31 @@ def _unit_of_work() -> UnitOfWork:
             ),
         ),
     )
+
+
+def _distill_unit_of_work() -> DistillUnitOfWork:
+    return cast(
+        DistillUnitOfWork,
+        cast(
+            object,
+            InMemoryDistillUnitOfWork(
+                _distill_note_repository,
+                _outbox_store,
+                _outbox_appender,
+            ),
+        ),
+    )
+
+
+_save_note_command = SaveNoteCommand(uow_factory=_distill_unit_of_work)
+_save_note_handler = SaveNoteHandler(_save_note_command)
+_outbox_worker = OutboxWorker(
+    _outbox_claimer,
+    [_save_note_handler],
+    worker_id=_settings.outbox_worker_id,
+    batch_size=_settings.outbox_batch_size,
+    max_attempts=_settings.outbox_max_attempts,
+)
 
 
 def get_capture_session_repository() -> CaptureSessionRepository:
