@@ -37,15 +37,3 @@ class SaveNoteHandler:
             tags=[TagSnapshot(id=tag.id, label=tag.label) for tag in payload.tags],
             approved_at=payload.approved_at,
         )
-
-
-class LoggingNoteSaveHandler:
-    envelope_type: EnvelopeType = NOTE_APPROVED
-
-    async def handle(self, envelope: OutboxEnvelope) -> None:
-        payload = NoteApprovedPayload.model_validate(envelope.payload)
-        logger.info(
-            "note approved: note_id=%s session_id=%s",
-            payload.note_id,
-            payload.session_id,
-        )
