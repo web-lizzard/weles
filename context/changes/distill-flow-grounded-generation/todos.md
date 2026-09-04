@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 1
-next_step: 1.1
+next_step: 1.4
 next_command: /implement distill-flow-grounded-generation phase 1
 updated: 2026-09-04
 ---
@@ -10,9 +10,9 @@ updated: 2026-09-04
 
 #### Automated
 
-- [ ] 1.1 Add `EmptyCardSideError`, `CardSideTooLongError`, `EmptyAnchorError`, `IdenticalCardSidesError`, `InvalidDistillationTransitionError` — `domain/distill/exceptions.py`
-- [ ] 1.2 Add `CardId`, `CardSide`, `Anchor`, `DiscardReason`, `AnchorResolution`, `Discard`, `CardLengthPolicy` (fields and constants only) — `domain/distill/value_objects.py`
-- [ ] 1.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, every new symbol importable
+- [x] 1.1 Add `EmptyCardSideError`, `CardSideTooLongError`, `EmptyAnchorError`, `IdenticalCardSidesError`, `InvalidDistillationTransitionError` — `domain/distill/exceptions.py`
+- [x] 1.2 Add `CardId`, `CardSide`, `Anchor`, `DiscardReason`, `AnchorResolution`, `Discard`, `CardLengthPolicy` (fields and constants only) — `domain/distill/value_objects.py`
+- [x] 1.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean, every new symbol importable
 
 #### Manual
 

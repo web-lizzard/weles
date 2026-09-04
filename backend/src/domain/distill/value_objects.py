@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
@@ -9,6 +10,8 @@ from domain.distill.exceptions import (
 )
 
 NOTE_CONTENT_MAX_LENGTH = 20000
+CARD_SIDE_MAX_LENGTH = 2000
+ANCHOR_MAX_LENGTH = 4000
 
 
 class NoteId(BaseModel, frozen=True):
@@ -52,3 +55,39 @@ class DistillationStatus(StrEnum):
     GENERATING = "generating"
     READY = "ready"
     FAILED = "failed"
+
+
+class CardId(BaseModel, frozen=True):
+    value: UUID
+
+
+class CardSide(BaseModel, frozen=True):
+    value: str
+
+
+class Anchor(BaseModel, frozen=True):
+    quote: str
+
+
+class DiscardReason(StrEnum):
+    UNGROUNDED = "ungrounded"
+    OVERSIZED = "oversized"
+    USER_AUDIT = "user_audit"
+
+
+class AnchorResolution(StrEnum):
+    RESOLVED = "resolved"
+    UNRESOLVED = "unresolved"
+
+
+class Discard(BaseModel, frozen=True):
+    reason: DiscardReason
+    detail: str | None
+    discarded_at: datetime
+
+
+class CardLengthPolicy(BaseModel, frozen=True):
+    front_max: int
+    back_max: int
+
+    def breach(self, _front: CardSide, _back: CardSide) -> str | None: ...
