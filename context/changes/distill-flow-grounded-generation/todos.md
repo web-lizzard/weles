@@ -86,16 +86,16 @@ updated: 2026-09-04
 
 #### Automated
 
-- [x] 6.1 Implement `_ensure_generating` raising `InvalidDistillationTransitionError` and both transitions — `domain/distill/note.py`
-- [x] 6.2 Implement `InMemoryCardRepository`'s `save`, `list_by_note`, `snapshot`, `restore` — `adapters/out/in_memory/distill/card_repository.py`
-- [x] 6.3 Rename the note contract suite's three cases to `save` — `tests/unit/distill/contracts/test_note_repository_contract.py`
-- [x] 6.4 Write the card repository contract suite incl. discarded rows appearing in `list_by_note` — `tests/unit/distill/contracts/test_card_repository_contract.py`
-- [x] 6.5 Write the transition tests incl. both illegal-transition cases — `tests/unit/distill/test_note.py`
-- [x] 6.6 `cd backend && uv run pytest` green
+- [x] 6.1 Implement `_ensure_generating` raising `InvalidDistillationTransitionError` and both transitions — `domain/distill/note.py` — 01ecc1a
+- [x] 6.2 Implement `InMemoryCardRepository`'s `save`, `list_by_note`, `snapshot`, `restore` — `adapters/out/in_memory/distill/card_repository.py` — 01ecc1a
+- [x] 6.3 Rename the note contract suite's three cases to `save` — `tests/unit/distill/contracts/test_note_repository_contract.py` — 01ecc1a
+- [x] 6.4 Write the card repository contract suite incl. discarded rows appearing in `list_by_note` — `tests/unit/distill/contracts/test_card_repository_contract.py` — 01ecc1a
+- [x] 6.5 Write the transition tests incl. both illegal-transition cases — `tests/unit/distill/test_note.py` — 01ecc1a
+- [x] 6.6 `cd backend && uv run pytest` green — 01ecc1a
 
 #### Manual
 
-- [x] 6.7 Confirm both contract suites report the `in_memory` parametrization id
+- [x] 6.7 Confirm both contract suites report the `in_memory` parametrization id — 01ecc1a
 
 ### Phase 7: Application ports and outbound adapters — stubs
 
