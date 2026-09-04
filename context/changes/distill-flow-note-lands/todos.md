@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-lands
 current_phase: 9
-next_step: 9.5
-next_command: /implement distill-flow-note-lands phase 9
+next_step: done
+next_command: /archive distill-flow-note-lands
 updated: 2026-09-04
 ---
 
@@ -103,4 +103,4 @@ updated: 2026-09-04
 
 #### Manual
 
-- [ ] 9.5 Approve a note through the existing flow and confirm via `/_outbox` that `note_approved` reaches `consumed` and a new `note_saved` envelope appears
+- [x] 9.5 Approve a note through the existing flow and confirm via `/_outbox` that `note_approved` reaches `consumed` and a new `note_saved` envelope appears
