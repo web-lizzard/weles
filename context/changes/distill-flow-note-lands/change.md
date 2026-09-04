@@ -3,7 +3,7 @@ change_id: distill-flow-note-lands
 title: Users' approved notes arrive in Weles automatically
 status: implementing
 created: 2026-09-03
-updated: 2026-09-03
+updated: 2026-09-04
 archived_at: null
 origin: distill-pillar
 effort_id: distill-flow
