@@ -1,9 +1,9 @@
 ---
 change_id: distill-flow-note-lands
-current_phase: 5
-next_step: 5.automated
-next_command: /implement distill-flow-note-lands phase 5
-updated: 2026-09-03
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test distill-flow-note-lands phase 6
+updated: 2026-09-04
 ---
 
 ### Phase 1: Note domain model — stubs
@@ -54,11 +54,11 @@ updated: 2026-09-03
 
 #### Automated
 
-- [ ] 5.1 Add the `UnitOfWork` protocol (`notes` + `outbox` only) — `application/distill/ports.py`
-- [ ] 5.2 Implement `InMemoryUnitOfWork` (snapshot/restore/commit, no independent test) — `adapters/out/in_memory/distill/unit_of_work.py`
-- [ ] 5.3 Implement `NOTE_SAVED` and `NoteSavedPayload` with `to_envelope()` (no independent test) — `domain/distill/outbox.py`
-- [ ] 5.4 Add `SaveNoteCommand` with an unimplemented `handle()` taking a `UnitOfWork` factory — `application/distill/commands/save_note.py`
-- [ ] 5.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 5.1 Add the `UnitOfWork` protocol (`notes` + `outbox` only) — `application/distill/ports.py`
+- [x] 5.2 Implement `InMemoryUnitOfWork` (snapshot/restore/commit, no independent test) — `adapters/out/in_memory/distill/unit_of_work.py`
+- [x] 5.3 Implement `NOTE_SAVED` and `NoteSavedPayload` with `to_envelope()` (no independent test) — `domain/distill/outbox.py`
+- [x] 5.4 Add `SaveNoteCommand` with an unimplemented `handle()` taking a `UnitOfWork` factory — `application/distill/commands/save_note.py`
+- [x] 5.5 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 6: SaveNoteCommand — behavior
 
