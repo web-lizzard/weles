@@ -36,7 +36,7 @@ def _sample_note() -> Note:
 
 
 @pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
-async def test_add_then_get_returns_the_saved_note(
+async def test_save_then_get_returns_the_saved_note(
     make_repository: Callable[[], NoteRepository],
 ) -> None:
     repository = make_repository()
@@ -60,7 +60,7 @@ async def test_get_returns_none_for_unknown_note_id(
 
 
 @pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
-async def test_second_add_with_same_id_overwrites(
+async def test_second_save_with_same_id_overwrites(
     make_repository: Callable[[], NoteRepository],
 ) -> None:
     repository = make_repository()
