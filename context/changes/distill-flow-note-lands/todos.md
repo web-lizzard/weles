@@ -76,8 +76,8 @@ updated: 2026-09-04
 
 #### Automated
 
-- [ ] 7.1 Add `SaveNoteHandler` with an unimplemented `handle()`, alongside the existing `LoggingNoteSaveHandler` — `adapters/out/worker/handlers/note_save.py`
-- [ ] 7.2 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
+- [x] 7.1 Add `SaveNoteHandler` with an unimplemented `handle()`, alongside the existing `LoggingNoteSaveHandler` — `adapters/out/worker/handlers/note_save.py`
+- [x] 7.2 `cd backend && uv run ruff check src`, `uv run basedpyright` clean
 
 ### Phase 8: Handler adapter — behavior
 
