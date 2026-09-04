@@ -22,6 +22,12 @@ class Note(BaseModel):
     approved_at: datetime
     created_at: datetime
 
+    def mark_ready(self) -> None: ...
+
+    def mark_failed(self) -> None: ...
+
+    def _ensure_generating(self) -> None: ...
+
 
 def mint_note(
     note_id: NoteId,

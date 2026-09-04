@@ -36,7 +36,7 @@ class SaveNoteCommand:
                 return
 
             note = mint_note(note_id, session_id, topic, content, tags, approved_at)
-            await uow.notes.add(note)
+            await uow.notes.save(note)
             payload = NoteSavedPayload(note_id=note_id.value)
             await uow.outbox.append(payload.to_envelope())
             await uow.commit()
