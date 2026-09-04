@@ -42,7 +42,7 @@ async def test_add_then_get_returns_the_saved_note(
     repository = make_repository()
     note = _sample_note()
 
-    await repository.add(note)
+    await repository.save(note)
     result = await repository.get(note.id)
 
     assert result == note
@@ -69,8 +69,8 @@ async def test_second_add_with_same_id_overwrites(
         update={"content": NoteContent(value="Updated body text.")}
     )
 
-    await repository.add(original)
-    await repository.add(updated)
+    await repository.save(original)
+    await repository.save(updated)
     result = await repository.get(original.id)
 
     assert result == updated

@@ -9,7 +9,7 @@ class InMemoryNoteRepository:
     def __init__(self) -> None:
         self._notes: dict[UUID, Note] = {}
 
-    async def add(self, note: Note) -> None:
+    async def save(self, note: Note) -> None:
         self._notes[note.id.value] = note
 
     async def get(self, note_id: NoteId) -> Note | None:
