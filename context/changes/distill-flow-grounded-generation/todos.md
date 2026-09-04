@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 4
-next_step: 4.1
-next_command: /unit-test distill-flow-grounded-generation phase 4
+next_step: 4.5
+next_command: /implement distill-flow-grounded-generation phase 4
 updated: 2026-09-04
 ---
 
@@ -51,14 +51,14 @@ updated: 2026-09-04
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 9bb6105
 
 #### Automated
 
-- [ ] 4.1 Implement the differing-sides invariant with casefold canonicalization — `domain/distill/card.py`
-- [ ] 4.2 Implement `mint`'s fixed order: construct, grounding, length policy, first violation wins — `domain/distill/card_factory.py`
-- [ ] 4.3 Write the aggregate and factory tests — `tests/unit/distill/test_card.py`, `tests/unit/distill/test_card_factory.py`
-- [ ] 4.4 `cd backend && uv run pytest` green
+- [x] 4.1 Implement the differing-sides invariant with casefold canonicalization — `domain/distill/card.py`
+- [x] 4.2 Implement `mint`'s fixed order: construct, grounding, length policy, first violation wins — `domain/distill/card_factory.py`
+- [x] 4.3 Write the aggregate and factory tests — `tests/unit/distill/test_card.py`, `tests/unit/distill/test_card_factory.py`
+- [x] 4.4 `cd backend && uv run pytest` green
 
 #### Manual
 
