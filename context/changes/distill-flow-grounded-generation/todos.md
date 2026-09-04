@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 4
-next_step: 4.5
-next_command: /implement distill-flow-grounded-generation phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement distill-flow-grounded-generation phase 5
 updated: 2026-09-04
 ---
 
@@ -62,7 +62,7 @@ updated: 2026-09-04
 
 #### Manual
 
-- [ ] 4.5 Confirm the ordering test name states grounding-before-length
+- [x] 4.5 Confirm the ordering test name states grounding-before-length — 0a898c6
 
 ### Phase 5: Note transitions and repository ports — stubs
 
