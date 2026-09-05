@@ -1,9 +1,9 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 8
-next_step: 8.1
+next_step: 8.5
 next_command: /implement distill-flow-grounded-generation phase 8
-updated: 2026-09-04
+updated: 2026-09-05
 ---
 
 ### Phase 1: Card value objects and exceptions — stubs
@@ -119,10 +119,10 @@ updated: 2026-09-04
 
 #### Automated
 
-- [ ] 8.1 Implement block splitting and the shared normalization — collapse whitespace, strip inline emphasis and block markers — `adapters/out/in_memory/distill/note_document_parser.py`
-- [ ] 8.2 Implement single-block substring resolution incl. the empty-quote-never-resolves rule — `adapters/out/in_memory/distill/note_document_parser.py`
-- [ ] 8.3 Write the parser contract suite — `tests/unit/distill/contracts/test_note_document_parser_contract.py`
-- [ ] 8.4 `cd backend && uv run pytest` green
+- [x] 8.1 Implement block splitting and the shared normalization — collapse whitespace, strip inline emphasis and block markers — `adapters/out/in_memory/distill/note_document_parser.py`
+- [x] 8.2 Implement single-block substring resolution incl. the empty-quote-never-resolves rule — `adapters/out/in_memory/distill/note_document_parser.py`
+- [x] 8.3 Write the parser contract suite — `tests/unit/distill/contracts/test_note_document_parser_contract.py`
+- [x] 8.4 `cd backend && uv run pytest` green
 
 #### Manual
 
