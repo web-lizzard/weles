@@ -77,3 +77,30 @@ async def test_resolves_false_when_no_single_block_matches(
     parser = make_parser()
 
     assert await parser.resolves(_NOTE, quote) is False
+
+
+@pytest.mark.parametrize("make_parser", _IMPLEMENTATIONS, ids=["markdown"])
+async def test_leading_block_markers_strip_before_matching(
+    make_parser: Callable[[], NoteDocumentParser],
+) -> None:
+    parser = make_parser()
+
+    assert (
+        await parser.resolves(NoteContent(value="# TCP Handshake"), "TCP Handshake")
+        is True
+    )
+
+
+@pytest.mark.parametrize("make_parser", _IMPLEMENTATIONS, ids=["markdown"])
+async def test_whitespace_runs_collapse_before_matching(
+    make_parser: Callable[[], NoteDocumentParser],
+) -> None:
+    parser = make_parser()
+
+    assert (
+        await parser.resolves(
+            NoteContent(value="Connections are\nestablished"),
+            "Connections are established",
+        )
+        is True
+    )

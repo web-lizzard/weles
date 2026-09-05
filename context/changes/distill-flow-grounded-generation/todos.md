@@ -137,6 +137,8 @@ updated: 2026-09-05
 
 - [x] 8.6 R2-F1 leading block markers must strip to empty — f86e8af
 - [x] 8.7 R2-F2 whitespace runs must collapse to a single space — f86e8af
+- [x] 8.8 R3-F2 test_note_document_parser.py duplicates the contract suite against the concrete adapter
+- [x] 8.9 R3-F3 test_note_document_parser.py is not named in any phase's Changes Required
 
 ### Phase 9: Deterministic CardGeneration adapter — behavior
 

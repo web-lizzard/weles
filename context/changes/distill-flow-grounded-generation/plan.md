@@ -449,6 +449,15 @@ Artifact: `reviews/2026-09-05-r2-mutation-test-phases-2-4-8-.md`
 - `R2-F2` — whitespace runs must collapse to a single space
   Fix: assert `_normalize("Connections are\nestablished") == "Connections are established"` (or a contract case that reflowed quotes still resolve after single-space collapse)
 
+### Review r3
+
+Artifact: `reviews/2026-09-05-r3-impl-review.md`
+
+- `R3-F2` — `test_note_document_parser.py` duplicates the contract suite against the concrete adapter
+  Fix: a deterministic in-memory adapter gets exactly one contract-parametrized suite under `contracts/`; a normalization invariant belongs there, parametrized over `_IMPLEMENTATIONS`, not in a standalone concrete-class test file
+- `R3-F3` — `test_note_document_parser.py` is not named in any phase's Changes Required
+  Fix: test coverage added to satisfy a Review-triage fix belongs in the plan-named contract file; do not create a new file outside any phase's Changes Required
+
 ---
 
 ## Phase 9: Deterministic CardGeneration adapter — behavior
