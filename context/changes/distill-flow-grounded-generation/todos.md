@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 12
-next_step: 12.1
+next_step: 12.5
 next_command: /implement distill-flow-grounded-generation phase 12
 updated: 2026-09-05
 ---
@@ -190,14 +190,14 @@ updated: 2026-09-05
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 4fa017f
 
 #### Automated
 
-- [ ] 12.1 Implement validate-via-`NoteSavedPayload` and delegate to the command — `adapters/out/worker/handlers/flashcard_gen.py`
-- [ ] 12.2 Implement the malformed-payload path: log and return without raising — `adapters/out/worker/handlers/flashcard_gen.py`
-- [ ] 12.3 Write the handler tests incl. the malformed-payload case — `tests/unit/distill/test_flashcard_gen_handler.py`
-- [ ] 12.4 `cd backend && uv run pytest` green
+- [x] 12.1 Implement validate-via-`NoteSavedPayload` and delegate to the command — `adapters/out/worker/handlers/flashcard_gen.py`
+- [x] 12.2 Implement the malformed-payload path: log and return without raising — `adapters/out/worker/handlers/flashcard_gen.py`
+- [x] 12.3 Write the handler tests incl. the malformed-payload case — `tests/unit/distill/test_flashcard_gen_handler.py`
+- [x] 12.4 `cd backend && uv run pytest` green
 
 #### Manual
 
