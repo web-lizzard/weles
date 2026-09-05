@@ -243,6 +243,15 @@ Implement the aggregate's one invariant and the factory's fixed evaluation order
 #### Manual Verification:
 - `cd backend && uv run pytest tests/unit/distill/test_card_factory.py -v` and confirm the ordering test name states grounding-before-length
 
+### Review r2
+
+Artifact: `reviews/2026-09-05-r2-mutation-test-phases-2-4-8-.md`
+
+- `R2-F3` — mint must stamp created_at in UTC
+  Fix: assert every minted `Card.created_at.tzinfo is UTC`, including live cards
+- `R2-F4` — oversized discard must stamp discarded_at in UTC
+  Fix: assert an oversized mint sets `card.discard.discarded_at.tzinfo is UTC`
+
 ---
 
 ## Phase 5: Note transitions and repository ports — stubs
@@ -430,6 +439,15 @@ Implement quote resolution — the rule the ADR deliberately left to this change
 
 #### Manual Verification:
 - `cd backend && uv run pytest tests/unit/distill/contracts/test_note_document_parser_contract.py -v` and read the case names as the statement of the matching rule
+
+### Review r2
+
+Artifact: `reviews/2026-09-05-r2-mutation-test-phases-2-4-8-.md`
+
+- `R2-F1` — leading block markers must strip to empty
+  Fix: assert `_normalize("# TCP Handshake") == "TCP Handshake"` (or an equivalent contract case that a heading quote resolves only when the `#` prefix is removed, not replaced)
+- `R2-F2` — whitespace runs must collapse to a single space
+  Fix: assert `_normalize("Connections are\nestablished") == "Connections are established"` (or a contract case that reflowed quotes still resolve after single-space collapse)
 
 ---
 
