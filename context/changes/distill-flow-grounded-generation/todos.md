@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 14
-next_step: 14.8
-next_command: /implement distill-flow-grounded-generation phase 14
+next_step: ""
+next_command: /archive distill-flow-grounded-generation
 updated: 2026-09-05
 ---
 
@@ -235,4 +235,4 @@ updated: 2026-09-05
 
 #### Manual
 
-- [ ] 14.8 `cd backend && uv run pytest tests/bdd -m "distill-flow and AC-04" -v` and confirm the zero-card scenario passes as a completed distillation
+- [x] 14.8 `cd backend && uv run pytest tests/bdd -m "distill-flow and AC-04" -v` and confirm the zero-card scenario passes as a completed distillation
