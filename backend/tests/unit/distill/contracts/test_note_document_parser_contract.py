@@ -9,7 +9,7 @@ from application.distill.ports import NoteDocumentParser
 from domain.distill.value_objects import NoteContent
 
 _IMPLEMENTATIONS: list[Callable[[], NoteDocumentParser]] = [
-    MarkdownNoteDocumentParser,  # pyright: ignore[reportAssignmentType]
+    MarkdownNoteDocumentParser,
 ]
 
 _NOTE = NoteContent(
