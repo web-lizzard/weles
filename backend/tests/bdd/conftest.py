@@ -8,6 +8,9 @@ from fastapi.testclient import TestClient
 from integration.support.in_memory_capture import (  # pyright: ignore[reportImplicitRelativeImport]
     InMemoryCaptureComposition,
 )
+from integration.support.in_memory_distill import (  # pyright: ignore[reportImplicitRelativeImport]
+    InMemoryDistillComposition,
+)
 
 from adapters.http.capture import router as capture_router
 from main import app
@@ -36,3 +39,10 @@ def capture_client(
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def distill_composition(
+    capture_composition: InMemoryCaptureComposition,
+) -> Iterator[InMemoryDistillComposition]:
+    yield InMemoryDistillComposition.create(capture_composition.outbox_store)

@@ -8,6 +8,7 @@ pytest_plugins = [
     "bdd.steps.approve_outbox",
     "bdd.steps.capture",
     "bdd.steps.coverage_wrapup",
+    "bdd.steps.distill",
     "bdd.steps.draft_note",
     "bdd.steps.vocabulary_reuse",
 ]
