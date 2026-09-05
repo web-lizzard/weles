@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 13
-next_step: 13.1
+next_step: 13.6
 next_command: /implement distill-flow-grounded-generation phase 13
 updated: 2026-09-05
 ---
@@ -207,11 +207,11 @@ updated: 2026-09-05
 
 #### Automated
 
-- [ ] 13.1 Add `card_front_max` and `card_back_max` — `config/settings.py`
-- [ ] 13.2 Wire the card repository, parser, generation adapter, `CardFactory` and the extended distill unit of work — `adapters/compose.py`
-- [ ] 13.3 Register `FlashcardGenHandler` after `SaveNoteHandler` in the `OutboxWorker` handler list — `adapters/compose.py`
-- [ ] 13.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
-- [ ] 13.5 `cd backend && uv run pytest` green incl. the exhaustiveness test, `uv run ruff check src` and `uv run basedpyright` clean
+- [x] 13.1 Add `card_front_max` and `card_back_max` — `config/settings.py`
+- [x] 13.2 Wire the card repository, parser, generation adapter, `CardFactory` and the extended distill unit of work — `adapters/compose.py`
+- [x] 13.3 Register `FlashcardGenHandler` after `SaveNoteHandler` in the `OutboxWorker` handler list — `adapters/compose.py`
+- [x] 13.4 Add the five new codes to `EXCEPTION_STATUS_MAP` — `adapters/http/errors.py`
+- [x] 13.5 `cd backend && uv run pytest` green incl. the exhaustiveness test, `uv run ruff check src` and `uv run basedpyright` clean
 
 #### Manual
 
