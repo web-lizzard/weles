@@ -2,7 +2,7 @@
 change_id: distill-flow-grounded-generation
 current_phase: 9
 next_step: 9.1
-next_command: /unit-test distill-flow-grounded-generation phase 9
+next_command: /implement distill-flow-grounded-generation phase 9
 updated: 2026-09-05
 ---
 
@@ -142,18 +142,18 @@ updated: 2026-09-05
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a0c6981
 
 #### Automated
 
-- [ ] 9.1 Implement block-derived proposals, skipping any block whose remainder is empty — `adapters/out/in_memory/distill/card_generation.py`
-- [ ] 9.2 Append the one fabricated proposal with its sentinel quote — `adapters/out/in_memory/distill/card_generation.py`
-- [ ] 9.3 Write the generation contract suite incl. determinism and the single unresolvable proposal — `tests/unit/distill/contracts/test_card_generation_contract.py`
-- [ ] 9.4 `cd backend && uv run pytest` green
+- [x] 9.1 Implement block-derived proposals, skipping any block whose remainder is empty — `adapters/out/in_memory/distill/card_generation.py`
+- [x] 9.2 Append the one fabricated proposal with its sentinel quote — `adapters/out/in_memory/distill/card_generation.py`
+- [x] 9.3 Write the generation contract suite incl. determinism and the single unresolvable proposal — `tests/unit/distill/contracts/test_card_generation_contract.py`
+- [x] 9.4 `cd backend && uv run pytest` green
 
 #### Manual
 
-- [ ] 9.5 Run the adapter on a two-block note in a one-liner and read the proposals
+- [x] 9.5 Run the adapter on a two-block note in a one-liner and read the proposals
 
 ### Phase 10: Command and handler — stubs
 
