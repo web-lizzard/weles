@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 10
-next_step: 10.1
-next_command: /implement distill-flow-grounded-generation phase 10
+current_phase: 11
+next_step: 11.1
+next_command: /unit-test distill-flow-grounded-generation phase 11
 updated: 2026-09-05
 ---
 
@@ -159,13 +159,13 @@ updated: 2026-09-05
 
 #### Automated
 
-- [ ] 10.1 Add `GenerateCardsCommand` with a uow factory and an unimplemented `handle` — `application/distill/commands/generate_cards.py`
-- [ ] 10.2 Add `FlashcardGenHandler` with `envelope_type = NOTE_SAVED` and an unimplemented `handle` — `adapters/out/worker/handlers/flashcard_gen.py`
-- [ ] 10.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean
+- [x] 10.1 Add `GenerateCardsCommand` with a uow factory and an unimplemented `handle` — `application/distill/commands/generate_cards.py`
+- [x] 10.2 Add `FlashcardGenHandler` with `envelope_type = NOTE_SAVED` and an unimplemented `handle` — `adapters/out/worker/handlers/flashcard_gen.py`
+- [x] 10.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean
 
 #### Manual
 
-- [ ] 10.4 Print `FlashcardGenHandler.envelope_type` and confirm it is `note_saved`
+- [x] 10.4 Print `FlashcardGenHandler.envelope_type` and confirm it is `note_saved`
 
 ### Phase 11: GenerateCardsCommand — behavior
 
