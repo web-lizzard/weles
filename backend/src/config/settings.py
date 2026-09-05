@@ -25,3 +25,5 @@ class Settings(BaseSettings):
     outbox_batch_size: int = 10
     outbox_max_attempts: int = 3
     outbox_worker_id: str = "note-save-worker"
+    card_front_max: int = 200
+    card_back_max: int = 600

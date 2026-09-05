@@ -27,7 +27,13 @@ from adapters.out.in_memory.capture.transcript_query import (
     InMemoryTranscriptQueryAdapter,
 )
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.distill.card_generation import (
+    DeterministicCardGenerationAdapter,
+)
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
+from adapters.out.in_memory.distill.note_document_parser import (
+    MarkdownNoteDocumentParser,
+)
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
@@ -40,6 +46,7 @@ from adapters.out.in_memory.shared.outbox.envelope_query import (
     InMemoryOutboxEnvelopeQueryAdapter,
 )
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from adapters.out.worker.handlers.flashcard_gen import FlashcardGenHandler
 from adapters.out.worker.handlers.note_save import SaveNoteHandler
 from adapters.out.worker.outbox_worker import OutboxWorker
 from application.capture.commands.approve_note import ApproveNoteCommand
@@ -49,6 +56,7 @@ from application.capture.commands.start_capture_session import (
 )
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from application.distill.commands.generate_cards import GenerateCardsCommand
 from application.distill.commands.save_note import SaveNoteCommand
 from application.distill.ports import UnitOfWork as DistillUnitOfWork
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
@@ -56,6 +64,8 @@ from config.settings import Settings
 from domain.capture.ports import CaptureSessionRepository
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
+from domain.distill.card_factory import CardFactory
+from domain.distill.value_objects import CardLengthPolicy
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
 _store = InMemoryMessageStore()
@@ -71,6 +81,13 @@ _outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
 _outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
 _distill_note_repository = InMemoryDistillNoteRepository()
 _distill_card_repository = InMemoryCardRepository()
+_note_document_parser = MarkdownNoteDocumentParser()
+_card_generation = DeterministicCardGenerationAdapter()
+_card_factory = CardFactory(
+    CardLengthPolicy(
+        front_max=_settings.card_front_max, back_max=_settings.card_back_max
+    )
+)
 _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
@@ -121,9 +138,16 @@ def _distill_unit_of_work() -> DistillUnitOfWork:
 
 _save_note_command = SaveNoteCommand(uow_factory=_distill_unit_of_work)
 _save_note_handler = SaveNoteHandler(_save_note_command)
+_generate_cards_command = GenerateCardsCommand(
+    uow_factory=_distill_unit_of_work,
+    card_generation=_card_generation,
+    parser=_note_document_parser,
+    card_factory=_card_factory,
+)
+_flashcard_gen_handler = FlashcardGenHandler(_generate_cards_command)
 _outbox_worker = OutboxWorker(
     _outbox_claimer,
-    [_save_note_handler],
+    [_save_note_handler, _flashcard_gen_handler],
     worker_id=_settings.outbox_worker_id,
     batch_size=_settings.outbox_batch_size,
     max_attempts=_settings.outbox_max_attempts,
