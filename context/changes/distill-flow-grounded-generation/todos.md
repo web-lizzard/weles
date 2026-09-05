@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 11
-next_step: 11.1
-next_command: /unit-test distill-flow-grounded-generation phase 11
+next_step: 11.7
+next_command: /implement distill-flow-grounded-generation phase 11
 updated: 2026-09-05
 ---
 
@@ -171,20 +171,20 @@ updated: 2026-09-05
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — c4b8132
 
 #### Automated
 
-- [ ] 11.1 Implement the load plus the missing-note and non-`generating` logged no-ops — `application/distill/commands/generate_cards.py`
-- [ ] 11.2 Implement the generation-failure path through `mark_failed` — `application/distill/commands/generate_cards.py`
-- [ ] 11.3 Implement the per-proposal resolve, mint and save loop with the `CoreException` catch-and-continue — `application/distill/commands/generate_cards.py`
-- [ ] 11.4 Implement `mark_ready` regardless of live card count, then save and commit — `application/distill/commands/generate_cards.py`
-- [ ] 11.5 Write the command tests incl. zero-live-cards, generation failure, redelivery no-op and rollback — `tests/unit/distill/test_generate_cards_command.py`
-- [ ] 11.6 `cd backend && uv run pytest` green
+- [x] 11.1 Implement the load plus the missing-note and non-`generating` logged no-ops — `application/distill/commands/generate_cards.py`
+- [x] 11.2 Implement the generation-failure path through `mark_failed` — `application/distill/commands/generate_cards.py`
+- [x] 11.3 Implement the per-proposal resolve, mint and save loop with the `CoreException` catch-and-continue — `application/distill/commands/generate_cards.py`
+- [x] 11.4 Implement `mark_ready` regardless of live card count, then save and commit — `application/distill/commands/generate_cards.py`
+- [x] 11.5 Write the command tests incl. zero-live-cards, generation failure, redelivery no-op and rollback — `tests/unit/distill/test_generate_cards_command.py`
+- [x] 11.6 `cd backend && uv run pytest` green
 
 #### Manual
 
-- [ ] 11.7 Confirm the zero-live-cards case is named as a success, not a failure
+- [x] 11.7 Confirm the zero-live-cards case is named as a success, not a failure
 
 ### Phase 12: FlashcardGenHandler — behavior
 
