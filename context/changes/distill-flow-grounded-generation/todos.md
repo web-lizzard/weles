@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 8
-next_step: 8.5
-next_command: /implement distill-flow-grounded-generation phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /unit-test distill-flow-grounded-generation phase 9
 updated: 2026-09-05
 ---
 
@@ -63,6 +63,11 @@ updated: 2026-09-05
 #### Manual
 
 - [x] 4.5 Confirm the ordering test name states grounding-before-length — 0a898c6
+
+#### Triage
+
+- [x] 4.6 R2-F3 mint must stamp created_at in UTC
+- [x] 4.7 R2-F4 oversized discard must stamp discarded_at in UTC
 
 ### Phase 5: Note transitions and repository ports — stubs
 
@@ -126,7 +131,12 @@ updated: 2026-09-05
 
 #### Manual
 
-- [ ] 8.5 Read the parser contract case names as the statement of the matching rule
+- [x] 8.5 Read the parser contract case names as the statement of the matching rule — f86e8af
+
+#### Triage
+
+- [x] 8.6 R2-F1 leading block markers must strip to empty — f86e8af
+- [x] 8.7 R2-F2 whitespace runs must collapse to a single space — f86e8af
 
 ### Phase 9: Deterministic CardGeneration adapter — behavior
 
