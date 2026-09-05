@@ -119,10 +119,10 @@ updated: 2026-09-05
 
 #### Automated
 
-- [x] 8.1 Implement block splitting and the shared normalization — collapse whitespace, strip inline emphasis and block markers — `adapters/out/in_memory/distill/note_document_parser.py`
-- [x] 8.2 Implement single-block substring resolution incl. the empty-quote-never-resolves rule — `adapters/out/in_memory/distill/note_document_parser.py`
-- [x] 8.3 Write the parser contract suite — `tests/unit/distill/contracts/test_note_document_parser_contract.py`
-- [x] 8.4 `cd backend && uv run pytest` green
+- [x] 8.1 Implement block splitting and the shared normalization — collapse whitespace, strip inline emphasis and block markers — `adapters/out/in_memory/distill/note_document_parser.py` — 1535f41
+- [x] 8.2 Implement single-block substring resolution incl. the empty-quote-never-resolves rule — `adapters/out/in_memory/distill/note_document_parser.py` — 1535f41
+- [x] 8.3 Write the parser contract suite — `tests/unit/distill/contracts/test_note_document_parser_contract.py` — 1535f41
+- [x] 8.4 `cd backend && uv run pytest` green — 1535f41
 
 #### Manual
 
