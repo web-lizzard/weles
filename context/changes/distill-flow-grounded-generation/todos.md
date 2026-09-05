@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-grounded-generation
 current_phase: 14
-next_step: 14.1
+next_step: 14.8
 next_command: /implement distill-flow-grounded-generation phase 14
 updated: 2026-09-05
 ---
@@ -225,13 +225,13 @@ updated: 2026-09-05
 
 #### Automated
 
-- [ ] 14.1 Register the `distill-flow` marker — `pyproject.toml`
-- [ ] 14.2 Add `InMemoryDistillComposition` over capture's shared outbox store, with a `worker()` builder — `tests/integration/support/in_memory_distill.py`
-- [ ] 14.3 Add the `distill_composition` fixture depending on `capture_composition` — `tests/bdd/conftest.py`
-- [ ] 14.4 Write the US-02 and US-03 feature files tagged `@distill-flow` plus AC ids — `tests/features/distill-flow/`
-- [ ] 14.5 Write the drain, seed-a-held-note and assertion steps — `tests/bdd/steps/distill.py`
-- [ ] 14.6 Register the step module in `pytest_plugins` — `tests/bdd/test_features.py`
-- [ ] 14.7 `cd backend && uv run pytest tests/bdd -m "distill-flow" -v` green with four scenarios and `uv run pytest` green
+- [x] 14.1 Register the `distill-flow` marker — `pyproject.toml`
+- [x] 14.2 Add `InMemoryDistillComposition` over capture's shared outbox store, with a `worker()` builder — `tests/integration/support/in_memory_distill.py`
+- [x] 14.3 Add the `distill_composition` fixture depending on `capture_composition` — `tests/bdd/conftest.py`
+- [x] 14.4 Write the US-02 and US-03 feature files tagged `@distill-flow` plus AC ids — `tests/features/distill-flow/`
+- [x] 14.5 Write the drain, seed-a-held-note and assertion steps — `tests/bdd/steps/distill.py`
+- [x] 14.6 Register the step module in `pytest_plugins` — `tests/bdd/test_features.py`
+- [x] 14.7 `cd backend && uv run pytest tests/bdd -m "distill-flow" -v` green with four scenarios and `uv run pytest` green
 
 #### Manual
 
