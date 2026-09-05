@@ -159,13 +159,13 @@ updated: 2026-09-05
 
 #### Automated
 
-- [x] 10.1 Add `GenerateCardsCommand` with a uow factory and an unimplemented `handle` — `application/distill/commands/generate_cards.py`
-- [x] 10.2 Add `FlashcardGenHandler` with `envelope_type = NOTE_SAVED` and an unimplemented `handle` — `adapters/out/worker/handlers/flashcard_gen.py`
-- [x] 10.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean
+- [x] 10.1 Add `GenerateCardsCommand` with a uow factory and an unimplemented `handle` — `application/distill/commands/generate_cards.py` — 8cec511
+- [x] 10.2 Add `FlashcardGenHandler` with `envelope_type = NOTE_SAVED` and an unimplemented `handle` — `adapters/out/worker/handlers/flashcard_gen.py` — 8cec511
+- [x] 10.3 `cd backend && uv run ruff check src` and `uv run basedpyright` clean — 8cec511
 
 #### Manual
 
-- [x] 10.4 Print `FlashcardGenHandler.envelope_type` and confirm it is `note_saved`
+- [x] 10.4 Print `FlashcardGenHandler.envelope_type` and confirm it is `note_saved` — 8cec511
 
 ### Phase 11: GenerateCardsCommand — behavior
 
