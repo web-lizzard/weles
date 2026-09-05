@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-grounded-generation
-current_phase: 13
-next_step: 13.6
-next_command: /implement distill-flow-grounded-generation phase 13
+current_phase: 14
+next_step: 14.1
+next_command: /implement distill-flow-grounded-generation phase 14
 updated: 2026-09-05
 ---
 
@@ -215,13 +215,13 @@ updated: 2026-09-05
 
 #### Manual
 
-- [ ] 13.6 Approve a note through the running backend and confirm via `/_outbox` that `note_approved` and `note_saved` both reach `consumed`
+- [x] 13.6 Approve a note through the running backend and confirm via `/_outbox` that `note_approved` and `note_saved` both reach `consumed`
 
 ### Phase 14: Acceptance scenarios for US-02 and US-03
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — ef4b307
 
 #### Automated
 
