@@ -5,8 +5,15 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from adapters.compose import get_list_notes_query
 from adapters.http.capture import router as capture_router
+from adapters.http.notes import router as notes_router
 from adapters.http.outbox import router as outbox_router
+from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
+from adapters.out.in_memory.distill.list_notes_query import InMemoryListNotesQuery
+from adapters.out.in_memory.distill.note_repository import (
+    InMemoryNoteRepository as InMemoryDistillNoteRepository,
+)
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from main import app
 
@@ -24,6 +31,10 @@ def _outbox_routes_registered(application: FastAPI) -> bool:
     return any(
         getattr(route, "path", None) == "/_outbox" for route in application.routes
     )
+
+
+def _notes_routes_registered(application: FastAPI) -> bool:
+    return any(getattr(route, "path", None) == "/notes" for route in application.routes)
 
 
 @pytest.fixture
@@ -55,4 +66,25 @@ def outbox_client() -> Iterator[OutboxTestContext]:
     app.dependency_overrides.update(composition.dependency_overrides())
     with TestClient(app) as client:
         yield OutboxTestContext(client=client, outbox_store=composition.outbox_store)
+    app.dependency_overrides.clear()
+
+
+@dataclass
+class NotesTestContext:
+    client: TestClient
+    notes: InMemoryDistillNoteRepository
+    cards: InMemoryCardRepository
+
+
+@pytest.fixture
+def notes_client() -> Iterator[NotesTestContext]:
+    if not _notes_routes_registered(app):
+        app.include_router(notes_router)
+
+    notes = InMemoryDistillNoteRepository()
+    cards = InMemoryCardRepository()
+    query = InMemoryListNotesQuery(notes, cards)
+    app.dependency_overrides[get_list_notes_query] = lambda: query
+    with TestClient(app) as client:
+        yield NotesTestContext(client=client, notes=notes, cards=cards)
     app.dependency_overrides.clear()
