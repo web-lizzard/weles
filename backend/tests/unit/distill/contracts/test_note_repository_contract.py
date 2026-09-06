@@ -74,3 +74,18 @@ async def test_second_save_with_same_id_overwrites(
     result = await repository.get(original.id)
 
     assert result == updated
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_list_all_returns_every_saved_note(
+    make_repository: Callable[[], NoteRepository],
+) -> None:
+    repository = make_repository()
+    first = _sample_note()
+    second = _sample_note()
+
+    await repository.save(first)
+    await repository.save(second)
+    result = await repository.list_all()
+
+    assert result == [first, second] or result == [second, first]
