@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 1
-next_step: 1.1
-next_command: /implement distill-flow-note-list phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test distill-flow-note-list phase 2
 updated: 2026-09-06
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 1.1 Add `Note.updated_at` field and private `_touch` stub — `domain/distill/note.py`
-- [ ] 1.2 `cd backend && uv run pytest tests/unit/distill/test_note.py` still green and `uv run basedpyright src/domain/distill/note.py` clean
+- [x] 1.1 Add `Note.updated_at` field and private `_touch` stub — `domain/distill/note.py`
+- [x] 1.2 `cd backend && uv run pytest tests/unit/distill/test_note.py` still green and `uv run basedpyright src/domain/distill/note.py` clean
 
 ### Phase 2: Note recency — wiring
 
