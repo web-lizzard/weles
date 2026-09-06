@@ -1,10 +1,10 @@
 ---
 change_id: distill-flow-note-list
 title: Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session
-status: implemented
+status: archived
 created: 2026-09-06
 updated: 2026-09-06
-archived_at: null
+archived_at: 2026-09-06T19:29:10Z
 origin: distill-pillar
 effort_id: distill-flow
 slice_ref: S-03
