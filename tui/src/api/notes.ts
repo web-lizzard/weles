@@ -1,3 +1,5 @@
+import { client } from "./client.js";
+
 export type NoteListItem = {
   noteId: string;
   topicLabel: string;
@@ -7,5 +9,16 @@ export type NoteListItem = {
 };
 
 export async function listNotes(): Promise<NoteListItem[]> {
-  throw new Error("Not implemented");
+  const { data, error } = await client.GET("/notes");
+  if (error || !data) {
+    throw new Error("Failed to list notes");
+  }
+  return data.map((item) => ({
+    noteId: item.note_id,
+    topicLabel: item.topic_label,
+    distillationStatus:
+      item.distillation_status as NoteListItem["distillationStatus"],
+    cardCount: item.card_count,
+    lastUpdatedAt: item.last_updated_at,
+  }));
 }
