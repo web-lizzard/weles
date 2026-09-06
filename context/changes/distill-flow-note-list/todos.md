@@ -120,10 +120,10 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 11.1 Add `isNotesOverlayOpen`/`openNotes`/`closeNotes` to `useAppStore` — `tui/src/store/index.ts`
-- [x] 11.2 Add `NOTES_COMMAND` constant — `tui/src/screens/CaptureScreen.tsx`
-- [x] 11.3 Import `useInput`, read overlay state, unimplemented handler — `tui/src/app.tsx`
-- [x] 11.4 `cd tui && pnpm typecheck` clean
+- [x] 11.1 Add `isNotesOverlayOpen`/`openNotes`/`closeNotes` to `useAppStore` — `tui/src/store/index.ts` — dd12f17
+- [x] 11.2 Add `NOTES_COMMAND` constant — `tui/src/screens/CaptureScreen.tsx` — dd12f17
+- [x] 11.3 Import `useInput`, read overlay state, unimplemented handler — `tui/src/app.tsx` — dd12f17
+- [x] 11.4 `cd tui && pnpm typecheck` clean — dd12f17
 
 ### Phase 12: Overlay shell + dispatch — wiring
 
