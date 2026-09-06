@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 8
-next_step: 8.4
-next_command: /implement distill-flow-note-list phase 8
+current_phase: 10
+next_step: 12.6
+next_command: /implement distill-flow-note-list phase 12
 updated: 2026-09-06
 ---
 
@@ -105,7 +105,7 @@ updated: 2026-09-06
 
 #### Triage
 
-- [ ] 8.4 R1-F2 api/client.ts modified outside any phase's Changes Required
+- [x] 8.4 R1-F2 api/client.ts modified outside any phase's Changes Required
 
 ### Phase 9: Notes data store — interfaces
 
@@ -130,7 +130,7 @@ updated: 2026-09-06
 
 #### Triage
 
-- [ ] 10.5 R1-F6 startPolling leaks a prior interval when called again before stopPolling
+- [x] 10.5 R1-F6 startPolling leaks a prior interval when called again before stopPolling — 602dd49
 
 ### Phase 11: Overlay shell + dispatch — interfaces
 
