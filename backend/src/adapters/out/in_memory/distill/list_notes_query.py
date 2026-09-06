@@ -2,7 +2,7 @@ from application.distill.queries.list_notes import NoteListItemDTO
 from domain.distill.ports import CardRepository, NoteRepository
 
 
-class InMemoryListNotesQuery:
+class InMemoryListNotesQueryAdapter:
     def __init__(
         self, note_repository: NoteRepository, card_repository: CardRepository
     ) -> None:
