@@ -105,3 +105,61 @@ def test_a_note_that_is_no_longer_generating_refuses_a_transition(
         transition(note)
 
     assert note.distillation_status is status
+
+
+def test_mint_note_sets_updated_at_equal_to_created_at() -> None:
+    note = mint_note(
+        NoteId(value=uuid4()),
+        SessionId(value=uuid4()),
+        TopicSnapshot(id=uuid4(), label="TCP handshakes"),
+        NoteContent(value="We discussed how connections are established."),
+        [],
+        datetime.now(UTC),
+    )
+
+    assert note.updated_at == note.created_at
+
+
+@pytest.mark.parametrize(
+    "transition",
+    [
+        pytest.param(Note.mark_ready, id="mark_ready"),
+        pytest.param(Note.mark_failed, id="mark_failed"),
+    ],
+)
+def test_a_legal_transition_bumps_updated_at_forward(
+    transition: Callable[[Note], None],
+) -> None:
+    note = _note_in(DistillationStatus.GENERATING)
+    previous_updated_at = note.updated_at
+
+    transition(note)
+
+    assert note.updated_at > previous_updated_at
+
+
+@pytest.mark.parametrize(
+    "transition",
+    [
+        pytest.param(Note.mark_ready, id="mark_ready"),
+        pytest.param(Note.mark_failed, id="mark_failed"),
+    ],
+)
+@pytest.mark.parametrize(
+    "status",
+    [
+        pytest.param(DistillationStatus.READY, id="from_ready"),
+        pytest.param(DistillationStatus.FAILED, id="from_failed"),
+    ],
+)
+def test_a_refused_transition_does_not_bump_updated_at(
+    status: DistillationStatus,
+    transition: Callable[[Note], None],
+) -> None:
+    note = _note_in(status)
+    previous_updated_at = note.updated_at
+
+    with pytest.raises(InvalidDistillationTransitionError):
+        transition(note)
+
+    assert note.updated_at == previous_updated_at
