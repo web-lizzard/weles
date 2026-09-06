@@ -111,10 +111,10 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 10.1 Implement `fetchNotes`/`startPolling`/`stopPolling` — `tui/src/store/notes.ts`
-- [x] 10.2 Implement `useNotesPolling`'s mount/unmount lifecycle — `tui/src/hooks/useNotesPolling.ts`
+- [x] 10.1 Implement `fetchNotes`/`startPolling`/`stopPolling` — `tui/src/store/notes.ts` — a5071c6
+- [x] 10.2 Implement `useNotesPolling`'s mount/unmount lifecycle — `tui/src/hooks/useNotesPolling.ts` — a5071c6
 - [x] 10.3 Write the notes-store tests (fake timers: immediate + interval fetch, stop, error-then-recover) — `tui/test/notesStore.test.ts` — 92687e2
-- [x] 10.4 `cd tui && pnpm vitest run test/notesStore.test.ts` green
+- [x] 10.4 `cd tui && pnpm vitest run test/notesStore.test.ts` green — a5071c6
 
 ### Phase 11: Overlay shell + dispatch — interfaces
 
