@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 6
-next_step: 6.6
-next_command: /implement distill-flow-note-list phase 6
+current_phase: 3
+next_step: 3.6
+next_command: /implement distill-flow-note-list phase 3
 updated: 2026-09-06
 ---
 
@@ -12,6 +12,10 @@ updated: 2026-09-06
 
 - [x] 1.1 Add `Note.updated_at` field and private `_touch` stub — `domain/distill/note.py` — ba73429
 - [x] 1.2 `cd backend && uv run pytest tests/unit/distill/test_note.py` still green and `uv run basedpyright src/domain/distill/note.py` clean — ba73429
+
+#### Triage
+
+- [x] 1.3 R1-F1 Note.updated_at gained an unspecified default_factory, weakening the aggregate-only-write invariant
 
 ### Phase 2: Note recency — wiring
 
@@ -34,6 +38,10 @@ updated: 2026-09-06
 - [x] 3.3 Add `list_all()` stub — `adapters/out/in_memory/distill/note_repository.py` — 833ebcb
 - [x] 3.4 Add `InMemoryListNotesQuery` skeleton — `adapters/out/in_memory/distill/list_notes_query.py` — 833ebcb
 - [x] 3.5 `cd backend && uv run basedpyright src/application/distill/queries/list_notes.py src/adapters/out/in_memory/distill/list_notes_query.py` clean — 833ebcb
+
+#### Triage
+
+- [ ] 3.6 R1-F3 InMemoryListNotesQuery missing the InMemory*QueryAdapter naming convention
 
 ### Phase 4: ListNotes read model — logic
 
@@ -95,6 +103,10 @@ updated: 2026-09-06
 - [x] 8.2 Write the notes-client tests (mapping, thrown error) — `tui/test/notes.test.ts` — aacf9a4
 - [x] 8.3 `cd tui && pnpm vitest run test/notes.test.ts` green — e09e8d3
 
+#### Triage
+
+- [ ] 8.4 R1-F2 api/client.ts modified outside any phase's Changes Required
+
 ### Phase 9: Notes data store — interfaces
 
 #### Automated
@@ -115,6 +127,10 @@ updated: 2026-09-06
 - [x] 10.2 Implement `useNotesPolling`'s mount/unmount lifecycle — `tui/src/hooks/useNotesPolling.ts` — a5071c6
 - [x] 10.3 Write the notes-store tests (fake timers: immediate + interval fetch, stop, error-then-recover) — `tui/test/notesStore.test.ts` — 92687e2
 - [x] 10.4 `cd tui && pnpm vitest run test/notesStore.test.ts` green — a5071c6
+
+#### Triage
+
+- [ ] 10.5 R1-F6 startPolling leaks a prior interval when called again before stopPolling
 
 ### Phase 11: Overlay shell + dispatch — interfaces
 
@@ -138,6 +154,10 @@ updated: 2026-09-06
 - [x] 12.3 Render `NoteListOverlay` conditionally and wire the ESC handler — `tui/src/app.tsx` (adapt: pulled a minimal `NoteListOverlay.tsx` stub forward from Phase 13 so the import resolves — user-approved per SKILL.md step 8) — fbc9ee4
 - [x] 12.4 Extend the app tests (open via `/notes`, close via ESC, capture-state-unchanged assertion) — `tui/test/app.test.tsx` — f027f14
 - [x] 12.5 `cd tui && pnpm vitest run test/app.test.tsx` green — fbc9ee4
+
+#### Triage
+
+- [ ] 12.6 R1-F7 app.test.tsx's notes-overlay tests reach a real, unmocked fetch
 
 ### Phase 13: `NoteListOverlay` — interfaces
 
