@@ -15,7 +15,7 @@ updated: 2026-09-06
 
 #### Triage
 
-- [x] 1.3 R1-F1 Note.updated_at gained an unspecified default_factory, weakening the aggregate-only-write invariant
+- [x] 1.3 R1-F1 Note.updated_at gained an unspecified default_factory, weakening the aggregate-only-write invariant — db13550
 
 ### Phase 2: Note recency — wiring
 
