@@ -13,6 +13,7 @@ updated: 2026-09-06
 | S-03 | Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session | distill-flow-note-list | done |
 | S-04 | Users can open a note and read what it produced | distill-flow-note-detail | in_progress |
 | S-05 | Users can jump from a card to the passage it came from | distill-flow-card-anchor-jump | pending |
+| S-06 | Users can see the cards generated from an open note | distill-flow-note-cards | in_progress |
 
 ## Dependencies
 
@@ -23,7 +24,9 @@ flowchart LR
   S-02 --> S-03
   S-01 --> S-04["S-04 · note detail"]
   S-02 --> S-04
+  S-04 --> S-06["S-06 · cards from a note"]
   S-04 --> S-05["S-05 · card-to-anchor jump"]
+  S-06 --> S-05
 ```
 
 ## Slices
@@ -55,7 +58,7 @@ flowchart LR
 ### S-04: Users can open a note and read what it produced
 
 - **Outcome:** Users can open a note and read what it produced
-- **Acceptance criteria:** AC-11, AC-12
+- **Acceptance criteria:** AC-11
 - **Change ID:** distill-flow-note-detail
 - **Status:** in_progress
 - **Prerequisites:** S-01, S-02
@@ -67,6 +70,14 @@ flowchart LR
 - **Acceptance criteria:** AC-13
 - **Change ID:** distill-flow-card-anchor-jump
 - **Status:** pending
+- **Prerequisites:** S-04, S-06
+
+### S-06: Users can see the cards generated from an open note
+
+- **Outcome:** Users can see the cards generated from an open note
+- **Acceptance criteria:** AC-12
+- **Change ID:** distill-flow-note-cards
+- **Status:** in_progress
 - **Prerequisites:** S-04
 
 ## Done
