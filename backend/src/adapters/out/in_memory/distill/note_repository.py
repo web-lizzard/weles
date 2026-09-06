@@ -16,7 +16,7 @@ class InMemoryNoteRepository:
         return self._notes.get(note_id.value)
 
     async def list_all(self) -> list[Note]:
-        raise NotImplementedError
+        return list(self._notes.values())
 
     def snapshot(self) -> dict[UUID, Note]:
         return copy.deepcopy(self._notes)

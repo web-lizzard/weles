@@ -2,7 +2,7 @@
 change_id: distill-flow-note-list
 current_phase: 4
 next_step: 4.1
-next_command: /unit-test distill-flow-note-list phase 4
+next_command: /implement distill-flow-note-list phase 4
 updated: 2026-09-06
 ---
 
@@ -39,15 +39,15 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 740ca54
 
 #### Automated
 
-- [ ] 4.1 Implement `list_all()` — `adapters/out/in_memory/distill/note_repository.py`
-- [ ] 4.2 Implement `InMemoryListNotesQuery.list_notes()` (live-card filter, status passthrough, recency `max()` ordering) — `adapters/out/in_memory/distill/list_notes_query.py`
-- [ ] 4.3 Add `list_all()` contract-test case — `tests/unit/distill/contracts/test_note_repository_contract.py`
-- [ ] 4.4 Write the ListNotes query tests (three-way status, discard filter, ordering, empty list) — `tests/unit/distill/test_list_notes_query.py`
-- [ ] 4.5 `cd backend && uv run pytest tests/unit/distill/contracts/test_note_repository_contract.py tests/unit/distill -k list_notes` green
+- [x] 4.1 Implement `list_all()` — `adapters/out/in_memory/distill/note_repository.py`
+- [x] 4.2 Implement `InMemoryListNotesQuery.list_notes()` (live-card filter, status passthrough, recency `max()` ordering) — `adapters/out/in_memory/distill/list_notes_query.py`
+- [x] 4.3 Add `list_all()` contract-test case — `tests/unit/distill/contracts/test_note_repository_contract.py` — 740ca54
+- [x] 4.4 Write the ListNotes query tests (three-way status, discard filter, ordering, empty list) — `tests/unit/distill/test_list_notes_query.py` — 740ca54
+- [x] 4.5 `cd backend && uv run pytest tests/unit/distill/contracts/test_note_repository_contract.py tests/unit/distill -k list_notes` green
 
 ### Phase 5: `GET /notes` route — interfaces
 
