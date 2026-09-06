@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 1
-next_step: 1.1
-next_command: /implement distill-flow-note-detail phase 1
+current_phase: 2
+next_step: tests
+next_command: /unit-test distill-flow-note-detail
 updated: 2026-09-06
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 1.1 basedpyright on exception/errors/port/DTO/adapter-skeleton files
-- [ ] 1.2 pytest test_http_error_mapping.py (exhaustiveness)
+- [x] 1.1 basedpyright on exception/errors/port/DTO/adapter-skeleton files
+- [x] 1.2 pytest test_http_error_mapping.py (exhaustiveness)
 
 ### Phase 2: GetNote read model — behavior
 
