@@ -9,8 +9,8 @@ type AppActions = {
   closeNotes: () => void;
 };
 
-export const useAppStore = create<AppState & AppActions>(() => ({
+export const useAppStore = create<AppState & AppActions>((set) => ({
   isNotesOverlayOpen: false,
-  openNotes: () => {},
-  closeNotes: () => {},
+  openNotes: () => set({ isNotesOverlayOpen: true }),
+  closeNotes: () => set({ isNotesOverlayOpen: false }),
 }));

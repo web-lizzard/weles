@@ -6,6 +6,7 @@ import {
   type TranscriptEntry,
   useChatStore,
 } from "../store/chat.js";
+import { useAppStore } from "../store/index.js";
 
 const WELES_TAGLINE = "wisdom through questions";
 const DEFAULT_TERMINAL_ROWS = 24;
@@ -58,6 +59,10 @@ export default function CaptureScreen() {
       return;
     }
     setInputValue("");
+    if (trimmed === NOTES_COMMAND) {
+      useAppStore.getState().openNotes();
+      return;
+    }
     if (trimmed === APPROVE_COMMAND) {
       void approveDraft();
       return;
@@ -65,6 +70,7 @@ export default function CaptureScreen() {
     void sendUserMessage(trimmed);
   };
   const isApproveCommand = inputValue.trim() === APPROVE_COMMAND;
+  const isNotesCommand = inputValue.trim() === NOTES_COMMAND;
 
   return (
     <Box flexDirection="column">
@@ -88,7 +94,7 @@ export default function CaptureScreen() {
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
         <UserLabel />
-        <Text color={isApproveCommand ? "green" : undefined}>
+        <Text color={isApproveCommand || isNotesCommand ? "green" : undefined}>
           <TextInput
             value={inputValue}
             onChange={setInputValue}
