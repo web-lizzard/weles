@@ -133,11 +133,11 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 12.1 Implement `openNotes`/`closeNotes` — `tui/src/store/index.ts`
-- [x] 12.2 Wire the `/notes` dispatch branch and `isNotesCommand` highlight — `tui/src/screens/CaptureScreen.tsx`
-- [x] 12.3 Render `NoteListOverlay` conditionally and wire the ESC handler — `tui/src/app.tsx` (adapt: pulled a minimal `NoteListOverlay.tsx` stub forward from Phase 13 so the import resolves — user-approved per SKILL.md step 8)
+- [x] 12.1 Implement `openNotes`/`closeNotes` — `tui/src/store/index.ts` — fbc9ee4
+- [x] 12.2 Wire the `/notes` dispatch branch and `isNotesCommand` highlight — `tui/src/screens/CaptureScreen.tsx` — fbc9ee4
+- [x] 12.3 Render `NoteListOverlay` conditionally and wire the ESC handler — `tui/src/app.tsx` (adapt: pulled a minimal `NoteListOverlay.tsx` stub forward from Phase 13 so the import resolves — user-approved per SKILL.md step 8) — fbc9ee4
 - [x] 12.4 Extend the app tests (open via `/notes`, close via ESC, capture-state-unchanged assertion) — `tui/test/app.test.tsx` — f027f14
-- [x] 12.5 `cd tui && pnpm vitest run test/app.test.tsx` green
+- [x] 12.5 `cd tui && pnpm vitest run test/app.test.tsx` green — fbc9ee4
 
 ### Phase 13: `NoteListOverlay` — interfaces
 
