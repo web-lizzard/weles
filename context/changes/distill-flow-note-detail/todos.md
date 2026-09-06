@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 2
-next_step: tests
-next_command: /unit-test distill-flow-note-detail
+current_phase: 3
+next_step: implement
+next_command: /implement distill-flow-note-detail phase 3
 updated: 2026-09-06
 ---
 
@@ -17,11 +17,11 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — d41bbd9
 
 #### Automated
 
-- [ ] 2.1 pytest test_get_note_query.py
+- [x] 2.1 pytest test_get_note_query.py
 
 ### Phase 3: `GET /notes/{note_id}` route — interfaces
 
