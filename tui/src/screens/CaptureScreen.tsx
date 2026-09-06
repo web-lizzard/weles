@@ -11,6 +11,7 @@ const WELES_TAGLINE = "wisdom through questions";
 const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
 const APPROVE_COMMAND = "/approve";
+const NOTES_COMMAND = "/notes";
 
 export default function CaptureScreen() {
   const { stdout } = useStdout();
