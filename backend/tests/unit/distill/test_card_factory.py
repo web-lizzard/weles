@@ -32,6 +32,7 @@ def test_a_resolved_proposal_within_the_policy_mints_a_live_card() -> None:
     assert card.discard is None
     assert card.note_id == note_id
     assert card.anchor.quote == _QUOTE
+    assert card.created_at.tzinfo is UTC
 
 
 def test_an_unresolved_anchor_mints_a_discard_keeping_the_claimed_quote() -> None:
@@ -62,6 +63,7 @@ def test_a_side_past_the_policy_bound_mints_a_discarded_card_naming_the_side() -
     assert card.discard is not None
     assert card.discard.reason == DiscardReason.OVERSIZED
     assert card.discard.detail == "front exceeds front_max=30"
+    assert card.discard.discarded_at.tzinfo is UTC
 
 
 def test_grounding_is_judged_before_length_when_a_proposal_breaches_both() -> None:

@@ -174,6 +174,45 @@ async def test_generate_cards_rolls_back_saved_cards_when_commit_is_never_reache
     assert persisted_note.distillation_status == DistillationStatus.GENERATING
 
 
+async def test_generate_cards_missing_note_is_a_logged_no_op(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # R3-F1
+    stack = _make_stack(
+        card_generation=_StubCardGeneration(),
+        parser=_StubNoteDocumentParser(),
+    )
+    unknown_note_id = NoteId(value=uuid4())
+
+    with caplog.at_level(logging.INFO):
+        await stack.command.handle(unknown_note_id)
+
+    assert any("not found" in record.message.lower() for record in caplog.records)
+
+
+async def test_generate_cards_skips_invalid_proposal_but_keeps_valid_siblings() -> None:
+    # R3-F1
+    stack = _make_stack(
+        card_generation=_StubCardGeneration(
+            [
+                CardProposal(front="Same", back="Same", quote="handshake begins"),
+                CardProposal(front="Q2", back="A2", quote="handshake begins"),
+            ]
+        ),
+        parser=_StubNoteDocumentParser(resolved={"handshake begins"}),
+    )
+    note = await stack.seed_generating_note()
+
+    await stack.command.handle(note.id)
+
+    cards = await stack.cards_repo.list_by_note(note.id)
+    assert len(cards) == 1
+    assert cards[0].front.value == "Q2"
+    persisted_note = await stack.notes_repo.get(note.id)
+    assert persisted_note is not None
+    assert persisted_note.distillation_status == DistillationStatus.READY
+
+
 class _Stack:
     notes_repo: InMemoryNoteRepository
     cards_repo: InMemoryCardRepository
