@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 14
-next_step: epilogue
-next_command: /implement distill-flow-note-list phase 14
+current_phase: 6
+next_step: 6.6
+next_command: /implement distill-flow-note-list phase 6
 updated: 2026-09-06
 ---
 
