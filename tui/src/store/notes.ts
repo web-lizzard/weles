@@ -31,6 +31,7 @@ export const useNotesStore = create<NotesState & NotesActions>((set, get) => ({
     }
   },
   startPolling: (intervalMs: number) => {
+    get().stopPolling();
     void get().fetchNotes();
     pollIntervalId = setInterval(() => {
       void get().fetchNotes();
