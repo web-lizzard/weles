@@ -351,6 +351,14 @@ Implement the request and snake_case→camelCase mapping.
 
 **Contract**: `const { data, error } = await client.GET("/notes"); if (error || !data) throw new Error("Failed to list notes"); return data.map((item) => ({ noteId: item.note_id, topicLabel: item.topic_label, distillationStatus: item.distillation_status, cardCount: item.card_count, lastUpdatedAt: item.last_updated_at }));`
 
+#### 2. Shared client — fetch mockability
+
+**File**: `tui/src/api/client.ts`
+
+**Intent**: `openapi-fetch`'s `createClient` captures `globalThis.fetch` at import time; `vi.stubGlobal("fetch", ...)` in `notes.test.ts` (and `stream.test.ts`) cannot intercept requests unless the shared client reads `globalThis.fetch` on every call.
+
+**Contract**: Pass `fetch: (...args) => globalThis.fetch(...args)` to `createClient` alongside the existing `baseUrl`.
+
 ### Success Criteria:
 
 #### Automated Verification:
