@@ -99,9 +99,9 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 9.1 Add `useNotesStore` skeleton — `tui/src/store/notes.ts`
-- [x] 9.2 Add `useNotesPolling` hook skeleton — `tui/src/hooks/useNotesPolling.ts`
-- [x] 9.3 `cd tui && pnpm typecheck` clean
+- [x] 9.1 Add `useNotesStore` skeleton — `tui/src/store/notes.ts` — 127934b
+- [x] 9.2 Add `useNotesPolling` hook skeleton — `tui/src/hooks/useNotesPolling.ts` — 127934b
+- [x] 9.3 `cd tui && pnpm typecheck` clean — 127934b
 
 ### Phase 10: Notes data store — behavior
 
