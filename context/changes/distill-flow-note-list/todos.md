@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 3
-next_step: 3.1
-next_command: /implement distill-flow-note-list phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test distill-flow-note-list phase 4
 updated: 2026-09-06
 ---
 
@@ -29,11 +29,11 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 3.1 Add `NoteListItemDTO` and `ListNotesQueryPort` — `application/distill/queries/list_notes.py`
-- [ ] 3.2 Add `NoteRepository.list_all()` to the port — `domain/distill/ports.py`
-- [ ] 3.3 Add `list_all()` stub — `adapters/out/in_memory/distill/note_repository.py`
-- [ ] 3.4 Add `InMemoryListNotesQuery` skeleton — `adapters/out/in_memory/distill/list_notes_query.py`
-- [ ] 3.5 `cd backend && uv run basedpyright src/application/distill/queries/list_notes.py src/adapters/out/in_memory/distill/list_notes_query.py` clean
+- [x] 3.1 Add `NoteListItemDTO` and `ListNotesQueryPort` — `application/distill/queries/list_notes.py`
+- [x] 3.2 Add `NoteRepository.list_all()` to the port — `domain/distill/ports.py`
+- [x] 3.3 Add `list_all()` stub — `adapters/out/in_memory/distill/note_repository.py`
+- [x] 3.4 Add `InMemoryListNotesQuery` skeleton — `adapters/out/in_memory/distill/list_notes_query.py`
+- [x] 3.5 `cd backend && uv run basedpyright src/application/distill/queries/list_notes.py src/adapters/out/in_memory/distill/list_notes_query.py` clean
 
 ### Phase 4: ListNotes read model — logic
 
