@@ -21,7 +21,7 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 2.1 pytest test_get_note_query.py
+- [x] 2.1 pytest test_get_note_query.py — bdaf7e9
 
 ### Phase 3: `GET /notes/{note_id}` route — interfaces
 
