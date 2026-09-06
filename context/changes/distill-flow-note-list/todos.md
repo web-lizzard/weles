@@ -91,9 +91,9 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 8.1 Implement `listNotes()` request + snake_case→camelCase mapping — `tui/src/api/notes.ts`
+- [x] 8.1 Implement `listNotes()` request + snake_case→camelCase mapping — `tui/src/api/notes.ts` — e09e8d3
 - [x] 8.2 Write the notes-client tests (mapping, thrown error) — `tui/test/notes.test.ts` — aacf9a4
-- [x] 8.3 `cd tui && pnpm vitest run test/notes.test.ts` green
+- [x] 8.3 `cd tui && pnpm vitest run test/notes.test.ts` green — e09e8d3
 
 ### Phase 9: Notes data store — interfaces
 
