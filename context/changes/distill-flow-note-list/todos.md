@@ -10,8 +10,8 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 1.1 Add `Note.updated_at` field and private `_touch` stub — `domain/distill/note.py`
-- [x] 1.2 `cd backend && uv run pytest tests/unit/distill/test_note.py` still green and `uv run basedpyright src/domain/distill/note.py` clean
+- [x] 1.1 Add `Note.updated_at` field and private `_touch` stub — `domain/distill/note.py` — ba73429
+- [x] 1.2 `cd backend && uv run pytest tests/unit/distill/test_note.py` still green and `uv run basedpyright src/domain/distill/note.py` clean — ba73429
 
 ### Phase 2: Note recency — wiring
 
