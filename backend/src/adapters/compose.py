@@ -31,7 +31,9 @@ from adapters.out.in_memory.distill.card_generation import (
     DeterministicCardGenerationAdapter,
 )
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
-from adapters.out.in_memory.distill.list_notes_query import InMemoryListNotesQuery
+from adapters.out.in_memory.distill.list_notes_query import (
+    InMemoryListNotesQueryAdapter,
+)
 from adapters.out.in_memory.distill.note_document_parser import (
     MarkdownNoteDocumentParser,
 )
@@ -83,7 +85,7 @@ _outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
 _outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
 _distill_note_repository = InMemoryDistillNoteRepository()
 _distill_card_repository = InMemoryCardRepository()
-_list_notes_query = InMemoryListNotesQuery(
+_list_notes_query = InMemoryListNotesQueryAdapter(
     _distill_note_repository, _distill_card_repository
 )
 _note_document_parser = MarkdownNoteDocumentParser()

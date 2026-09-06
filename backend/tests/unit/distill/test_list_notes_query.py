@@ -2,7 +2,9 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
-from adapters.out.in_memory.distill.list_notes_query import InMemoryListNotesQuery
+from adapters.out.in_memory.distill.list_notes_query import (
+    InMemoryListNotesQueryAdapter,
+)
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
 from domain.distill.card import Card
 from domain.distill.note import Note
@@ -54,7 +56,9 @@ def _card(
 
 
 async def test_list_notes_returns_empty_list_when_no_notes_saved() -> None:
-    query = InMemoryListNotesQuery(InMemoryNoteRepository(), InMemoryCardRepository())
+    query = InMemoryListNotesQueryAdapter(
+        InMemoryNoteRepository(), InMemoryCardRepository()
+    )
 
     result = await query.list_notes()
 
@@ -69,7 +73,7 @@ async def test_list_notes_exposes_raw_distillation_status_per_note() -> None:
     failed = _note(DistillationStatus.FAILED, now)
     for note in (generating, ready, failed):
         await note_repository.save(note)
-    query = InMemoryListNotesQuery(note_repository, InMemoryCardRepository())
+    query = InMemoryListNotesQueryAdapter(note_repository, InMemoryCardRepository())
 
     result = await query.list_notes()
 
@@ -96,7 +100,7 @@ async def test_list_notes_card_count_excludes_discarded_cards() -> None:
             ),
         )
     )
-    query = InMemoryListNotesQuery(note_repository, card_repository)
+    query = InMemoryListNotesQueryAdapter(note_repository, card_repository)
 
     result = await query.list_notes()
 
@@ -117,7 +121,7 @@ async def test_list_notes_orders_by_recency_using_max_of_note_and_card_timestamp
     await note_repository.save(stale_by_own_timestamp_alone)
     await note_repository.save(recent_only_because_of_its_card)
     await card_repository.save(_card(recent_only_because_of_its_card.id, t4))
-    query = InMemoryListNotesQuery(note_repository, card_repository)
+    query = InMemoryListNotesQueryAdapter(note_repository, card_repository)
 
     result = await query.list_notes()
 

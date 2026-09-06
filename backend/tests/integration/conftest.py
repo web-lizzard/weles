@@ -10,7 +10,9 @@ from adapters.http.capture import router as capture_router
 from adapters.http.notes import router as notes_router
 from adapters.http.outbox import router as outbox_router
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
-from adapters.out.in_memory.distill.list_notes_query import InMemoryListNotesQuery
+from adapters.out.in_memory.distill.list_notes_query import (
+    InMemoryListNotesQueryAdapter,
+)
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
@@ -83,7 +85,7 @@ def notes_client() -> Iterator[NotesTestContext]:
 
     notes = InMemoryDistillNoteRepository()
     cards = InMemoryCardRepository()
-    query = InMemoryListNotesQuery(notes, cards)
+    query = InMemoryListNotesQueryAdapter(notes, cards)
     app.dependency_overrides[get_list_notes_query] = lambda: query
     with TestClient(app) as client:
         yield NotesTestContext(client=client, notes=notes, cards=cards)
