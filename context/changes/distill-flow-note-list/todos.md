@@ -80,8 +80,8 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 7.1 Add `NoteListItem` type and unimplemented `listNotes()` — `tui/src/api/notes.ts`
-- [ ] 7.2 `cd tui && pnpm typecheck` clean
+- [x] 7.1 Add `NoteListItem` type and unimplemented `listNotes()` — `tui/src/api/notes.ts`
+- [x] 7.2 `cd tui && pnpm typecheck` clean
 
 ### Phase 8: Notes API client — behavior
 
