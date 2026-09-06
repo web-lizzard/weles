@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-note-list
 current_phase: 6
-next_step: 6.1
+next_step: 6.6
 next_command: /implement distill-flow-note-list phase 6
 updated: 2026-09-06
 ---
@@ -80,8 +80,8 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 7.1 Add `NoteListItem` type and unimplemented `listNotes()` — `tui/src/api/notes.ts`
-- [x] 7.2 `cd tui && pnpm typecheck` clean
+- [x] 7.1 Add `NoteListItem` type and unimplemented `listNotes()` — `tui/src/api/notes.ts` — 58dee3c
+- [x] 7.2 `cd tui && pnpm typecheck` clean — 58dee3c
 
 ### Phase 8: Notes API client — behavior
 
