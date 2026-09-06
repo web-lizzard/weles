@@ -1,3 +1,9 @@
+import { useEffect } from "react";
+import { useNotesStore } from "../store/notes.js";
+
 export function useNotesPolling(intervalMs: number): void {
-  throw new Error("Not implemented");
+  useEffect(() => {
+    useNotesStore.getState().startPolling(intervalMs);
+    return () => useNotesStore.getState().stopPolling();
+  }, [intervalMs]);
 }

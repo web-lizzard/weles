@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { NoteListItem } from "../api/notes.js";
+import { listNotes, type NoteListItem } from "../api/notes.js";
 
 type NotesState = {
   items: NoteListItem[];
@@ -13,17 +13,33 @@ type NotesActions = {
   stopPolling: () => void;
 };
 
-export const useNotesStore = create<NotesState & NotesActions>(() => ({
+let pollIntervalId: ReturnType<typeof setInterval> | null = null;
+
+export const useNotesStore = create<NotesState & NotesActions>((set, get) => ({
   items: [],
   isLoading: false,
   error: null,
   fetchNotes: async () => {
-    throw new Error("Not implemented");
+    set({ isLoading: true });
+    try {
+      const items = await listNotes();
+      set({ items, error: null });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : String(error) });
+    } finally {
+      set({ isLoading: false });
+    }
   },
   startPolling: (intervalMs: number) => {
-    throw new Error("Not implemented");
+    void get().fetchNotes();
+    pollIntervalId = setInterval(() => {
+      void get().fetchNotes();
+    }, intervalMs);
   },
   stopPolling: () => {
-    throw new Error("Not implemented");
+    if (pollIntervalId !== null) {
+      clearInterval(pollIntervalId);
+      pollIntervalId = null;
+    }
   },
 }));
