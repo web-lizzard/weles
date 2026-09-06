@@ -157,7 +157,7 @@ updated: 2026-09-06
 
 #### Triage
 
-- [x] 12.6 R1-F7 app.test.tsx's notes-overlay tests reach a real, unmocked fetch
+- [x] 12.6 R1-F7 app.test.tsx's notes-overlay tests reach a real, unmocked fetch — 6e21b79
 
 ### Phase 13: `NoteListOverlay` — interfaces
 
