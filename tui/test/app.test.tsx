@@ -19,6 +19,10 @@ vi.mock("../src/api/stream", async (importOriginal) => {
   };
 });
 
+vi.mock("../src/hooks/useNotesPolling", () => ({
+  useNotesPolling: vi.fn(),
+}));
+
 async function waitFor(
   predicate: () => boolean,
   timeoutMs = 2000,
