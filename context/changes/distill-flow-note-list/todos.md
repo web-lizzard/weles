@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 9
-next_step: 10 (tests)
-next_command: /unit-test distill-flow-note-list phase 10
+current_phase: 11
+next_step: 11.1
+next_command: /implement distill-flow-note-list phase 11
 updated: 2026-09-06
 ---
 
@@ -107,14 +107,14 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 92687e2
 
 #### Automated
 
-- [ ] 10.1 Implement `fetchNotes`/`startPolling`/`stopPolling` — `tui/src/store/notes.ts`
-- [ ] 10.2 Implement `useNotesPolling`'s mount/unmount lifecycle — `tui/src/hooks/useNotesPolling.ts`
-- [ ] 10.3 Write the notes-store tests (fake timers: immediate + interval fetch, stop, error-then-recover) — `tui/test/notesStore.test.ts`
-- [ ] 10.4 `cd tui && pnpm vitest run test/notesStore.test.ts` green
+- [x] 10.1 Implement `fetchNotes`/`startPolling`/`stopPolling` — `tui/src/store/notes.ts`
+- [x] 10.2 Implement `useNotesPolling`'s mount/unmount lifecycle — `tui/src/hooks/useNotesPolling.ts`
+- [x] 10.3 Write the notes-store tests (fake timers: immediate + interval fetch, stop, error-then-recover) — `tui/test/notesStore.test.ts` — 92687e2
+- [x] 10.4 `cd tui && pnpm vitest run test/notesStore.test.ts` green
 
 ### Phase 11: Overlay shell + dispatch — interfaces
 
