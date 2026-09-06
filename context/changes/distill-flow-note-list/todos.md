@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 10
-next_step: 12.6
-next_command: /implement distill-flow-note-list phase 12
+current_phase: 12
+next_step: epilogue
+next_command: /archive distill-flow-note-list
 updated: 2026-09-06
 ---
 
@@ -157,7 +157,7 @@ updated: 2026-09-06
 
 #### Triage
 
-- [ ] 12.6 R1-F7 app.test.tsx's notes-overlay tests reach a real, unmocked fetch
+- [x] 12.6 R1-F7 app.test.tsx's notes-overlay tests reach a real, unmocked fetch
 
 ### Phase 13: `NoteListOverlay` — interfaces
 
