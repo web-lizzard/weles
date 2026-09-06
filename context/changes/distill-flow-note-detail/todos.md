@@ -10,8 +10,8 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 1.1 basedpyright on exception/errors/port/DTO/adapter-skeleton files
-- [x] 1.2 pytest test_http_error_mapping.py (exhaustiveness)
+- [x] 1.1 basedpyright on exception/errors/port/DTO/adapter-skeleton files — 7759434
+- [x] 1.2 pytest test_http_error_mapping.py (exhaustiveness) — 7759434
 
 ### Phase 2: GetNote read model — behavior
 
