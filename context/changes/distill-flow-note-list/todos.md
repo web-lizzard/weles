@@ -65,11 +65,11 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 6.1 Implement the route body (`return await query.list_notes()`) — `adapters/http/notes.py`
-- [x] 6.2 Register `notes_router` unconditionally — `main.py`
+- [x] 6.1 Implement the route body (`return await query.list_notes()`) — `adapters/http/notes.py` — 371a777
+- [x] 6.2 Register `notes_router` unconditionally — `main.py` — 371a777
 - [x] 6.3 Add `notes_client` fixture — `tests/integration/conftest.py` — 0c9e4be
 - [x] 6.4 Write the `GET /notes` integration test — `tests/integration/test_notes_http.py` — 0c9e4be
-- [x] 6.5 `cd backend && uv run pytest tests/integration/test_notes_http.py` green
+- [x] 6.5 `cd backend && uv run pytest tests/integration/test_notes_http.py` green — 371a777
 
 #### Manual
 
