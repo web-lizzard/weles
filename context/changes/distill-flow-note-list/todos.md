@@ -155,7 +155,7 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 14.1 Implement `statusBadge` (three-way mapping + elapsed age) — `tui/src/screens/NoteListOverlay.tsx`
-- [x] 14.2 Implement row rendering + inline error + loading state — `tui/src/screens/NoteListOverlay.tsx`
+- [x] 14.1 Implement `statusBadge` (three-way mapping + elapsed age) — `tui/src/screens/NoteListOverlay.tsx` — 8294eaf
+- [x] 14.2 Implement row rendering + inline error + loading state — `tui/src/screens/NoteListOverlay.tsx` — 8294eaf
 - [x] 14.3 Write the overlay rendering tests — `tui/test/noteListOverlay.test.tsx` — d267795
-- [x] 14.4 `cd tui && pnpm vitest run test/noteListOverlay.test.tsx` green
+- [x] 14.4 `cd tui && pnpm vitest run test/noteListOverlay.test.tsx` green — 8294eaf
