@@ -13,8 +13,6 @@ router = APIRouter()
 
 @router.get("/notes")
 async def list_notes(
-    query: Annotated[  # pyright: ignore[reportUnusedParameter]
-        ListNotesQueryPort, Depends(get_list_notes_query)
-    ],
+    query: Annotated[ListNotesQueryPort, Depends(get_list_notes_query)],
 ) -> list[NoteListItemDTO]:
-    raise NotImplementedError
+    return await query.list_notes()
