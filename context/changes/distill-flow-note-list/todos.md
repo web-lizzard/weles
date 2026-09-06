@@ -87,13 +87,13 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — aacf9a4
 
 #### Automated
 
-- [ ] 8.1 Implement `listNotes()` request + snake_case→camelCase mapping — `tui/src/api/notes.ts`
-- [ ] 8.2 Write the notes-client tests (mapping, thrown error) — `tui/test/notes.test.ts`
-- [ ] 8.3 `cd tui && pnpm vitest run test/notes.test.ts` green
+- [x] 8.1 Implement `listNotes()` request + snake_case→camelCase mapping — `tui/src/api/notes.ts`
+- [x] 8.2 Write the notes-client tests (mapping, thrown error) — `tui/test/notes.test.ts` — aacf9a4
+- [x] 8.3 `cd tui && pnpm vitest run test/notes.test.ts` green
 
 ### Phase 9: Notes data store — interfaces
 

@@ -72,6 +72,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/notes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Notes */
+    get: operations["list_notes_notes_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/_outbox": {
     parameters: {
       query?: never;
@@ -167,6 +184,25 @@ export interface components {
     HTTPValidationError: {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
+    };
+    /** NoteListItemDTO */
+    NoteListItemDTO: {
+      /**
+       * Note Id
+       * Format: uuid
+       */
+      note_id: string;
+      /** Topic Label */
+      topic_label: string;
+      /** Distillation Status */
+      distillation_status: string;
+      /** Card Count */
+      card_count: number;
+      /**
+       * Last Updated At
+       * Format: date-time
+       */
+      last_updated_at: string;
     };
     /** OutboxEnvelopeDTO */
     OutboxEnvelopeDTO: {
@@ -371,6 +407,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_notes_notes_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["NoteListItemDTO"][];
         };
       };
     };
