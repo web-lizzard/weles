@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 3
-next_step: 3.6
-next_command: /implement distill-flow-note-list phase 3
+current_phase: 6
+next_step: 6.6
+next_command: /implement distill-flow-note-list phase 6
 updated: 2026-09-06
 ---
 
@@ -41,7 +41,7 @@ updated: 2026-09-06
 
 #### Triage
 
-- [ ] 3.6 R1-F3 InMemoryListNotesQuery missing the InMemory*QueryAdapter naming convention
+- [x] 3.6 R1-F3 InMemoryListNotesQuery missing the InMemory*QueryAdapter naming convention — 9b88552
 
 ### Phase 4: ListNotes read model — logic
 
