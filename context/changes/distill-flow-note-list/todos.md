@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 5
-next_step: 5.1
-next_command: /implement distill-flow-note-list phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test distill-flow-note-list phase 6
 updated: 2026-09-06
 ---
 
@@ -53,9 +53,9 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 5.1 Add `router` and unimplemented `list_notes` route — `adapters/http/notes.py`
-- [ ] 5.2 Add `_list_notes_query` singleton and `get_list_notes_query()` — `adapters/compose.py`
-- [ ] 5.3 `cd backend && uv run basedpyright src/adapters/http/notes.py src/adapters/compose.py` clean
+- [x] 5.1 Add `router` and unimplemented `list_notes` route — `adapters/http/notes.py`
+- [x] 5.2 Add `_list_notes_query` singleton and `get_list_notes_query()` — `adapters/compose.py`
+- [x] 5.3 `cd backend && uv run basedpyright src/adapters/http/notes.py src/adapters/compose.py` clean
 
 ### Phase 6: `GET /notes` route — wiring
 
