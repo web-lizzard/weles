@@ -75,3 +75,32 @@ async def test_get_notes_returns_empty_list_when_no_notes_saved(
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+async def test_get_note_returns_seeded_note_shaped_for_a_known_id(
+    notes_client: NotesTestContext,
+) -> None:
+    now = datetime.now(UTC)
+    note = _note(DistillationStatus.READY, now)
+    await notes_client.notes.save(note)
+
+    response = notes_client.client.get(f"/notes/{note.id.value}")
+
+    assert response.status_code == 200
+    body = cast(dict[str, object], response.json())
+    assert body["note_id"] == str(note.id.value)
+    assert body["topic"] == {"id": str(note.topic.id), "label": note.topic.label}
+    assert body["content"] == note.content.value
+    assert body["tags"] == [
+        {"id": str(tag.id), "label": tag.label} for tag in note.tags
+    ]
+    assert body["distillation_status"] == "ready"
+
+
+async def test_get_note_returns_404_for_an_unknown_note_id(
+    notes_client: NotesTestContext,
+) -> None:
+    response = notes_client.client.get(f"/notes/{uuid4()}")
+
+    assert response.status_code == 404
+    assert response.json()["code"] == "distill_note_not_found"
