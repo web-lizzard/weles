@@ -53,9 +53,9 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 5.1 Add `router` and unimplemented `list_notes` route — `adapters/http/notes.py`
-- [x] 5.2 Add `_list_notes_query` singleton and `get_list_notes_query()` — `adapters/compose.py`
-- [x] 5.3 `cd backend && uv run basedpyright src/adapters/http/notes.py src/adapters/compose.py` clean
+- [x] 5.1 Add `router` and unimplemented `list_notes` route — `adapters/http/notes.py` — 4cd9f38
+- [x] 5.2 Add `_list_notes_query` singleton and `get_list_notes_query()` — `adapters/compose.py` — 4cd9f38
+- [x] 5.3 `cd backend && uv run basedpyright src/adapters/http/notes.py src/adapters/compose.py` clean — 4cd9f38
 
 ### Phase 6: `GET /notes` route — wiring
 
