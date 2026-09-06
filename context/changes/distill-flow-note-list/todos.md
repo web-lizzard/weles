@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test distill-flow-note-list phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement distill-flow-note-list phase 3
 updated: 2026-09-06
 ---
 
@@ -17,13 +17,13 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — dbba68e
 
 #### Automated
 
-- [ ] 2.1 Wire `_touch` into `mint_note`, `mark_ready`, `mark_failed` — `domain/distill/note.py`
-- [ ] 2.2 Write the recency tests (mint sets it, mark_ready/mark_failed bump it, invalid transition doesn't) — `tests/unit/distill/test_note.py`
-- [ ] 2.3 `cd backend && uv run pytest tests/unit/distill/test_note.py` green
+- [x] 2.1 Wire `_touch` into `mint_note`, `mark_ready`, `mark_failed` — `domain/distill/note.py`
+- [x] 2.2 Write the recency tests (mint sets it, mark_ready/mark_failed bump it, invalid transition doesn't) — `tests/unit/distill/test_note.py` — dbba68e
+- [x] 2.3 `cd backend && uv run pytest tests/unit/distill/test_note.py` green
 
 ### Phase 3: ListNotes read model — interfaces
 

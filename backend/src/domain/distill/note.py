@@ -27,10 +27,12 @@ class Note(BaseModel):
     def mark_ready(self) -> None:
         self._ensure_generating()
         self.distillation_status = DistillationStatus.READY
+        self._touch(datetime.now(UTC))
 
     def mark_failed(self) -> None:
         self._ensure_generating()
         self.distillation_status = DistillationStatus.FAILED
+        self._touch(datetime.now(UTC))
 
     def _ensure_generating(self) -> None:
         if self.distillation_status is not DistillationStatus.GENERATING:
@@ -48,6 +50,7 @@ def mint_note(
     tags: list[TagSnapshot],
     approved_at: datetime,
 ) -> Note:
+    minted_at = datetime.now(UTC)
     return Note(
         id=note_id,
         session_id=session_id,
@@ -56,5 +59,6 @@ def mint_note(
         tags=tags,
         distillation_status=DistillationStatus.GENERATING,
         approved_at=approved_at,
-        created_at=datetime.now(UTC),
+        created_at=minted_at,
+        updated_at=minted_at,
     )
