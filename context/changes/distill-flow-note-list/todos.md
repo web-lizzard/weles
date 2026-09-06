@@ -143,9 +143,9 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 13.1 Add `NoteListOverlay` skeleton calling `useNotesPolling` — `tui/src/screens/NoteListOverlay.tsx` (pulled forward in fbc9ee4 during Phase 12)
-- [x] 13.2 Add `statusBadge` helper skeleton — `tui/src/screens/NoteListOverlay.tsx` (pulled forward in fbc9ee4 during Phase 12)
-- [x] 13.3 `cd tui && pnpm typecheck` clean
+- [x] 13.1 Add `NoteListOverlay` skeleton calling `useNotesPolling` — `tui/src/screens/NoteListOverlay.tsx` (pulled forward in fbc9ee4 during Phase 12) — af61424
+- [x] 13.2 Add `statusBadge` helper skeleton — `tui/src/screens/NoteListOverlay.tsx` (pulled forward in fbc9ee4 during Phase 12) — af61424
+- [x] 13.3 `cd tui && pnpm typecheck` clean — af61424
 
 ### Phase 14: `NoteListOverlay` — rendering
 
