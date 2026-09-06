@@ -2,15 +2,12 @@
 effort_id: distill-flow
 created: 2026-09-03
 updated: 2026-09-06
----
-
-## At a glance
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
 | S-01 | Users' approved notes arrive in Weles automatically | distill-flow-note-lands | done |
 | S-02 | Weles generates grounded flashcards from a held note automatically, and zero cards is a valid outcome | distill-flow-grounded-generation | done |
-| S-03 | Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session | distill-flow-note-list | in_progress |
+| S-03 | Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session | distill-flow-note-list | done |
 | S-04 | Users can open a note and read what it produced | distill-flow-note-detail | pending |
 | S-05 | Users can jump from a card to the passage it came from | distill-flow-card-anchor-jump | pending |
 
@@ -48,7 +45,7 @@ flowchart LR
 - **Outcome:** Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session
 - **Acceptance criteria:** AC-07, AC-08, AC-09, AC-10
 - **Change ID:** distill-flow-note-list
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-01, S-02
 - **Parallel with:** S-04
 
@@ -73,3 +70,4 @@ flowchart LR
 
 - **S-01: Users' approved notes arrive in Weles automatically** — Archived 2026-09-04 → `context/archive/changes/2026-09-03-distill-flow-note-lands/`. Lesson: —.
 - **S-02: Weles generates grounded flashcards from a held note automatically, and zero cards is a valid outcome** — Archived 2026-09-06 → `context/archive/changes/2026-09-04-distill-flow-grounded-generation/`. Lesson: —.
+- **S-03: Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session** — Archived 2026-09-06 → `context/archive/changes/2026-09-06-distill-flow-note-list/`. Lesson: —.
