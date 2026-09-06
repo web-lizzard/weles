@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 6
-next_step: 6.6
-next_command: /implement distill-flow-note-list phase 6
+current_phase: 8
+next_step: 8.4
+next_command: /implement distill-flow-note-list phase 8
 updated: 2026-09-06
 ---
 
@@ -81,8 +81,8 @@ updated: 2026-09-06
 
 #### Manual
 
-- [ ] 6.6 `cd backend && uv run fastapi dev src/main.py`, then `curl localhost:8000/notes` and confirm the JSON shape
-- [ ] 6.7 `cd tui && pnpm generate:api` (backend running) and confirm `schema.d.ts` gains a `/notes` path
+- [x] 6.6 `cd backend && uv run fastapi dev src/main.py`, then `curl localhost:8000/notes` and confirm the JSON shape
+- [x] 6.7 `cd tui && pnpm generate:api` (backend running) and confirm `schema.d.ts` gains a `/notes` path
 
 ### Phase 7: Notes API client — interfaces
 
