@@ -2,7 +2,7 @@
 change_id: distill-flow-note-list
 current_phase: 6
 next_step: 6.1
-next_command: /unit-test distill-flow-note-list phase 6
+next_command: /implement distill-flow-note-list phase 6
 updated: 2026-09-06
 ---
 
@@ -61,15 +61,15 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 0c9e4be
 
 #### Automated
 
-- [ ] 6.1 Implement the route body (`return await query.list_notes()`) — `adapters/http/notes.py`
-- [ ] 6.2 Register `notes_router` unconditionally — `main.py`
-- [ ] 6.3 Add `notes_client` fixture — `tests/integration/conftest.py`
-- [ ] 6.4 Write the `GET /notes` integration test — `tests/integration/test_notes_http.py`
-- [ ] 6.5 `cd backend && uv run pytest tests/integration/test_notes_http.py` green
+- [x] 6.1 Implement the route body (`return await query.list_notes()`) — `adapters/http/notes.py`
+- [x] 6.2 Register `notes_router` unconditionally — `main.py`
+- [x] 6.3 Add `notes_client` fixture — `tests/integration/conftest.py` — 0c9e4be
+- [x] 6.4 Write the `GET /notes` integration test — `tests/integration/test_notes_http.py` — 0c9e4be
+- [x] 6.5 `cd backend && uv run pytest tests/integration/test_notes_http.py` green
 
 #### Manual
 
