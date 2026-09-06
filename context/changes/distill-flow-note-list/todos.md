@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 12
-next_step: 12.tests
-next_command: /unit-test distill-flow-note-list phase 12
+current_phase: 13
+next_step: 13.1
+next_command: /implement distill-flow-note-list phase 13
 updated: 2026-09-06
 ---
 
@@ -129,15 +129,15 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f027f14
 
 #### Automated
 
-- [ ] 12.1 Implement `openNotes`/`closeNotes` — `tui/src/store/index.ts`
-- [ ] 12.2 Wire the `/notes` dispatch branch and `isNotesCommand` highlight — `tui/src/screens/CaptureScreen.tsx`
-- [ ] 12.3 Render `NoteListOverlay` conditionally and wire the ESC handler — `tui/src/app.tsx`
-- [ ] 12.4 Extend the app tests (open via `/notes`, close via ESC, capture-state-unchanged assertion) — `tui/test/app.test.tsx`
-- [ ] 12.5 `cd tui && pnpm vitest run test/app.test.tsx` green
+- [x] 12.1 Implement `openNotes`/`closeNotes` — `tui/src/store/index.ts`
+- [x] 12.2 Wire the `/notes` dispatch branch and `isNotesCommand` highlight — `tui/src/screens/CaptureScreen.tsx`
+- [x] 12.3 Render `NoteListOverlay` conditionally and wire the ESC handler — `tui/src/app.tsx` (adapt: pulled a minimal `NoteListOverlay.tsx` stub forward from Phase 13 so the import resolves — user-approved per SKILL.md step 8)
+- [x] 12.4 Extend the app tests (open via `/notes`, close via ESC, capture-state-unchanged assertion) — `tui/test/app.test.tsx` — f027f14
+- [x] 12.5 `cd tui && pnpm vitest run test/app.test.tsx` green
 
 ### Phase 13: `NoteListOverlay` — interfaces
 
