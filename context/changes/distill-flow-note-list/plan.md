@@ -73,6 +73,13 @@ Add the exported symbols a domain test will need to import, with no behavior yet
 - `cd backend && uv run pytest tests/unit/distill/test_note.py` (existing suite still green — no behavior changed yet)
 - `cd backend && uv run basedpyright src/domain/distill/note.py`
 
+### Review r1
+
+Artifact: `reviews/2026-09-06-r1-impl-review.md`
+
+- `R1-F1` — `Note.updated_at` gained an unspecified `default_factory`, weakening the aggregate-only-write invariant
+  Fix: `Note.updated_at` must never gain a default outside `mint_note`'s explicit assignment — direct construction without going through `mint_note` should require the field, not silently default, so the aggregate stays the only path that ever sets it.
+
 ---
 
 ## Phase 2: Note recency — wiring
@@ -157,6 +164,13 @@ class ListNotesQueryPort(Protocol):
 
 #### Automated Verification:
 - `cd backend && uv run basedpyright src/application/distill/queries/list_notes.py src/adapters/out/in_memory/distill/list_notes_query.py`
+
+### Review r1
+
+Artifact: `reviews/2026-09-06-r1-impl-review.md`
+
+- `R1-F3` — `InMemoryListNotesQuery` missing the `InMemory*QueryAdapter` naming convention
+  Fix: in-memory query adapter classes in this codebase are named `InMemory<X>QueryAdapter`; `InMemoryListNotesQuery` should carry the same `...QueryAdapter` suffix as `InMemoryOutboxEnvelopeQueryAdapter` and `InMemoryTranscriptQueryAdapter`.
 
 ---
 
@@ -342,6 +356,13 @@ Implement the request and snake_case→camelCase mapping.
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/notes.test.ts` (new file, mirroring `stream.test.ts`'s `vi.stubGlobal("fetch", ...)` convention) — covers: successful mapping of a multi-item response; thrown `Error` on a non-ok response.
 
+### Review r1
+
+Artifact: `reviews/2026-09-06-r1-impl-review.md`
+
+- `R1-F2` — `api/client.ts` modified outside any phase's Changes Required
+  Fix: shared TUI infrastructure (`api/client.ts`) touched to support a phase must be named in that phase's Changes Required — a mockability change to the shared client belongs in the plan, not riding silently along with an unrelated phase's commit.
+
 ---
 
 ## Phase 9: Notes data store — interfaces
@@ -421,6 +442,13 @@ Implement fetch, poll start/stop, and the inline-error-with-auto-retry behavior.
 
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/notesStore.test.ts` (new file) — using `vi.useFakeTimers()` + a mocked `tui/src/api/notes.ts` (per the agreed approach: fake timers plus module mocking, consistent with the existing `vi.stubGlobal` convention rather than a new mock-service library): covers `startPolling` firing an immediate fetch then one per interval tick; `stopPolling` halting further fetches; a failed fetch setting `error` while a subsequent successful tick clears it and updates `items`.
+
+### Review r1
+
+Artifact: `reviews/2026-09-06-r1-impl-review.md`
+
+- `R1-F6` — `startPolling` leaks a prior interval when called again before `stopPolling`
+  Fix: `startPolling` must not leak a prior interval when called again before `stopPolling` — clear any existing interval at the top of `startPolling`, or otherwise make double-start impossible to orphan.
 
 ---
 
@@ -503,6 +531,13 @@ Wire `/notes` to open the overlay, ESC to close it, and confirm `CaptureScreen` 
 
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/app.test.tsx` (extended) — covers: typing `/notes` then Enter causes the overlay's presence to be detectable in the rendered frame; pressing ESC afterward removes it; before/after comparing every `useChatStore` field (`sessionId`, `transcript`, `topic`, `coverageConfidence`, `draft`, `currentReply`, `isStreaming`) shows no change across the open/close cycle.
+
+### Review r1
+
+Artifact: `reviews/2026-09-06-r1-impl-review.md`
+
+- `R1-F7` — `app.test.tsx`'s notes-overlay tests reach a real, unmocked `fetch`
+  Fix: `app.test.tsx`'s notes-overlay tests must mock `../src/api/notes` (and/or `../src/hooks/useNotesPolling`), matching the isolation convention `notesStore.test.ts` and `noteListOverlay.test.tsx` already establish, so dispatching `/notes` never reaches a real `fetch`.
 
 ---
 

@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from domain.distill.exceptions import InvalidDistillationTransitionError
 from domain.distill.value_objects import (
@@ -22,7 +22,7 @@ class Note(BaseModel):
     distillation_status: DistillationStatus
     approved_at: datetime
     created_at: datetime
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime
 
     def mark_ready(self) -> None:
         self._ensure_generating()

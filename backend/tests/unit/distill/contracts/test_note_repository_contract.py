@@ -23,6 +23,7 @@ _IMPLEMENTATIONS: list[Callable[[], NoteRepository]] = [
 
 
 def _sample_note() -> Note:
+    stamped_at = datetime.now(UTC)
     return Note(
         id=NoteId(value=uuid4()),
         session_id=SessionId(value=uuid4()),
@@ -30,8 +31,9 @@ def _sample_note() -> Note:
         content=NoteContent(value="We discussed how connections are established."),
         tags=[TagSnapshot(id=uuid4(), label="networking")],
         distillation_status=DistillationStatus.GENERATING,
-        approved_at=datetime.now(UTC),
-        created_at=datetime.now(UTC),
+        approved_at=stamped_at,
+        created_at=stamped_at,
+        updated_at=stamped_at,
     )
 
 
