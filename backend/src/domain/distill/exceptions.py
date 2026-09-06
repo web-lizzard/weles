@@ -27,3 +27,7 @@ class IdenticalCardSidesError(CoreException):
 
 class InvalidDistillationTransitionError(CoreException):
     pass
+
+
+class DistillNoteNotFoundError(CoreException):
+    pass

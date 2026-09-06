@@ -38,6 +38,7 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "empty_anchor": 422,
     "identical_card_sides": 422,
     "invalid_distillation_transition": 409,
+    "distill_note_not_found": 404,
 }
 
 
