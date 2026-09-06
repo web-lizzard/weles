@@ -27,7 +27,7 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 3.1 basedpyright on notes.py / compose.py
+- [x] 3.1 basedpyright on notes.py / compose.py — 0cd5c99
 
 ### Phase 4: `GET /notes/{note_id}` route — behavior
 
