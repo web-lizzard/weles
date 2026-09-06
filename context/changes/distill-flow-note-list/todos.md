@@ -29,11 +29,11 @@ updated: 2026-09-06
 
 #### Automated
 
-- [x] 3.1 Add `NoteListItemDTO` and `ListNotesQueryPort` — `application/distill/queries/list_notes.py`
-- [x] 3.2 Add `NoteRepository.list_all()` to the port — `domain/distill/ports.py`
-- [x] 3.3 Add `list_all()` stub — `adapters/out/in_memory/distill/note_repository.py`
-- [x] 3.4 Add `InMemoryListNotesQuery` skeleton — `adapters/out/in_memory/distill/list_notes_query.py`
-- [x] 3.5 `cd backend && uv run basedpyright src/application/distill/queries/list_notes.py src/adapters/out/in_memory/distill/list_notes_query.py` clean
+- [x] 3.1 Add `NoteListItemDTO` and `ListNotesQueryPort` — `application/distill/queries/list_notes.py` — 833ebcb
+- [x] 3.2 Add `NoteRepository.list_all()` to the port — `domain/distill/ports.py` — 833ebcb
+- [x] 3.3 Add `list_all()` stub — `adapters/out/in_memory/distill/note_repository.py` — 833ebcb
+- [x] 3.4 Add `InMemoryListNotesQuery` skeleton — `adapters/out/in_memory/distill/list_notes_query.py` — 833ebcb
+- [x] 3.5 `cd backend && uv run basedpyright src/application/distill/queries/list_notes.py src/adapters/out/in_memory/distill/list_notes_query.py` clean — 833ebcb
 
 ### Phase 4: ListNotes read model — logic
 
