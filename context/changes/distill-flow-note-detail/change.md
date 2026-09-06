@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-note-detail
 title: Users can open a note and read what it produced
-status: new
+status: planned
 created: 2026-09-06
 updated: 2026-09-06
 archived_at: null
@@ -12,4 +12,6 @@ slice_ref: S-04
 
 ## Notes
 
-<!-- Materialized from effort `distill-flow`, slice S-04. Run /plan distill-flow-note-detail to write the plan. -->
+Scoped to AC-11 only (open a note, read its full content). AC-12 (see the
+cards a note produced) was split out during planning into slice S-06,
+`distill-flow-note-cards` — see `context/efforts/distill-flow/roadmap.md`.
