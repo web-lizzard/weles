@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 3
-next_step: implement
-next_command: /implement distill-flow-note-detail phase 3
+current_phase: 4
+next_step: unit-test
+next_command: /unit-test distill-flow-note-detail phase 4
 updated: 2026-09-06
 ---
 
@@ -27,7 +27,7 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 3.1 basedpyright on notes.py / compose.py
+- [x] 3.1 basedpyright on notes.py / compose.py
 
 ### Phase 4: `GET /notes/{note_id}` route — behavior
 
