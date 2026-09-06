@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 13
-next_step: 13.1
-next_command: /implement distill-flow-note-list phase 13
+current_phase: 14
+next_step: 14.tests
+next_command: /unit-test distill-flow-note-list phase 14
 updated: 2026-09-06
 ---
 
@@ -143,9 +143,9 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 13.1 Add `NoteListOverlay` skeleton calling `useNotesPolling` — `tui/src/screens/NoteListOverlay.tsx`
-- [ ] 13.2 Add `statusBadge` helper skeleton — `tui/src/screens/NoteListOverlay.tsx`
-- [ ] 13.3 `cd tui && pnpm typecheck` clean
+- [x] 13.1 Add `NoteListOverlay` skeleton calling `useNotesPolling` — `tui/src/screens/NoteListOverlay.tsx` (pulled forward in fbc9ee4 during Phase 12)
+- [x] 13.2 Add `statusBadge` helper skeleton — `tui/src/screens/NoteListOverlay.tsx` (pulled forward in fbc9ee4 during Phase 12)
+- [x] 13.3 `cd tui && pnpm typecheck` clean
 
 ### Phase 14: `NoteListOverlay` — rendering
 
