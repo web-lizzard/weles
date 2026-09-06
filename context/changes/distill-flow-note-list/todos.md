@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-list
-current_phase: 11
-next_step: 11.1
-next_command: /implement distill-flow-note-list phase 11
+current_phase: 12
+next_step: 12.tests
+next_command: /unit-test distill-flow-note-list phase 12
 updated: 2026-09-06
 ---
 
@@ -120,10 +120,10 @@ updated: 2026-09-06
 
 #### Automated
 
-- [ ] 11.1 Add `isNotesOverlayOpen`/`openNotes`/`closeNotes` to `useAppStore` — `tui/src/store/index.ts`
-- [ ] 11.2 Add `NOTES_COMMAND` constant — `tui/src/screens/CaptureScreen.tsx`
-- [ ] 11.3 Import `useInput`, read overlay state, unimplemented handler — `tui/src/app.tsx`
-- [ ] 11.4 `cd tui && pnpm typecheck` clean
+- [x] 11.1 Add `isNotesOverlayOpen`/`openNotes`/`closeNotes` to `useAppStore` — `tui/src/store/index.ts`
+- [x] 11.2 Add `NOTES_COMMAND` constant — `tui/src/screens/CaptureScreen.tsx`
+- [x] 11.3 Import `useInput`, read overlay state, unimplemented handler — `tui/src/app.tsx`
+- [x] 11.4 `cd tui && pnpm typecheck` clean
 
 ### Phase 12: Overlay shell + dispatch — wiring
 
