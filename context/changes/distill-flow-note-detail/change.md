@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-note-detail
 title: Users can open a note and read what it produced
-status: implementing
+status: implemented
 created: 2026-09-06
 updated: 2026-09-07
 archived_at: null
