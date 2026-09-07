@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 7
-next_step: 7.1
-next_command: /implement distill-flow-note-detail phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test distill-flow-note-detail phase 8
 updated: 2026-09-07
 ---
 
@@ -64,7 +64,7 @@ updated: 2026-09-07
 
 #### Automated
 
-- [ ] 7.1 pnpm typecheck
+- [x] 7.1 pnpm typecheck — 695c15f
 
 ### Phase 8: Note detail navigation state — behavior
 
