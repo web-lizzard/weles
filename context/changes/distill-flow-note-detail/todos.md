@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
 current_phase: 11
-next_step:
-next_command: /archive distill-flow-note-detail
+next_step: 11.3
+next_command: /implement distill-flow-note-detail phase 11
 updated: 2026-09-07
 ---
 
@@ -93,6 +93,10 @@ updated: 2026-09-07
 
 - [x] 10.1 pnpm vitest run test/noteDetailScreen.test.tsx — de7080d
 
+#### Triage
+
+- [x] 10.2 R1-F2 NoteDetailScreen skips refetch for a selectedNoteId already cached, diverging from Phase 10 contract — 2a02322
+
 ### Phase 11: List navigation + shell wiring
 
 #### Tests
@@ -103,3 +107,8 @@ updated: 2026-09-07
 
 - [x] 11.1 pnpm vitest run test/noteListOverlay.test.tsx (extended) — 0309166
 - [x] 11.2 pnpm vitest run test/app.test.tsx (extended) — 0309166
+
+#### Triage
+
+- [ ] 11.3 R1-F1 CaptureScreen.tsx focus-gating modified outside any phase's Changes Required
+- [ ] 11.4 R1-F3 clamp() helper breaks public-before-private ordering convention in NoteListOverlay.tsx
