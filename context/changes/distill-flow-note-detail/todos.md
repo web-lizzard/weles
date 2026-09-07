@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 5
-next_step: 5.1
-next_command: /implement distill-flow-note-detail phase 5
+current_phase: 7
+next_step: 7.1
+next_command: /implement distill-flow-note-detail phase 7
 updated: 2026-09-07
 ---
 
@@ -48,17 +48,17 @@ updated: 2026-09-07
 
 #### Automated
 
-- [ ] 5.1 pnpm typecheck
+- [x] 5.1 pnpm typecheck
 
 ### Phase 6: Notes API client `getNote` — behavior
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 69982b2
 
 #### Automated
 
-- [ ] 6.1 pnpm vitest run test/notes.test.ts
+- [x] 6.1 pnpm vitest run test/notes.test.ts
 
 ### Phase 7: Note detail navigation state — interfaces
 

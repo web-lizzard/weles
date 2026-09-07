@@ -8,6 +8,40 @@ export type NoteListItem = {
   lastUpdatedAt: string;
 };
 
+export type NoteDetailTopic = { id: string; label: string };
+export type NoteDetailTag = { id: string; label: string };
+export type NoteDetail = {
+  noteId: string;
+  topic: NoteDetailTopic;
+  content: string;
+  tags: NoteDetailTag[];
+  distillationStatus: "generating" | "ready" | "failed";
+  approvedAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export async function getNote(noteId: string): Promise<NoteDetail> {
+  const { data, error, response } = await client.GET("/notes/{note_id}", {
+    params: { path: { note_id: noteId } },
+  });
+  if (error || !data) {
+    if (response.status === 404) throw new Error("Note not found");
+    throw new Error("Failed to load note");
+  }
+  return {
+    noteId: data.note_id,
+    topic: { id: data.topic.id, label: data.topic.label },
+    content: data.content,
+    tags: data.tags.map((t) => ({ id: t.id, label: t.label })),
+    distillationStatus:
+      data.distillation_status as NoteDetail["distillationStatus"],
+    approvedAt: data.approved_at,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
 export async function listNotes(): Promise<NoteListItem[]> {
   const { data, error } = await client.GET("/notes");
   if (error || !data) {
