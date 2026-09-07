@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
 current_phase: 10
-next_step: tests
-next_command: /unit-test distill-flow-note-detail phase 10
+next_step: 10.1
+next_command: /implement distill-flow-note-detail phase 10
 updated: 2026-09-07
 ---
 
@@ -87,7 +87,7 @@ updated: 2026-09-07
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 0a53c42
 
 #### Automated
 
