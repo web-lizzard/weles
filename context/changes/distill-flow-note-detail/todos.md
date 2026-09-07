@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
 current_phase: 11
-next_step: 11.3
-next_command: /implement distill-flow-note-detail phase 11
+next_step:
+next_command: /archive distill-flow-note-detail
 updated: 2026-09-07
 ---
 
@@ -110,5 +110,5 @@ updated: 2026-09-07
 
 #### Triage
 
-- [ ] 11.3 R1-F1 CaptureScreen.tsx focus-gating modified outside any phase's Changes Required
-- [ ] 11.4 R1-F3 clamp() helper breaks public-before-private ordering convention in NoteListOverlay.tsx
+- [ ] 11.3 R1-F1 CaptureScreen.tsx focus-gating modified outside any phase's Changes Required DISMISSED: user skipped; overlay focus gating retained
+- [x] 11.4 R1-F3 clamp() helper breaks public-before-private ordering convention in NoteListOverlay.tsx — 8d6db63
