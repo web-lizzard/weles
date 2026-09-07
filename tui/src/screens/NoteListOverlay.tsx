@@ -7,10 +7,6 @@ import { useNotesStore } from "../store/notes.js";
 const NOTES_POLL_INTERVAL_MS = 3000;
 const DEFAULT_TERMINAL_COLUMNS = 80;
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
 export default function NoteListOverlay() {
   useNotesPolling(NOTES_POLL_INTERVAL_MS);
   const items = useNotesStore((s) => s.items);
@@ -66,6 +62,10 @@ export default function NoteListOverlay() {
       </Box>
     </Box>
   );
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }
 
 function NoteRow({

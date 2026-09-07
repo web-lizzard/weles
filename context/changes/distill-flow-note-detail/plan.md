@@ -424,6 +424,13 @@ Fetch on open and render topic, tags, content, and a loading state.
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/noteDetailScreen.test.tsx` (new file, seeding `useAppStore.setState({ selectedNoteId: ... })` and `useNoteDetailStore.setState({ note: ..., isLoading: ... })` directly, mocking `../src/api/notes`) — covers: mounting with a `selectedNoteId` calls `getNote` with that id; topic/tags/content render once `note` is set; a loading indicator shows only while `note` is still `null`; tags are omitted (no empty separator artifact) when a note has none.
 
+### Review r1
+
+Artifact: `reviews/2026-09-07-r1-impl-review.md`
+
+- `R1-F2` — NoteDetailScreen skips refetch for a selectedNoteId already cached, diverging from Phase 10 contract
+  Fix: opening a note must not depend on whatever the store happens to already hold; either restore the contract's unconditional fetch, or state the caching intent explicitly so a stale note can't be shown without a fresh fetch.
+
 ---
 
 ## Phase 11: List navigation + shell wiring
@@ -459,6 +466,15 @@ Wire arrow-key selection and Enter-to-open into `NoteListOverlay`, and the two-l
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/noteListOverlay.test.tsx` (extended) — covers: arrow-down/arrow-up move `useAppStore.getState().selectedIndex` within bounds; arrow keys on an empty list are a no-op; Enter on a `ready` row calls `openDetail` (asserted via `useAppStore.getState().isDetailOpen`/`selectedNoteId`); Enter on a `generating`/`failed` row is a no-op.
 - `cd tui && pnpm vitest run test/app.test.tsx` (extended, `getNote` mocked alongside the existing `sendMessage`/`approveNote`/`startCaptureSession`/`useNotesPolling` mocks per `appNotesFetchIsolation.test.tsx`'s isolation convention) — covers: opening a `ready` note's detail via arrow+Enter renders its content; ESC from the detail view returns to the list (`isDetailOpen` false, `isNotesOverlayOpen` still true) with `useChatStore` untouched; a second ESC then closes the overlay entirely.
+
+### Review r1
+
+Artifact: `reviews/2026-09-07-r1-impl-review.md`
+
+- `R1-F1` — CaptureScreen.tsx focus-gating modified outside any phase's Changes Required
+  Fix: `CaptureScreen.tsx` stays out of this change's diff; overlay-aware focus gating belongs in a phase's own Changes Required (this change or a follow-up), not a same-day polish commit riding under this change-id.
+- `R1-F3` — clamp() helper breaks public-before-private ordering convention in NoteListOverlay.tsx
+  Fix: move `clamp` below `NoteListOverlay`'s default export, alongside the file's other private helpers (`NoteRow`, `StatusBadge`, `formatElapsed`).
 
 ---
 
