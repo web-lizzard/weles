@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 8
-next_step: 8.1
-next_command: /unit-test distill-flow-note-detail phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /implement distill-flow-note-detail phase 9
 updated: 2026-09-07
 ---
 
@@ -70,12 +70,12 @@ updated: 2026-09-07
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e14bbb8
 
 #### Automated
 
-- [ ] 8.1 pnpm vitest run test/noteDetailStore.test.ts
-- [ ] 8.2 pnpm vitest run test/appStore.test.ts
+- [x] 8.1 pnpm vitest run test/noteDetailStore.test.ts — bc594d2
+- [x] 8.2 pnpm vitest run test/appStore.test.ts — bc594d2
 
 ### Phase 9: `NoteDetailScreen` — interfaces
 
