@@ -80,8 +80,20 @@ describe("NoteDetailScreen", () => {
     expect(getNote).toHaveBeenCalledWith(NOTE_ID);
   });
 
-  it("renders the back hint, topic, joined tags, and full content when loaded", () => {
+  // R1-F2: plan Contract (Phase 10) fetches unconditionally whenever
+  // selectedNoteId is non-null; skip guard is undocumented drift.
+  it("refetches when mounted with a selectedNoteId that already matches a cached note", async () => {
     useAppStore.setState({ selectedNoteId: NOTE_ID });
+    useNoteDetailStore.setState({ note: NOTE_DETAIL, isLoading: false });
+    vi.mocked(getNote).mockResolvedValue(NOTE_DETAIL);
+
+    render(<NoteDetailScreen />);
+
+    await waitFor(() => vi.mocked(getNote).mock.calls.length > 0);
+    expect(getNote).toHaveBeenCalledWith(NOTE_ID);
+  });
+
+  it("renders the back hint, topic, joined tags, and full content when loaded", () => {
     useNoteDetailStore.setState({ note: NOTE_DETAIL, isLoading: false });
 
     const { lastFrame } = render(<NoteDetailScreen />);
@@ -112,7 +124,6 @@ describe("NoteDetailScreen", () => {
       tags: [],
     };
 
-    useAppStore.setState({ selectedNoteId: NOTE_ID });
     useNoteDetailStore.setState({ note: noteWithoutTags, isLoading: false });
 
     const { lastFrame } = render(<NoteDetailScreen />);

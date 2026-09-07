@@ -9,14 +9,9 @@ export default function NoteDetailScreen() {
   const isLoading = useNoteDetailStore((s) => s.isLoading);
 
   useEffect(() => {
-    if (selectedNoteId === null) {
-      return;
+    if (selectedNoteId !== null) {
+      void useNoteDetailStore.getState().fetchNote(selectedNoteId);
     }
-    const { note } = useNoteDetailStore.getState();
-    if (note?.noteId === selectedNoteId) {
-      return;
-    }
-    void useNoteDetailStore.getState().fetchNote(selectedNoteId);
   }, [selectedNoteId]);
 
   return (
