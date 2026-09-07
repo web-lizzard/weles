@@ -9,6 +9,7 @@ from application.distill.queries.list_notes import (
     ListNotesQueryPort,
     NoteListItemDTO,
 )
+from domain.distill.value_objects import NoteId
 
 router = APIRouter()
 
@@ -25,4 +26,4 @@ async def get_note(
     note_id: UUID,
     query: Annotated[GetNoteQueryPort, Depends(get_note_query)],
 ) -> NoteDetailDTO:
-    raise NotImplementedError(note_id, query)
+    return await query.get_note(NoteId(value=note_id))
