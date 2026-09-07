@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
 current_phase: 11
-next_step: tests
-next_command: /unit-test distill-flow-note-detail phase 11
+next_step:
+next_command: /archive distill-flow-note-detail
 updated: 2026-09-07
 ---
 
@@ -97,9 +97,9 @@ updated: 2026-09-07
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — ba4b610
 
 #### Automated
 
-- [ ] 11.1 pnpm vitest run test/noteListOverlay.test.tsx (extended)
-- [ ] 11.2 pnpm vitest run test/app.test.tsx (extended)
+- [x] 11.1 pnpm vitest run test/noteListOverlay.test.tsx (extended)
+- [x] 11.2 pnpm vitest run test/app.test.tsx (extended)
