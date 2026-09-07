@@ -1,9 +1,9 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 4
-next_step: unit-test
-next_command: /unit-test distill-flow-note-detail phase 4
-updated: 2026-09-06
+current_phase: 5
+next_step: 5.1
+next_command: /implement distill-flow-note-detail phase 5
+updated: 2026-09-07
 ---
 
 ### Phase 1: GetNote read model — interfaces
@@ -33,16 +33,16 @@ updated: 2026-09-06
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 3a12ace
 
 #### Automated
 
-- [ ] 4.1 pytest test_notes_http.py
+- [x] 4.1 pytest test_notes_http.py — 3b9e802
 
 #### Manual
 
-- [ ] 4.2 curl /notes/{id} — 200 known id, 404 unknown id
-- [ ] 4.3 pnpm generate:api — schema.d.ts gains /notes/{note_id}
+- [x] 4.2 curl /notes/{id} — 200 known id, 404 unknown id — 3b9e802
+- [x] 4.3 pnpm generate:api — schema.d.ts gains /notes/{note_id} — 3b9e802
 
 ### Phase 5: Notes API client `getNote` — interfaces
 
