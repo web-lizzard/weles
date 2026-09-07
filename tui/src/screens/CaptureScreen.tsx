@@ -27,6 +27,7 @@ export default function CaptureScreen() {
   const streamError = useChatStore((state) => state.streamError);
   const draft = useChatStore((state) => state.draft);
   const approvalReceipt = useChatStore((state) => state.approvalReceipt);
+  const isNotesOverlayOpen = useAppStore((state) => state.isNotesOverlayOpen);
 
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
@@ -99,7 +100,7 @@ export default function CaptureScreen() {
             value={inputValue}
             onChange={setInputValue}
             onSubmit={handleSubmit}
-            focus={!isStreaming}
+            focus={!isStreaming && !isNotesOverlayOpen}
           />
         </Text>
       </Box>

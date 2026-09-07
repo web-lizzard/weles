@@ -89,6 +89,7 @@ describe("NoteDetailScreen", () => {
 
     expect(frame).toContain("← ESC to go back");
     expect(frame).toContain("TCP handshakes");
+    expect(frame).toContain("Tags:");
     expect(frame).toContain("networking · protocols");
     expect(frame).toContain("Full note content for the detail view");
   });
@@ -119,6 +120,7 @@ describe("NoteDetailScreen", () => {
 
     expect(frame).toContain("TCP handshakes");
     expect(frame).toContain("Full note content for the detail view");
+    expect(frame).not.toContain("Tags:");
     expect(frame).not.toContain(" · ");
   });
 });

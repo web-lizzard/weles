@@ -49,20 +49,20 @@ export default function NoteListOverlay() {
   return (
     <Box flexDirection="column" flexGrow={1}>
       <Text dimColor>← ESC to go back</Text>
-      <Box marginTop={1} marginBottom={1}>
+      <Box marginTop={1} flexDirection="column" gap={1} flexGrow={1}>
+        {error !== null && <Text color="red">{error}</Text>}
         <Text bold>Notes</Text>
-      </Box>
-      {error !== null && <Text color="red">{error}</Text>}
-      {items.length === 0 && isLoading && <Text>Loading...</Text>}
-      <Box flexDirection="column" gap={1}>
-        {items.map((item, index) => (
-          <NoteRow
-            key={item.noteId}
-            item={item}
-            now={now}
-            isSelected={index === effectiveIndex}
-          />
-        ))}
+        {items.length === 0 && isLoading && <Text>Loading...</Text>}
+        <Box flexDirection="column" gap={1}>
+          {items.map((item, index) => (
+            <NoteRow
+              key={item.noteId}
+              item={item}
+              now={now}
+              isSelected={index === effectiveIndex}
+            />
+          ))}
+        </Box>
       </Box>
     </Box>
   );
