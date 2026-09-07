@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import type { NoteDetail } from "../api/notes.js";
+import { getNote, type NoteDetail } from "../api/notes.js";
+import { useAppStore } from "./index.js";
+import { useNotesStore } from "./notes.js";
 
 type NoteDetailState = {
   note: NoteDetail | null;
@@ -11,11 +13,21 @@ type NoteDetailActions = {
 };
 
 export const useNoteDetailStore = create<NoteDetailState & NoteDetailActions>(
-  () => ({
+  (set) => ({
     note: null,
     isLoading: false,
-    fetchNote: async (_noteId: string) => {
-      throw new Error("Not implemented");
+    fetchNote: async (noteId: string) => {
+      set({ note: null, isLoading: true });
+      try {
+        const note = await getNote(noteId);
+        set({ note, isLoading: false });
+      } catch (error) {
+        set({ isLoading: false });
+        useAppStore.getState().closeDetail();
+        useNotesStore.setState({
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     },
   }),
 );

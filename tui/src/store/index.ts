@@ -21,14 +21,14 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   isDetailOpen: false,
   selectedNoteId: null,
   openNotes: () => set({ isNotesOverlayOpen: true }),
-  closeNotes: () => set({ isNotesOverlayOpen: false }),
-  setSelectedIndex: (_index) => {
-    throw new Error("Not implemented");
-  },
-  openDetail: (_noteId) => {
-    throw new Error("Not implemented");
-  },
-  closeDetail: () => {
-    throw new Error("Not implemented");
-  },
+  closeNotes: () =>
+    set({
+      isNotesOverlayOpen: false,
+      selectedIndex: 0,
+      isDetailOpen: false,
+      selectedNoteId: null,
+    }),
+  setSelectedIndex: (index) => set({ selectedIndex: index }),
+  openDetail: (noteId) => set({ isDetailOpen: true, selectedNoteId: noteId }),
+  closeDetail: () => set({ isDetailOpen: false, selectedNoteId: null }),
 }));
