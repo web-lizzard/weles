@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-detail
-current_phase: 10
-next_step: 10.1
-next_command: /implement distill-flow-note-detail phase 10
+current_phase: 11
+next_step: tests
+next_command: /unit-test distill-flow-note-detail phase 11
 updated: 2026-09-07
 ---
 
@@ -91,7 +91,7 @@ updated: 2026-09-07
 
 #### Automated
 
-- [ ] 10.1 pnpm vitest run test/noteDetailScreen.test.tsx
+- [x] 10.1 pnpm vitest run test/noteDetailScreen.test.tsx — de7080d
 
 ### Phase 11: List navigation + shell wiring
 
