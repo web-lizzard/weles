@@ -3,7 +3,7 @@ change_id: distill-flow-note-detail
 title: Users can open a note and read what it produced
 status: implementing
 created: 2026-09-06
-updated: 2026-09-07
+updated: 2026-09-07T12:30:00Z
 archived_at: null
 origin: distill-pillar
 effort_id: distill-flow
