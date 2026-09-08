@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
 current_phase: 2
-next_step: 2.1
-next_command: /unit-test distill-flow-note-cards phase 2
+next_step: 2.4
+next_command: /implement distill-flow-note-cards phase 2
 updated: 2026-09-08
 ---
 
@@ -24,13 +24,13 @@ updated: 2026-09-08
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1ec7311
 
 #### Automated
 
-- [ ] 2.1 Implement live-card filter, created_at ordering and 404
-- [ ] 2.2 Add HTTP integration cases for cards, empty, discarded and unknown note
-- [ ] 2.3 Run backend pytest
+- [x] 2.1 Implement live-card filter, created_at ordering and 404
+- [x] 2.2 Add HTTP integration cases for cards, empty, discarded and unknown note — 1ec7311
+- [x] 2.3 Run backend pytest
 
 #### Manual
 
