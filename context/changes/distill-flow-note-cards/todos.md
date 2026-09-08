@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
 current_phase: 6
-next_step:
-next_command: /archive distill-flow-note-cards
+next_step: 6.8
+next_command: /implement distill-flow-note-cards phase 6
 updated: 2026-09-08
 ---
 
@@ -93,3 +93,7 @@ updated: 2026-09-08
 #### Manual
 
 - [x] 6.7 Walk the tab and depth axes in the running TUI, including a zero-card note — 739ebc3
+
+#### Triage
+
+- [ ] 6.8 R1-F1 Card list keeps another note's cards visible while the new note loads (proof: 17a8cd4)
