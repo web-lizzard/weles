@@ -1,5 +1,7 @@
 import { Box, useInput, useStdout } from "ink";
 import CaptureScreen from "./screens/CaptureScreen.js";
+import CardDetailScreen from "./screens/CardDetailScreen.js";
+import CardListScreen from "./screens/CardListScreen.js";
 import NoteDetailScreen from "./screens/NoteDetailScreen.js";
 import NoteListOverlay from "./screens/NoteListOverlay.js";
 import { useAppStore } from "./store/index.js";
@@ -11,6 +13,8 @@ export default function App() {
   const { stdout } = useStdout();
   const isNotesOverlayOpen = useAppStore((state) => state.isNotesOverlayOpen);
   const isDetailOpen = useAppStore((state) => state.isDetailOpen);
+  const activeNoteTab = useAppStore((state) => state.activeNoteTab);
+  const selectedCardId = useAppStore((state) => state.selectedCardId);
   const closeNotes = useAppStore((state) => state.closeNotes);
   const closeDetail = useAppStore((state) => state.closeDetail);
   const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
@@ -46,7 +50,17 @@ export default function App() {
           backgroundColor="black"
           padding={1}
         >
-          {isDetailOpen ? <NoteDetailScreen /> : <NoteListOverlay />}
+          {isDetailOpen ? (
+            selectedCardId !== null ? (
+              <CardDetailScreen />
+            ) : activeNoteTab === "cards" ? (
+              <CardListScreen />
+            ) : (
+              <NoteDetailScreen />
+            )
+          ) : (
+            <NoteListOverlay />
+          )}
         </Box>
       )}
     </Box>
