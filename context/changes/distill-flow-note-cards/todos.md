@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
-current_phase: 3
-next_step: 3.1
-next_command: /implement distill-flow-note-cards phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test distill-flow-note-cards phase 4
 updated: 2026-09-08
 ---
 
@@ -40,14 +40,14 @@ updated: 2026-09-08
 
 #### Automated
 
-- [ ] 3.1 Regenerate schema.d.ts against the running backend
-- [ ] 3.2 Add tui/src/api/cards.ts signatures
-- [ ] 3.3 Add tui/src/store/cards.ts store shape
-- [ ] 3.4 Run tui build and tests
+- [x] 3.1 Regenerate schema.d.ts against the running backend
+- [x] 3.2 Add tui/src/api/cards.ts signatures
+- [x] 3.3 Add tui/src/store/cards.ts store shape
+- [x] 3.4 Run tui build and tests
 
 #### Manual
 
-- [ ] 3.5 Confirm the regenerated schema carries the cards path and DTO
+- [x] 3.5 Confirm the regenerated schema carries the cards path and DTO
 
 ### Phase 4: TUI card fetch behavior
 
