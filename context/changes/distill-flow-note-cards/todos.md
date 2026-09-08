@@ -96,4 +96,4 @@ updated: 2026-09-08
 
 #### Triage
 
-- [x] 6.8 R1-F1 Card list keeps another note's cards visible while the new note loads (proof: 17a8cd4)
+- [x] 6.8 R1-F1 Card list keeps another note's cards visible while the new note loads (proof: 17a8cd4) — ef833f5
