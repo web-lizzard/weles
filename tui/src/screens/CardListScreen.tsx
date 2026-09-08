@@ -27,12 +27,7 @@ export default function CardListScreen() {
     if (selectedNoteId === null) {
       return;
     }
-    const store = useCardsStore.getState();
-    if (store.cards.length === 0) {
-      void store.fetchCards(selectedNoteId);
-      return;
-    }
-    void store.refresh();
+    void useCardsStore.getState().fetchCards(selectedNoteId);
   }, [selectedNoteId]);
 
   useInput((input, key) => {
