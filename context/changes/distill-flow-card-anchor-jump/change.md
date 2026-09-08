@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-card-anchor-jump
 title: Users can jump from a card to the passage it came from
-status: planned
+status: implementing
 created: 2026-09-08
 updated: 2026-09-08
 archived_at: null
