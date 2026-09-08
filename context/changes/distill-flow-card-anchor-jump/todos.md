@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test distill-flow-card-anchor-jump phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement distill-flow-card-anchor-jump phase 3
 updated: 2026-09-08
 ---
 
@@ -18,18 +18,18 @@ updated: 2026-09-08
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a5c8ebb
 
 #### Automated
 
-- [ ] 2.1 Implement MarkdownNoteFormat blocks and normalize with the offset map
-- [ ] 2.2 Implement NoteDocument.of and locate with exact and block precision
-- [ ] 2.3 Add note format and note document unit suites
-- [ ] 2.4 Run backend pytest, ruff and basedpyright
+- [x] 2.1 Implement MarkdownNoteFormat blocks and normalize with the offset map
+- [x] 2.2 Implement NoteDocument.of and locate with exact and block precision
+- [x] 2.3 Add note format and note document unit suites
+- [x] 2.4 Run backend pytest, ruff and basedpyright
 
 #### Manual
 
-- [ ] 2.5 Resolve a sample anchor through a python one-liner
+- [x] 2.5 Resolve a sample anchor through a python one-liner
 
 ### Phase 3: Generation on the domain locator
 
