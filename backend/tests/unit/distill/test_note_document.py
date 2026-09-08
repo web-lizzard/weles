@@ -55,6 +55,21 @@ def test_locate_degrades_a_heading_match_and_reports_the_second_block() -> None:
     assert later_location.block_index == 1
 
 
+def test_locate_keeps_an_exact_span_when_only_the_first_word_is_emphasized() -> None:
+    # R1-F1: a match at the start of a block must not mark the remainder.
+    content = "lead in\n\n**aaa** and aaaaaaaaaaaaaaaa"
+    document = NoteDocument.of(NoteContent(value=content))
+
+    location = document.locate(Anchor(quote="aaa"))
+
+    assert location is not None
+    block = document.blocks[location.block_index]
+    span = block.text[location.start : location.end]
+    assert location.precision is AnchorPrecision.EXACT
+    assert "aaaaaaaaaaaaaaaa" not in span
+    assert "aaa" in span.replace("*", "")
+
+
 def test_locate_returns_none_when_unresolved_and_ignores_format_syntax() -> None:
     document = NoteDocument.of(
         NoteContent(value="The device replies within a bounded window.")
