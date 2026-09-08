@@ -75,11 +75,11 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 5.1 Fill blocks from NoteDocument in the note detail adapter
-- [x] 5.2 Resolve anchor_location per live card in the cards adapter
-- [x] 5.3 Add HTTP integration cases for blocks and the three location outcomes
-- [x] 5.4 Add the US-07 feature, step module and loader entry
-- [x] 5.5 Run backend pytest, the AC-13 scenarios, ruff and basedpyright
+- [x] 5.1 Fill blocks from NoteDocument in the note detail adapter — d2f23b3
+- [x] 5.2 Resolve anchor_location per live card in the cards adapter — d2f23b3
+- [x] 5.3 Add HTTP integration cases for blocks and the three location outcomes — d2f23b3
+- [x] 5.4 Add the US-07 feature, step module and loader entry — d2f23b3
+- [x] 5.5 Run backend pytest, the AC-13 scenarios, ruff and basedpyright — d2f23b3
 
 #### Manual
 
