@@ -22,14 +22,14 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 2.1 Implement MarkdownNoteFormat blocks and normalize with the offset map
-- [x] 2.2 Implement NoteDocument.of and locate with exact and block precision
-- [x] 2.3 Add note format and note document unit suites
-- [x] 2.4 Run backend pytest, ruff and basedpyright
+- [x] 2.1 Implement MarkdownNoteFormat blocks and normalize with the offset map — fa95fd8
+- [x] 2.2 Implement NoteDocument.of and locate with exact and block precision — fa95fd8
+- [x] 2.3 Add note format and note document unit suites — fa95fd8
+- [x] 2.4 Run backend pytest, ruff and basedpyright — fa95fd8
 
 #### Manual
 
-- [x] 2.5 Resolve a sample anchor through a python one-liner
+- [x] 2.5 Resolve a sample anchor through a python one-liner — fa95fd8
 
 ### Phase 3: Generation on the domain locator
 
