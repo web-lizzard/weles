@@ -54,7 +54,7 @@ MARKDOWN = MarkdownNoteFormat()
 
 _BLOCK_SEPARATOR = re.compile(r"\n\s*\n")
 _INLINE_EMPHASIS_CHARS = frozenset("*_`")
-_LEADING_MARKER_CHARS = frozenset("#>+-")
+_LEADING_MARKER = re.compile(r"^(?:[#>+-]+|\d+[.)])\s*")
 
 
 def _trimmed_bounds(text: str) -> tuple[int, int]:
@@ -70,20 +70,7 @@ def _trimmed_bounds(text: str) -> tuple[int, int]:
 def _after_leading_marker(text: str, start: int, end: int) -> int:
     if start >= end:
         return start
-    if text[start] in _LEADING_MARKER_CHARS:
-        cursor = start
-        while cursor < end and text[cursor] in _LEADING_MARKER_CHARS:
-            cursor += 1
-        while cursor < end and text[cursor].isspace():
-            cursor += 1
-        return cursor
-    if text[start].isdigit():
-        cursor = start
-        while cursor < end and text[cursor].isdigit():
-            cursor += 1
-        if cursor < end and text[cursor] in ".)":
-            cursor += 1
-            while cursor < end and text[cursor].isspace():
-                cursor += 1
-            return cursor
-    return start
+    match = _LEADING_MARKER.match(text[start:end])
+    if match is None:
+        return start
+    return start + match.end()

@@ -140,6 +140,21 @@ Artifact: `reviews/2026-09-08-r1-property-test-phase-2.md`
 - `R1-F1` — Leading emphasis at block start marks the whole paragraph
   Fix: The shrunk input (`lead in\n\n**aaa** and aaaaaaaaaaaaaaaa` / quote `aaa`) must fail the example suite until locate is `exact` and the raw slice does not contain `aaaaaaaaaaaaaaaa`, then remain as regression
 
+### Review r2
+
+Artifact: `reviews/2026-09-08-r2-mutation-test-phase-2.md`
+
+- `R2-F1` — Multi-character and numbered leading markers are not stripped
+  Fix: Normalizing a block drops exactly one leading run matching `^(?:[#>+-]+|\d+[.)])\s*` (including `## Title`, `> quote`, `- item`, and `1. item`) and keeps the remainder as comparable text.
+- `R2-F2` — Block split strips indentation not just newlines
+  Fix: After splitting on blank lines, a kept block retains leading and trailing spaces; only surrounding newlines are stripped.
+- `R2-F3` — Normalize does not pin trimming of leading and trailing whitespace
+  Fix: `normalize` omits leading and trailing whitespace from `value` and from `offsets`; a quote padded with spaces still matches the unpadded block.
+- `R2-F4` — Locate takes the last in-block match
+  Fix: When the normalized quote occurs more than once in a block, `locate` marks the first span, not the last.
+- `R2-F5` — Exact end bound can extend one raw character past the quote
+  Fix: An `exact` location's `end` is exclusive of the raw character after the last kept quote character (`offsets[last] + 1`), so a following letter is not swept into the span and must not force `block` precision.
+
 ---
 
 ## Phase 3: Generation on the domain locator

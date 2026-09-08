@@ -34,6 +34,11 @@ updated: 2026-09-08
 #### Triage
 
 - [x] 2.6 R1-F1 Leading emphasis at block start marks the whole paragraph (proof: 99a75f0) — a1b6a1d
+- [x] 2.7 R2-F1 Multi-character and numbered leading markers are not stripped
+- [x] 2.8 R2-F2 Block split strips indentation not just newlines
+- [x] 2.9 R2-F3 Normalize does not pin trimming of leading and trailing whitespace
+- [x] 2.10 R2-F4 Locate takes the last in-block match
+- [x] 2.11 R2-F5 Exact end bound can extend one raw character past the quote
 
 ### Phase 3: Generation on the domain locator
 
