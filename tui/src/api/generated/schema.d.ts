@@ -106,6 +106,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/notes/{note_id}/cards": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Cards For Note */
+    get: operations["list_cards_for_note_notes__note_id__cards_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/_outbox": {
     parameters: {
       query?: never;
@@ -143,6 +160,25 @@ export interface components {
        * Format: date-time
        */
       approved_at: string;
+    };
+    /** CardListItemDTO */
+    CardListItemDTO: {
+      /**
+       * Card Id
+       * Format: uuid
+       */
+      card_id: string;
+      /** Front */
+      front: string;
+      /** Back */
+      back: string;
+      /** Anchor Quote */
+      anchor_quote: string;
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
     };
     /** DraftDeltaEvent */
     DraftDeltaEvent: {
@@ -516,6 +552,37 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["NoteDetailDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_cards_for_note_notes__note_id__cards_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        note_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CardListItemDTO"][];
         };
       };
       /** @description Validation Error */
