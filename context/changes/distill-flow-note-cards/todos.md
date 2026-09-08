@@ -28,9 +28,9 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 2.1 Implement live-card filter, created_at ordering and 404
+- [x] 2.1 Implement live-card filter, created_at ordering and 404 — b85eded
 - [x] 2.2 Add HTTP integration cases for cards, empty, discarded and unknown note — 1ec7311
-- [x] 2.3 Run backend pytest
+- [x] 2.3 Run backend pytest — b85eded
 
 #### Manual
 
