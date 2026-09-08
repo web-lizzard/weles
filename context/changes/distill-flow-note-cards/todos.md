@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
-current_phase: 4
-next_step: 4.1
-next_command: /unit-test distill-flow-note-cards phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement distill-flow-note-cards phase 5
 updated: 2026-09-08
 ---
 
@@ -53,14 +53,14 @@ updated: 2026-09-08
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 0294329
 
 #### Automated
 
-- [ ] 4.1 Implement listCards mapping and status-aware errors
-- [ ] 4.2 Implement useCardsStore fetch, refresh and error paths
-- [ ] 4.3 Add cards API and cards store test suites
-- [ ] 4.4 Run tui tests and build
+- [x] 4.1 Implement listCards mapping and status-aware errors
+- [x] 4.2 Implement useCardsStore fetch, refresh and error paths
+- [x] 4.3 Add cards API and cards store test suites
+- [x] 4.4 Run tui tests and build
 
 ### Phase 5: TUI navigation and screen stubs
 
