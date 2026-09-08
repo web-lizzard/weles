@@ -13,8 +13,10 @@ from integration.support.in_memory_distill import (  # pyright: ignore[reportImp
 from pytest_bdd import given, then, when
 
 from domain.distill.note import mint_note
+from domain.distill.note_document import NoteDocument
 from domain.distill.outbox import NoteSavedPayload
 from domain.distill.value_objects import (
+    Anchor,
     DiscardReason,
     DistillationStatus,
     NoteContent,
@@ -123,10 +125,9 @@ def every_live_card_quote_resolves(
     live = [card for card in cards if card.discard is None]
     assert live
     for card in live:
-        assert asyncio.run(
-            distill_composition.note_document_parser.resolves(
-                note.content, card.anchor.quote
-            )
+        assert (
+            NoteDocument.of(note.content).locate(Anchor(quote=card.anchor.quote))
+            is not None
         )
 
 

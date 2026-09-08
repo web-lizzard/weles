@@ -26,6 +26,8 @@ from domain.distill.value_objects import (
 )
 from domain.shared.outbox.model import OutboxEnvelope
 
+_RESOLVING_NOTE = NoteContent(value="A handshake begins the connection.")
+
 
 class _StubCardGeneration:
     def __init__(self, proposals: list[CardProposal] | None = None) -> None:
@@ -34,15 +36,6 @@ class _StubCardGeneration:
     async def generate(self, content: NoteContent) -> list[CardProposal]:
         del content
         return self._proposals
-
-
-class _StubNoteDocumentParser:
-    def __init__(self, resolved: set[str] | None = None) -> None:
-        self._resolved: set[str] = resolved or set()
-
-    async def resolves(self, content: NoteContent, quote: str) -> bool:
-        del content
-        return quote in self._resolved
 
 
 def test_envelope_type_is_note_saved() -> None:
@@ -54,7 +47,6 @@ async def test_valid_envelope_dispatches_to_the_command_for_that_note() -> None:
         card_generation=_StubCardGeneration(
             [CardProposal(front="Q1", back="A1", quote="handshake begins")]
         ),
-        parser=_StubNoteDocumentParser(resolved={"handshake begins"}),
     )
     note = await stack.seed_generating_note()
     payload = NoteSavedPayload(note_id=note.id.value)
@@ -71,9 +63,7 @@ async def test_valid_envelope_dispatches_to_the_command_for_that_note() -> None:
 async def test_malformed_payload_is_logged_and_not_dispatched(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    stack = _make_handler_stack(
-        card_generation=_StubCardGeneration(), parser=_StubNoteDocumentParser()
-    )
+    stack = _make_handler_stack(card_generation=_StubCardGeneration())
     note = await stack.seed_generating_note()
     envelope = OutboxEnvelope.pending(NOTE_SAVED, {})
 
@@ -107,7 +97,7 @@ class _HandlerStack:
             NoteId(value=uuid4()),
             SessionId(value=uuid4()),
             TopicSnapshot(id=uuid4(), label="TCP handshakes"),
-            NoteContent(value="A handshake begins the connection."),
+            _RESOLVING_NOTE,
             [TagSnapshot(id=uuid4(), label="networking")],
             datetime.now(UTC),
         )
@@ -115,9 +105,7 @@ class _HandlerStack:
         return note
 
 
-def _make_handler_stack(
-    card_generation: _StubCardGeneration, parser: _StubNoteDocumentParser
-) -> _HandlerStack:
+def _make_handler_stack(card_generation: _StubCardGeneration) -> _HandlerStack:
     notes_repo = InMemoryNoteRepository()
     cards_repo = InMemoryCardRepository()
     outbox_store = InMemoryOutboxStore()
@@ -130,7 +118,6 @@ def _make_handler_stack(
     command = GenerateCardsCommand(
         uow_factory,  # pyright: ignore[reportArgumentType]
         card_generation,
-        parser,
         card_factory,
     )
     handler = FlashcardGenHandler(command)

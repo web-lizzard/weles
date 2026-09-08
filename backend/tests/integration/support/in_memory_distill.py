@@ -5,9 +5,6 @@ from adapters.out.in_memory.distill.card_generation import (
     DeterministicCardGenerationAdapter,
 )
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
-from adapters.out.in_memory.distill.note_document_parser import (
-    MarkdownNoteDocumentParser,
-)
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
 from adapters.out.in_memory.distill.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
@@ -35,7 +32,6 @@ class InMemoryDistillComposition:
     cards: InMemoryCardRepository
     outbox_store: InMemoryOutboxStore
     outbox: InMemoryOutboxAppender
-    note_document_parser: MarkdownNoteDocumentParser
     card_generation: DeterministicCardGenerationAdapter
     card_factory: CardFactory
 
@@ -46,7 +42,6 @@ class InMemoryDistillComposition:
             cards=InMemoryCardRepository(),
             outbox_store=outbox_store,
             outbox=InMemoryOutboxAppender(outbox_store),
-            note_document_parser=MarkdownNoteDocumentParser(),
             card_generation=DeterministicCardGenerationAdapter(),
             card_factory=CardFactory(
                 CardLengthPolicy(front_max=_CARD_FRONT_MAX, back_max=_CARD_BACK_MAX)
@@ -72,7 +67,6 @@ class InMemoryDistillComposition:
             GenerateCardsCommand(
                 uow_factory=self.unit_of_work,
                 card_generation=self.card_generation,
-                parser=self.note_document_parser,
                 card_factory=self.card_factory,
             )
         )

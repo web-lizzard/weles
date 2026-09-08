@@ -11,10 +11,14 @@ from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.distill.commands.generate_cards import GenerateCardsCommand
 from application.distill.value_objects import CardProposal
+from domain.distill.card import Card
 from domain.distill.card_factory import CardFactory
 from domain.distill.note import Note, mint_note
 from domain.distill.value_objects import (
+    Anchor,
+    AnchorResolution,
     CardLengthPolicy,
+    CardSide,
     DiscardReason,
     DistillationStatus,
     NoteContent,
@@ -23,6 +27,8 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+
+_RESOLVING_NOTE = NoteContent(value="A handshake begins the connection.")
 
 
 class _StubCardGeneration:
@@ -41,18 +47,23 @@ class _StubCardGeneration:
         return self._proposals
 
 
-class _StubNoteDocumentParser:
-    def __init__(
-        self, resolved: set[str] | None = None, raises_for: str | None = None
-    ) -> None:
-        self._resolved: set[str] = resolved or set()
-        self._raises_for: str | None = raises_for
+class _RaisingOnSecondMintCardFactory:
+    def __init__(self, inner: CardFactory) -> None:
+        self._inner: CardFactory = inner
+        self._mint_count: int = 0
 
-    async def resolves(self, content: NoteContent, quote: str) -> bool:
-        del content
-        if quote == self._raises_for:
+    def mint(
+        self,
+        note_id: NoteId,
+        front: CardSide,
+        back: CardSide,
+        anchor: Anchor,
+        resolution: AnchorResolution,
+    ) -> Card:
+        self._mint_count += 1
+        if self._mint_count == 2:
             raise RuntimeError("boom")
-        return quote in self._resolved
+        return self._inner.mint(note_id, front, back, anchor, resolution)
 
 
 async def test_generate_cards_persists_live_and_discarded_cards_and_reaches_ready() -> (
@@ -65,7 +76,6 @@ async def test_generate_cards_persists_live_and_discarded_cards_and_reaches_read
                 CardProposal(front="Q2", back="A2", quote="never mentioned"),
             ]
         ),
-        parser=_StubNoteDocumentParser(resolved={"handshake begins"}),
     )
     note = await stack.seed_generating_note()
 
@@ -93,7 +103,6 @@ async def test_generate_cards_reaches_ready_with_zero_live_cards_when_unresolved
                 CardProposal(front="Q2", back="A2", quote="also absent"),
             ]
         ),
-        parser=_StubNoteDocumentParser(resolved=set()),
     )
     note = await stack.seed_generating_note()
 
@@ -110,7 +119,6 @@ async def test_generate_cards_reaches_ready_with_zero_live_cards_when_unresolved
 async def test_generate_cards_marks_note_failed_when_generation_port_raises() -> None:
     stack = _make_stack(
         card_generation=_StubCardGeneration(error=RuntimeError("generation down")),
-        parser=_StubNoteDocumentParser(),
     )
     note = await stack.seed_generating_note()
 
@@ -130,7 +138,6 @@ async def test_generate_cards_redelivery_against_a_ready_note_is_a_logged_no_op(
         card_generation=_StubCardGeneration(
             [CardProposal(front="Q1", back="A1", quote="handshake begins")]
         ),
-        parser=_StubNoteDocumentParser(resolved={"handshake begins"}),
     )
     note = await stack.seed_generating_note()
     await stack.command.handle(note.id)
@@ -155,11 +162,11 @@ async def test_generate_cards_rolls_back_saved_cards_when_commit_is_never_reache
         card_generation=_StubCardGeneration(
             [
                 CardProposal(front="Q1", back="A1", quote="handshake begins"),
-                CardProposal(front="Q2", back="A2", quote="boom trigger"),
+                CardProposal(front="Q2", back="A2", quote="also in note"),
             ]
         ),
-        parser=_StubNoteDocumentParser(
-            resolved={"handshake begins"}, raises_for="boom trigger"
+        card_factory=_RaisingOnSecondMintCardFactory(
+            CardFactory(CardLengthPolicy(front_max=200, back_max=600))
         ),
     )
     note = await stack.seed_generating_note()
@@ -178,10 +185,7 @@ async def test_generate_cards_missing_note_is_a_logged_no_op(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     # R3-F1
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(),
-        parser=_StubNoteDocumentParser(),
-    )
+    stack = _make_stack(card_generation=_StubCardGeneration())
     unknown_note_id = NoteId(value=uuid4())
 
     with caplog.at_level(logging.INFO):
@@ -199,7 +203,6 @@ async def test_generate_cards_skips_invalid_proposal_but_keeps_valid_siblings() 
                 CardProposal(front="Q2", back="A2", quote="handshake begins"),
             ]
         ),
-        parser=_StubNoteDocumentParser(resolved={"handshake begins"}),
     )
     note = await stack.seed_generating_note()
 
@@ -233,7 +236,7 @@ class _Stack:
             NoteId(value=uuid4()),
             SessionId(value=uuid4()),
             TopicSnapshot(id=uuid4(), label="TCP handshakes"),
-            NoteContent(value="A handshake begins the connection."),
+            _RESOLVING_NOTE,
             [TagSnapshot(id=uuid4(), label="networking")],
             datetime.now(UTC),
         )
@@ -242,7 +245,8 @@ class _Stack:
 
 
 def _make_stack(
-    card_generation: _StubCardGeneration, parser: _StubNoteDocumentParser
+    card_generation: _StubCardGeneration,
+    card_factory: CardFactory | _RaisingOnSecondMintCardFactory | None = None,
 ) -> _Stack:
     notes_repo = InMemoryNoteRepository()
     cards_repo = InMemoryCardRepository()
@@ -252,11 +256,10 @@ def _make_stack(
     def uow_factory() -> InMemoryUnitOfWork:
         return InMemoryUnitOfWork(notes_repo, cards_repo, outbox_store, outbox)
 
-    card_factory = CardFactory(CardLengthPolicy(front_max=200, back_max=600))
+    factory = card_factory or CardFactory(CardLengthPolicy(front_max=200, back_max=600))
     command = GenerateCardsCommand(
         uow_factory,  # pyright: ignore[reportArgumentType]
         card_generation,
-        parser,
-        card_factory,
+        factory,  # pyright: ignore[reportArgumentType]
     )
     return _Stack(notes_repo, cards_repo, command)
