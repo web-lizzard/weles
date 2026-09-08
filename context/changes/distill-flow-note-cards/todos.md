@@ -34,7 +34,7 @@ updated: 2026-09-08
 
 #### Manual
 
-- [x] 2.4 Curl the cards route for a generated note and for an unknown note id
+- [x] 2.4 Curl the cards route for a generated note and for an unknown note id — 5e1f5d4
 
 ### Phase 3: OpenAPI regeneration and TUI card surface stubs
 
