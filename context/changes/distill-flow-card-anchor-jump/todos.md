@@ -3,7 +3,7 @@ change_id: distill-flow-card-anchor-jump
 current_phase: 3
 next_step: 3.1
 next_command: /implement distill-flow-card-anchor-jump phase 3
-updated: 2026-09-08
+updated: 2026-09-09
 ---
 
 ### Phase 1: Domain anchor-location contracts
@@ -34,11 +34,11 @@ updated: 2026-09-08
 #### Triage
 
 - [x] 2.6 R1-F1 Leading emphasis at block start marks the whole paragraph (proof: 99a75f0) — a1b6a1d
-- [x] 2.7 R2-F1 Multi-character and numbered leading markers are not stripped
-- [x] 2.8 R2-F2 Block split strips indentation not just newlines
-- [x] 2.9 R2-F3 Normalize does not pin trimming of leading and trailing whitespace
-- [x] 2.10 R2-F4 Locate takes the last in-block match
-- [x] 2.11 R2-F5 Exact end bound can extend one raw character past the quote
+- [x] 2.7 R2-F1 Multi-character and numbered leading markers are not stripped — 11ed503
+- [x] 2.8 R2-F2 Block split strips indentation not just newlines — 11ed503
+- [x] 2.9 R2-F3 Normalize does not pin trimming of leading and trailing whitespace — 11ed503
+- [x] 2.10 R2-F4 Locate takes the last in-block match — 11ed503
+- [x] 2.11 R2-F5 Exact end bound can extend one raw character past the quote — 11ed503
 
 ### Phase 3: Generation on the domain locator
 
