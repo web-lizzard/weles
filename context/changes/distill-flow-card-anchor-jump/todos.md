@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
-current_phase: 4
-next_step: 4.1
-next_command: /implement distill-flow-card-anchor-jump phase 4
+current_phase: 5
+next_step: tests
+next_command: /unit-test distill-flow-card-anchor-jump phase 5
 updated: 2026-09-09
 ---
 
@@ -58,14 +58,14 @@ updated: 2026-09-09
 
 #### Automated
 
-- [ ] 4.1 Add NoteBlockDTO and blocks to NoteDetailDTO
-- [ ] 4.2 Add AnchorLocationDTO and anchor_location to CardListItemDTO
-- [ ] 4.3 Wire both query adapters to empty values
-- [ ] 4.4 Run backend pytest, ruff and basedpyright
+- [x] 4.1 Add NoteBlockDTO and blocks to NoteDetailDTO
+- [x] 4.2 Add AnchorLocationDTO and anchor_location to CardListItemDTO
+- [x] 4.3 Wire both query adapters to empty values
+- [x] 4.4 Run backend pytest, ruff and basedpyright
 
 #### Manual
 
-- [ ] 4.5 Confirm both new shapes appear in openapi.json
+- [x] 4.5 Confirm both new shapes appear in openapi.json
 
 ### Phase 5: Read-model behavior and US-07 acceptance
 

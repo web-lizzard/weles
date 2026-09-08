@@ -17,10 +17,16 @@ class NoteDetailTagDTO(BaseModel):
     label: str
 
 
+class NoteBlockDTO(BaseModel):
+    index: int
+    text: str
+
+
 class NoteDetailDTO(BaseModel):
     note_id: UUID
     topic: NoteDetailTopicDTO
     content: str
+    blocks: list[NoteBlockDTO]
     tags: list[NoteDetailTagDTO]
     distillation_status: str
     approved_at: datetime

@@ -20,6 +20,7 @@ class InMemoryGetNoteQueryAdapter:
             note_id=note.id.value,
             topic=NoteDetailTopicDTO(id=note.topic.id, label=note.topic.label),
             content=note.content.value,
+            blocks=[],
             tags=[NoteDetailTagDTO(id=tag.id, label=tag.label) for tag in note.tags],
             distillation_status=note.distillation_status,
             approved_at=note.approved_at,
