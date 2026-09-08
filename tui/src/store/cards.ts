@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import type { Card } from "../api/cards.js";
+import { type Card, listCards } from "../api/cards.js";
+import { useAppStore } from "./index.js";
+import { useNotesStore } from "./notes.js";
 
 type CardsState = {
   cards: Card[];
@@ -11,13 +13,35 @@ type CardsActions = {
   refresh: () => Promise<void>;
 };
 
-export const useCardsStore = create<CardsState & CardsActions>(() => ({
+function surfaceCardsError(error: unknown) {
+  useAppStore.getState().closeDetail();
+  useNotesStore.setState({
+    error: error instanceof Error ? error.message : String(error),
+  });
+}
+
+export const useCardsStore = create<CardsState & CardsActions>((set) => ({
   cards: [],
   isLoading: false,
-  fetchCards: async (_noteId: string) => {
-    throw new Error("not implemented");
+  fetchCards: async (noteId: string) => {
+    set({ cards: [], isLoading: true });
+    try {
+      const cards = await listCards(noteId);
+      set({ cards, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      surfaceCardsError(error);
+    }
   },
   refresh: async () => {
-    throw new Error("not implemented");
+    const noteId = useAppStore.getState().selectedNoteId;
+    if (noteId === null) return;
+    try {
+      const cards = await listCards(noteId);
+      set({ cards, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false });
+      surfaceCardsError(error);
+    }
   },
 }));
