@@ -6,18 +6,14 @@ import pytest
 from adapters.out.in_memory.distill.card_generation import (
     DeterministicCardGenerationAdapter,
 )
-from adapters.out.in_memory.distill.note_document_parser import (
-    MarkdownNoteDocumentParser,
-)
 from application.distill.ports import CardGeneration
 from application.distill.value_objects import CardProposal
-from domain.distill.value_objects import NoteContent
+from domain.distill.note_document import NoteDocument
+from domain.distill.value_objects import Anchor, NoteContent
 
 _IMPLEMENTATIONS: list[Callable[[], CardGeneration]] = [
     cast(Callable[[], CardGeneration], DeterministicCardGenerationAdapter),
 ]
-
-_PARSER = MarkdownNoteDocumentParser()
 
 _TWO_BLOCK_NOTE = NoteContent(
     value=(
@@ -31,7 +27,7 @@ _SINGLE_SENTENCE_NOTE = NoteContent(value="Only one sentence appears here.")
 
 
 async def _resolves(content: NoteContent, proposal: CardProposal) -> bool:
-    return await _PARSER.resolves(content, proposal.quote)
+    return NoteDocument.of(content).locate(Anchor(quote=proposal.quote)) is not None
 
 
 @pytest.mark.parametrize("make_generator", _IMPLEMENTATIONS, ids=["deterministic"])

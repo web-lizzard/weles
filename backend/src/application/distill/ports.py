@@ -10,10 +10,6 @@ class CardGeneration(Protocol):
     async def generate(self, content: NoteContent) -> list[CardProposal]: ...
 
 
-class NoteDocumentParser(Protocol):
-    async def resolves(self, content: NoteContent, quote: str) -> bool: ...
-
-
 class UnitOfWork(Protocol):
     notes: NoteRepository
     cards: CardRepository

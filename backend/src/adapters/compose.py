@@ -40,9 +40,6 @@ from adapters.out.in_memory.distill.list_cards_for_note_query import (
 from adapters.out.in_memory.distill.list_notes_query import (
     InMemoryListNotesQueryAdapter,
 )
-from adapters.out.in_memory.distill.note_document_parser import (
-    MarkdownNoteDocumentParser,
-)
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
@@ -100,7 +97,6 @@ _get_note_query = InMemoryGetNoteQueryAdapter(_distill_note_repository)
 _list_cards_for_note_query = InMemoryListCardsForNoteQueryAdapter(
     _distill_note_repository, _distill_card_repository
 )
-_note_document_parser = MarkdownNoteDocumentParser()
 _card_generation = DeterministicCardGenerationAdapter()
 _card_factory = CardFactory(
     CardLengthPolicy(
@@ -160,7 +156,6 @@ _save_note_handler = SaveNoteHandler(_save_note_command)
 _generate_cards_command = GenerateCardsCommand(
     uow_factory=_distill_unit_of_work,
     card_generation=_card_generation,
-    parser=_note_document_parser,
     card_factory=_card_factory,
 )
 _flashcard_gen_handler = FlashcardGenHandler(_generate_cards_command)

@@ -1,8 +1,9 @@
 import logging
 from collections.abc import Callable
 
-from application.distill.ports import CardGeneration, NoteDocumentParser, UnitOfWork
+from application.distill.ports import CardGeneration, UnitOfWork
 from domain.distill.card_factory import CardFactory
+from domain.distill.note_document import NoteDocument
 from domain.distill.value_objects import (
     Anchor,
     AnchorResolution,
@@ -20,12 +21,10 @@ class GenerateCardsCommand:
         self,
         uow_factory: Callable[[], UnitOfWork],
         card_generation: CardGeneration,
-        parser: NoteDocumentParser,
         card_factory: CardFactory,
     ) -> None:
         self._uow_factory: Callable[[], UnitOfWork] = uow_factory
         self._card_generation: CardGeneration = card_generation
-        self._parser: NoteDocumentParser = parser
         self._card_factory: CardFactory = card_factory
 
     async def handle(self, note_id: NoteId) -> None:
@@ -47,15 +46,15 @@ class GenerateCardsCommand:
                 await uow.commit()
                 return
 
+            document = NoteDocument.of(note.content)
             for proposal in proposals:
                 try:
                     front = CardSide(value=proposal.front)
                     back = CardSide(value=proposal.back)
                     anchor = Anchor(quote=proposal.quote)
-                    resolved = await self._parser.resolves(note.content, proposal.quote)
                     resolution = (
                         AnchorResolution.RESOLVED
-                        if resolved
+                        if document.locate(anchor) is not None
                         else AnchorResolution.UNRESOLVED
                     )
                     card = self._card_factory.mint(
