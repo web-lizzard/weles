@@ -83,13 +83,13 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 6.1 Add tab strip and right-arrow entry to NoteDetailScreen
-- [x] 6.2 Implement CardListScreen fetch, selection, refresh and empty state
-- [x] 6.3 Implement CardDetailScreen render and left-arrow back
-- [x] 6.4 Route tab and card depth in app.tsx
-- [x] 6.5 Add card screen and navigation test suites
-- [x] 6.6 Run tui tests, tui build and backend pytest
+- [x] 6.1 Add tab strip and right-arrow entry to NoteDetailScreen — 739ebc3
+- [x] 6.2 Implement CardListScreen fetch, selection, refresh and empty state — 739ebc3
+- [x] 6.3 Implement CardDetailScreen render and left-arrow back — 739ebc3
+- [x] 6.4 Route tab and card depth in app.tsx — 739ebc3
+- [x] 6.5 Add card screen and navigation test suites — 739ebc3
+- [x] 6.6 Run tui tests, tui build and backend pytest — 739ebc3
 
 #### Manual
 
-- [x] 6.7 Walk the tab and depth axes in the running TUI, including a zero-card note
+- [x] 6.7 Walk the tab and depth axes in the running TUI, including a zero-card note — 739ebc3
