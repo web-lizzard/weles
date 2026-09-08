@@ -66,14 +66,14 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 5.1 Extend useAppStore with activeNoteTab and selectedCardId
-- [x] 5.2 Add NoteTabStrip component
-- [x] 5.3 Add CardListScreen and CardDetailScreen shells
-- [x] 5.4 Run tui build and tests
+- [x] 5.1 Extend useAppStore with activeNoteTab and selectedCardId — 2ac4ba5
+- [x] 5.2 Add NoteTabStrip component — 2ac4ba5
+- [x] 5.3 Add CardListScreen and CardDetailScreen shells — 2ac4ba5
+- [x] 5.4 Run tui build and tests — 2ac4ba5
 
 #### Manual
 
-- [x] 5.5 Confirm existing note navigation is unchanged with the new state inert
+- [x] 5.5 Confirm existing note navigation is unchanged with the new state inert — 2ac4ba5
 
 ### Phase 6: TUI navigation behavior and card screens
 
