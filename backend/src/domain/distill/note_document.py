@@ -1,3 +1,4 @@
+import re
 from enum import StrEnum
 from typing import ClassVar
 
@@ -66,7 +67,7 @@ def _locate_in_block(
     start = normalized.offsets[index]
     end = normalized.offsets[last] + 1
     recovered = note_format.normalize(block.text[start:end])
-    if recovered.value == quote.value and not (index == 0 and start > 0):
+    if recovered.value == quote.value and not _has_structural_prefix(block.text, start):
         return AnchorLocation(
             block_index=block.index,
             start=start,
@@ -79,3 +80,12 @@ def _locate_in_block(
         end=len(block.text),
         precision=AnchorPrecision.BLOCK,
     )
+
+
+_STRUCTURAL_PREFIX = re.compile(r"^(?:[#>+-]+|\d+[.)])\s*")
+
+
+def _has_structural_prefix(text: str, start: int) -> bool:
+    leading_ws = len(text) - len(text.lstrip())
+    marker = _STRUCTURAL_PREFIX.match(text[leading_ws:])
+    return marker is not None and start >= leading_ws + marker.end()

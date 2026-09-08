@@ -31,6 +31,10 @@ updated: 2026-09-08
 
 - [x] 2.5 Resolve a sample anchor through a python one-liner — fa95fd8
 
+#### Triage
+
+- [x] 2.6 R1-F1 Leading emphasis at block start marks the whole paragraph (proof: 99a75f0)
+
 ### Phase 3: Generation on the domain locator
 
 #### Automated
