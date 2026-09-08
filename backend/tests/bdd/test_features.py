@@ -5,6 +5,7 @@ from pathlib import Path
 from pytest_bdd import scenarios
 
 pytest_plugins = [
+    "bdd.steps.anchor_jump",
     "bdd.steps.approve_outbox",
     "bdd.steps.capture",
     "bdd.steps.coverage_wrapup",

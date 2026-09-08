@@ -21,12 +21,16 @@ from domain.distill.value_objects import (
 from .conftest import NotesTestContext
 
 
-def _note(status: DistillationStatus, updated_at: datetime) -> Note:
+def _note(
+    status: DistillationStatus,
+    updated_at: datetime,
+    content: str = "We discussed how connections are established.",
+) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
-        content=NoteContent(value="We discussed how connections are established."),
+        content=NoteContent(value=content),
         tags=[TagSnapshot(id=uuid4(), label="networking")],
         distillation_status=status,
         approved_at=updated_at,
@@ -36,14 +40,18 @@ def _note(status: DistillationStatus, updated_at: datetime) -> Note:
 
 
 def _card(
-    note_id: NoteId, created_at: datetime, discard: Discard | None = None
+    note_id: NoteId,
+    created_at: datetime,
+    discard: Discard | None = None,
+    quote: str = "Connections are established via a three-way handshake.",
+    front: str = "What establishes a connection?",
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
         note_id=note_id,
-        front=CardSide(value="What establishes a connection?"),
+        front=CardSide(value=front),
         back=CardSide(value="A three-way handshake."),
-        anchor=Anchor(quote="Connections are established via a three-way handshake."),
+        anchor=Anchor(quote=quote),
         discard=discard,
         created_at=created_at,
     )
@@ -175,3 +183,83 @@ async def test_get_cards_for_note_returns_404_for_an_unknown_note_id(
 
     assert response.status_code == 404
     assert response.json()["code"] == "distill_note_not_found"
+
+
+async def test_get_note_returns_blocks_in_document_order_with_raw_text(
+    notes_client: NotesTestContext,
+) -> None:
+    now = datetime.now(UTC)
+    content = "# TCP Handshake\n\nThe client sends SYN.\n\nThe server replies SYN-ACK."
+    note = _note(DistillationStatus.READY, now, content=content)
+    await notes_client.notes.save(note)
+
+    response = notes_client.client.get(f"/notes/{note.id.value}")
+
+    assert response.status_code == 200
+    body = cast(dict[str, object], response.json())
+    assert body["content"] == content
+    assert body["blocks"] == [
+        {"index": 0, "text": "# TCP Handshake"},
+        {"index": 1, "text": "The client sends SYN."},
+        {"index": 2, "text": "The server replies SYN-ACK."},
+    ]
+
+
+async def test_get_cards_for_note_returns_exact_block_and_unresolved_locations(
+    notes_client: NotesTestContext,
+) -> None:
+    now = datetime.now(UTC)
+    content = "# TCP Handshake\n\nThe client sends SYN and waits."
+    exact_quote = "The client sends SYN and waits."
+    heading_quote = "TCP Handshake"
+    missing_quote = "a fragment that is no longer in this note"
+    note = _note(DistillationStatus.READY, now, content=content)
+    await notes_client.notes.save(note)
+    await notes_client.cards.save(
+        _card(note.id, now, quote=exact_quote, front="What does the client send?")
+    )
+    await notes_client.cards.save(
+        _card(
+            note.id,
+            now + timedelta(seconds=1),
+            quote=heading_quote,
+            front="What is the heading?",
+        )
+    )
+    await notes_client.cards.save(
+        _card(
+            note.id,
+            now + timedelta(seconds=2),
+            quote=missing_quote,
+            front="What is missing?",
+        )
+    )
+
+    note_response = notes_client.client.get(f"/notes/{note.id.value}")
+    cards_response = notes_client.client.get(f"/notes/{note.id.value}/cards")
+
+    assert note_response.status_code == 200
+    assert cards_response.status_code == 200
+    note_body = cast(dict[str, object], note_response.json())
+    cards = cast(list[dict[str, object]], cards_response.json())
+    blocks = cast(list[dict[str, object]], note_body["blocks"])
+    by_quote = {str(item["anchor_quote"]): item for item in cards}
+
+    exact_location = by_quote[exact_quote]["anchor_location"]
+    assert exact_location is not None
+    exact_location = cast(dict[str, object], exact_location)
+    exact_block = cast(str, blocks[cast(int, exact_location["block_index"])]["text"])
+    start = cast(int, exact_location["start"])
+    end = cast(int, exact_location["end"])
+    assert exact_location["precision"] == "exact"
+    assert exact_block[start:end] == exact_quote
+
+    block_location = by_quote[heading_quote]["anchor_location"]
+    assert block_location is not None
+    block_location = cast(dict[str, object], block_location)
+    heading_block = cast(str, blocks[cast(int, block_location["block_index"])]["text"])
+    assert block_location["precision"] == "block"
+    assert block_location["start"] == 0
+    assert block_location["end"] == len(heading_block)
+
+    assert by_quote[missing_quote]["anchor_location"] is None
