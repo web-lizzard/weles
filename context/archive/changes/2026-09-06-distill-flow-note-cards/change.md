@@ -1,10 +1,10 @@
 ---
 change_id: distill-flow-note-cards
 title: Users can see the cards generated from an open note
-status: implemented
+status: archived
 created: 2026-09-06
 updated: 2026-09-08
-archived_at: null
+archived_at: 2026-09-08T13:23:20Z
 origin: distill-pillar
 effort_id: distill-flow
 slice_ref: S-06
