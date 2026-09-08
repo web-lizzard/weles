@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
-current_phase: 2
-next_step: 2.4
-next_command: /implement distill-flow-note-cards phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement distill-flow-note-cards phase 3
 updated: 2026-09-08
 ---
 
@@ -34,7 +34,7 @@ updated: 2026-09-08
 
 #### Manual
 
-- [ ] 2.4 Curl the cards route for a generated note and for an unknown note id
+- [x] 2.4 Curl the cards route for a generated note and for an unknown note id
 
 ### Phase 3: OpenAPI regeneration and TUI card surface stubs
 
