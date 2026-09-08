@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
-current_phase: 5
-next_step: 5.1
-next_command: /implement distill-flow-note-cards phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test distill-flow-note-cards phase 6
 updated: 2026-09-08
 ---
 
@@ -66,14 +66,14 @@ updated: 2026-09-08
 
 #### Automated
 
-- [ ] 5.1 Extend useAppStore with activeNoteTab and selectedCardId
-- [ ] 5.2 Add NoteTabStrip component
-- [ ] 5.3 Add CardListScreen and CardDetailScreen shells
-- [ ] 5.4 Run tui build and tests
+- [x] 5.1 Extend useAppStore with activeNoteTab and selectedCardId
+- [x] 5.2 Add NoteTabStrip component
+- [x] 5.3 Add CardListScreen and CardDetailScreen shells
+- [x] 5.4 Run tui build and tests
 
 #### Manual
 
-- [ ] 5.5 Confirm existing note navigation is unchanged with the new state inert
+- [x] 5.5 Confirm existing note navigation is unchanged with the new state inert
 
 ### Phase 6: TUI navigation behavior and card screens
 
