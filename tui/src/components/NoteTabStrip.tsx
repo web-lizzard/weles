@@ -23,6 +23,7 @@ function TabLabel({ label, isActive }: { label: string; isActive: boolean }) {
   if (isActive) {
     return (
       <Text backgroundColor="blue" color="black">
+        {"\x1B[44m"}
         {label}
       </Text>
     );

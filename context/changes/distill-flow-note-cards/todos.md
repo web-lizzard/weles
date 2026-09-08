@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
 current_phase: 6
-next_step: 6.1
-next_command: /unit-test distill-flow-note-cards phase 6
+next_step:
+next_command: /archive distill-flow-note-cards
 updated: 2026-09-08
 ---
 
@@ -79,17 +79,17 @@ updated: 2026-09-08
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 6da0302
 
 #### Automated
 
-- [ ] 6.1 Add tab strip and right-arrow entry to NoteDetailScreen
-- [ ] 6.2 Implement CardListScreen fetch, selection, refresh and empty state
-- [ ] 6.3 Implement CardDetailScreen render and left-arrow back
-- [ ] 6.4 Route tab and card depth in app.tsx
-- [ ] 6.5 Add card screen and navigation test suites
-- [ ] 6.6 Run tui tests, tui build and backend pytest
+- [x] 6.1 Add tab strip and right-arrow entry to NoteDetailScreen
+- [x] 6.2 Implement CardListScreen fetch, selection, refresh and empty state
+- [x] 6.3 Implement CardDetailScreen render and left-arrow back
+- [x] 6.4 Route tab and card depth in app.tsx
+- [x] 6.5 Add card screen and navigation test suites
+- [x] 6.6 Run tui tests, tui build and backend pytest
 
 #### Manual
 
-- [ ] 6.7 Walk the tab and depth axes in the running TUI, including a zero-card note
+- [x] 6.7 Walk the tab and depth axes in the running TUI, including a zero-card note
