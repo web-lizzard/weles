@@ -40,14 +40,14 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 3.1 Regenerate schema.d.ts against the running backend
-- [x] 3.2 Add tui/src/api/cards.ts signatures
-- [x] 3.3 Add tui/src/store/cards.ts store shape
-- [x] 3.4 Run tui build and tests
+- [x] 3.1 Regenerate schema.d.ts against the running backend — a35a3f4
+- [x] 3.2 Add tui/src/api/cards.ts signatures — a35a3f4
+- [x] 3.3 Add tui/src/store/cards.ts store shape — a35a3f4
+- [x] 3.4 Run tui build and tests — a35a3f4
 
 #### Manual
 
-- [x] 3.5 Confirm the regenerated schema carries the cards path and DTO
+- [x] 3.5 Confirm the regenerated schema carries the cards path and DTO — a35a3f4
 
 ### Phase 4: TUI card fetch behavior
 
