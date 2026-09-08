@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
-current_phase: 5
-next_step: 5.6
-next_command: /implement distill-flow-card-anchor-jump phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /implement distill-flow-card-anchor-jump phase 6
 updated: 2026-09-09
 ---
 
@@ -83,7 +83,7 @@ updated: 2026-09-09
 
 #### Manual
 
-- [ ] 5.6 Curl both routes for a generated note and inspect a location
+- [x] 5.6 Curl both routes for a generated note and inspect a location — d2f23b3
 
 ### Phase 6: TUI anchor surface stubs
 
