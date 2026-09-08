@@ -10,9 +10,9 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 1.1 Add NoteFormat protocol, NormalizedText and MarkdownNoteFormat stubs
-- [x] 1.2 Add NoteBlock, AnchorPrecision, AnchorLocation and NoteDocument stubs
-- [x] 1.3 Run backend pytest, ruff and basedpyright
+- [x] 1.1 Add NoteFormat protocol, NormalizedText and MarkdownNoteFormat stubs — 9cf0cfe
+- [x] 1.2 Add NoteBlock, AnchorPrecision, AnchorLocation and NoteDocument stubs — 9cf0cfe
+- [x] 1.3 Run backend pytest, ruff and basedpyright — 9cf0cfe
 
 ### Phase 2: Domain anchor-location behavior
 
