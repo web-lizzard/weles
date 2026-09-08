@@ -33,7 +33,7 @@ updated: 2026-09-08
 
 #### Triage
 
-- [x] 2.6 R1-F1 Leading emphasis at block start marks the whole paragraph (proof: 99a75f0)
+- [x] 2.6 R1-F1 Leading emphasis at block start marks the whole paragraph (proof: 99a75f0) — a1b6a1d
 
 ### Phase 3: Generation on the domain locator
 
