@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
-current_phase: 3
-next_step: 3.6
-next_command: /implement distill-flow-card-anchor-jump phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement distill-flow-card-anchor-jump phase 4
 updated: 2026-09-09
 ---
 
@@ -44,15 +44,15 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 3.1 Delete the NoteDocumentParser port and its markdown adapter
-- [x] 3.2 Move GenerateCards onto NoteDocument.locate
-- [x] 3.3 Drop the parser from compose
-- [x] 3.4 Migrate the parser-shaped unit, integration and bdd test surfaces
-- [x] 3.5 Run backend pytest, the bdd suite, ruff and basedpyright
+- [x] 3.1 Delete the NoteDocumentParser port and its markdown adapter — 00073db
+- [x] 3.2 Move GenerateCards onto NoteDocument.locate — 00073db
+- [x] 3.3 Drop the parser from compose — 00073db
+- [x] 3.4 Migrate the parser-shaped unit, integration and bdd test surfaces — 00073db
+- [x] 3.5 Run backend pytest, the bdd suite, ruff and basedpyright — 00073db
 
 #### Manual
 
-- [ ] 3.6 Approve a note end to end and confirm cards are still grounded
+- [x] 3.6 Approve a note end to end and confirm cards are still grounded — 00073db
 
 ### Phase 4: Read-model anchor contracts
 
