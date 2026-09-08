@@ -57,10 +57,10 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 4.1 Implement listCards mapping and status-aware errors
-- [x] 4.2 Implement useCardsStore fetch, refresh and error paths
-- [x] 4.3 Add cards API and cards store test suites
-- [x] 4.4 Run tui tests and build
+- [x] 4.1 Implement listCards mapping and status-aware errors — df29c91
+- [x] 4.2 Implement useCardsStore fetch, refresh and error paths — df29c91
+- [x] 4.3 Add cards API and cards store test suites — df29c91
+- [x] 4.4 Run tui tests and build — df29c91
 
 ### Phase 5: TUI navigation and screen stubs
 
