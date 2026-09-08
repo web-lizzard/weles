@@ -332,6 +332,13 @@ Wire the tab axis, the card-detail depth, the refresh key and the routing, and c
 - Enter on a card shows it in full with the tab strip still visible; `←` returns to the list; `←` again returns to the note; ESC returns to the note list; ESC again returns to capture
 - On a note whose card count reads `0 cards`, `→` does nothing
 
+### Review r1
+
+Artifact: `reviews/2026-09-08-r1-impl-review.md`
+
+- `R1-F1` — Card list keeps another note's cards visible while the new note loads
+  Fix: opening the cards tab must not display cards that belong to a previously opened note; mount must go through `fetchCards`, which clears the list, rather than `refresh`
+
 ---
 
 ## Testing Strategy
