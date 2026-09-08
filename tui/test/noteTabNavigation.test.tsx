@@ -84,6 +84,21 @@ vi.mock("../src/api/cards", async (importOriginal) => {
   };
 });
 
+async function waitFor(
+  predicate: () => boolean,
+  timeoutMs = 2000,
+  intervalMs = 20,
+): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (predicate()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  throw new Error("Timed out waiting for condition");
+}
+
 async function pressKey(
   stdin: { write: (data: string) => void },
   key: string,
@@ -183,11 +198,12 @@ describe("note tab navigation", () => {
     expect(useAppStore.getState().isDetailOpen).toBe(true);
   });
 
-  it("shows the card list or card detail body for the current tab and depth", () => {
+  it("shows the card list or card detail body for the current tab and depth", async () => {
     seedOpenNote(2);
     useAppStore.setState({ activeNoteTab: "cards" });
     const { lastFrame, rerender } = render(<App />);
 
+    await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
     expect(lastFrame()).toContain("What is a SYN?");
     expect(lastFrame()).not.toContain("Full note content for the detail view");
 
