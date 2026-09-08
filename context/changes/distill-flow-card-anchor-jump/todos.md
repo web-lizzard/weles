@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
-current_phase: 1
-next_step: 1.1
-next_command: /implement distill-flow-card-anchor-jump phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test distill-flow-card-anchor-jump phase 2
 updated: 2026-09-08
 ---
 
@@ -10,9 +10,9 @@ updated: 2026-09-08
 
 #### Automated
 
-- [ ] 1.1 Add NoteFormat protocol, NormalizedText and MarkdownNoteFormat stubs
-- [ ] 1.2 Add NoteBlock, AnchorPrecision, AnchorLocation and NoteDocument stubs
-- [ ] 1.3 Run backend pytest, ruff and basedpyright
+- [x] 1.1 Add NoteFormat protocol, NormalizedText and MarkdownNoteFormat stubs
+- [x] 1.2 Add NoteBlock, AnchorPrecision, AnchorLocation and NoteDocument stubs
+- [x] 1.3 Run backend pytest, ruff and basedpyright
 
 ### Phase 2: Domain anchor-location behavior
 
