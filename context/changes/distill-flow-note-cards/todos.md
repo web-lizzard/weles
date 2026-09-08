@@ -10,15 +10,15 @@ updated: 2026-09-08
 
 #### Automated
 
-- [x] 1.1 Add ListCardsForNoteQueryPort and CardListItemDTO
-- [x] 1.2 Add InMemoryListCardsForNoteQueryAdapter shell
-- [x] 1.3 Add GET /notes/{note_id}/cards route
-- [x] 1.4 Wire the card list query in compose
-- [x] 1.5 Run backend pytest and lint
+- [x] 1.1 Add ListCardsForNoteQueryPort and CardListItemDTO — 48d0bbe
+- [x] 1.2 Add InMemoryListCardsForNoteQueryAdapter shell — 48d0bbe
+- [x] 1.3 Add GET /notes/{note_id}/cards route — 48d0bbe
+- [x] 1.4 Wire the card list query in compose — 48d0bbe
+- [x] 1.5 Run backend pytest and lint — 48d0bbe
 
 #### Manual
 
-- [x] 1.6 Start the backend and confirm the route appears in openapi.json
+- [x] 1.6 Start the backend and confirm the route appears in openapi.json — 48d0bbe
 
 ### Phase 2: Backend card-read behavior
 
