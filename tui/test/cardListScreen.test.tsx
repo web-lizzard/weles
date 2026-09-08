@@ -158,4 +158,45 @@ describe("CardListScreen", () => {
 
     expect(listCards).toHaveBeenCalledWith(NOTE_ID);
   });
+
+  // R1-F1
+  it("does not keep another note's cards visible while the new note's cards load", async () => {
+    const otherNoteId = "00000000-0000-4000-8000-000000000002";
+    const leftover: Card = {
+      cardId: "00000000-0000-4000-8000-000000000199",
+      front: "Leftover front from another note",
+      back: "Leftover back",
+      anchorQuote: "Leftover quote",
+      createdAt: "2026-09-06T11:00:00Z",
+    };
+
+    useAppStore.setState({ selectedNoteId: otherNoteId });
+    useNotesStore.setState({
+      items: [
+        {
+          noteId: otherNoteId,
+          topicLabel: "UDP",
+          distillationStatus: "ready",
+          cardCount: 1,
+          lastUpdatedAt: "2026-09-06T12:00:00Z",
+        },
+      ],
+      isLoading: false,
+      error: null,
+    });
+    useCardsStore.setState({ cards: [leftover], isLoading: false });
+
+    vi.mocked(listCards).mockReturnValue(new Promise(() => {}));
+
+    const { lastFrame, unmount } = render(<CardListScreen />);
+    try {
+      await waitFor(() => vi.mocked(listCards).mock.calls.length > 0);
+
+      expect(lastFrame()).not.toContain("Leftover front from another note");
+      expect(useCardsStore.getState().cards).toEqual([]);
+      expect(listCards).toHaveBeenCalledWith(otherNoteId);
+    } finally {
+      unmount();
+    }
+  });
 });
