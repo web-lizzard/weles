@@ -58,14 +58,14 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 4.1 Add NoteBlockDTO and blocks to NoteDetailDTO
-- [x] 4.2 Add AnchorLocationDTO and anchor_location to CardListItemDTO
-- [x] 4.3 Wire both query adapters to empty values
-- [x] 4.4 Run backend pytest, ruff and basedpyright
+- [x] 4.1 Add NoteBlockDTO and blocks to NoteDetailDTO — 9cc4aa7
+- [x] 4.2 Add AnchorLocationDTO and anchor_location to CardListItemDTO — 9cc4aa7
+- [x] 4.3 Wire both query adapters to empty values — 9cc4aa7
+- [x] 4.4 Run backend pytest, ruff and basedpyright — 9cc4aa7
 
 #### Manual
 
-- [x] 4.5 Confirm both new shapes appear in openapi.json
+- [x] 4.5 Confirm both new shapes appear in openapi.json — 9cc4aa7
 
 ### Phase 5: Read-model behavior and US-07 acceptance
 
