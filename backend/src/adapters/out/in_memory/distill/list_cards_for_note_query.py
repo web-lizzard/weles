@@ -1,5 +1,9 @@
-from application.distill.queries.list_cards_for_note import CardListItemDTO
+from application.distill.queries.list_cards_for_note import (
+    AnchorLocationDTO,
+    CardListItemDTO,
+)
 from domain.distill.exceptions import DistillNoteNotFoundError
+from domain.distill.note_document import AnchorLocation, NoteDocument
 from domain.distill.ports import CardRepository, NoteRepository
 from domain.distill.value_objects import NoteId
 
@@ -21,14 +25,28 @@ class InMemoryListCardsForNoteQueryAdapter:
             if card.discard is None
         ]
         live_cards.sort(key=lambda card: card.created_at)
+        document = NoteDocument.of(note.content)
         return [
             CardListItemDTO(
                 card_id=card.id.value,
                 front=card.front.value,
                 back=card.back.value,
                 anchor_quote=card.anchor.quote,
-                anchor_location=None,
+                anchor_location=_to_anchor_location_dto(document.locate(card.anchor)),
                 created_at=card.created_at,
             )
             for card in live_cards
         ]
+
+
+def _to_anchor_location_dto(
+    location: AnchorLocation | None,
+) -> AnchorLocationDTO | None:
+    if location is None:
+        return None
+    return AnchorLocationDTO(
+        block_index=location.block_index,
+        start=location.start,
+        end=location.end,
+        precision=location.precision.value,
+    )

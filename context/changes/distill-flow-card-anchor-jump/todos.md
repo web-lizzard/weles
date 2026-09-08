@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
 current_phase: 5
-next_step: tests
-next_command: /unit-test distill-flow-card-anchor-jump phase 5
+next_step: 5.6
+next_command: /implement distill-flow-card-anchor-jump phase 5
 updated: 2026-09-09
 ---
 
@@ -71,15 +71,15 @@ updated: 2026-09-09
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 955882b
 
 #### Automated
 
-- [ ] 5.1 Fill blocks from NoteDocument in the note detail adapter
-- [ ] 5.2 Resolve anchor_location per live card in the cards adapter
-- [ ] 5.3 Add HTTP integration cases for blocks and the three location outcomes
-- [ ] 5.4 Add the US-07 feature, step module and loader entry
-- [ ] 5.5 Run backend pytest, the AC-13 scenarios, ruff and basedpyright
+- [x] 5.1 Fill blocks from NoteDocument in the note detail adapter
+- [x] 5.2 Resolve anchor_location per live card in the cards adapter
+- [x] 5.3 Add HTTP integration cases for blocks and the three location outcomes
+- [x] 5.4 Add the US-07 feature, step module and loader entry
+- [x] 5.5 Run backend pytest, the AC-13 scenarios, ruff and basedpyright
 
 #### Manual
 
