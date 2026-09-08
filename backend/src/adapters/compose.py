@@ -34,6 +34,9 @@ from adapters.out.in_memory.distill.card_repository import InMemoryCardRepositor
 from adapters.out.in_memory.distill.get_note_query import (
     InMemoryGetNoteQueryAdapter,
 )
+from adapters.out.in_memory.distill.list_cards_for_note_query import (
+    InMemoryListCardsForNoteQueryAdapter,
+)
 from adapters.out.in_memory.distill.list_notes_query import (
     InMemoryListNotesQueryAdapter,
 )
@@ -66,6 +69,7 @@ from application.distill.commands.generate_cards import GenerateCardsCommand
 from application.distill.commands.save_note import SaveNoteCommand
 from application.distill.ports import UnitOfWork as DistillUnitOfWork
 from application.distill.queries.get_note import GetNoteQueryPort
+from application.distill.queries.list_cards_for_note import ListCardsForNoteQueryPort
 from application.distill.queries.list_notes import ListNotesQueryPort
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import Settings
@@ -93,6 +97,9 @@ _list_notes_query = InMemoryListNotesQueryAdapter(
     _distill_note_repository, _distill_card_repository
 )
 _get_note_query = InMemoryGetNoteQueryAdapter(_distill_note_repository)
+_list_cards_for_note_query = InMemoryListCardsForNoteQueryAdapter(
+    _distill_note_repository, _distill_card_repository
+)
 _note_document_parser = MarkdownNoteDocumentParser()
 _card_generation = DeterministicCardGenerationAdapter()
 _card_factory = CardFactory(
@@ -200,6 +207,10 @@ def get_list_notes_query() -> ListNotesQueryPort:
 
 def get_note_query() -> GetNoteQueryPort:
     return _get_note_query
+
+
+def get_list_cards_for_note_query() -> ListCardsForNoteQueryPort:
+    return _list_cards_for_note_query
 
 
 def get_outbox_worker() -> OutboxWorker:
