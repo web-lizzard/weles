@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-note-cards
-current_phase: 1
-next_step: 1.1
-next_command: /implement distill-flow-note-cards phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test distill-flow-note-cards phase 2
 updated: 2026-09-08
 ---
 
@@ -10,15 +10,15 @@ updated: 2026-09-08
 
 #### Automated
 
-- [ ] 1.1 Add ListCardsForNoteQueryPort and CardListItemDTO
-- [ ] 1.2 Add InMemoryListCardsForNoteQueryAdapter shell
-- [ ] 1.3 Add GET /notes/{note_id}/cards route
-- [ ] 1.4 Wire the card list query in compose
-- [ ] 1.5 Run backend pytest and lint
+- [x] 1.1 Add ListCardsForNoteQueryPort and CardListItemDTO
+- [x] 1.2 Add InMemoryListCardsForNoteQueryAdapter shell
+- [x] 1.3 Add GET /notes/{note_id}/cards route
+- [x] 1.4 Wire the card list query in compose
+- [x] 1.5 Run backend pytest and lint
 
 #### Manual
 
-- [ ] 1.6 Start the backend and confirm the route appears in openapi.json
+- [x] 1.6 Start the backend and confirm the route appears in openapi.json
 
 ### Phase 2: Backend card-read behavior
 

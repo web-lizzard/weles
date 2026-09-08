@@ -3,8 +3,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from adapters.compose import get_list_notes_query, get_note_query
+from adapters.compose import (
+    get_list_cards_for_note_query,
+    get_list_notes_query,
+    get_note_query,
+)
 from application.distill.queries.get_note import GetNoteQueryPort, NoteDetailDTO
+from application.distill.queries.list_cards_for_note import (
+    CardListItemDTO,
+    ListCardsForNoteQueryPort,
+)
 from application.distill.queries.list_notes import (
     ListNotesQueryPort,
     NoteListItemDTO,
@@ -27,3 +35,11 @@ async def get_note(
     query: Annotated[GetNoteQueryPort, Depends(get_note_query)],
 ) -> NoteDetailDTO:
     return await query.get_note(NoteId(value=note_id))
+
+
+@router.get("/notes/{note_id}/cards")
+async def list_cards_for_note(
+    note_id: UUID,
+    query: Annotated[ListCardsForNoteQueryPort, Depends(get_list_cards_for_note_query)],
+) -> list[CardListItemDTO]:
+    return await query.list_cards_for_note(NoteId(value=note_id))

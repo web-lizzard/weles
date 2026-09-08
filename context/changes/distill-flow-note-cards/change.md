@@ -1,7 +1,7 @@
 ---
 change_id: distill-flow-note-cards
 title: Users can see the cards generated from an open note
-status: planned
+status: implementing
 created: 2026-09-06
 updated: 2026-09-08
 archived_at: null
