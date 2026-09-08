@@ -13,10 +13,18 @@ from integration.support.in_memory_distill import (  # pyright: ignore[reportImp
     InMemoryDistillComposition,
 )
 
-from adapters.compose import get_list_notes_query
+from adapters.compose import (
+    get_list_cards_for_note_query,
+    get_list_notes_query,
+    get_note_query,
+)
 from adapters.http.capture import router as capture_router
 from adapters.http.notes import router as notes_router
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
+from adapters.out.in_memory.distill.get_note_query import InMemoryGetNoteQueryAdapter
+from adapters.out.in_memory.distill.list_cards_for_note_query import (
+    InMemoryListCardsForNoteQueryAdapter,
+)
 from adapters.out.in_memory.distill.list_notes_query import (
     InMemoryListNotesQueryAdapter,
 )
@@ -77,7 +85,11 @@ def notes_client() -> Iterator[NotesTestContext]:
     notes = InMemoryDistillNoteRepository()
     cards = InMemoryCardRepository()
     query = InMemoryListNotesQueryAdapter(notes, cards)
+    note_query = InMemoryGetNoteQueryAdapter(notes)
+    cards_query = InMemoryListCardsForNoteQueryAdapter(notes, cards)
     app.dependency_overrides[get_list_notes_query] = lambda: query
+    app.dependency_overrides[get_note_query] = lambda: note_query
+    app.dependency_overrides[get_list_cards_for_note_query] = lambda: cards_query
     with TestClient(app) as client:
         yield NotesTestContext(client=client, notes=notes, cards=cards)
     app.dependency_overrides.clear()
