@@ -27,6 +27,7 @@ class InMemoryListCardsForNoteQueryAdapter:
                 front=card.front.value,
                 back=card.back.value,
                 anchor_quote=card.anchor.quote,
+                anchor_location=None,
                 created_at=card.created_at,
             )
             for card in live_cards
