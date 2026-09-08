@@ -133,6 +133,13 @@ def normalize(self, text: str) -> NormalizedText:
 
 - `cd backend && uv run python -c "from domain.distill.note_document import NoteDocument; from domain.distill.value_objects import Anchor, NoteContent; print(NoteDocument.of(NoteContent(value='# TCP\n\nThe **handshake** begins here.')).locate(Anchor(quote='handshake begins here')))"` prints a location with `block_index=1` and `precision` reported
 
+### Review r1
+
+Artifact: `reviews/2026-09-08-r1-property-test-phase-2.md`
+
+- `R1-F1` — Leading emphasis at block start marks the whole paragraph
+  Fix: The shrunk input (`lead in\n\n**aaa** and aaaaaaaaaaaaaaaa` / quote `aaa`) must fail the example suite until locate is `exact` and the raw slice does not contain `aaaaaaaaaaaaaaaa`, then remain as regression
+
 ---
 
 ## Phase 3: Generation on the domain locator
