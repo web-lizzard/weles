@@ -8,6 +8,8 @@ from domain.distill.value_objects import (
     Anchor,
     CardId,
     CardSide,
+    Discard,
+    DiscardReason,
     DistillationStatus,
     NoteContent,
     NoteId,
@@ -33,14 +35,16 @@ def _note(status: DistillationStatus, updated_at: datetime) -> Note:
     )
 
 
-def _card(note_id: NoteId, created_at: datetime) -> Card:
+def _card(
+    note_id: NoteId, created_at: datetime, discard: Discard | None = None
+) -> Card:
     return Card(
         id=CardId(value=uuid4()),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
         anchor=Anchor(quote="Connections are established via a three-way handshake."),
-        discard=None,
+        discard=discard,
         created_at=created_at,
     )
 
@@ -101,6 +105,73 @@ async def test_get_note_returns_404_for_an_unknown_note_id(
     notes_client: NotesTestContext,
 ) -> None:
     response = notes_client.client.get(f"/notes/{uuid4()}")
+
+    assert response.status_code == 404
+    assert response.json()["code"] == "distill_note_not_found"
+
+
+async def test_get_cards_for_note_returns_live_cards_ordered_by_created_at(
+    notes_client: NotesTestContext,
+) -> None:
+    now = datetime.now(UTC)
+    note = _note(DistillationStatus.READY, now)
+    await notes_client.notes.save(note)
+    older = _card(note.id, now)
+    newer = _card(note.id, now + timedelta(minutes=5))
+    await notes_client.cards.save(newer)
+    await notes_client.cards.save(older)
+
+    response = notes_client.client.get(f"/notes/{note.id.value}/cards")
+
+    assert response.status_code == 200
+    body = cast(list[dict[str, object]], response.json())
+    assert [item["card_id"] for item in body] == [
+        str(older.id.value),
+        str(newer.id.value),
+    ]
+    assert body[0]["front"] == older.front.value
+    assert body[0]["back"] == older.back.value
+    assert body[0]["anchor_quote"] == older.anchor.quote
+
+
+async def test_get_cards_for_note_returns_empty_list_when_all_cards_are_discarded(
+    notes_client: NotesTestContext,
+) -> None:
+    now = datetime.now(UTC)
+    note = _note(DistillationStatus.READY, now)
+    await notes_client.notes.save(note)
+    await notes_client.cards.save(
+        _card(
+            note.id,
+            now,
+            discard=Discard(
+                reason=DiscardReason.UNGROUNDED, detail=None, discarded_at=now
+            ),
+        )
+    )
+
+    response = notes_client.client.get(f"/notes/{note.id.value}/cards")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+async def test_get_cards_for_note_returns_empty_list_for_a_ready_note_with_no_cards(
+    notes_client: NotesTestContext,
+) -> None:
+    note = _note(DistillationStatus.READY, datetime.now(UTC))
+    await notes_client.notes.save(note)
+
+    response = notes_client.client.get(f"/notes/{note.id.value}/cards")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+async def test_get_cards_for_note_returns_404_for_an_unknown_note_id(
+    notes_client: NotesTestContext,
+) -> None:
+    response = notes_client.client.get(f"/notes/{uuid4()}/cards")
 
     assert response.status_code == 404
     assert response.json()["code"] == "distill_note_not_found"
