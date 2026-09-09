@@ -70,12 +70,12 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 5.1 Fill OpenSittingCommand over the due set and the first front
-- [x] 5.2 Inject the Scheduler so the command can read the live stamp
+- [x] 5.1 Fill OpenSittingCommand over the due set and the first front — 653356a
+- [x] 5.2 Inject the Scheduler so the command can read the live stamp — 653356a
 
 #### Manual
 
-- [x] 5.3 Confirm the nothing-due case leaves the sitting repository untouched
+- [x] 5.3 Confirm the nothing-due case leaves the sitting repository untouched — 653356a
 
 ### Phase 6: Application — revealing a back and rereading the current card
 
