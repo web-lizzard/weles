@@ -87,3 +87,19 @@ def test_locate_returns_none_when_unresolved_and_ignores_format_syntax() -> None
     assert location is not None
     assert location.precision is AnchorPrecision.EXACT
     assert fake.blocks[0].text[location.start : location.end] == "plain source fragment"
+
+
+def test_locate_does_not_apply_markdown_markers_under_a_non_markdown_format() -> None:
+    # R3-F1: precision must fall out of re-normalizing the recovered span, so a
+    # format that declares no markers cannot have markdown ones read into it.
+    fake = NoteDocument.of(
+        NoteContent(value="- plain source fragment"),
+        note_format=_IdentityFormat(),
+    )
+
+    location = fake.locate(Anchor(quote="plain source fragment"))
+
+    assert location is not None
+    assert location.precision is AnchorPrecision.EXACT
+    span = fake.blocks[location.block_index].text[location.start : location.end]
+    assert span == "plain source fragment"
