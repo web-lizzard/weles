@@ -12,6 +12,7 @@ pytest_plugins = [
     "bdd.steps.distill",
     "bdd.steps.draft_note",
     "bdd.steps.note_list",
+    "bdd.steps.remember_review",
     "bdd.steps.vocabulary_reuse",
 ]
 
