@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
 current_phase: 7
-next_step: 7.1
-next_command: /unit-test distill-flow-card-anchor-jump phase 7
+next_step: 7.6
+next_command: /implement distill-flow-card-anchor-jump phase 7
 updated: 2026-09-09
 ---
 
@@ -103,15 +103,15 @@ updated: 2026-09-09
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — cb340ba
 
 #### Automated
 
-- [ ] 7.1 Implement jumpToAnchor and the four clearing transitions
-- [ ] 7.2 Add the Enter jump and hint line to CardDetailScreen
-- [ ] 7.3 Render note blocks with the anchored viewport, marked span and notice
-- [ ] 7.4 Add card detail, note detail and store test suites
-- [ ] 7.5 Run tui tests, typecheck, lint, build and backend pytest
+- [x] 7.1 Implement jumpToAnchor and the four clearing transitions
+- [x] 7.2 Add the Enter jump and hint line to CardDetailScreen
+- [x] 7.3 Render note blocks with the anchored viewport, marked span and notice
+- [x] 7.4 Add card detail, note detail and store test suites
+- [x] 7.5 Run tui tests, typecheck, lint, build and backend pytest
 
 #### Manual
 

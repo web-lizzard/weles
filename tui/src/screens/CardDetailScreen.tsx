@@ -8,6 +8,7 @@ export default function CardDetailScreen() {
   const selectedNoteId = useAppStore((s) => s.selectedNoteId);
   const selectedCardId = useAppStore((s) => s.selectedCardId);
   const closeCard = useAppStore((s) => s.closeCard);
+  const jumpToAnchor = useAppStore((s) => s.jumpToAnchor);
   const cards = useCardsStore((s) => s.cards);
   const card = cards.find((c) => c.cardId === selectedCardId) ?? null;
   const cardCount = useNotesStore(
@@ -19,6 +20,17 @@ export default function CardDetailScreen() {
   useInput((_input, key) => {
     if (key.leftArrow) {
       closeCard();
+      return;
+    }
+    if (key.return) {
+      const selected = useCardsStore
+        .getState()
+        .cards.find(
+          (item) => item.cardId === useAppStore.getState().selectedCardId,
+        );
+      if (selected !== undefined) {
+        jumpToAnchor(selected.cardId, selected.anchorLocation);
+      }
     }
   });
 
@@ -32,6 +44,7 @@ export default function CardDetailScreen() {
           <Text wrap="wrap">{card.anchorQuote}</Text>
         </>
       )}
+      <Text dimColor>Enter jump to source · ← back</Text>
     </Box>
   );
 }
