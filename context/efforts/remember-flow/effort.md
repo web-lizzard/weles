@@ -1,7 +1,7 @@
 ---
 effort_id: remember-flow
 title: Remember flow
-status: preparing
+status: active
 created: 2026-09-09
 updated: 2026-09-09
 archived_at: null
