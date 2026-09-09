@@ -177,8 +177,7 @@ describe("NoteDetailScreen", () => {
     const frame = render(<NoteDetailScreen />).lastFrame() ?? "";
 
     expect(frame).not.toContain(HIDDEN_INTRO);
-    expect(frame).toContain(ANCHORED_BLOCK);
-    expect(frame).toContain(`${INVERSE}${QUOTED_RUN}${INVERSE_OFF}`);
+    expect(frame).toContain(`The ${INVERSE}${QUOTED_RUN}${INVERSE_OFF} here.`);
     expect(frame).not.toContain(`${INVERSE}${ANCHORED_BLOCK}${INVERSE_OFF}`);
   });
 

@@ -59,9 +59,14 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
       selectedNoteId: null,
       ...clearedNoteView,
     }),
-  setActiveNoteTab: (tab) => set({ activeNoteTab: tab }),
+  setActiveNoteTab: (tab) =>
+    set({ activeNoteTab: tab, highlightedAnchor: null }),
   openCard: (cardId) => set({ selectedCardId: cardId }),
   closeCard: () => set({ selectedCardId: null }),
   jumpToAnchor: (cardId, location) =>
-    set({ highlightedAnchor: { cardId, location } }),
+    set({
+      activeNoteTab: "note",
+      selectedCardId: null,
+      highlightedAnchor: { cardId, location },
+    }),
 }));
