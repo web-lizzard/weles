@@ -89,15 +89,15 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 6.1 Regenerate schema.d.ts against the running backend
-- [x] 6.2 Add NoteBlock and blocks to the notes API module
-- [x] 6.3 Add AnchorLocation and anchorLocation to the cards API module
-- [x] 6.4 Add highlightedAnchor and jumpToAnchor to useAppStore
-- [x] 6.5 Run tui typecheck, lint, build and tests
+- [x] 6.1 Regenerate schema.d.ts against the running backend — 19d270d
+- [x] 6.2 Add NoteBlock and blocks to the notes API module — 19d270d
+- [x] 6.3 Add AnchorLocation and anchorLocation to the cards API module — 19d270d
+- [x] 6.4 Add highlightedAnchor and jumpToAnchor to useAppStore — 19d270d
+- [x] 6.5 Run tui typecheck, lint, build and tests — 19d270d
 
 #### Manual
 
-- [x] 6.6 Confirm the regenerated schema carries anchor_location
+- [x] 6.6 Confirm the regenerated schema carries anchor_location — 19d270d
 
 ### Phase 7: Jump gesture and anchored highlight
 
