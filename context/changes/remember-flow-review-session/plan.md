@@ -79,6 +79,8 @@ repeatability test.
 - Any substitutable policy for selection or completion, and any field on the sitting
   recording which policy it began under.
 - A SQL or Notion adapter for any of the five seams. In-memory only, per `InMemoryFirst`.
+- A database lock (`SELECT … FOR UPDATE` or equivalent) for concurrent grades. Phase 8's
+  in-memory UoW holds an `asyncio.Lock`; SQL takes the same exclusion when that adapter exists.
 - `fsrs[optimizer]`, `Scheduler.to_dict()` persistence, and the library's own `ReviewLog`.
 - Any TUI surface.
 
@@ -111,6 +113,19 @@ lock — an assumption that holds only while the scheduler is called from the lo
 which the adapter must state in a comment. If the port is ever driven from a threadpool, a
 `threading.Lock` is the only thing that helps; an `asyncio.Lock` cannot guard a region no
 coroutine can interleave with.
+
+That FSRS-region lock is not the grade race. `GradeCardCommand` decides presentability from
+the sitting's event log, so a second grade of the same showing is refused only after the
+first commit is visible. Two overlapping `handle` calls on the same in-front card both pass
+`card_id == next_card` and both append events unless the whole read-then-write window is
+serialized. `SchedulerStamp` does not close this — it marks memoized scheduler state stale
+after an algorithm or parameter bump. Phase 8's in-memory unit of work takes a shared
+`asyncio.Lock` on `__aenter__` and releases it on `__aexit__` (commit or rollback), covering
+open and grade because both already own that UoW window. The lock is constructed once at
+composition and passed into every UoW instance — a per-instance lock would not exclude a
+second factory call. Per-sitting locking is the wrong grain here: `OpenSittingCommand`
+enters the UoW before a sitting id exists. A later SQL adapter maps the same window to a
+transaction lock (`SELECT … FOR UPDATE` on the sitting, or equivalent), not an `asyncio.Lock`.
 
 ## Phase 1: Extend the acceptance layer to the frame's behaviours
 
@@ -428,6 +443,8 @@ clock.now()` is captured once and used for both the event and the scheduler.
 `previous` is the memoized state when its stamp matches `scheduler.stamp()`, otherwise
 `SchedulingReplay.replay` over the card's prior events. One UoW saves the event first, then
 the scheduling state, then commits. The DTO carries the recomputed next front, or completion.
+The sitting-log guards are sequential, not a concurrency control. Phase 8 serializes the
+UoW window with a shared `asyncio.Lock`; this command does not take a lock of its own.
 
 ### Success Criteria:
 
@@ -477,10 +494,15 @@ holds, plus `snapshot()` / `restore()`.
 
 **File**: `backend/src/adapters/out/in_memory/remember/unit_of_work.py`
 
-**Intent**: Commands own the commit boundary; nothing survives an exception.
+**Intent**: Commands own the commit boundary; nothing survives an exception; overlapping
+commands cannot interleave reads and writes on the shared in-memory stores.
 
 **Contract**: Mirrors `adapters/out/in_memory/distill/unit_of_work.py` — snapshots all three
-repositories on `__aenter__`, restores them on `__aexit__` unless `commit()` ran.
+repositories on `__aenter__`, restores them on `__aexit__` unless `commit()` ran. In addition,
+composition constructs one `asyncio.Lock` and every UoW instance receives it. `__aenter__`
+`await`s that lock before snapshotting; `__aexit__` releases it after restore-or-keep, always.
+A second `uow_factory()` call therefore waits until the first window closes, which is what
+stops two overlapping `GradeCardCommand.handle` calls from both seeing the same `next_card`.
 
 **File**: `backend/src/adapters/out/in_memory/remember/clock.py`
 
@@ -507,6 +529,8 @@ repositories on `__aenter__`, restores them on `__aexit__` unless `commit()` ran
 #### Manual Verification:
 - `cd backend && uv run pytest tests/unit/remember/contracts -v` and confirm each suite reports
   its cases under the `in_memory` id.
+- Confirm two overlapping UoW entries: the second `__aenter__` does not return until the first
+  `__aexit__` has released the shared lock.
 
 ---
 
