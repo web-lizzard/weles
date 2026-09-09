@@ -10,10 +10,12 @@ export type NoteListItem = {
 
 export type NoteDetailTopic = { id: string; label: string };
 export type NoteDetailTag = { id: string; label: string };
+export type NoteBlock = { index: number; text: string };
 export type NoteDetail = {
   noteId: string;
   topic: NoteDetailTopic;
   content: string;
+  blocks: NoteBlock[];
   tags: NoteDetailTag[];
   distillationStatus: "generating" | "ready" | "failed";
   approvedAt: string;
@@ -33,6 +35,10 @@ export async function getNote(noteId: string): Promise<NoteDetail> {
     noteId: data.note_id,
     topic: { id: data.topic.id, label: data.topic.label },
     content: data.content,
+    blocks: data.blocks.map((block) => ({
+      index: block.index,
+      text: block.text,
+    })),
     tags: data.tags.map((t) => ({ id: t.id, label: t.label })),
     distillationStatus:
       data.distillation_status as NoteDetail["distillationStatus"],

@@ -19,6 +19,7 @@ const CARDS: Card[] = [
     front: "What is a SYN?",
     back: "The first packet of a TCP handshake.",
     anchorQuote: "The client sends SYN",
+    anchorLocation: null,
     createdAt: "2026-09-06T12:00:00Z",
   },
   {
@@ -26,6 +27,7 @@ const CARDS: Card[] = [
     front: "What is ACK?",
     back: "The acknowledgement flag in TCP.",
     anchorQuote: "The server replies with SYN-ACK",
+    anchorLocation: null,
     createdAt: "2026-09-06T12:01:00Z",
   },
   {
@@ -33,6 +35,7 @@ const CARDS: Card[] = [
     front: "What is FIN?",
     back: "The flag that closes a TCP connection.",
     anchorQuote: "Either side may send FIN",
+    anchorLocation: null,
     createdAt: "2026-09-06T12:02:00Z",
   },
 ];
@@ -167,6 +170,7 @@ describe("CardListScreen", () => {
       front: "Leftover front from another note",
       back: "Leftover back",
       anchorQuote: "Leftover quote",
+      anchorLocation: null,
       createdAt: "2026-09-06T11:00:00Z",
     };
 

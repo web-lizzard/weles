@@ -39,6 +39,7 @@ const NOTE_DETAIL: NoteDetail = {
     label: "TCP handshakes",
   },
   content: "Full note content for the detail view",
+  blocks: [],
   tags: [],
   distillationStatus: "ready",
   approvedAt: "2026-09-06T12:00:00Z",
@@ -51,6 +52,7 @@ const CARD: Card = {
   front: "What is a SYN?",
   back: "The first packet of a TCP handshake.",
   anchorQuote: "The client sends SYN",
+  anchorLocation: null,
   createdAt: "2026-09-06T12:00:00Z",
 };
 

@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
-current_phase: 6
-next_step: 6.1
-next_command: /implement distill-flow-card-anchor-jump phase 6
+current_phase: 7
+next_step: 7.1
+next_command: /unit-test distill-flow-card-anchor-jump phase 7
 updated: 2026-09-09
 ---
 
@@ -89,15 +89,15 @@ updated: 2026-09-09
 
 #### Automated
 
-- [ ] 6.1 Regenerate schema.d.ts against the running backend
-- [ ] 6.2 Add NoteBlock and blocks to the notes API module
-- [ ] 6.3 Add AnchorLocation and anchorLocation to the cards API module
-- [ ] 6.4 Add highlightedAnchor and jumpToAnchor to useAppStore
-- [ ] 6.5 Run tui typecheck, lint, build and tests
+- [x] 6.1 Regenerate schema.d.ts against the running backend
+- [x] 6.2 Add NoteBlock and blocks to the notes API module
+- [x] 6.3 Add AnchorLocation and anchorLocation to the cards API module
+- [x] 6.4 Add highlightedAnchor and jumpToAnchor to useAppStore
+- [x] 6.5 Run tui typecheck, lint, build and tests
 
 #### Manual
 
-- [ ] 6.6 Confirm the regenerated schema carries anchor_location
+- [x] 6.6 Confirm the regenerated schema carries anchor_location
 
 ### Phase 7: Jump gesture and anchored highlight
 

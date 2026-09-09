@@ -144,6 +144,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
+    /** AnchorLocationDTO */
+    AnchorLocationDTO: {
+      /** Block Index */
+      block_index: number;
+      /** Start */
+      start: number;
+      /** End */
+      end: number;
+      /** Precision */
+      precision: string;
+    };
     /** ApproveNoteResponseDTO */
     ApproveNoteResponseDTO: {
       /**
@@ -174,6 +185,7 @@ export interface components {
       back: string;
       /** Anchor Quote */
       anchor_quote: string;
+      anchor_location: components["schemas"]["AnchorLocationDTO"] | null;
       /**
        * Created At
        * Format: date-time
@@ -238,6 +250,13 @@ export interface components {
       /** Detail */
       detail?: components["schemas"]["ValidationError"][];
     };
+    /** NoteBlockDTO */
+    NoteBlockDTO: {
+      /** Index */
+      index: number;
+      /** Text */
+      text: string;
+    };
     /** NoteDetailDTO */
     NoteDetailDTO: {
       /**
@@ -248,6 +267,8 @@ export interface components {
       topic: components["schemas"]["NoteDetailTopicDTO"];
       /** Content */
       content: string;
+      /** Blocks */
+      blocks: components["schemas"]["NoteBlockDTO"][];
       /** Tags */
       tags: components["schemas"]["NoteDetailTagDTO"][];
       /** Distillation Status */

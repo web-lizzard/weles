@@ -80,6 +80,9 @@ describe("getNote", () => {
         label: "TCP handshakes",
       },
       content: "We discussed how connections are established.",
+      blocks: [
+        { index: 0, text: "We discussed how connections are established." },
+      ],
       tags: [
         { id: "00000000-0000-4000-8000-000000000021", label: "networking" },
         { id: "00000000-0000-4000-8000-000000000022", label: "tcp" },
@@ -99,6 +102,9 @@ describe("getNote", () => {
         label: "TCP handshakes",
       },
       content: "We discussed how connections are established.",
+      blocks: [
+        { index: 0, text: "We discussed how connections are established." },
+      ],
       tags: [
         { id: "00000000-0000-4000-8000-000000000021", label: "networking" },
         { id: "00000000-0000-4000-8000-000000000022", label: "tcp" },
