@@ -24,6 +24,7 @@ const NOTE_DETAIL: NoteDetail = {
     label: "DNS resolution",
   },
   content: "Full note content shown in the detail view",
+  blocks: [],
   tags: [{ id: "00000000-0000-4000-8000-000000000020", label: "networking" }],
   distillationStatus: "ready",
   approvedAt: "2026-09-06T12:00:00Z",

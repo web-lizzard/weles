@@ -20,6 +20,7 @@ const NOTE_DETAIL: NoteDetail = {
     label: "TCP handshakes",
   },
   content: "Full note content",
+  blocks: [],
   tags: [
     {
       id: "00000000-0000-4000-8000-000000000020",

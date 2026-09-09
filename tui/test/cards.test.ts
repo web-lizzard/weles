@@ -28,6 +28,12 @@ describe("listCards", () => {
         front: "What is a SYN?",
         back: "The first packet of a TCP handshake.",
         anchor_quote: "The client sends SYN",
+        anchor_location: {
+          block_index: 0,
+          start: 4,
+          end: 21,
+          precision: "exact",
+        },
         created_at: "2026-09-06T12:00:00Z",
       },
     ]);
@@ -40,6 +46,12 @@ describe("listCards", () => {
         front: "What is a SYN?",
         back: "The first packet of a TCP handshake.",
         anchorQuote: "The client sends SYN",
+        anchorLocation: {
+          blockIndex: 0,
+          start: 4,
+          end: 21,
+          precision: "exact",
+        },
         createdAt: "2026-09-06T12:00:00Z",
       },
     ]);

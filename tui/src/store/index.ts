@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AnchorLocation } from "../api/cards.js";
 
 export type NoteTab = "note" | "cards";
 
@@ -9,6 +10,7 @@ type AppState = {
   selectedNoteId: string | null;
   activeNoteTab: NoteTab;
   selectedCardId: string | null;
+  highlightedAnchor: { cardId: string; location: AnchorLocation | null } | null;
 };
 
 type AppActions = {
@@ -20,11 +22,13 @@ type AppActions = {
   setActiveNoteTab: (tab: NoteTab) => void;
   openCard: (cardId: string) => void;
   closeCard: () => void;
+  jumpToAnchor: (cardId: string, location: AnchorLocation | null) => void;
 };
 
 const clearedNoteView = {
   activeNoteTab: "note" as const,
   selectedCardId: null,
+  highlightedAnchor: null,
 };
 
 export const useAppStore = create<AppState & AppActions>((set) => ({
@@ -58,4 +62,6 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   setActiveNoteTab: (tab) => set({ activeNoteTab: tab }),
   openCard: (cardId) => set({ selectedCardId: cardId }),
   closeCard: () => set({ selectedCardId: null }),
+  jumpToAnchor: (cardId, location) =>
+    set({ highlightedAnchor: { cardId, location } }),
 }));
