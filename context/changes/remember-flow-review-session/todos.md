@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 6
-next_step: 6.3
-next_command: /implement remember-flow-review-session phase 6
+current_phase: 7
+next_step: tests
+next_command: /unit-test remember-flow-review-session phase 7
 updated: 2026-09-10
 ---
 
@@ -85,12 +85,12 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 6.1 Fill RevealBackQuery with its three not-found guards
-- [x] 6.2 Fill CurrentCardQuery so presentation survives a reread
+- [x] 6.1 Fill RevealBackQuery with its three not-found guards — 05a0782
+- [x] 6.2 Fill CurrentCardQuery so presentation survives a reread — 05a0782
 
 #### Manual
 
-- [ ] 6.3 Confirm two consecutive handles over one sitting return the same card
+- [x] 6.3 Confirm two consecutive handles over one sitting return the same card — 05a0782
 
 ### Phase 7: Application — grading a card
 
