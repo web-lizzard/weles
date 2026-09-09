@@ -37,6 +37,7 @@ markers = [
     "bdd: Gherkin tag applied by pytest-bdd (effort id or AC-nn)",
     "capture-flow: capture-flow effort acceptance scenarios",
     "distill-flow: distill-flow effort acceptance scenarios",
+    "remember-flow: remember-flow effort acceptance scenarios",
     "AC-01: acceptance criterion 01",
     "AC-02: acceptance criterion 02",
     "AC-03: acceptance criterion 03",
