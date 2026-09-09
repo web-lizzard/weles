@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 2
-next_step: 2.3
-next_command: /implement remember-flow-review-session phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test remember-flow-review-session phase 3
 updated: 2026-09-09
 ---
 
@@ -21,12 +21,12 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 2.1 Fill ShowingLimit, Sitting validation, contains and visible
-- [x] 2.2 Give card_is_due a stamp parameter and treat a stale record as due
+- [x] 2.1 Fill ShowingLimit, Sitting validation, contains and visible — 64a1d18
+- [x] 2.2 Give card_is_due a stamp parameter and treat a stale record as due — 64a1d18
 
 #### Manual
 
-- [x] 2.3 Check the stale-stamp case is asserted apart from the missing-record case
+- [x] 2.3 Check the stale-stamp case is asserted apart from the missing-record case — 64a1d18
 
 ### Phase 3: Domain — completion and ordering
 
