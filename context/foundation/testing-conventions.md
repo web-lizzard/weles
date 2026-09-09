@@ -12,12 +12,12 @@ named explicitly wherever it differs.
 | --- | --- |
 | Backend unit | `backend/tests/unit/<context>/` — `capture/`, `distill/`, `shared/` |
 | Backend port contracts | `backend/tests/unit/<context>/contracts/test_<port>_contract.py` |
+| Backend property | `backend/tests/property/<context>/` |
 | Backend integration | `backend/tests/integration/` |
 | Backend acceptance | features `backend/tests/features/<effort-id>/US-nn-<slug>.feature`, steps `backend/tests/bdd/steps/<subject>.py` |
 | TUI | `tui/test/<subject>.test.ts` — `.test.tsx` when the subject renders Ink |
 
-Backend test packages carry `__init__.py`. Property tests live beside the unit
-tests of the surface they exercise; they get no directory of their own.
+Backend test packages carry `__init__.py`.
 
 ### Import style
 
@@ -181,14 +181,13 @@ own fakes and factories are unaffected.
 
 - **Engine**: Hypothesis 6 inside pytest.
 - **Green-verify**: `cd backend && uv run pytest`.
-- **Invoke**: `cd backend && uv run pytest -k <pattern> -v`.
+- **Invoke**: `cd backend && uv run pytest tests/property -k <pattern> -v`.
 - **Host runner**: `@given(...)` with Hypothesis strategies on a plain pytest
   test function — the unit conventions above apply unchanged.
 - **Time budget**: 30 seconds per hunt.
-- **Property file**: written under `backend/tests/unit/<context>/`, alongside the
-  unit tests of the surface being hunted. Session-local throwaway properties are
-  not committed; a shrunk counterexample is committed as a pinned regression
-  test.
+- **Property file**: written under `backend/tests/property/<context>/`.
+  Session-local throwaway properties are not committed; a shrunk counterexample
+  is committed as a pinned regression test.
 - **Blocking**: advisory. A counterexample becomes a triage row, not a gate.
 - **TUI**: no node-side property engine installed. The lane resolves to the
   backend.

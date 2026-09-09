@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 5
-next_step: tests
-next_command: /unit-test remember-flow-review-session phase 5
+current_phase: 3
+next_step: 3.5
+next_command: /implement remember-flow-review-session phase 3
 updated: 2026-09-10
 ---
 
@@ -43,6 +43,10 @@ updated: 2026-09-10
 #### Manual
 
 - [x] 3.4 Run the sitting suite twice and confirm the seeded draw picks the same card — e3a9aa3
+
+#### Triage
+
+- [ ] 3.5 R1-F1 Foreign sitting events change the drawn next card (proof: 340db23)
 
 ### Phase 4: Domain — reconstruction from the log
 
