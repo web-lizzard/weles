@@ -1,5 +1,9 @@
-# pyright: reportUnusedParameter=false
 from application.remember.dto import RevealedCardDTO
+from domain.remember.exceptions import (
+    CardNotInSittingError,
+    CardNotReviewableError,
+    SittingNotFoundError,
+)
 from domain.remember.ports import ReviewCatalog, SittingRepository
 from domain.remember.value_objects import CardId, SittingId
 
@@ -14,10 +18,21 @@ class RevealBackQuery:
         self._catalog: ReviewCatalog = catalog
 
     async def handle(self, sitting_id: SittingId, card_id: CardId) -> RevealedCardDTO:
-        """
-        No UnitOfWork. Sitting exists; card is a member; catalog still
-        has it. Return front and back. Does not write.
-        Does not re-derive the card in front — that is CurrentCardQuery.
-        SittingNotFoundError / CardNotInSittingError / CardNotReviewableError.
-        """
-        ...
+        """Return front and back for a sitting member. Read-only; no UnitOfWork."""
+        sitting = await self._sittings.get(sitting_id)
+        if sitting is None:
+            raise SittingNotFoundError
+
+        if not sitting.contains(card_id):
+            raise CardNotInSittingError
+
+        reviewable = await self._catalog.get_reviewable(card_id)
+        if reviewable is None:
+            raise CardNotReviewableError
+
+        return RevealedCardDTO(
+            sitting_id=sitting_id.value,
+            card_id=card_id.value,
+            front=reviewable.front,
+            back=reviewable.back,
+        )
