@@ -29,14 +29,14 @@ def _state(*, due_at: datetime, stamp: SchedulerStamp) -> SchedulingState:
 def test_a_card_with_no_memoized_record_is_due() -> None:
     as_of = datetime.now(UTC)
 
-    assert card_is_due(None, as_of, _stamp()) is True  # pyright: ignore[reportCallIssue]
+    assert card_is_due(None, as_of, _stamp()) is True
 
 
 def test_a_card_whose_stamp_does_not_match_the_live_scheduler_is_due() -> None:
     as_of = datetime.now(UTC)
     stale = _state(due_at=as_of + timedelta(days=30), stamp=_stamp("old-pin"))
 
-    assert card_is_due(stale, as_of, _stamp("live-pin")) is True  # pyright: ignore[reportCallIssue]
+    assert card_is_due(stale, as_of, _stamp("live-pin")) is True
 
 
 def test_when_the_stamp_matches_due_ness_follows_whether_due_at_has_been_reached() -> (
@@ -47,5 +47,5 @@ def test_when_the_stamp_matches_due_ness_follows_whether_due_at_has_been_reached
     due_now = _state(due_at=as_of, stamp=stamp)
     due_later = _state(due_at=as_of + timedelta(seconds=1), stamp=stamp)
 
-    assert card_is_due(due_now, as_of, stamp) is True  # pyright: ignore[reportCallIssue]
-    assert card_is_due(due_later, as_of, stamp) is False  # pyright: ignore[reportCallIssue]
+    assert card_is_due(due_now, as_of, stamp) is True
+    assert card_is_due(due_later, as_of, stamp) is False

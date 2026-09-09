@@ -4,6 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, model_validator
 
+from domain.remember.exceptions import EmptySittingError
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import CardId, ShowingLimit, SittingId
 
@@ -18,7 +19,9 @@ class Sitting(BaseModel, frozen=True):
     @model_validator(mode="after")
     def _validate_intent(self) -> "Sitting":
         """Refuse an empty card_ids set (EmptySittingError)."""
-        ...
+        if not self.card_ids:
+            raise EmptySittingError
+        return self
 
     @classmethod
     def open(
@@ -34,11 +37,12 @@ class Sitting(BaseModel, frozen=True):
             showing_limit=showing_limit,
         )
 
-    def contains(self, card_id: CardId) -> bool: ...
+    def contains(self, card_id: CardId) -> bool:
+        return card_id in self.card_ids
 
     def visible(self, live: frozenset[CardId]) -> frozenset[CardId]:
         """Membership as read: gone ids drop out; the stored set is unchanged."""
-        ...
+        return self.card_ids & live
 
     def next_card(
         self,
