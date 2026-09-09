@@ -1,8 +1,8 @@
 ---
 change_id: distill-flow-card-anchor-jump
 current_phase: 7
-next_step: 7.6
-next_command: /implement distill-flow-card-anchor-jump phase 7
+next_step: ""
+next_command: /archive distill-flow-card-anchor-jump
 updated: 2026-09-09
 ---
 
@@ -115,4 +115,4 @@ updated: 2026-09-09
 
 #### Manual
 
-- [ ] 7.6 Walk the jump in the running TUI, including a heading-anchored card
+- [x] 7.6 Walk the jump in the running TUI, including a heading-anchored card
