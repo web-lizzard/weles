@@ -175,11 +175,11 @@ def _command(
         return _UnitOfWork(sittings, scheduling_states, review_events)
 
     command = OpenSittingCommand(
-        uow_factory,
+        uow_factory,  # pyright: ignore[reportArgumentType]
         _Catalog(cards),
         _Clock(instant),
         showing_limit or ShowingLimit(value=2),
-        _Scheduler(stamp or _stamp()),  # pyright: ignore[reportCallIssue]
+        _Scheduler(stamp or _stamp()),
     )
     return command, sittings, instant
 

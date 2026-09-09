@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 5
-next_step: Tests
-next_command: /unit-test remember-flow-review-session phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test remember-flow-review-session phase 6
 updated: 2026-09-10
 ---
 
@@ -66,16 +66,16 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 2c7c5d1
 
 #### Automated
 
-- [ ] 5.1 Fill OpenSittingCommand over the due set and the first front
-- [ ] 5.2 Inject the Scheduler so the command can read the live stamp
+- [x] 5.1 Fill OpenSittingCommand over the due set and the first front
+- [x] 5.2 Inject the Scheduler so the command can read the live stamp
 
 #### Manual
 
-- [ ] 5.3 Confirm the nothing-due case leaves the sitting repository untouched
+- [x] 5.3 Confirm the nothing-due case leaves the sitting repository untouched
 
 ### Phase 6: Application — revealing a back and rereading the current card
 
