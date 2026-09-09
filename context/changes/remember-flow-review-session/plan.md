@@ -289,6 +289,13 @@ wall-clock or process state.
 - `cd backend && uv run pytest tests/unit/remember/test_sitting.py -v` twice in a row and
   confirm the seeded-draw assertions pick the same card both runs.
 
+### Review r1
+
+Artifact: `reviews/2026-09-10-r1-property-test-phases-2-3-4-.md`
+
+- `R1-F1` — Foreign sitting events change the drawn next card
+  Fix: The shrunk two-card example with sitting `5ab7c383-a883-4fdf-ab28-0d827faaea53` must fail the pin until `_draw_seed` / `_seeded_pick` use only this sitting's events, then remain as regression.
+
 ---
 
 ## Phase 4: Domain — reconstruction from the log
