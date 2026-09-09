@@ -1,13 +1,11 @@
 ---
 status: draft
-version: 2
+version: 1
 created: 2026-09-09
 effort_id: remember-flow
 ---
 
 # Remember flow — User Stories
-
-> Revision 2 (2026-09-09): adds US-12 over the PRD's new FR-017 and FR-018, covering entry into a review from an in-flight capture session and the guarantee that free text cannot trigger one. Purely additive — US-01 through US-11 and AC-01 through AC-20 are unchanged. Prior version: stories-versions/v1-stories.md
 
 ## Stories
 
@@ -107,15 +105,6 @@ Realizes: FR-016
 
 - AC-19: A card whose source fragment can no longer be found is still presented and graded.
 - AC-20: For such a card the jump to its source becomes unavailable, rather than the card being withheld.
-
-### US-12 — Step into a review without losing the conversation
-
-I want to open a review from inside a capture session and return to the conversation untouched, and never to open one just by talking, so that stepping away mid-capture costs nothing and saying the wrong sentence costs nothing either.
-
-Realizes: FR-017, FR-018
-
-- AC-21: A review opened from within a capture session leaves that conversation intact to return to.
-- AC-22: Free text typed into a capture conversation never opens a review.
 
 ## Uncovered Requirements
 
