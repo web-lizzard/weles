@@ -3,6 +3,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, model_validator
 
+from domain.remember.exceptions import InvalidShowingLimitError
+
 
 class Grade(StrEnum):
     FORGOT = "forgot"
@@ -66,4 +68,7 @@ class ShowingLimit(BaseModel, frozen=True):
     value: int
 
     @model_validator(mode="after")
-    def _validate_positive(self) -> "ShowingLimit": ...
+    def _validate_positive(self) -> "ShowingLimit":
+        if self.value < 1:
+            raise InvalidShowingLimitError
+        return self

@@ -573,6 +573,7 @@ def opened_sitting_contains_every_due_card(
         if card_is_due(
             asyncio.run(remember_flow_context.scheduling_states.get(card.id)),
             remember_flow_context.clock.now(),
+            remember_flow_context.scheduler.stamp(),
         )
     }
     assert due_ids.issubset(sitting.card_ids)
@@ -595,6 +596,7 @@ def opened_sitting_excludes_not_due_cards(
         if not card_is_due(
             asyncio.run(remember_flow_context.scheduling_states.get(card.id)),
             remember_flow_context.clock.now(),
+            remember_flow_context.scheduler.stamp(),
         )
     }
     assert not_due_ids.isdisjoint(sitting.card_ids)
