@@ -234,6 +234,12 @@ or when `state.due_at <= as_of`. The `<=` includes a card due at exactly this in
 Fill the two named rules the frame demands exist once each: what finishes a card in this
 sitting, and which card comes next.
 
+**Implementation note**: the contract sketch below names `SittingCompletion` and
+`sitting_seeded_draw` as separate modules. They ship as private methods on `Sitting`
+(`_card_is_finished`, `_showing_count`, `_seeded_pick`, `_draw_seed`) so completion and
+ordering cannot be reached outside the aggregate. Behaviour and tests are unchanged; only
+the encapsulation boundary moved.
+
 ### Changes Required:
 
 #### 1. Completion

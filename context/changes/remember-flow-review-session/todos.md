@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test remember-flow-review-session phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test remember-flow-review-session phase 4
 updated: 2026-09-09
 ---
 
@@ -32,17 +32,17 @@ updated: 2026-09-09
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — b0406e3
 
 #### Automated
 
-- [ ] 3.1 Fill SittingCompletion over this sitting's grades
-- [ ] 3.2 Fill _eligible_pool and next_card with the foreign-event filter
-- [ ] 3.3 Fill sitting_seeded_draw as a pure function of sitting id and events
+- [x] 3.1 Fill SittingCompletion over this sitting's grades
+- [x] 3.2 Fill _eligible_pool and next_card with the foreign-event filter
+- [x] 3.3 Fill sitting_seeded_draw as a pure function of sitting id and events
 
 #### Manual
 
-- [ ] 3.4 Run the sitting suite twice and confirm the seeded draw picks the same card
+- [x] 3.4 Run the sitting suite twice and confirm the seeded draw picks the same card
 
 ### Phase 4: Domain — reconstruction from the log
 
