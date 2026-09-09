@@ -64,9 +64,35 @@ class Scheduler(Protocol):
 
 
 class SchedulingReplay:
+    """Rebuild a card's scheduling state from its review log.
+
+    Folds Scheduler.review over stored events so a stale memoized record
+    can be discarded and reconstructed at any time. Depends only on the
+    Scheduler port; no concrete adapter is imported here.
+    """
+
     def __init__(self, scheduler: Scheduler) -> None:
         self._scheduler: Scheduler = scheduler
 
     def replay(
         self, card_id: CardId, events: Sequence[ReviewEvent]
-    ) -> SchedulingState | None: ...
+    ) -> SchedulingState | None:
+        """Fold events in reviewed_at order; return None when the log is empty.
+
+        Each scheduler result becomes the next previous state. Only
+        card_id, reviewed_at, and grade are read — sitting_id never
+        reaches the scheduler.
+        """
+        if not events:
+            return None
+
+        ordered = sorted(events, key=lambda event: event.reviewed_at)
+        previous: SchedulingState | None = None
+        for event in ordered:
+            previous = self._scheduler.review(
+                previous,
+                card_id,
+                event.grade,
+                event.reviewed_at,
+            )
+        return previous

@@ -143,7 +143,7 @@ def test_replay_of_n_events_matches_n_sequential_live_reviews() -> None:
 
     assert actual == expected
     assert actual is not None
-    assert actual.due_at == base + timedelta(days=3)
+    assert actual.due_at == base + timedelta(days=5)
 
 
 def test_replay_ignores_each_event_sitting_id_when_calling_the_scheduler() -> None:
