@@ -1,5 +1,6 @@
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { AnchorLocation } from "../src/api/cards";
 import type { NoteDetail } from "../src/api/notes";
 import { getNote } from "../src/api/notes";
 import NoteDetailScreen from "../src/screens/NoteDetailScreen";
@@ -23,7 +24,7 @@ const NOTE_DETAIL: NoteDetail = {
     label: "TCP handshakes",
   },
   content: "Full note content for the detail view",
-  blocks: [],
+  blocks: [{ index: 0, text: "Full note content for the detail view" }],
   tags: [
     {
       id: "00000000-0000-4000-8000-000000000020",
@@ -54,6 +55,37 @@ async function waitFor(
   }
   throw new Error("Timed out waiting for condition");
 }
+
+const HIDDEN_INTRO = "Hidden intro about UDP.";
+const ANCHORED_BLOCK = "The handshake begins here.";
+const QUOTED_RUN = "handshake begins";
+const INVERSE = "\u001b[7m";
+const INVERSE_OFF = "\u001b[27m";
+
+const BLOCKS_NOTE: NoteDetail = {
+  ...NOTE_DETAIL,
+  content: `${HIDDEN_INTRO}\n\n${ANCHORED_BLOCK}`,
+  blocks: [
+    { index: 0, text: HIDDEN_INTRO },
+    { index: 1, text: ANCHORED_BLOCK },
+  ],
+};
+
+const EXACT_LOCATION: AnchorLocation = {
+  blockIndex: 1,
+  start: 4,
+  end: 20,
+  precision: "exact",
+};
+
+const BLOCK_LOCATION: AnchorLocation = {
+  blockIndex: 1,
+  start: 0,
+  end: ANCHORED_BLOCK.length,
+  precision: "block",
+};
+
+const CARD_ID = "00000000-0000-4000-8000-000000000101";
 
 describe("NoteDetailScreen", () => {
   beforeEach(() => {
@@ -134,5 +166,44 @@ describe("NoteDetailScreen", () => {
     expect(frame).toContain("Full note content for the detail view");
     expect(frame).not.toContain("Tags:");
     expect(frame).not.toContain(" · ");
+  });
+
+  it("marks the quoted run of an exact location and hides blocks above it", () => {
+    useNoteDetailStore.setState({ note: BLOCKS_NOTE, isLoading: false });
+    useAppStore.setState({
+      highlightedAnchor: { cardId: CARD_ID, location: EXACT_LOCATION },
+    });
+
+    const frame = render(<NoteDetailScreen />).lastFrame() ?? "";
+
+    expect(frame).not.toContain(HIDDEN_INTRO);
+    expect(frame).toContain(ANCHORED_BLOCK);
+    expect(frame).toContain(`${INVERSE}${QUOTED_RUN}${INVERSE_OFF}`);
+    expect(frame).not.toContain(`${INVERSE}${ANCHORED_BLOCK}${INVERSE_OFF}`);
+  });
+
+  it("marks the whole anchored block when precision is block", () => {
+    useNoteDetailStore.setState({ note: BLOCKS_NOTE, isLoading: false });
+    useAppStore.setState({
+      highlightedAnchor: { cardId: CARD_ID, location: BLOCK_LOCATION },
+    });
+
+    const frame = render(<NoteDetailScreen />).lastFrame() ?? "";
+
+    expect(frame).not.toContain(HIDDEN_INTRO);
+    expect(frame).toContain(`${INVERSE}${ANCHORED_BLOCK}${INVERSE_OFF}`);
+  });
+
+  it("renders from the top with a notice when the highlighted location is missing", () => {
+    useNoteDetailStore.setState({ note: BLOCKS_NOTE, isLoading: false });
+    useAppStore.setState({
+      highlightedAnchor: { cardId: CARD_ID, location: null },
+    });
+
+    const frame = render(<NoteDetailScreen />).lastFrame() ?? "";
+
+    expect(frame).toMatch(/not found/i);
+    expect(frame).toContain(HIDDEN_INTRO);
+    expect(frame).toContain(ANCHORED_BLOCK);
   });
 });
