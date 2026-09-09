@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-review-session
 title: Users can work through every due card in one review sitting — graded cards reschedule themselves
-status: preparing
+status: planned
 created: 2026-09-09
 updated: 2026-09-09
 archived_at: null
