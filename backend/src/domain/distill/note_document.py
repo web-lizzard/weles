@@ -67,7 +67,10 @@ def _locate_in_block(
     start = normalized.offsets[index]
     end = normalized.offsets[last] + 1
     recovered = note_format.normalize(block.text[start:end])
-    if recovered.value == quote.value and not _has_structural_prefix(block.text, start):
+    content_start = normalized.offsets[0] if normalized.offsets else 0
+    if recovered.value == quote.value and not _should_degrade_to_block(
+        block.text, index, content_start
+    ):
         return AnchorLocation(
             block_index=block.index,
             start=start,
@@ -85,7 +88,8 @@ def _locate_in_block(
 _STRUCTURAL_PREFIX = re.compile(r"^(?:[#>+-]+|\d+[.)])\s*")
 
 
-def _has_structural_prefix(text: str, start: int) -> bool:
-    leading_ws = len(text) - len(text.lstrip())
-    marker = _STRUCTURAL_PREFIX.match(text[leading_ws:])
-    return marker is not None and start >= leading_ws + marker.end()
+def _should_degrade_to_block(text: str, quote_index: int, content_start: int) -> bool:
+    if quote_index != 0 or content_start == 0:
+        return False
+    prefix = text[:content_start].lstrip()
+    return prefix != "" and _STRUCTURAL_PREFIX.match(prefix) is not None
