@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
 current_phase: 6
-next_step: 6.1
-next_command: /unit-test remember-flow-review-session phase 6
+next_step: 6.3
+next_command: /implement remember-flow-review-session phase 6
 updated: 2026-09-10
 ---
 
@@ -81,12 +81,12 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 95e745d
 
 #### Automated
 
-- [ ] 6.1 Fill RevealBackQuery with its three not-found guards
-- [ ] 6.2 Fill CurrentCardQuery so presentation survives a reread
+- [x] 6.1 Fill RevealBackQuery with its three not-found guards
+- [x] 6.2 Fill CurrentCardQuery so presentation survives a reread
 
 #### Manual
 
