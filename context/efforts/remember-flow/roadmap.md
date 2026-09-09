@@ -8,7 +8,7 @@ updated: 2026-09-09
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | Users can work through every due card in one review sitting — graded cards reschedule themselves | remember-flow-review-session | pending |
+| S-01 | Users can work through every due card in one review sitting — graded cards reschedule themselves | remember-flow-review-session | in_progress |
 | S-02 | Users can leave a review mid-way and pick up where they left off | remember-flow-session-resume | pending |
 | S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | pending |
 | S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | pending |
@@ -35,7 +35,7 @@ flowchart LR
 - **Outcome:** Users can work through every due card in one review sitting — graded cards reschedule themselves
 - **Acceptance criteria:** AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09
 - **Change ID:** remember-flow-review-session
-- **Status:** pending
+- **Status:** in_progress
 
 ### S-02: Users can leave a review mid-way and pick up where they left off
 
