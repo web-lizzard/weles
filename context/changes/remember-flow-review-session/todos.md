@@ -52,11 +52,11 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 4.1 Fill SchedulingReplay.replay folding events in reviewed_at order
+- [x] 4.1 Fill SchedulingReplay.replay folding events in reviewed_at order — f20150c
 
 #### Manual
 
-- [x] 4.2 Confirm a replay of N events equals N sequential live reviews
+- [x] 4.2 Confirm a replay of N events equals N sequential live reviews — f20150c
 
 ### Phase 5: Application — opening a sitting
 
