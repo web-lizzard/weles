@@ -119,7 +119,7 @@ class Sitting(BaseModel, frozen=True):
     def _draw_seed(self, events: Sequence[ReviewEvent]) -> int:
         parts = [str(self.id.value)]
         ordered = sorted(
-            events,
+            self._sitting_events(events),
             key=lambda event: (
                 event.reviewed_at,
                 event.card_id.value,
