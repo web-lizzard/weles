@@ -57,6 +57,9 @@ class _FakeReviewCatalog:
     def add(self, card: ReviewableCard) -> None:
         self._cards[card.id] = card
 
+    def discard(self, card_id: CardId) -> None:
+        _ = self._cards.pop(card_id, None)
+
     async def list_reviewable(self) -> Sequence[ReviewableCard]:
         return list(self._cards.values())
 
@@ -196,6 +199,9 @@ class RememberFlowContext:
     current_card_id: CardId | None = None
     graded_card_id: CardId | None = None
     second_good_grade_due_at: datetime | None = None
+    current_card_reads: list[PresentedCardDTO] = field(default_factory=list)
+    live_membership: frozenset[CardId] | None = None
+    prior_sitting_id: SittingId | None = None
 
 
 @pytest.fixture
@@ -279,8 +285,8 @@ def _mark_not_due(context: RememberFlowContext, card_id: CardId) -> None:
 
 
 @given("a remember review backend")
-def remember_review_backend(_remember_flow_context: RememberFlowContext) -> None:
-    return None
+def remember_review_backend(remember_flow_context: RememberFlowContext) -> None:
+    _ = remember_flow_context
 
 
 @given(
@@ -319,6 +325,19 @@ def catalog_has_due_card(
     _mark_due(remember_flow_context, card.id)
 
 
+@given(parsers.parse('the catalog has due cards "{first}" and "{second}"'))
+def catalog_has_two_due_cards(
+    remember_flow_context: RememberFlowContext,
+    first: str,
+    second: str,
+) -> None:
+    for label in (first, second):
+        card = _card(label)
+        remember_flow_context.catalog.add(card)
+        remember_flow_context.cards_by_label[label] = card
+        _mark_due(remember_flow_context, card.id)
+
+
 @given(parsers.parse('the catalog has due cards "{first}", "{second}", and "{third}"'))
 def catalog_has_three_due_cards(
     remember_flow_context: RememberFlowContext,
@@ -348,6 +367,34 @@ def catalog_has_due_card_with_content(
     remember_flow_context.catalog.add(card)
     remember_flow_context.cards_by_label[label] = card
     _mark_due(remember_flow_context, card.id)
+
+
+@given(
+    parsers.parse(
+        'the catalog has a due card "{label}" with a stale memoized scheduler stamp'
+    )
+)
+def catalog_has_due_card_with_stale_stamp(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = _card(label)
+    remember_flow_context.catalog.add(card)
+    remember_flow_context.cards_by_label[label] = card
+    stale_stamp = SchedulerStamp(
+        algorithm=SchedulerAlgorithm.FSRS,
+        parameter_version="stale-version",
+    )
+    future = remember_flow_context.clock.now() + timedelta(days=30)
+    asyncio.run(
+        remember_flow_context.scheduling_states.save(
+            SchedulingState(
+                card_id=card.id,
+                due_at=future,
+                scheduler_state=OpaqueSchedulerState(payload={"step": 30}),
+                stamp=stale_stamp,
+            )
+        )
+    )
 
 
 @given("the card has two prior good grades in its history")
@@ -401,8 +448,18 @@ def user_has_revealed_current_back(remember_flow_context: RememberFlowContext) -
     remember_flow_context.last_reveal_result = result
 
 
+@given(parsers.parse('the card "{label}" is the one in front'))
+def card_is_the_one_in_front(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    expected = remember_flow_context.cards_by_label[label]
+    assert remember_flow_context.current_card_id == expected.id
+
+
 @when("the user starts a review")
 def user_starts_review(remember_flow_context: RememberFlowContext) -> None:
+    if remember_flow_context.sitting_id is not None:
+        remember_flow_context.prior_sitting_id = remember_flow_context.sitting_id
     result = asyncio.run(remember_flow_context.open_sitting.handle())
     remember_flow_context.last_open_result = result
     if isinstance(result, SittingOpenedDTO):
@@ -450,6 +507,55 @@ def user_grades_current_card(
         )
 
 
+@when(parsers.parse('the card "{label}" is discarded from the catalog'))
+def card_is_discarded_from_catalog(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = remember_flow_context.cards_by_label[label]
+    remember_flow_context.catalog.discard(card.id)
+
+
+@when("the sitting's live membership is read")
+def sitting_live_membership_is_read(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    assert remember_flow_context.sitting_id is not None
+    sitting = asyncio.run(
+        remember_flow_context.sittings.get(remember_flow_context.sitting_id)
+    )
+    assert sitting is not None
+    live_ids = frozenset(
+        card.id for card in asyncio.run(remember_flow_context.catalog.list_reviewable())
+    )
+    remember_flow_context.live_membership = sitting.visible(live_ids)
+
+
+@when("the user reads the current card")
+def user_reads_current_card(remember_flow_context: RememberFlowContext) -> None:
+    assert remember_flow_context.sitting_id is not None
+    result = asyncio.run(
+        remember_flow_context.current_card.handle(remember_flow_context.sitting_id)
+    )
+    remember_flow_context.current_card_reads.append(result)
+    remember_flow_context.last_presented = result
+    remember_flow_context.current_card_id = CardId(value=result.card_id)
+
+
+@when(parsers.parse('the card "{label}" still has a next due date in the past'))
+def card_still_has_past_due_date(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = remember_flow_context.cards_by_label[label]
+    past = remember_flow_context.clock.now() - timedelta(hours=1)
+    state = asyncio.run(remember_flow_context.scheduling_states.get(card.id))
+    assert state is not None
+    asyncio.run(
+        remember_flow_context.scheduling_states.save(
+            state.model_copy(update={"due_at": past})
+        )
+    )
+
+
 @then("the opened sitting contains every due card")
 def opened_sitting_contains_every_due_card(
     remember_flow_context: RememberFlowContext,
@@ -492,6 +598,101 @@ def opened_sitting_excludes_not_due_cards(
         )
     }
     assert not_due_ids.isdisjoint(sitting.card_ids)
+
+
+@then(parsers.parse('the opened sitting contains the due card "{label}"'))
+def opened_sitting_contains_named_due_card(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    assert isinstance(remember_flow_context.last_open_result, SittingOpenedDTO)
+    card = remember_flow_context.cards_by_label[label]
+    sitting = asyncio.run(
+        remember_flow_context.sittings.get(
+            SittingId(value=remember_flow_context.last_open_result.sitting_id)
+        )
+    )
+    assert sitting is not None
+    assert card.id in sitting.card_ids
+
+
+@then(parsers.parse('the live set excludes the card "{label}"'))
+def live_set_excludes_named_card(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    assert remember_flow_context.live_membership is not None
+    card = remember_flow_context.cards_by_label[label]
+    assert card.id not in remember_flow_context.live_membership
+
+
+@then(parsers.parse('the sitting\'s stored set still contains the card "{label}"'))
+def stored_set_still_contains_named_card(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    assert remember_flow_context.sitting_id is not None
+    sitting = asyncio.run(
+        remember_flow_context.sittings.get(remember_flow_context.sitting_id)
+    )
+    assert sitting is not None
+    card = remember_flow_context.cards_by_label[label]
+    assert card.id in sitting.card_ids
+
+
+@then("both readings show the same card")
+def both_readings_show_same_card(remember_flow_context: RememberFlowContext) -> None:
+    assert len(remember_flow_context.current_card_reads) == 2
+    first, second = remember_flow_context.current_card_reads
+    assert first.card_id == second.card_id
+
+
+@then("the next card shown is not the card just graded")
+def next_card_is_not_the_one_just_graded(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    assert remember_flow_context.last_grade_result is not None
+    assert remember_flow_context.graded_card_id is not None
+    assert remember_flow_context.last_grade_result.next_card_id is not None
+    assert (
+        remember_flow_context.last_grade_result.next_card_id
+        != remember_flow_context.graded_card_id.value
+    )
+
+
+@then(
+    parsers.parse('the grade from the prior sitting is recorded for the card "{label}"')
+)
+def grade_from_prior_sitting_is_recorded(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    assert remember_flow_context.prior_sitting_id is not None
+    card = remember_flow_context.cards_by_label[label]
+    events = asyncio.run(
+        remember_flow_context.events.list_by_sitting(
+            remember_flow_context.prior_sitting_id
+        )
+    )
+    assert any(event.card_id == card.id for event in events)
+
+
+@then("the sitting ends without presenting that card again")
+def sitting_ends_without_presenting_that_card_again(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    assert remember_flow_context.last_grade_result is not None
+    assert remember_flow_context.last_grade_result.sitting_complete is True
+    assert remember_flow_context.last_grade_result.next_card_id is None
+
+
+@then(
+    parsers.parse('the card "{label}" is not presented again before the sitting ends')
+)
+def named_card_not_presented_again_before_sitting_ends(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = remember_flow_context.cards_by_label[label]
+    assert remember_flow_context.last_grade_result is not None
+    next_card_id = remember_flow_context.last_grade_result.next_card_id
+    if next_card_id is not None:
+        assert next_card_id != card.id.value
 
 
 @then("the user is told nothing is due")
