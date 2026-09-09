@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 1
-next_step: 1.1
-next_command: /implement remember-flow-review-session phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test remember-flow-review-session phase 2
 updated: 2026-09-09
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-09-09
 
 #### Manual
 
-- [ ] 1.1 Author the frame-derived scenarios under existing AC tags via /bdd
-- [ ] 1.2 Confirm the remember-flow scenarios fail on assertions, not collection
+- [x] 1.1 Author the frame-derived scenarios under existing AC tags via /bdd — c70dfe1
+- [x] 1.2 Confirm the remember-flow scenarios fail on assertions, not collection — c70dfe1
 
 ### Phase 2: Domain — membership and due-ness
 
