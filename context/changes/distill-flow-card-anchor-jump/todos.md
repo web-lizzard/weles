@@ -107,11 +107,11 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 7.1 Implement jumpToAnchor and the four clearing transitions
-- [x] 7.2 Add the Enter jump and hint line to CardDetailScreen
-- [x] 7.3 Render note blocks with the anchored viewport, marked span and notice
-- [x] 7.4 Add card detail, note detail and store test suites
-- [x] 7.5 Run tui tests, typecheck, lint, build and backend pytest
+- [x] 7.1 Implement jumpToAnchor and the four clearing transitions — c24e9f4
+- [x] 7.2 Add the Enter jump and hint line to CardDetailScreen — c24e9f4
+- [x] 7.3 Render note blocks with the anchored viewport, marked span and notice — c24e9f4
+- [x] 7.4 Add card detail, note detail and store test suites — c24e9f4
+- [x] 7.5 Run tui tests, typecheck, lint, build and backend pytest — c24e9f4
 
 #### Manual
 
