@@ -36,13 +36,13 @@ updated: 2026-09-09
 
 #### Automated
 
-- [x] 3.1 Fill SittingCompletion over this sitting's grades
-- [x] 3.2 Fill _eligible_pool and next_card with the foreign-event filter
-- [x] 3.3 Fill sitting_seeded_draw as a pure function of sitting id and events
+- [x] 3.1 Fill SittingCompletion over this sitting's grades — e3a9aa3
+- [x] 3.2 Fill _eligible_pool and next_card with the foreign-event filter — e3a9aa3
+- [x] 3.3 Fill sitting_seeded_draw as a pure function of sitting id and events — e3a9aa3
 
 #### Manual
 
-- [x] 3.4 Run the sitting suite twice and confirm the seeded draw picks the same card
+- [x] 3.4 Run the sitting suite twice and confirm the seeded draw picks the same card — e3a9aa3
 
 ### Phase 4: Domain — reconstruction from the log
 
