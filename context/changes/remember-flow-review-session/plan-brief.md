@@ -44,7 +44,8 @@ behaviours.
 
 **Out of scope:** AC-10…AC-22 (resume, expiry, due count, capture prompt, rejection, source
 jump, capture entry), sitting expiry, scoped or timeboxed selection, any substitutable
-selection or completion policy, SQL/Notion adapters, and the TUI.
+selection or completion policy, SQL/Notion adapters, a SQL-row lock for concurrent grades
+(the in-memory UoW lock is Phase 8), and the TUI.
 
 ## Architecture / Approach
 
@@ -69,8 +70,8 @@ HTTP router → command/query handlers → Sitting + SittingCompletion + seeded 
 | 4. Replay | `SchedulingReplay.replay` | Event ordering must be by `reviewed_at`, not insertion |
 | 5. Open sitting | `OpenSittingCommand` | Nothing-due must write nothing at all |
 | 6. Reveal & current | `RevealBackQuery`, `CurrentCardQuery` | Presentation must survive a reread |
-| 7. Grade | `GradeCardCommand` | Guard order; event saved before memo |
-| 8. Adapters & contracts | Three repositories, UoW, clock, contract suites | Snapshot/restore must cover all three stores |
+| 7. Grade | `GradeCardCommand` | Guard order; event saved before memo; lock lives on the Phase 8 UoW |
+| 8. Adapters & contracts | Three repositories, UoW with shared asyncio.Lock, clock, contract suites | Snapshot/restore must cover all three stores; lock must be composition-scoped |
 | 9. Catalog | `ReviewCatalog` over distill | Discarded cards must vanish from both methods |
 | 10. FSRS adapter | `fsrs==6.3.2`, grade mapping, seeded fuzz | Fuzz reproducibility is unproven until the library is installed |
 | 11. HTTP & compose | Four routes, full wiring | `ShowingLimit` must reach only `OpenSittingCommand` |
@@ -91,6 +92,9 @@ the dependency is added.
 - A stale stamp making every card due means the first sitting after a library bump may be the
   whole backlog. Accepted — the frame caps nothing.
 - Reaching completion is not the first-run path; a large first due set will not be exhausted.
+- Two overlapping grades of the same in-front card both pass `next_card` until the first
+  commit is visible. Phase 8 serializes that window with a shared `asyncio.Lock` on the
+  in-memory UoW. A later SQL adapter maps the same window to a database lock.
 
 ## Success Criteria (Summary)
 

@@ -117,12 +117,13 @@ updated: 2026-09-10
 #### Automated
 
 - [ ] 8.1 Write the three in-memory remember repositories with snapshot and restore
-- [ ] 8.2 Write the remember unit of work and the system clock
+- [ ] 8.2 Write the remember unit of work with a shared asyncio.Lock, and the system clock
 - [ ] 8.3 Write one behavioural contract suite per remember repository port
 
 #### Manual
 
 - [ ] 8.4 Confirm each contract suite reports its cases under the in_memory id
+- [ ] 8.5 Confirm a second UoW waits on the shared lock until the first window exits
 
 ### Phase 9: The catalog onto distill
 
