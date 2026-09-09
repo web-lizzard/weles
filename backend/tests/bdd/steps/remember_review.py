@@ -239,6 +239,7 @@ def remember_flow_context() -> RememberFlowContext:
             catalog=catalog,
             clock=clock,
             showing_limit=showing_limit,
+            scheduler=scheduler,
         ),
         grade_card=GradeCardCommand(
             uow_factory=uow_factory,
