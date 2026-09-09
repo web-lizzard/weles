@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import type { AnchorLocation } from "../src/api/cards";
 import { useAppStore } from "../src/store/index";
+
+const NOTE_ID = "00000000-0000-4000-8000-000000000001";
+const CARD_ID = "00000000-0000-4000-8000-000000000101";
+const LOCATION: AnchorLocation = {
+  blockIndex: 1,
+  start: 4,
+  end: 20,
+  precision: "exact",
+};
 
 describe("useAppStore", () => {
   beforeEach(() => {
@@ -8,6 +18,9 @@ describe("useAppStore", () => {
       selectedIndex: 0,
       isDetailOpen: false,
       selectedNoteId: null,
+      activeNoteTab: "note",
+      selectedCardId: null,
+      highlightedAnchor: null,
     });
   });
 
@@ -52,5 +65,45 @@ describe("useAppStore", () => {
     useAppStore.getState().setSelectedIndex(2);
 
     expect(useAppStore.getState().selectedIndex).toBe(2);
+  });
+
+  it("jumps to a card's location in one write and drops the highlight on each leaving transition", () => {
+    useAppStore.setState({
+      isDetailOpen: true,
+      selectedNoteId: NOTE_ID,
+      activeNoteTab: "cards",
+      selectedCardId: CARD_ID,
+      highlightedAnchor: null,
+    });
+
+    useAppStore.getState().jumpToAnchor(CARD_ID, LOCATION);
+
+    expect(useAppStore.getState()).toMatchObject({
+      activeNoteTab: "note",
+      selectedCardId: null,
+      highlightedAnchor: { cardId: CARD_ID, location: LOCATION },
+    });
+
+    useAppStore.getState().setActiveNoteTab("cards");
+    expect(useAppStore.getState().highlightedAnchor).toBeNull();
+
+    useAppStore.setState({
+      highlightedAnchor: { cardId: CARD_ID, location: LOCATION },
+    });
+    useAppStore.getState().openDetail(NOTE_ID);
+    expect(useAppStore.getState().highlightedAnchor).toBeNull();
+
+    useAppStore.setState({
+      highlightedAnchor: { cardId: CARD_ID, location: LOCATION },
+    });
+    useAppStore.getState().closeDetail();
+    expect(useAppStore.getState().highlightedAnchor).toBeNull();
+
+    useAppStore.setState({
+      isNotesOverlayOpen: true,
+      highlightedAnchor: { cardId: CARD_ID, location: LOCATION },
+    });
+    useAppStore.getState().closeNotes();
+    expect(useAppStore.getState().highlightedAnchor).toBeNull();
   });
 });
