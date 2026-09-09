@@ -64,6 +64,11 @@ The single Weles user — one person working through technical material (books, 
 - FR-015: User can jump from a card under review to the note fragment it was derived from. Priority: nice-to-have
 - FR-016: A card whose source fragment can no longer be found stays reviewable; only the jump to it becomes unavailable. Priority: must-have
 
+### While capture is in flight
+
+- FR-017: While a capture session is in flight, typed input belongs to that conversation; opening a review takes a gesture that free text cannot trigger. Priority: must-have
+- FR-018: User can open a review from within an in-flight capture session and return to that conversation with nothing lost. Priority: must-have
+
 ## Non-Goals
 
 - **Topic- or note-scoped selection.** Argued through and deferred: a selection that ignores due-ness forces a second completion policy alongside it, so it costs two capabilities designed together, not one. The default pair (everything × exhaust what is due) delivers the pillar's whole product value.
@@ -79,4 +84,4 @@ The single Weles user — one person working through technical material (books, 
 1. **Exact UI labels for the four grades.** — Owner: user. Block: no (four steps are settled; the wording can land during stories).
 2. **How often the due count refreshes while Weles is open.** — Owner: user. Block: no (any sane cadence ships).
 3. **The session expiry horizon value.** — Owner: user. Block: no (a configured setting; the number can be tuned after first use).
-4. **Whether the post-capture prompt (FR-012) earns its place at all.** — Owner: user. Block: no (nice-to-have; may be dropped rather than built).
+4. **Whether the post-capture prompt (FR-012) earns its place at all**, now that FR-018 makes a review reachable during capture and the due count (FR-010, FR-011) is already visible while the conversation runs — being told again at close may be duplicative. — Owner: user. Block: no (nice-to-have; may be dropped rather than built).
