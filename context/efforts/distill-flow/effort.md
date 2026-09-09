@@ -1,9 +1,9 @@
 ---
 effort_id: distill-flow
 title: Distill flow
-status: active
+status: done
 created: 2026-09-02
-updated: 2026-09-08
+updated: 2026-09-09
 archived_at: null
 origin: distill-pillar
 adr_refs:

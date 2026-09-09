@@ -1,7 +1,7 @@
 ---
 effort_id: distill-flow
 created: 2026-09-03
-updated: 2026-09-08
+updated: 2026-09-09
 ---
 
 ## At a glance
@@ -12,7 +12,7 @@ updated: 2026-09-08
 | S-02 | Weles generates grounded flashcards from a held note automatically, and zero cards is a valid outcome | distill-flow-grounded-generation | done |
 | S-03 | Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session | distill-flow-note-list | done |
 | S-04 | Users can open a note and read what it produced | distill-flow-note-detail | done |
-| S-05 | Users can jump from a card to the passage it came from | distill-flow-card-anchor-jump | in_progress |
+| S-05 | Users can jump from a card to the passage it came from | distill-flow-card-anchor-jump | done |
 | S-06 | Users can see the cards generated from an open note | distill-flow-note-cards | done |
 
 ## Dependencies
@@ -69,7 +69,7 @@ flowchart LR
 - **Outcome:** Users can jump from a card to the passage it came from
 - **Acceptance criteria:** AC-13
 - **Change ID:** distill-flow-card-anchor-jump
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-04, S-06
 
 ### S-06: Users can see the cards generated from an open note
@@ -87,3 +87,4 @@ flowchart LR
 - **S-03: Users can see their notes — topic, distillation state, card count — without losing an in-flight capture session** — Archived 2026-09-06 → `context/archive/changes/2026-09-06-distill-flow-note-list/`. Lesson: —.
 - **S-04: Users can open a note and read what it produced** — Archived 2026-09-07 → `context/archive/changes/2026-09-06-distill-flow-note-detail/`. Lesson: —.
 - **S-06: Users can see the cards generated from an open note** — Archived 2026-09-08 → `context/archive/changes/2026-09-06-distill-flow-note-cards/`. Lesson: —.
+- **S-05: Users can jump from a card to the passage it came from** — Archived 2026-09-09 → `context/archive/changes/2026-09-08-distill-flow-card-anchor-jump/`. Lesson: —.
