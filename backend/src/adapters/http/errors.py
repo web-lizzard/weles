@@ -39,6 +39,13 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "identical_card_sides": 422,
     "invalid_distillation_transition": 409,
     "distill_note_not_found": 404,
+    "empty_sitting": 422,
+    "invalid_showing_limit": 422,
+    "sitting_not_found": 404,
+    "card_not_in_sitting": 409,
+    "card_not_presentable": 409,
+    "sitting_already_complete": 409,
+    "card_not_reviewable": 404,
 }
 
 
