@@ -1,9 +1,9 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 4
-next_step: 4.1
-next_command: /unit-test remember-flow-review-session phase 4
-updated: 2026-09-09
+current_phase: 5
+next_step: tests
+next_command: /unit-test remember-flow-review-session phase 5
+updated: 2026-09-10
 ---
 
 ### Phase 1: Extend the acceptance layer to the frame's behaviours
@@ -48,15 +48,15 @@ updated: 2026-09-09
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 82ede50
 
 #### Automated
 
-- [ ] 4.1 Fill SchedulingReplay.replay folding events in reviewed_at order
+- [x] 4.1 Fill SchedulingReplay.replay folding events in reviewed_at order
 
 #### Manual
 
-- [ ] 4.2 Confirm a replay of N events equals N sequential live reviews
+- [x] 4.2 Confirm a replay of N events equals N sequential live reviews
 
 ### Phase 5: Application — opening a sitting
 
