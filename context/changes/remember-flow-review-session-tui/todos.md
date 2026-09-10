@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 6
-next_step: 6.1
-next_command: /unit-test remember-flow-review-session-tui phase 6
+current_phase: 7
+next_step: 7.1
+next_command: /unit-test remember-flow-review-session-tui phase 7
 updated: 2026-09-10
 ---
 
@@ -52,12 +52,12 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e16d56e
 
 #### Automated
 
-- [ ] 6.1 Fill loading/front/back-toggle rendering and mount-time `open()` call
-- [ ] 6.2 Wire number-key grading, arrow-selection + Enter grading, and card advance
+- [x] 6.1 Fill loading/front/back-toggle rendering and mount-time `open()` call — c454f7f
+- [x] 6.2 Wire number-key grading, arrow-selection + Enter grading, and card advance — c454f7f
 
 ### Phase 7: Sitting overlay — terminal and error states
 
