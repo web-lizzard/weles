@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 1
-next_step: 1.2
-next_command: /implement remember-flow-review-session-tui phase 1
+current_phase: 8
+next_step: 8.4
+next_command: /implement remember-flow-review-session-tui phase 8
 updated: 2026-09-10
 ---
 
@@ -14,7 +14,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 1.2 Regenerate `schema.d.ts` against a running backend and confirm the three review-sitting paths are present
+- [x] 1.2 Regenerate `schema.d.ts` against a running backend and confirm the three review-sitting paths are present
 
 #### Triage
 
