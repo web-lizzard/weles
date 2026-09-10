@@ -520,6 +520,14 @@ mapping `outstanding_count` → `outstandingCount`; the incomplete-response guar
   `SITTING_EXPIRED`
 - `cd tui && pnpm typecheck` clean
 
+### Review r2
+
+Artifact: `reviews/2026-09-10-r2-impl-review.md`
+
+- `R2-F2` — Generated `outstanding_count` is cast optional and defaulted to zero
+  Fix: a field the generated schema declares required must be read directly off the typed
+  payload; do not cast `data` to a looser shape or supply a fallback for it.
+
 ---
 
 ## Phase 8: TUI store stubs
@@ -634,6 +642,15 @@ state and offers no retry key.
 - Repeat with `SITTING_RESUME_HORIZON_HOURS=0.001`: leave the overlay open past the horizon, press
   a grade key, and confirm the overlay recovers into a fresh sitting with the expiry notice rather
   than showing an error screen
+
+### Review r2
+
+Artifact: `reviews/2026-09-10-r2-impl-review.md`
+
+- `R2-F1` — Outstanding count renders only in the presented phase
+  Fix: the outstanding count must render whenever the store holds a `sittingId`, not only in the
+  `presented` phase; the toggle hint may stay `presented`-only, because it is the hint, not the
+  count, that is phase-specific.
 
 ---
 
