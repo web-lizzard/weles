@@ -85,6 +85,7 @@ describe("SittingOverlay", () => {
       cardId,
       front: "What is a SYN?",
       sittingComplete: false,
+      outstandingCount: 0,
     });
     await vi.advanceTimersByTimeAsync(0);
 
@@ -102,6 +103,7 @@ describe("SittingOverlay", () => {
       cardId,
       front: "Front line",
       sittingComplete: false,
+      outstandingCount: 0,
     });
 
     const { stdin } = render(<SittingOverlay />);
@@ -121,6 +123,7 @@ describe("SittingOverlay", () => {
       cardId,
       front: "Front line",
       sittingComplete: false,
+      outstandingCount: 0,
     });
     vi.mocked(revealBack).mockResolvedValue({
       sittingId,
@@ -149,9 +152,11 @@ describe("SittingOverlay", () => {
       cardId,
       front: "Front line",
       sittingComplete: false,
+      outstandingCount: 0,
     });
     vi.mocked(gradeCard).mockResolvedValue({
       sittingId,
+      outstandingCount: 0,
       sittingComplete: true,
       nextCardId: null,
       nextFront: null,
@@ -173,6 +178,7 @@ describe("SittingOverlay", () => {
       cardId,
       front: "Front line",
       sittingComplete: false,
+      outstandingCount: 0,
     });
     vi.mocked(revealBack).mockResolvedValue({
       sittingId,
@@ -182,6 +188,7 @@ describe("SittingOverlay", () => {
     });
     vi.mocked(gradeCard).mockResolvedValue({
       sittingId,
+      outstandingCount: 0,
       sittingComplete: true,
       nextCardId: null,
       nextFront: null,
@@ -205,9 +212,11 @@ describe("SittingOverlay", () => {
       cardId,
       front: "First front",
       sittingComplete: false,
+      outstandingCount: 0,
     });
     vi.mocked(gradeCard).mockResolvedValue({
       sittingId,
+      outstandingCount: 0,
       sittingComplete: false,
       nextCardId,
       nextFront: "Second front",
@@ -242,9 +251,11 @@ describe("SittingOverlay", () => {
       cardId,
       front: "Last card",
       sittingComplete: false,
+      outstandingCount: 0,
     });
     vi.mocked(gradeCard).mockResolvedValue({
       sittingId,
+      outstandingCount: 0,
       sittingComplete: true,
       nextCardId: null,
       nextFront: null,
@@ -286,6 +297,7 @@ describe("SittingOverlay", () => {
         cardId,
         front: "Recovered front",
         sittingComplete: false,
+        outstandingCount: 0,
       });
 
     const { stdin, lastFrame } = render(<SittingOverlay />);

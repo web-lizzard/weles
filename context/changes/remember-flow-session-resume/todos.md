@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-session-resume
 current_phase: 6
-next_step: 6.1
+next_step: 6.2
 next_command: /implement remember-flow-session-resume phase 6
 updated: 2026-09-10
 ---
@@ -68,7 +68,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 6.1 Add ResumedSitting, SITTING_EXPIRED and outstandingCount to the client types
+- [x] 6.1 Add ResumedSitting, SITTING_EXPIRED and outstandingCount to the client types
 
 #### Manual
 

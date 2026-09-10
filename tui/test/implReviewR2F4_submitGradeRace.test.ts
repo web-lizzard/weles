@@ -42,6 +42,7 @@ describe("submitGrade re-entrancy", () => {
   it("does not issue a second gradeCard call when submitGrade is invoked again before the first resolves", async () => {
     let resolveFirst!: (value: {
       sittingId: string;
+      outstandingCount: number;
       sittingComplete: boolean;
       nextCardId: string | null;
       nextFront: string | null;
@@ -56,6 +57,7 @@ describe("submitGrade re-entrancy", () => {
 
     resolveFirst({
       sittingId,
+      outstandingCount: 0,
       sittingComplete: true,
       nextCardId: null,
       nextFront: null,

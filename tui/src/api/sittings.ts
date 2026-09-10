@@ -1,13 +1,23 @@
 import { client } from "./client.js";
 
+export const SITTING_EXPIRED = "sitting_expired";
+
 export type Grade = "forgot" | "hard" | "good" | "easy";
 
-export type OpenedSitting = {
-  kind: "opened";
+type PresentedSittingFields = {
   sittingId: string;
   cardId: string | null;
   front: string | null;
   sittingComplete: boolean;
+  outstandingCount: number;
+};
+
+export type OpenedSitting = PresentedSittingFields & {
+  kind: "opened";
+};
+
+export type ResumedSitting = PresentedSittingFields & {
+  kind: "resumed";
 };
 
 export type NothingDue = { kind: "nothing_due" };
@@ -22,9 +32,14 @@ export type RevealedCard = {
 export type GradeApplied = {
   sittingId: string;
   sittingComplete: boolean;
+  outstandingCount: number;
   nextCardId: string | null;
   nextFront: string | null;
 };
+
+function readOutstandingCount(data: { outstanding_count?: number }): number {
+  return data.outstanding_count ?? 0;
+}
 
 export class SittingHttpError extends Error {
   constructor(
@@ -36,7 +51,9 @@ export class SittingHttpError extends Error {
   }
 }
 
-export async function openSitting(): Promise<OpenedSitting | NothingDue> {
+export async function openSitting(): Promise<
+  OpenedSitting | ResumedSitting | NothingDue
+> {
   const { data, error, response } = await client.POST("/review-sittings");
   if (error || !data) {
     throwOnClientError(error, response, "openSitting failed");
@@ -55,12 +72,17 @@ export async function openSitting(): Promise<OpenedSitting | NothingDue> {
     throw new Error("Incomplete opened sitting response");
   }
 
+  const outstandingCount = readOutstandingCount(
+    data as { outstanding_count?: number },
+  );
+
   return {
     kind: "opened",
     sittingId: sitting_id,
     cardId: card_id,
     front,
     sittingComplete: sitting_complete,
+    outstandingCount,
   };
 }
 
@@ -103,6 +125,9 @@ export async function gradeCard(
   return {
     sittingId: data.sitting_id,
     sittingComplete: data.sitting_complete,
+    outstandingCount: readOutstandingCount(
+      data as { outstanding_count?: number },
+    ),
     nextCardId: data.next_card_id,
     nextFront: data.next_front,
   };
