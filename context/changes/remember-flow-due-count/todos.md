@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
 current_phase: 5
-next_step: 5.1
-next_command: /unit-test remember-flow-due-count phase 5
+next_step: 5.3
+next_command: /implement remember-flow-due-count phase 5
 updated: 2026-09-10
 ---
 
@@ -48,16 +48,16 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5183b57
 
 #### Automated
 
-- [ ] 5.1 Assemble the four readings and return a real partition from DueCountQuery
-- [ ] 5.2 Treat a sitting past its resume horizon as absent
+- [x] 5.1 Assemble the four readings and return a real partition from DueCountQuery
+- [x] 5.2 Treat a sitting past its resume horizon as absent
 
 #### Manual
 
-- [ ] 5.3 Curl /due-cards/count against a seeded backend and confirm the buckets sum to the total
+- [x] 5.3 Curl /due-cards/count against a seeded backend and confirm the buckets sum to the total
 
 ### Phase 6: Partition on sitting responses
 
