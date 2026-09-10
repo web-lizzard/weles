@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
 current_phase: 3
-next_step: tests
-next_command: /unit-test remember-flow-session-resume phase 3
+next_step: 3.1
+next_command: /implement remember-flow-session-resume phase 3
 updated: 2026-09-10
 ---
 
@@ -30,7 +30,7 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — c56163b
 
 #### Automated
 
