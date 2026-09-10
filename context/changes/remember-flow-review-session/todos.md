@@ -112,13 +112,13 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 8.1 Create the remember in-memory adapter package
-- [x] 8.2 Write the three repository classes as signatures with `...` bodies
-- [x] 8.3 Write the unit of work and system clock as signatures with `...` bodies
+- [x] 8.1 Create the remember in-memory adapter package — 2ace364
+- [x] 8.2 Write the three repository classes as signatures with `...` bodies — 2ace364
+- [x] 8.3 Write the unit of work and system clock as signatures with `...` bodies — 2ace364
 
 #### Manual
 
-- [x] 8.4 Confirm every method body in the new package is still `...`
+- [x] 8.4 Confirm every method body in the new package is still `...` — 2ace364
 
 ### Phase 9: Fill the in-memory adapters, the unit of work, and the port contracts
 
