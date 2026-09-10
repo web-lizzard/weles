@@ -29,5 +29,9 @@ class SittingAlreadyCompleteError(CoreException):
     pass
 
 
+class SittingExpiredError(CoreException):
+    pass
+
+
 class CardNotReviewableError(NotFoundError):
     pass

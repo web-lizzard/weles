@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 4
-next_step: 4.1
-next_command: /implement remember-flow-session-resume phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /unit-test remember-flow-session-resume phase 5
 updated: 2026-09-10
 ---
 
@@ -45,9 +45,9 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 4.1 Add SittingExpiredError and map sitting_expired to 409
-- [ ] 4.2 Give CurrentCardQuery and RevealBackQuery a Clock parameter
-- [ ] 4.3 Pass the clock from the production and test compositions
+- [x] 4.1 Add SittingExpiredError and map sitting_expired to 409
+- [x] 4.2 Give CurrentCardQuery and RevealBackQuery a Clock parameter
+- [x] 4.3 Pass the clock from the production and test compositions
 
 ### Phase 5: Expiry refuses work by sitting id
 

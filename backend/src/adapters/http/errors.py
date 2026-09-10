@@ -46,6 +46,7 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "card_not_in_sitting": 409,
     "card_not_presentable": 409,
     "sitting_already_complete": 409,
+    "sitting_expired": 409,
     "card_not_reviewable": 404,
 }
 
