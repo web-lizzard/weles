@@ -278,3 +278,16 @@ def test_the_seeded_draw_matches_a_pinned_outcome_for_an_empty_log() -> None:
     assert sitting.next_card(sitting.card_ids, ()) == CardId(
         value=UUID("6513270e-269e-0d37-f2a7-4de452e6b438")
     )
+
+
+def test_the_first_front_over_two_cards_ignores_the_sitting_id() -> None:
+    """The acceptance step `the card "X" is the one in front` assumes this."""
+    first = _card_id()
+    second = _card_id()
+    present = frozenset({first, second})
+
+    fronts = {
+        _open_sitting(first, second).next_card(present, events=[]) for _ in range(50)
+    }
+
+    assert len(fronts) == 1
