@@ -34,8 +34,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 3.1 Return a resumed sitting from the convergent branch of handle
-- [x] 3.2 Replace the inline due comprehension with due_card_ids
+- [x] 3.1 Return a resumed sitting from the convergent branch of handle — 955cfc0
+- [x] 3.2 Replace the inline due comprehension with due_card_ids — 955cfc0
 
 #### Manual
 
