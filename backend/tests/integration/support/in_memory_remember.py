@@ -29,7 +29,11 @@ from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.ports import Clock, UnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.reveal_back import RevealBackQuery
-from domain.remember.value_objects import ShowingLimit
+from domain.remember.value_objects import (
+    MIN_RESUME_HORIZON,
+    ResumeHorizon,
+    ShowingLimit,
+)
 
 _DEFAULT_SHOWING_LIMIT = 2
 
@@ -43,6 +47,7 @@ class InMemoryRememberComposition:
     scheduler: FsrsScheduler
     clock: Clock
     showing_limit: ShowingLimit
+    resume_horizon: ResumeHorizon
     notes: InMemoryDistillNoteRepository
     cards: InMemoryCardRepository
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
@@ -52,6 +57,7 @@ class InMemoryRememberComposition:
         cls,
         clock: Clock | None = None,
         showing_limit: ShowingLimit | None = None,
+        resume_horizon: ResumeHorizon | None = None,
     ) -> "InMemoryRememberComposition":
         notes = InMemoryDistillNoteRepository()
         cards = InMemoryCardRepository()
@@ -63,6 +69,7 @@ class InMemoryRememberComposition:
             scheduler=FsrsScheduler(),
             clock=clock or SystemClock(),
             showing_limit=showing_limit or ShowingLimit(value=_DEFAULT_SHOWING_LIMIT),
+            resume_horizon=resume_horizon or ResumeHorizon(value=MIN_RESUME_HORIZON),
             notes=notes,
             cards=cards,
         )
@@ -88,6 +95,7 @@ class InMemoryRememberComposition:
             clock=self.clock,
             showing_limit=self.showing_limit,
             scheduler=self.scheduler,
+            resume_horizon=self.resume_horizon,
         )
 
     def grade_card(self) -> GradeCardCommand:
