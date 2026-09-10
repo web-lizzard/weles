@@ -1,0 +1,19 @@
+# pyright: reportUnusedParameter=false
+from collections.abc import Sequence
+
+from domain.remember.review_event import ReviewEvent
+from domain.remember.value_objects import CardId, SittingId
+
+
+class InMemoryReviewEventStore:
+    def __init__(self) -> None: ...
+
+    async def save(self, event: ReviewEvent) -> None: ...
+
+    async def list_by_card(self, card_id: CardId) -> Sequence[ReviewEvent]: ...
+
+    async def list_by_sitting(self, sitting_id: SittingId) -> Sequence[ReviewEvent]: ...
+
+    def snapshot(self) -> list[ReviewEvent]: ...
+
+    def restore(self, snapshot: list[ReviewEvent]) -> None: ...
