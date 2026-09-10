@@ -47,11 +47,11 @@ updated: 2026-09-10
 #### Triage
 
 - [x] 3.5 R1-F1 Foreign sitting events change the drawn next card (proof: 340db23) — 24dbe25
-- [x] 3.6 R2-F1 Eligible pool must exclude members above the minimum showing count
-- [x] 3.7 R2-F2 Draw seed must incorporate the sitting id
-- [x] 3.8 R2-F3 Draw seed must sort events before hashing
-- [x] 3.9 R2-F4 Draw seed must incorporate each event's card id
-- [x] 3.10 R2-F5 Draw seed must use eight big-endian digest bytes
+- [x] 3.6 R2-F1 Eligible pool must exclude members above the minimum showing count — 7e4321b
+- [x] 3.7 R2-F2 Draw seed must incorporate the sitting id — 7e4321b
+- [x] 3.8 R2-F3 Draw seed must sort events before hashing — 7e4321b
+- [x] 3.9 R2-F4 Draw seed must incorporate each event's card id — 7e4321b
+- [x] 3.10 R2-F5 Draw seed must use eight big-endian digest bytes — 7e4321b
 
 ### Phase 4: Domain — reconstruction from the log
 
