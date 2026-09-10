@@ -40,6 +40,7 @@ from domain.remember.value_objects import (
     CardId,
     Grade,
     OpaqueSchedulerState,
+    ResumeHorizon,
     SchedulerAlgorithm,
     SchedulerStamp,
     SittingId,
@@ -54,6 +55,9 @@ class _FixedClock:
 
     def now(self) -> datetime:
         return self._moment
+
+    def advance(self, delta: timedelta) -> None:
+        self._moment = self._moment + delta
 
 
 @dataclass
@@ -144,6 +148,16 @@ def _mark_not_due(context: RememberFlowContext, card_id: CardId) -> None:
 @given("a remember review backend")
 def remember_review_backend(remember_flow_context: RememberFlowContext) -> None:
     _ = remember_flow_context
+
+
+@given(parsers.parse("the resume horizon is {hours:d} hours"))
+def resume_horizon_is_hours(
+    remember_flow_context: RememberFlowContext, hours: int
+) -> None:
+    remember_flow_context.composition = InMemoryRememberComposition.create(
+        clock=remember_flow_context.clock,
+        resume_horizon=ResumeHorizon(value=timedelta(hours=hours)),
+    )
 
 
 @given(
@@ -320,11 +334,18 @@ def user_starts_review(remember_flow_context: RememberFlowContext) -> None:
         remember_flow_context.prior_sitting_id = remember_flow_context.sitting_id
     result = asyncio.run(remember_flow_context.composition.open_sitting().handle())
     remember_flow_context.last_open_result = result
-    if isinstance(result, SittingOpenedDTO):
+    if isinstance(result, (SittingOpenedDTO, SittingResumedDTO)):
         remember_flow_context.sitting_id = SittingId(value=result.sitting_id)
         assert result.card_id is not None
         remember_flow_context.current_card_id = CardId(value=result.card_id)
         remember_flow_context.last_presented = result
+
+
+@when(parsers.parse("the clock advances by {hours:d} hours"))
+def clock_advances_by_hours(
+    remember_flow_context: RememberFlowContext, hours: int
+) -> None:
+    remember_flow_context.clock.advance(timedelta(hours=hours))
 
 
 @when("the user reveals the current card's back")
@@ -639,6 +660,18 @@ def card_has_scheduled_next_due(remember_flow_context: RememberFlowContext) -> N
     assert state.due_at > remember_flow_context.clock.now()
 
 
+@then(parsers.parse('the card "{label}" has a scheduled next due date'))
+def named_card_has_scheduled_next_due(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = remember_flow_context.cards_by_label[label]
+    state = asyncio.run(
+        remember_flow_context.composition.scheduling_states.get(card.id)
+    )
+    assert state is not None
+    assert state.due_at > remember_flow_context.clock.now()
+
+
 @then("the next due date is farther out than after the second good grade")
 def next_due_is_farther_than_second_good(
     remember_flow_context: RememberFlowContext,
@@ -676,3 +709,73 @@ def same_card_presented_again_before_end(
         remember_flow_context.last_grade_result.next_card_id
         == remember_flow_context.graded_card_id.value
     )
+
+
+@then("the sitting is resumed")
+def sitting_is_resumed(remember_flow_context: RememberFlowContext) -> None:
+    assert isinstance(remember_flow_context.last_open_result, SittingResumedDTO)
+
+
+@then("the sitting is newly opened")
+def sitting_is_newly_opened(remember_flow_context: RememberFlowContext) -> None:
+    assert isinstance(remember_flow_context.last_open_result, SittingOpenedDTO)
+
+
+@then("the resumed sitting is the same sitting as before")
+def resumed_sitting_is_same_as_before(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    assert remember_flow_context.prior_sitting_id is not None
+    assert isinstance(remember_flow_context.last_open_result, SittingResumedDTO)
+    assert (
+        remember_flow_context.last_open_result.sitting_id
+        == remember_flow_context.prior_sitting_id.value
+    )
+
+
+@then("the opened sitting is not the same sitting as before")
+def opened_sitting_is_not_same_as_before(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    assert remember_flow_context.prior_sitting_id is not None
+    result = remember_flow_context.last_open_result
+    assert isinstance(result, (SittingOpenedDTO, SittingResumedDTO))
+    assert result.sitting_id != remember_flow_context.prior_sitting_id.value
+
+
+@then(parsers.parse("the outstanding count is {count:d}"))
+def outstanding_count_is(
+    remember_flow_context: RememberFlowContext, count: int
+) -> None:
+    result = remember_flow_context.last_open_result
+    assert isinstance(result, (SittingOpenedDTO, SittingResumedDTO))
+    assert result.outstanding_count == count
+
+
+@then("only one sitting exists")
+def only_one_sitting_exists(remember_flow_context: RememberFlowContext) -> None:
+    assert len(remember_flow_context.composition.sittings.snapshot()) == 1
+
+
+@then(parsers.parse('the card "{label}" is not the one in front'))
+def named_card_is_not_the_one_in_front(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    assert remember_flow_context.current_card_id is not None
+    card = remember_flow_context.cards_by_label[label]
+    assert remember_flow_context.current_card_id != card.id
+
+
+@then(parsers.parse('the opened sitting excludes the card "{label}"'))
+def opened_sitting_excludes_named_card(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    assert isinstance(remember_flow_context.last_open_result, SittingOpenedDTO)
+    card = remember_flow_context.cards_by_label[label]
+    sitting = asyncio.run(
+        remember_flow_context.composition.sittings.get(
+            SittingId(value=remember_flow_context.last_open_result.sitting_id)
+        )
+    )
+    assert sitting is not None
+    assert card.id not in sitting.card_ids

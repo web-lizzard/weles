@@ -3,7 +3,7 @@ change_id: remember-flow-session-resume
 title: Users can leave a review mid-way and pick up where they left off
 status: planned
 created: 2026-09-10
-updated: 2026-09-10
+updated: 2026-09-11
 archived_at: null
 origin: remember-pillar
 effort_id: remember-flow
