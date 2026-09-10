@@ -40,7 +40,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 4.1 Fill `open`/`toggleBack`/`moveSelection`/`submitGrade`/`retry`/`reset`
+- [x] 4.1 Fill `open`/`toggleBack`/`moveSelection`/`submitGrade`/`retry`/`reset` — beceb42
 
 ### Phase 5: Sitting overlay stubs
 
