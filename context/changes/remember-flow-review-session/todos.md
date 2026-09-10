@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 11
-next_step: 11.3
-next_command: /implement remember-flow-review-session phase 11
+current_phase: 12
+next_step: 12.1
+next_command: /implement remember-flow-review-session phase 12
 updated: 2026-09-10
 ---
 
@@ -165,7 +165,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 11.3 Confirm a discarded card is absent from both catalog methods
+- [x] 11.3 Confirm a discarded card is absent from both catalog methods
 
 ### Phase 12: FSRS dependency and scheduler stub
 
