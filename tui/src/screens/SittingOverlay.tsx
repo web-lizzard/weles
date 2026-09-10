@@ -9,6 +9,7 @@ const GRADES: Grade[] = ["forgot", "hard", "good", "easy"];
 const GRADE_LABELS = ["1 Forgot", "2 Hard", "3 Good", "4 Easy"];
 const ESC_HINT = "← ESC to go back";
 const TOGGLE_CARD_HINT = "Press t to toggle card";
+const RESUMED_BANNER = "Resumed — picking up where you left off";
 
 export default function SittingOverlay(): JSX.Element {
   const phase = useSittingStore((s) => s.phase);
@@ -21,6 +22,9 @@ export default function SittingOverlay(): JSX.Element {
   const submitGrade = useSittingStore((s) => s.submitGrade);
   const error = useSittingStore((s) => s.error);
   const retry = useSittingStore((s) => s.retry);
+  const isResumed = useSittingStore((s) => s.isResumed);
+  const outstandingCount = useSittingStore((s) => s.outstandingCount);
+  const notice = useSittingStore((s) => s.notice);
 
   useEffect(() => {
     void useSittingStore.getState().open();
@@ -96,13 +100,29 @@ export default function SittingOverlay(): JSX.Element {
 
   const footer =
     phase === "presented" ? (
-      <Text color="yellow">{TOGGLE_CARD_HINT}</Text>
+      <Box flexDirection="column">
+        <Text color="yellow">{outstandingCount} left</Text>
+        <Text color="yellow">{TOGGLE_CARD_HINT}</Text>
+      </Box>
     ) : null;
+
+  const presentedTopMargin = phase === "presented" ? (isResumed ? 2 : 1) : 1;
 
   return (
     <Box flexDirection="column" flexGrow={1}>
       <Text dimColor>{ESC_HINT}</Text>
-      <Box flexDirection="column" flexGrow={1} marginTop={1}>
+      {phase === "presented" && isResumed && (
+        <Box marginTop={1}>
+          <Text color="cyan">{RESUMED_BANNER}</Text>
+        </Box>
+      )}
+      <Box
+        flexDirection="column"
+        flexGrow={1}
+        marginTop={presentedTopMargin}
+        gap={notice !== null ? 1 : 0}
+      >
+        {notice !== null && <Text dimColor>{notice}</Text>}
         {body}
       </Box>
       {footer}

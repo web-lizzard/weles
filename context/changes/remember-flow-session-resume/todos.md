@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
 current_phase: 10
-next_step: 10.1
-next_command: /unit-test remember-flow-session-resume phase 10
+next_step: 10.2
+next_command: /implement remember-flow-session-resume phase 10
 updated: 2026-09-10
 ---
 
@@ -106,11 +106,11 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — d11b291
 
 #### Automated
 
-- [ ] 10.1 Render the resumed marker, the outstanding count and the notice
+- [x] 10.1 Render the resumed marker, the outstanding count and the notice
 
 #### Manual
 
