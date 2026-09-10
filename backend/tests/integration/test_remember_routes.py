@@ -102,6 +102,25 @@ async def test_open_sitting_returns_nothing_due_when_no_cards_are_reviewable(
     assert response.json() == {"kind": "nothing_due"}
 
 
+async def test_get_due_cards_count_returns_a_live_partition_for_seeded_cards(
+    remember_client: RememberTestContext,
+) -> None:
+    note = _note()
+    card = _card(note.id)
+    await remember_client.notes.save(note)
+    await remember_client.cards.save(card)
+
+    response = remember_client.client.get("/due-cards/count")
+
+    assert response.status_code == 200
+    body = cast(dict[str, object], response.json())
+    due = cast(dict[str, object], body["due"])
+    assert due["total"] == 1
+    assert due["not_yet_seen"] == 1
+    assert due["seen_still_owed"] == 0
+    assert due["ripe_outside_sitting"] == 0
+
+
 async def test_current_card_returns_404_for_an_unknown_sitting_id(
     remember_client: RememberTestContext,
 ) -> None:
