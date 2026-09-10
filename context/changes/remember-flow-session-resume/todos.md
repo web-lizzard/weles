@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
 current_phase: 10
-next_step: 10.2
-next_command: /implement remember-flow-session-resume phase 10
+next_step: done
+next_command: /archive remember-flow-session-resume
 updated: 2026-09-10
 ---
 
@@ -118,8 +118,8 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 10.2 Walk resume and expiry recovery in the TUI against a live backend
+- [x] 10.2 Walk resume and expiry recovery in the TUI against a live backend — d4a3b1c
 
 #### Triage
 
-- [ ] 10.3 R2-F1 Outstanding count renders only in the presented phase (proof: ea48ac6)
+- [x] 10.3 R2-F1 Outstanding count renders only in the presented phase (proof: ea48ac6) — d4a3b1c
