@@ -7,10 +7,12 @@ import {
   SittingHttpError,
 } from "../src/api/sittings";
 import SittingOverlay from "../src/screens/SittingOverlay";
+import { useAppStore } from "../src/store/index";
 import { useSittingStore } from "../src/store/sitting";
 
 const DOWN_ARROW = "\x1B[B";
 const ENTER = "\r";
+const ESC = "\x1B";
 
 async function pressKey(
   stdin: { write: (data: string) => void },
@@ -52,6 +54,7 @@ function resetStore() {
 describe("SittingOverlay", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    useAppStore.setState({ isSittingOverlayOpen: true });
     resetStore();
     vi.mocked(openSitting).mockReset();
     vi.mocked(revealBack).mockReset();
@@ -85,7 +88,30 @@ describe("SittingOverlay", () => {
     });
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(lastFrame()).toContain("What is a SYN?");
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("What is a SYN?");
+    expect(frame).toContain("← ESC to go back");
+    expect(frame).toContain("Front");
+    expect(frame).toContain("Press t to toggle card");
+  });
+
+  it("closes the overlay and resets the store when ESC is pressed", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, ESC);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useAppStore.getState().isSittingOverlayOpen).toBe(false);
+    expect(useSittingStore.getState().sittingId).toBeNull();
   });
 
   it("shows the card back after t is pressed and hides it when t is pressed again", async () => {

@@ -2,10 +2,13 @@ import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import type { Grade } from "../api/sittings.js";
+import { useAppStore } from "../store/index.js";
 import { useSittingStore } from "../store/sitting.js";
 
 const GRADES: Grade[] = ["forgot", "hard", "good", "easy"];
 const GRADE_LABELS = ["1 Forgot", "2 Hard", "3 Good", "4 Easy"];
+const ESC_HINT = "← ESC to go back";
+const TOGGLE_CARD_HINT = "Press t to toggle card";
 
 export default function SittingOverlay(): JSX.Element {
   const phase = useSittingStore((s) => s.phase);
@@ -24,6 +27,12 @@ export default function SittingOverlay(): JSX.Element {
   }, []);
 
   useInput((input, key) => {
+    if (key.escape) {
+      useAppStore.getState().closeSittingOverlay();
+      useSittingStore.getState().reset();
+      return;
+    }
+
     if (phase === "error") {
       if (input === "r") {
         void retry();
@@ -85,9 +94,18 @@ export default function SittingOverlay(): JSX.Element {
       break;
   }
 
+  const footer =
+    phase === "presented" ? (
+      <Text color="yellow">{TOGGLE_CARD_HINT}</Text>
+    ) : null;
+
   return (
     <Box flexDirection="column" flexGrow={1}>
-      {body}
+      <Text dimColor>{ESC_HINT}</Text>
+      <Box flexDirection="column" flexGrow={1} marginTop={1}>
+        {body}
+      </Box>
+      {footer}
     </Box>
   );
 }
@@ -108,8 +126,22 @@ function renderPresented(
 ): JSX.Element {
   return (
     <Box flexDirection="column" gap={1}>
-      {front !== null && <Text>{front}</Text>}
-      {isBackVisible && back !== null && <Text>{back}</Text>}
+      {front !== null && (
+        <Box flexDirection="column">
+          <Text bold dimColor>
+            Front
+          </Text>
+          <Text>{front}</Text>
+        </Box>
+      )}
+      {isBackVisible && back !== null && (
+        <Box flexDirection="column">
+          <Text bold dimColor>
+            Back
+          </Text>
+          <Text>{back}</Text>
+        </Box>
+      )}
       <Box flexDirection="column">
         {GRADE_LABELS.map((label, index) => (
           <Text
