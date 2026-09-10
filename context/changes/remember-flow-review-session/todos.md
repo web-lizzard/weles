@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 11
-next_step: 11.1
-next_command: /unit-test remember-flow-review-session phase 11
+current_phase: 3
+next_step: 3.6
+next_command: /implement remember-flow-review-session phase 3
 updated: 2026-09-10
 ---
 
@@ -47,11 +47,11 @@ updated: 2026-09-10
 #### Triage
 
 - [x] 3.5 R1-F1 Foreign sitting events change the drawn next card (proof: 340db23) — 24dbe25
-- [x] 3.6 R2-F1 Eligible pool must exclude members above the minimum showing count
-- [x] 3.7 R2-F2 Draw seed must incorporate the sitting id
-- [x] 3.8 R2-F3 Draw seed must sort events before hashing
-- [x] 3.9 R2-F4 Draw seed must incorporate each event's card id
-- [x] 3.10 R2-F5 Draw seed must use eight big-endian digest bytes
+- [ ] 3.6 R2-F1 Eligible pool must exclude members above the minimum showing count
+- [ ] 3.7 R2-F2 Draw seed must incorporate the sitting id
+- [ ] 3.8 R2-F3 Draw seed must sort events before hashing
+- [ ] 3.9 R2-F4 Draw seed must incorporate each event's card id
+- [ ] 3.10 R2-F5 Draw seed must use eight big-endian digest bytes
 
 ### Phase 4: Domain — reconstruction from the log
 
@@ -146,11 +146,11 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 10.1 Write InMemoryReviewCatalog as a signature with `...` bodies
+- [x] 10.1 Write InMemoryReviewCatalog as a signature with `...` bodies — 5dacaaf
 
 #### Manual
 
-- [x] 10.2 Confirm both catalog method bodies are still `...`
+- [x] 10.2 Confirm both catalog method bodies are still `...` — 5dacaaf
 
 ### Phase 11: Fill the catalog and its contract suite
 
