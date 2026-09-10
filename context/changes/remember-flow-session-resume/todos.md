@@ -45,9 +45,9 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 4.1 Add SittingExpiredError and map sitting_expired to 409
-- [x] 4.2 Give CurrentCardQuery and RevealBackQuery a Clock parameter
-- [x] 4.3 Pass the clock from the production and test compositions
+- [x] 4.1 Add SittingExpiredError and map sitting_expired to 409 — 1c56bf9
+- [x] 4.2 Give CurrentCardQuery and RevealBackQuery a Clock parameter — 1c56bf9
+- [x] 4.3 Pass the clock from the production and test compositions — 1c56bf9
 
 ### Phase 5: Expiry refuses work by sitting id
 
