@@ -1,9 +1,9 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 2
-next_step: 2.1
-next_command: /implement remember-flow-session-resume phase 2
-updated: 2026-09-11
+current_phase: 3
+next_step: tests
+next_command: /unit-test remember-flow-session-resume phase 3
+updated: 2026-09-10
 ---
 
 ### Phase 1: Acceptance layer for AC-10 through AC-13
@@ -19,12 +19,12 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 2.1 Add sitting_resume_horizon_hours to Settings
-- [ ] 2.2 Compose ResumeHorizon and pass it to OpenSittingCommand
+- [x] 2.1 Add sitting_resume_horizon_hours to Settings
+- [x] 2.2 Compose ResumeHorizon and pass it to OpenSittingCommand
 
 #### Manual
 
-- [ ] 2.3 Check a zero horizon is refused by the VO at compose time
+- [x] 2.3 Check a zero horizon is refused by the VO at compose time
 
 ### Phase 3: Convergent open returns a resumable sitting
 
