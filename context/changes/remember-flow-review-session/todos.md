@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
 current_phase: 11
-next_step: 11.1
-next_command: /unit-test remember-flow-review-session phase 11
+next_step: 11.3
+next_command: /implement remember-flow-review-session phase 11
 updated: 2026-09-10
 ---
 
@@ -156,12 +156,12 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 26f8f1b
 
 #### Automated
 
-- [ ] 11.1 Fill InMemoryReviewCatalog over NoteRepository.list_all
-- [ ] 11.2 Write the ReviewCatalog contract suite
+- [x] 11.1 Fill InMemoryReviewCatalog over NoteRepository.list_all
+- [x] 11.2 Write the ReviewCatalog contract suite
 
 #### Manual
 
