@@ -24,6 +24,10 @@ vi.mock("../src/hooks/useNotesPolling", () => ({
   useNotesPolling: vi.fn(),
 }));
 
+vi.mock("../src/hooks/useDuePolling", () => ({
+  useDuePolling: vi.fn(),
+}));
+
 async function waitFor(
   predicate: () => boolean,
   timeoutMs = 2000,

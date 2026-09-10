@@ -1,4 +1,6 @@
 import { Box, useInput, useStdout } from "ink";
+import DueCountHeader from "./components/DueCountHeader.js";
+import { useDuePolling } from "./hooks/useDuePolling.js";
 import CaptureScreen from "./screens/CaptureScreen.js";
 import CardDetailScreen from "./screens/CardDetailScreen.js";
 import CardListScreen from "./screens/CardListScreen.js";
@@ -10,6 +12,7 @@ import { useSittingStore } from "./store/sitting.js";
 
 const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
+export const DUE_POLL_INTERVAL_MS = 15_000;
 
 export default function App() {
   const { stdout } = useStdout();
@@ -26,6 +29,8 @@ export default function App() {
   const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
   const columns =
     stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS;
+
+  useDuePolling(DUE_POLL_INTERVAL_MS);
 
   useInput((_input, key) => {
     if (!key.escape) {
@@ -50,14 +55,15 @@ export default function App() {
 
   return (
     <Box position="relative" flexDirection="column" height={rows}>
+      <DueCountHeader />
       <CaptureScreen />
       {isNotesOverlayOpen && (
         <Box
           position="absolute"
-          top={0}
+          top={1}
           left={0}
           width={columns}
-          height={rows}
+          height={rows - 1}
           flexDirection="column"
           backgroundColor="black"
           padding={1}
@@ -78,10 +84,10 @@ export default function App() {
       {isSittingOverlayOpen && (
         <Box
           position="absolute"
-          top={0}
+          top={1}
           left={0}
           width={columns}
-          height={rows}
+          height={rows - 1}
           flexDirection="column"
           backgroundColor="black"
           padding={1}
