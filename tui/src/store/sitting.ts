@@ -68,6 +68,17 @@ export const useSittingStore = create<SittingState & SittingActions>(
   (set, get) => ({
     ...initialState,
     open: async () => {
+      const state = get();
+      if (
+        state.phase === "presented" ||
+        state.phase === "nothing_due" ||
+        state.phase === "complete"
+      ) {
+        return;
+      }
+      if (state.phase === "opening" && state.lastAction?.type === "open") {
+        return;
+      }
       set({ lastAction: { type: "open" }, error: null });
       try {
         const result = await openSitting();

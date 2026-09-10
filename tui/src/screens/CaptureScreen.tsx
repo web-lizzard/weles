@@ -13,6 +13,7 @@ const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
 const APPROVE_COMMAND = "/approve";
 const NOTES_COMMAND = "/notes";
+const REMEMBER_COMMAND = "/remember";
 
 export default function CaptureScreen() {
   const { stdout } = useStdout();
@@ -28,6 +29,9 @@ export default function CaptureScreen() {
   const draft = useChatStore((state) => state.draft);
   const approvalReceipt = useChatStore((state) => state.approvalReceipt);
   const isNotesOverlayOpen = useAppStore((state) => state.isNotesOverlayOpen);
+  const isSittingOverlayOpen = useAppStore(
+    (state) => state.isSittingOverlayOpen,
+  );
 
   const [inputValue, setInputValue] = useState("");
   const hasTopic = topic !== null;
@@ -64,6 +68,10 @@ export default function CaptureScreen() {
       useAppStore.getState().openNotes();
       return;
     }
+    if (trimmed === REMEMBER_COMMAND) {
+      useAppStore.getState().openSittingOverlay();
+      return;
+    }
     if (trimmed === APPROVE_COMMAND) {
       void approveDraft();
       return;
@@ -72,6 +80,7 @@ export default function CaptureScreen() {
   };
   const isApproveCommand = inputValue.trim() === APPROVE_COMMAND;
   const isNotesCommand = inputValue.trim() === NOTES_COMMAND;
+  const isRememberCommand = inputValue.trim() === REMEMBER_COMMAND;
 
   return (
     <Box flexDirection="column">
@@ -95,12 +104,18 @@ export default function CaptureScreen() {
       {streamError !== null && <StatusBar error={streamError} />}
       <Box>
         <UserLabel />
-        <Text color={isApproveCommand || isNotesCommand ? "green" : undefined}>
+        <Text
+          color={
+            isApproveCommand || isNotesCommand || isRememberCommand
+              ? "green"
+              : undefined
+          }
+        >
           <TextInput
             value={inputValue}
             onChange={setInputValue}
             onSubmit={handleSubmit}
-            focus={!isStreaming && !isNotesOverlayOpen}
+            focus={!isStreaming && !isNotesOverlayOpen && !isSittingOverlayOpen}
           />
         </Text>
       </Box>

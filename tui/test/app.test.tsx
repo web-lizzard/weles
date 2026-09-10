@@ -115,6 +115,7 @@ describe("App", () => {
     });
     useAppStore.setState({
       isNotesOverlayOpen: false,
+      isSittingOverlayOpen: false,
       selectedIndex: 0,
       isDetailOpen: false,
       selectedNoteId: null,

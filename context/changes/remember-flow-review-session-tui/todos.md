@@ -1,9 +1,9 @@
 ---
 change_id: remember-flow-review-session-tui
 current_phase: 8
-next_step: 8.1
-next_command: /unit-test remember-flow-review-session-tui phase 8
-updated: 2026-09-10
+next_step: 8.4
+next_command: /implement remember-flow-review-session-tui phase 8
+updated: 2026-09-11
 ---
 
 ### Phase 1: API client stubs
@@ -74,13 +74,13 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e049cfa
 
 #### Automated
 
-- [ ] 8.1 Add `isSittingOverlayOpen`/`openSittingOverlay`/`closeSittingOverlay` to `store/index.ts`
-- [ ] 8.2 Add the `/remember` command and focus gate in `CaptureScreen.tsx`
-- [ ] 8.3 Mount `SittingOverlay` and wire ESC-close + reset in `app.tsx`
+- [x] 8.1 Add `isSittingOverlayOpen`/`openSittingOverlay`/`closeSittingOverlay` to `store/index.ts`
+- [x] 8.2 Add the `/remember` command and focus gate in `CaptureScreen.tsx`
+- [x] 8.3 Mount `SittingOverlay` and wire ESC-close + reset in `app.tsx`
 
 #### Manual
 
