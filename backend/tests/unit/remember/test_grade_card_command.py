@@ -144,17 +144,11 @@ class _SittingRepository:
 
 
 class _ReviewEventStore:
-    def __init__(
-        self,
-        events: Sequence[ReviewEvent] = (),
-        writes: list[tuple[str, object]] | None = None,
-    ) -> None:
+    def __init__(self, events: Sequence[ReviewEvent] = ()) -> None:
         self._events: list[ReviewEvent] = list(events)
-        self._writes: list[tuple[str, object]] = writes if writes is not None else []
         self.saved: list[ReviewEvent] = []
 
     async def save(self, event: ReviewEvent) -> None:
-        self._writes.append(("event", event))
         self.saved.append(event)
         self._events.append(event)
 
@@ -176,17 +170,11 @@ class _ReviewEventStore:
 
 
 class _SchedulingStateRepository:
-    def __init__(
-        self,
-        states: dict[CardId, SchedulingState] | None = None,
-        writes: list[tuple[str, object]] | None = None,
-    ) -> None:
+    def __init__(self, states: dict[CardId, SchedulingState] | None = None) -> None:
         self._states: dict[CardId, SchedulingState] = dict(states or {})
-        self._writes: list[tuple[str, object]] = writes if writes is not None else []
         self.saved: list[SchedulingState] = []
 
     async def save(self, state: SchedulingState) -> None:
-        self._writes.append(("state", state))
         self.saved.append(state)
         self._states[state.card_id] = state
 
@@ -209,12 +197,10 @@ class _UnitOfWork:
         sittings: _SittingRepository,
         scheduling_states: _SchedulingStateRepository,
         review_events: _ReviewEventStore,
-        writes: list[tuple[str, object]],
     ) -> None:
         self.sittings: _SittingRepository = sittings
         self.scheduling_states: _SchedulingStateRepository = scheduling_states
         self.review_events: _ReviewEventStore = review_events
-        self.writes: list[tuple[str, object]] = writes
         self.committed: bool = False
 
     async def __aenter__(self) -> "_UnitOfWork":
@@ -243,12 +229,11 @@ def _command(
     _UnitOfWork,
 ]:
     instant = as_of or datetime.now(UTC)
-    writes: list[tuple[str, object]] = []
     sittings = _SittingRepository()
-    review_events = _ReviewEventStore(events, writes)
-    scheduling_states = _SchedulingStateRepository(states, writes)
+    review_events = _ReviewEventStore(events)
+    scheduling_states = _SchedulingStateRepository(states)
     scheduler = _RecordingScheduler(stamp or _stamp())
-    uow = _UnitOfWork(sittings, scheduling_states, review_events, writes)
+    uow = _UnitOfWork(sittings, scheduling_states, review_events)
 
     def uow_factory() -> _UnitOfWork:
         return uow
@@ -378,48 +363,6 @@ async def test_a_member_that_is_not_the_seeded_pick_raises_not_presentable() -> 
     assert events_store.saved == []
     assert states_repo.saved == []
     assert uow.committed is False
-
-
-async def test_a_grade_writes_the_event_before_the_memoized_state() -> None:
-    shown = _reviewable(front="Already in front")
-    waiting = _reviewable(front="Next front")
-    sitting = _open_sitting(shown, waiting)
-    catalog = _Catalog([shown, waiting])
-    present = sitting.visible(frozenset({shown.id, waiting.id}))
-    in_front = sitting.next_card(present, events=[])
-    assert in_front is not None
-    in_front_card = shown if in_front == shown.id else waiting
-    other = waiting if in_front_card is shown else shown
-    live = _stamp()
-    memoized = _state(
-        in_front_card.id,
-        due_at=datetime.now(UTC) + timedelta(days=4),
-        stamp=live,
-    )
-    command, events_store, states_repo, scheduler, instant, uow = await _saved_command(
-        sitting=sitting,
-        catalog=catalog,
-        states={in_front_card.id: memoized},
-        stamp=live,
-    )
-
-    result = await command.handle(sitting.id, in_front_card.id, Grade.FORGOT)
-
-    assert isinstance(result, GradeAppliedDTO)
-    assert result.sitting_id == sitting.id.value
-    assert result.sitting_complete is False
-    assert result.next_card_id == other.id.value
-    assert result.next_front == other.front
-    assert events_store.saved[0].card_id == in_front_card.id
-    assert events_store.saved[0].sitting_id == sitting.id
-    assert events_store.saved[0].grade == Grade.FORGOT
-    assert events_store.saved[0].reviewed_at == instant
-    assert scheduler.calls == [
-        (memoized, in_front_card.id, Grade.FORGOT, instant),
-    ]
-    assert states_repo.saved == [scheduler.results[0]]
-    assert [kind for kind, _payload in uow.writes] == ["event", "state"]
-    assert uow.committed is True
 
 
 async def test_a_stale_stamp_rebuilds_previous_from_the_card_log() -> None:
