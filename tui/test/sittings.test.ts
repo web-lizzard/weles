@@ -3,6 +3,7 @@ import {
   gradeCard,
   openSitting,
   revealBack,
+  SITTING_EXPIRED,
   SittingHttpError,
 } from "../src/api/sittings";
 
@@ -56,6 +57,50 @@ describe("sittings API", () => {
     expect(result).toEqual({ kind: "nothing_due" });
   });
 
+  it("maps a resumed sitting with kind resumed and outstanding_count", async () => {
+    mockFetchJson({
+      kind: "resumed",
+      sitting_id: sittingId,
+      card_id: cardId,
+      front: "What is a SYN?",
+      sitting_complete: false,
+      outstanding_count: 2,
+    });
+
+    const result = await openSitting();
+
+    expect(result).toEqual({
+      kind: "resumed",
+      sittingId,
+      cardId,
+      front: "What is a SYN?",
+      sittingComplete: false,
+      outstandingCount: 2,
+    });
+  });
+
+  it("maps outstanding_count onto openSitting when kind is opened", async () => {
+    mockFetchJson({
+      kind: "opened",
+      sitting_id: sittingId,
+      card_id: cardId,
+      front: "Front",
+      sitting_complete: false,
+      outstanding_count: 3,
+    });
+
+    const result = await openSitting();
+
+    expect(result).toEqual({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front",
+      sittingComplete: false,
+      outstandingCount: 3,
+    });
+  });
+
   it("maps revealBack fields from snake_case to camelCase", async () => {
     mockFetchJson({
       sitting_id: sittingId,
@@ -107,6 +152,38 @@ describe("sittings API", () => {
       outstandingCount: 0,
       nextCardId: null,
       nextFront: null,
+    });
+  });
+
+  it("maps outstanding_count onto gradeCard from the response body", async () => {
+    mockFetchJson({
+      sitting_id: sittingId,
+      sitting_complete: false,
+      outstanding_count: 1,
+      next_card_id: cardId,
+      next_front: "Next front",
+    });
+
+    const result = await gradeCard(sittingId, cardId, "good");
+
+    expect(result).toEqual({
+      sittingId,
+      sittingComplete: false,
+      outstandingCount: 1,
+      nextCardId: cardId,
+      nextFront: "Next front",
+    });
+  });
+
+  it("throws SittingHttpError with SITTING_EXPIRED on a 409 expiry body", async () => {
+    mockFetchJson({ code: "sitting_expired", detail: "Sitting expired" }, 409);
+
+    await expect(openSitting()).rejects.toSatisfy((error: unknown) => {
+      expect(error).toBeInstanceOf(SittingHttpError);
+      const httpError = error as SittingHttpError;
+      expect(httpError.code).toBe(SITTING_EXPIRED);
+      expect(httpError.status).toBe(409);
+      return true;
     });
   });
 
