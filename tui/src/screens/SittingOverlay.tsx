@@ -22,6 +22,7 @@ export default function SittingOverlay(): JSX.Element {
   const submitGrade = useSittingStore((s) => s.submitGrade);
   const error = useSittingStore((s) => s.error);
   const retry = useSittingStore((s) => s.retry);
+  const sittingId = useSittingStore((s) => s.sittingId);
   const isResumed = useSittingStore((s) => s.isResumed);
   const outstandingCount = useSittingStore((s) => s.outstandingCount);
   const notice = useSittingStore((s) => s.notice);
@@ -99,10 +100,12 @@ export default function SittingOverlay(): JSX.Element {
   }
 
   const footer =
-    phase === "presented" ? (
+    sittingId !== null ? (
       <Box flexDirection="column">
         <Text color="yellow">{outstandingCount} left</Text>
-        <Text color="yellow">{TOGGLE_CARD_HINT}</Text>
+        {phase === "presented" && (
+          <Text color="yellow">{TOGGLE_CARD_HINT}</Text>
+        )}
       </Box>
     ) : null;
 
