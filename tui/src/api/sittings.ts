@@ -37,10 +37,6 @@ export type GradeApplied = {
   nextFront: string | null;
 };
 
-function readOutstandingCount(data: { outstanding_count?: number }): number {
-  return data.outstanding_count ?? 0;
-}
-
 export class SittingHttpError extends Error {
   constructor(
     public code: string,
@@ -67,21 +63,18 @@ export async function openSitting(): Promise<
     throw new Error("Unexpected open sitting response");
   }
 
-  const { sitting_id, card_id, front, sitting_complete } = data;
+  const { sitting_id, card_id, front, sitting_complete, outstanding_count } =
+    data;
   if ((card_id == null || front == null) && !sitting_complete) {
     throw new Error("Incomplete open sitting response");
   }
-
-  const outstandingCount = readOutstandingCount(
-    data as { outstanding_count?: number },
-  );
 
   const presented = {
     sittingId: sitting_id,
     cardId: card_id,
     front,
     sittingComplete: sitting_complete,
-    outstandingCount,
+    outstandingCount: outstanding_count,
   };
 
   if (data.kind === "resumed") {
@@ -130,9 +123,7 @@ export async function gradeCard(
   return {
     sittingId: data.sitting_id,
     sittingComplete: data.sitting_complete,
-    outstandingCount: readOutstandingCount(
-      data as { outstanding_count?: number },
-    ),
+    outstandingCount: data.outstanding_count,
     nextCardId: data.next_card_id,
     nextFront: data.next_front,
   };
