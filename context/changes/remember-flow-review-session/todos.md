@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 15
-next_step: 15.4
-next_command: /implement remember-flow-review-session phase 15
+current_phase: 16
+next_step: 16.8
+next_command: /implement remember-flow-review-session phase 16
 updated: 2026-09-10
 ---
 
@@ -242,13 +242,13 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 16.1 Write InMemoryRememberComposition in the integration support package
-- [ ] 16.2 Replace the step module's doubles with that composition
-- [ ] 16.3 Move the AC-07 assertion from a multiplier to a growing interval
-- [ ] 16.4 Add tests/unit/remember/conftest.py with the shared handler fixtures and builders
-- [ ] 16.5 Repoint the four handler unit-test modules onto the real in-memory adapters
-- [ ] 16.6 Drive the handler tests through FsrsScheduler except where a value must be forced
-- [ ] 16.7 Assert one commit on the happy path and no leaked write past an exception
+- [x] 16.1 Write InMemoryRememberComposition in the integration support package
+- [x] 16.2 Replace the step module's doubles with that composition
+- [x] 16.3 Move the AC-07 assertion from a multiplier to a growing interval
+- [x] 16.4 Add tests/unit/remember/conftest.py with the shared handler fixtures and builders
+- [x] 16.5 Repoint the four handler unit-test modules onto the real in-memory adapters
+- [x] 16.6 Drive the handler tests through FsrsScheduler except where a value must be forced
+- [x] 16.7 Assert one commit on the happy path and no leaked write past an exception
 
 #### Manual
 

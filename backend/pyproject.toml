@@ -67,7 +67,7 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.basedpyright]
 include = ["src", "tests"]
-extraPaths = ["src"]
+extraPaths = ["src", "tests"]
 pythonVersion = "3.12"
 
 [tool.mutmut]

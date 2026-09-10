@@ -1,9 +1,10 @@
-from collections.abc import Sequence
-from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 import pytest
+from integration.support.in_memory_remember import InMemoryRememberComposition
 
+from adapters.out.fsrs.scheduler import FsrsScheduler
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.dto import GradeAppliedDTO
 from domain.remember.exceptions import (
@@ -12,399 +13,184 @@ from domain.remember.exceptions import (
     SittingAlreadyCompleteError,
     SittingNotFoundError,
 )
-from domain.remember.ports import ReviewableCard, SchedulingReplay
+from domain.remember.ports import SchedulingReplay
 from domain.remember.review_event import ReviewEvent
-from domain.remember.scheduling_state import SchedulingState
-from domain.remember.sitting import Sitting
-from domain.remember.value_objects import (
-    CardId,
-    Grade,
-    OpaqueSchedulerState,
-    SchedulerAlgorithm,
-    SchedulerStamp,
-    ShowingLimit,
-    SittingId,
-)
+from domain.remember.value_objects import Grade, SchedulerStamp, SittingId
+
+from .conftest import open_sitting, reviewable, stamp
 
 
-def _card_id() -> CardId:
-    return CardId(value=uuid4())
+class _RaisingScheduler:
+    """Forces a review() failure to prove a failed grade leaves no partial write."""
 
+    def __init__(self, scheduler: FsrsScheduler) -> None:
+        self._scheduler: FsrsScheduler = scheduler
 
-def _reviewable(
-    card_id: CardId | None = None,
-    *,
-    front: str = "What is ARP?",
-    back: str = "MAC from IP.",
-) -> ReviewableCard:
-    return ReviewableCard(id=card_id or _card_id(), front=front, back=back)
+    def stamp(self) -> SchedulerStamp:
+        return self._scheduler.stamp()
 
-
-def _open_sitting(*cards: ReviewableCard) -> Sitting:
-    return Sitting.open(
-        frozenset(card.id for card in cards),
-        datetime.now(UTC),
-        ShowingLimit(value=2),
-    )
-
-
-def _stamp(parameter_version: str = "fsrs-6.3.2-defaults") -> SchedulerStamp:
-    return SchedulerStamp(
-        algorithm=SchedulerAlgorithm.FSRS,
-        parameter_version=parameter_version,
-    )
-
-
-def _state(
-    card_id: CardId,
-    *,
-    due_at: datetime,
-    stamp: SchedulerStamp,
-    payload: dict[str, object] | None = None,
-) -> SchedulingState:
-    return SchedulingState(
-        card_id=card_id,
-        due_at=due_at,
-        scheduler_state=OpaqueSchedulerState(payload=payload or {"memo": True}),
-        stamp=stamp,
-    )
+    def review(self, *args: object, **kwargs: object) -> None:
+        del args, kwargs
+        raise RuntimeError("scheduler unavailable")
 
 
 def _event(
-    card_id: CardId,
+    card_id: object,
     sitting_id: SittingId,
     grade: Grade,
     *,
     reviewed_at: datetime | None = None,
 ) -> ReviewEvent:
     return ReviewEvent(
-        card_id=card_id,
+        card_id=card_id,  # pyright: ignore[reportArgumentType]
         reviewed_at=reviewed_at or datetime.now(UTC),
         grade=grade,
         sitting_id=sitting_id,
     )
 
 
-class _Clock:
-    def __init__(self, instant: datetime) -> None:
-        self._instant: datetime = instant
-
-    def now(self) -> datetime:
-        return self._instant
-
-
-class _RecordingScheduler:
-    def __init__(self, stamp: SchedulerStamp) -> None:
-        self._stamp: SchedulerStamp = stamp
-        self.calls: list[tuple[SchedulingState | None, CardId, Grade, datetime]] = []
-        self.results: list[SchedulingState] = []
-
-    def stamp(self) -> SchedulerStamp:
-        return self._stamp
-
-    def review(
-        self,
-        previous: SchedulingState | None,
-        card_id: CardId,
-        grade: Grade,
-        reviewed_at: datetime,
-    ) -> SchedulingState:
-        self.calls.append((previous, card_id, grade, reviewed_at))
-        step = len(self.calls)
-        state = SchedulingState(
-            card_id=card_id,
-            due_at=reviewed_at + timedelta(days=step),
-            scheduler_state=OpaqueSchedulerState(payload={"step": step}),
-            stamp=self._stamp,
-        )
-        self.results.append(state)
-        return state
-
-
-class _Catalog:
-    def __init__(self, cards: Sequence[ReviewableCard]) -> None:
-        self._cards: dict[CardId, ReviewableCard] = {card.id: card for card in cards}
-
-    async def list_reviewable(self) -> Sequence[ReviewableCard]:
-        return list(self._cards.values())
-
-    async def get_reviewable(self, card_id: CardId) -> ReviewableCard | None:
-        return self._cards.get(card_id)
-
-
-class _SittingRepository:
-    def __init__(self) -> None:
-        self._sittings: dict[SittingId, Sitting] = {}
-
-    async def save(self, sitting: Sitting) -> None:
-        self._sittings[sitting.id] = sitting
-
-    async def get(self, sitting_id: SittingId) -> Sitting | None:
-        return self._sittings.get(sitting_id)
-
-
-class _ReviewEventStore:
-    def __init__(self, events: Sequence[ReviewEvent] = ()) -> None:
-        self._events: list[ReviewEvent] = list(events)
-        self.saved: list[ReviewEvent] = []
-
-    async def save(self, event: ReviewEvent) -> None:
-        self.saved.append(event)
-        self._events.append(event)
-
-    async def list_by_card(self, card_id: CardId) -> Sequence[ReviewEvent]:
-        return tuple(
-            sorted(
-                (event for event in self._events if event.card_id == card_id),
-                key=lambda event: event.reviewed_at,
-            )
-        )
-
-    async def list_by_sitting(self, sitting_id: SittingId) -> Sequence[ReviewEvent]:
-        return tuple(
-            sorted(
-                (event for event in self._events if event.sitting_id == sitting_id),
-                key=lambda event: event.reviewed_at,
-            )
-        )
-
-
-class _SchedulingStateRepository:
-    def __init__(self, states: dict[CardId, SchedulingState] | None = None) -> None:
-        self._states: dict[CardId, SchedulingState] = dict(states or {})
-        self.saved: list[SchedulingState] = []
-
-    async def save(self, state: SchedulingState) -> None:
-        self.saved.append(state)
-        self._states[state.card_id] = state
-
-    async def get(self, card_id: CardId) -> SchedulingState | None:
-        return self._states.get(card_id)
-
-    async def get_many(
-        self, card_ids: Sequence[CardId]
-    ) -> dict[CardId, SchedulingState]:
-        return {
-            card_id: self._states[card_id]
-            for card_id in card_ids
-            if card_id in self._states
-        }
-
-
-class _UnitOfWork:
-    def __init__(
-        self,
-        sittings: _SittingRepository,
-        scheduling_states: _SchedulingStateRepository,
-        review_events: _ReviewEventStore,
-    ) -> None:
-        self.sittings: _SittingRepository = sittings
-        self.scheduling_states: _SchedulingStateRepository = scheduling_states
-        self.review_events: _ReviewEventStore = review_events
-        self.committed: bool = False
-
-    async def __aenter__(self) -> "_UnitOfWork":
-        return self
-
-    async def __aexit__(self, *exc: object) -> None:
-        return None
-
-    async def commit(self) -> None:
-        self.committed = True
-
-
-def _command(
-    *,
-    catalog: _Catalog,
-    events: Sequence[ReviewEvent] = (),
-    states: dict[CardId, SchedulingState] | None = None,
-    as_of: datetime | None = None,
-    stamp: SchedulerStamp | None = None,
-) -> tuple[
-    GradeCardCommand,
-    _ReviewEventStore,
-    _SchedulingStateRepository,
-    _RecordingScheduler,
-    datetime,
-    _UnitOfWork,
-]:
-    instant = as_of or datetime.now(UTC)
-    sittings = _SittingRepository()
-    review_events = _ReviewEventStore(events)
-    scheduling_states = _SchedulingStateRepository(states)
-    scheduler = _RecordingScheduler(stamp or _stamp())
-    uow = _UnitOfWork(sittings, scheduling_states, review_events)
-
-    def uow_factory() -> _UnitOfWork:
-        return uow
-
-    command = GradeCardCommand(
-        uow_factory,  # pyright: ignore[reportArgumentType]
-        catalog,
-        scheduler,
-        _Clock(instant),
-    )
-    return command, review_events, scheduling_states, scheduler, instant, uow
-
-
-async def _saved_command(
-    *,
-    sitting: Sitting,
-    catalog: _Catalog,
-    events: Sequence[ReviewEvent] = (),
-    states: dict[CardId, SchedulingState] | None = None,
-    as_of: datetime | None = None,
-    stamp: SchedulerStamp | None = None,
-) -> tuple[
-    GradeCardCommand,
-    _ReviewEventStore,
-    _SchedulingStateRepository,
-    _RecordingScheduler,
-    datetime,
-    _UnitOfWork,
-]:
-    command, events_store, states_repo, scheduler, instant, uow = _command(
-        catalog=catalog,
-        events=events,
-        states=states,
-        as_of=as_of,
-        stamp=stamp,
-    )
-    await uow.sittings.save(sitting)
-    return command, events_store, states_repo, scheduler, instant, uow
-
-
-async def test_an_unknown_sitting_raises_sitting_not_found() -> None:
-    card = _reviewable()
-    sitting = _open_sitting(card)
-    catalog = _Catalog([card])
-    (
-        command,
-        events_store,
-        states_repo,
-        _scheduler,
-        _instant,
-        uow,
-    ) = await _saved_command(sitting=sitting, catalog=catalog)
+async def test_an_unknown_sitting_raises_sitting_not_found(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition)
+    sitting = open_sitting(card)
+    await composition.sittings.save(sitting)
 
     with pytest.raises(SittingNotFoundError):
-        _ = await command.handle(SittingId.new(), card.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(SittingId.new(), card.id, Grade.GOOD)
 
-    assert events_store.saved == []
-    assert states_repo.saved == []
-    assert uow.committed is False
+    assert await composition.review_events.list_by_card(card.id) == []
+    assert await composition.scheduling_states.get(card.id) is None
 
 
-async def test_a_card_outside_the_sitting_raises_card_not_in_sitting() -> None:
-    member = _reviewable()
-    outsider = _reviewable()
-    sitting = _open_sitting(member)
-    catalog = _Catalog([member, outsider])
-    (
-        command,
-        events_store,
-        states_repo,
-        _scheduler,
-        _instant,
-        uow,
-    ) = await _saved_command(sitting=sitting, catalog=catalog)
+async def test_a_card_outside_the_sitting_raises_card_not_in_sitting(
+    composition: InMemoryRememberComposition,
+) -> None:
+    member = await reviewable(composition)
+    outsider = await reviewable(composition)
+    sitting = open_sitting(member)
+    await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotInSittingError):
-        _ = await command.handle(sitting.id, outsider.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(sitting.id, outsider.id, Grade.GOOD)
 
-    assert events_store.saved == []
-    assert states_repo.saved == []
-    assert uow.committed is False
+    assert await composition.review_events.list_by_card(outsider.id) == []
+    assert await composition.scheduling_states.get(outsider.id) is None
 
 
-async def test_a_finished_sitting_raises_already_complete_before_presentable() -> None:
-    card = _reviewable()
-    sitting = _open_sitting(card)
+async def test_a_finished_sitting_raises_already_complete_before_presentable(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition)
+    sitting = open_sitting(card)
     prior = _event(card.id, sitting.id, Grade.GOOD)
-    catalog = _Catalog([card])
-    (
-        command,
-        events_store,
-        states_repo,
-        _scheduler,
-        _instant,
-        uow,
-    ) = await _saved_command(sitting=sitting, catalog=catalog, events=(prior,))
+    await composition.sittings.save(sitting)
+    await composition.review_events.save(prior)
 
     with pytest.raises(SittingAlreadyCompleteError):
-        _ = await command.handle(sitting.id, card.id, Grade.EASY)
+        _ = await composition.grade_card().handle(sitting.id, card.id, Grade.EASY)
 
-    assert events_store.saved == []
-    assert states_repo.saved == []
-    assert uow.committed is False
+    assert await composition.review_events.list_by_card(card.id) == [prior]
+    assert await composition.scheduling_states.get(card.id) is None
 
 
-async def test_a_member_that_is_not_the_seeded_pick_raises_not_presentable() -> None:
-    first = _reviewable(front="Alpha")
-    second = _reviewable(front="Beta")
-    sitting = _open_sitting(first, second)
-    catalog = _Catalog([first, second])
+async def test_a_member_that_is_not_the_seeded_pick_raises_not_presentable(
+    composition: InMemoryRememberComposition,
+) -> None:
+    first = await reviewable(composition, front="Alpha")
+    second = await reviewable(composition, front="Beta")
+    sitting = open_sitting(first, second)
     present = sitting.visible(frozenset({first.id, second.id}))
     in_front = sitting.next_card(present, events=[])
     assert in_front is not None
     other = second if in_front == first.id else first
-    (
-        command,
-        events_store,
-        states_repo,
-        _scheduler,
-        _instant,
-        uow,
-    ) = await _saved_command(sitting=sitting, catalog=catalog)
+    await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotPresentableError):
-        _ = await command.handle(sitting.id, other.id, Grade.FORGOT)
+        _ = await composition.grade_card().handle(sitting.id, other.id, Grade.FORGOT)
 
-    assert events_store.saved == []
-    assert states_repo.saved == []
-    assert uow.committed is False
+    assert await composition.review_events.list_by_card(other.id) == []
+    assert await composition.scheduling_states.get(other.id) is None
 
 
-async def test_a_stale_stamp_rebuilds_previous_from_the_card_log() -> None:
-    card = _reviewable(front="Stale memo")
-    sitting = _open_sitting(card)
-    catalog = _Catalog([card])
+async def test_a_stale_stamp_rebuilds_previous_from_the_card_log(
+    make_composition: Callable[..., InMemoryRememberComposition],
+) -> None:
     prior_at = datetime(2026, 2, 1, tzinfo=UTC)
+    instant = datetime(2026, 8, 15, tzinfo=UTC)
+    composition = make_composition(instant=instant)
+    card = await reviewable(composition, front="Stale memo")
+    sitting = open_sitting(card)
     prior = _event(card.id, sitting.id, Grade.FORGOT, reviewed_at=prior_at)
-    live = _stamp("live-pin")
-    memoized = _state(
-        card.id,
-        due_at=datetime(2026, 8, 1, tzinfo=UTC),
-        stamp=_stamp("old-pin"),
-        payload={"memo": "stale"},
+    await composition.sittings.save(sitting)
+    await composition.review_events.save(prior)
+    memoized_live = composition.scheduler.review(
+        None, card.id, Grade.HARD, datetime(2026, 7, 1, tzinfo=UTC)
     )
-    (
-        command,
-        _events_store,
-        _states_repo,
-        scheduler,
-        instant,
-        _uow,
-    ) = await _saved_command(
-        sitting=sitting,
-        catalog=catalog,
-        events=(prior,),
-        states={card.id: memoized},
-        stamp=live,
+    memoized = memoized_live.model_copy(
+        update={"due_at": datetime(2026, 8, 1, tzinfo=UTC), "stamp": stamp("old-pin")}
     )
-    expected_previous = SchedulingReplay(_RecordingScheduler(live)).replay(
+    await composition.scheduling_states.save(memoized)
+    expected_previous = SchedulingReplay(composition.scheduler).replay(
         card.id, (prior,)
     )
-
-    result = await command.handle(sitting.id, card.id, Grade.GOOD)
-
     assert expected_previous is not None
-    assert scheduler.calls
-    grade_call = scheduler.calls[-1]
-    assert grade_call[0] == expected_previous
-    assert grade_call[0] != memoized
-    assert grade_call[1:] == (card.id, Grade.GOOD, instant)
+
+    result = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+
+    # fsrs.Card() stamps a fresh internal card_id on every from-scratch replay, so
+    # full-state equality is compared on the meaningful fields, not the raw payload.
+    expected_next = composition.scheduler.review(
+        expected_previous, card.id, Grade.GOOD, instant
+    )
+    from_memoized = composition.scheduler.review(memoized, card.id, Grade.GOOD, instant)
+    saved = await composition.scheduling_states.get(card.id)
+    assert saved is not None
+    assert saved.scheduler_state.payload["stability"] == pytest.approx(
+        expected_next.scheduler_state.payload["stability"]
+    )
+    assert saved.scheduler_state.payload["stability"] != pytest.approx(
+        from_memoized.scheduler_state.payload["stability"]
+    )
     assert isinstance(result, GradeAppliedDTO)
     assert result.sitting_complete is True
     assert result.next_card_id is None
     assert result.next_front is None
+
+
+async def test_a_raising_scheduler_leaves_no_partial_write(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition)
+    sitting = open_sitting(card)
+    await composition.sittings.save(sitting)
+    command = GradeCardCommand(
+        uow_factory=composition.unit_of_work,
+        catalog=composition.catalog,
+        scheduler=_RaisingScheduler(composition.scheduler),  # pyright: ignore[reportArgumentType]
+        clock=composition.clock,
+    )
+
+    with pytest.raises(RuntimeError):
+        _ = await command.handle(sitting.id, card.id, Grade.GOOD)
+
+    assert await composition.review_events.list_by_card(card.id) == []
+    assert await composition.scheduling_states.get(card.id) is None
+    assert await composition.sittings.get(sitting.id) == sitting
+
+
+async def test_grading_persists_exactly_the_one_submitted_write(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition)
+    sitting = open_sitting(card)
+    await composition.sittings.save(sitting)
+
+    result = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+
+    assert isinstance(result, GradeAppliedDTO)
+    events = await composition.review_events.list_by_card(card.id)
+    assert len(events) == 1
+    assert events[0].grade == Grade.GOOD
+    state_saved = await composition.scheduling_states.get(card.id)
+    assert state_saved is not None

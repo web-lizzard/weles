@@ -1,7 +1,7 @@
 """Step definitions for coverage wrap-up acceptance scenarios."""
 
 from bdd.steps.capture import CaptureFlowContext
-from integration.support.in_memory_capture import (  # pyright: ignore[reportImplicitRelativeImport]
+from integration.support.in_memory_capture import (
     InMemoryCaptureComposition,
 )
 from pytest_bdd import given, then
