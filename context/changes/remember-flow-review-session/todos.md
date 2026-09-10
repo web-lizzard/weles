@@ -252,5 +252,5 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 16.8 Confirm only _FixedClock survives in the step module
-- [ ] 16.9 Confirm every surviving double under tests/unit/remember is named for what it forces
+- [x] 16.8 Confirm only _FixedClock survives in the step module
+- [x] 16.9 Confirm every surviving double under tests/unit/remember is named for what it forces
