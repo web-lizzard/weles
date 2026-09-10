@@ -124,7 +124,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [ ] 7.5 R4-F5 The grade write saves event and scheduling state concurrently, not in order — DISMISSED: the TaskGroup concurrency is a deliberate decision, not a defect
+- [x] 7.5 R4-F5 The grade write saves event and scheduling state concurrently, not in order — DISMISSED: the TaskGroup concurrency is a deliberate decision, not a defect
 
 ### Phase 8: In-memory adapter stubs
 
