@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 6
-next_step: 6.2
-next_command: /implement remember-flow-session-resume phase 6
+current_phase: 7
+next_step: 7.0
+next_command: /unit-test remember-flow-session-resume phase 7
 updated: 2026-09-10
 ---
 
@@ -72,7 +72,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 6.2 Regenerate schema.d.ts against a running backend
+- [x] 6.2 Regenerate schema.d.ts against a running backend — 4d86dd3
 
 ### Phase 7: TUI API client behaviour
 
