@@ -10,7 +10,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 1.1 Write `api/sittings.ts` type and function signatures
+- [x] 1.1 Write `api/sittings.ts` type and function signatures — b13f806
 
 #### Manual
 
