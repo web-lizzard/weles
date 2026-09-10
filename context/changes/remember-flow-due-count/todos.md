@@ -73,18 +73,18 @@ updated: 2026-09-11
 
 #### Manual
 
-- [x] 6.4 Confirm seen_still_owed is zero on a fresh sitting and non-zero after a hard grade
+- [x] 6.4 Confirm seen_still_owed is zero on a fresh sitting and non-zero after a hard grade — 484412e
 
 ### Phase 7: TUI API client and due store stubs
 
 #### Automated
 
-- [x] 7.1 Add api/due.ts with DuePartition and the fetchDueCount signature
-- [x] 7.2 Add store/due.ts and hooks/useDuePolling.ts on the notesStore polling shape
+- [x] 7.1 Add api/due.ts with DuePartition and the fetchDueCount signature — 484412e
+- [x] 7.2 Add store/due.ts and hooks/useDuePolling.ts on the notesStore polling shape — 484412e
 
 #### Manual
 
-- [x] 7.3 Regenerate schema.d.ts against a running backend
+- [x] 7.3 Regenerate schema.d.ts against a running backend — 484412e
 
 ### Phase 8: Due client and store behaviour
 
