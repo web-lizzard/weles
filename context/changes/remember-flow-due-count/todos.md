@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 4
-next_step: 4.1
-next_command: /implement remember-flow-due-count phase 4
+current_phase: 5
+next_step: tests
+next_command: /unit-test remember-flow-due-count phase 5
 updated: 2026-09-10
 ---
 
@@ -40,9 +40,9 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 4.1 Author the AC-14 and AC-15 scenarios via /bdd
-- [ ] 4.2 Confirm the new scenarios fail on assertions, not collection
-- [ ] 4.3 Confirm no existing remember-flow scenario regressed
+- [x] 4.1 Author the AC-14 and AC-15 scenarios via /bdd
+- [x] 4.2 Confirm the new scenarios fail on assertions, not collection
+- [x] 4.3 Confirm no existing remember-flow scenario regressed
 
 ### Phase 5: Due count query and route behaviour
 

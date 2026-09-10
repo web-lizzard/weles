@@ -10,6 +10,7 @@ from integration.support.in_memory_remember import InMemoryRememberComposition
 from pytest_bdd import given, parsers, then, when
 
 from application.remember.dto import (
+    DueCountDTO,
     GradeAppliedDTO,
     NothingDueDTO,
     PresentedCardDTO,
@@ -77,6 +78,7 @@ class RememberFlowContext:
     current_card_reads: list[PresentedCardDTO] = field(default_factory=list)
     live_membership: frozenset[CardId] | None = None
     prior_sitting_id: SittingId | None = None
+    last_due_count: DueCountDTO | None = None
 
 
 @pytest.fixture
@@ -615,6 +617,40 @@ def user_is_told_nothing_is_due(remember_flow_context: RememberFlowContext) -> N
 @then("no sitting was created")
 def no_sitting_was_created(remember_flow_context: RememberFlowContext) -> None:
     assert remember_flow_context.composition.sittings.snapshot() == {}
+
+
+@given(parsers.parse('the catalog has a card "{label}" that is not yet due'))
+def catalog_has_card_not_yet_due(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = _card(remember_flow_context, label)
+    _mark_not_due(remember_flow_context, card.id)
+
+
+@when("the user reads the due count")
+def user_reads_due_count(remember_flow_context: RememberFlowContext) -> None:
+    result = asyncio.run(remember_flow_context.composition.due_count().handle())
+    remember_flow_context.last_due_count = result
+
+
+@when(parsers.parse('the clock advances enough for the card "{label}" to become due'))
+def clock_advances_until_card_is_due(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = remember_flow_context.cards_by_label[label]
+    state = asyncio.run(
+        remember_flow_context.composition.scheduling_states.get(card.id)
+    )
+    assert state is not None
+    remember_flow_context.clock.advance(
+        state.due_at - remember_flow_context.clock.now()
+    )
+
+
+@then(parsers.parse("the due total is {count:d}"))
+def due_total_is(remember_flow_context: RememberFlowContext, count: int) -> None:
+    assert remember_flow_context.last_due_count is not None
+    assert remember_flow_context.last_due_count.due.total == count
 
 
 @then("the current card shows only the front")
