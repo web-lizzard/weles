@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from bdd.steps.approve_outbox import ApproveOutboxContext
-from integration.support.in_memory_distill import (  # pyright: ignore[reportImplicitRelativeImport]
+from integration.support.in_memory_distill import (
     InMemoryDistillComposition,
 )
 from pytest_bdd import given, then, when

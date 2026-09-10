@@ -6,10 +6,10 @@ from dataclasses import dataclass
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from integration.support.in_memory_capture import (  # pyright: ignore[reportImplicitRelativeImport]
+from integration.support.in_memory_capture import (
     InMemoryCaptureComposition,
 )
-from integration.support.in_memory_distill import (  # pyright: ignore[reportImplicitRelativeImport]
+from integration.support.in_memory_distill import (
     InMemoryDistillComposition,
 )
 
