@@ -2,6 +2,7 @@ import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NoteDetail } from "../src/api/notes";
 import { getNote } from "../src/api/notes";
+import { openSitting } from "../src/api/sittings";
 import {
   approveNote,
   sendMessage,
@@ -11,6 +12,7 @@ import App from "../src/app";
 import { useChatStore } from "../src/store/chat";
 import { useAppStore } from "../src/store/index";
 import { useNotesStore } from "../src/store/notes";
+import { useSittingStore } from "../src/store/sitting";
 
 const DOWN_ARROW = "\x1B[B";
 const ENTER = "\r";
@@ -53,6 +55,17 @@ vi.mock("../src/api/notes", async (importOriginal) => {
     getNote: vi.fn(),
   };
 });
+
+vi.mock("../src/api/sittings", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/api/sittings")>();
+  return {
+    ...actual,
+    openSitting: vi.fn(),
+  };
+});
+
+const sittingId = "00000000-0000-4000-8000-000000000001";
+const cardId = "00000000-0000-4000-8000-000000000101";
 
 async function waitFor(
   predicate: () => boolean,
@@ -107,10 +120,23 @@ describe("App", () => {
       selectedNoteId: null,
     });
     useNotesStore.setState({ items: [], isLoading: false, error: null });
+    useSittingStore.setState({
+      phase: "opening",
+      sittingId: null,
+      cardId: null,
+      front: null,
+      back: null,
+      isBackVisible: false,
+      selectedGradeIndex: 0,
+      isSubmitting: false,
+      error: null,
+      lastAction: null,
+    });
     vi.mocked(startCaptureSession).mockResolvedValue({ sessionId: "sess-1" });
     vi.mocked(sendMessage).mockReset();
     vi.mocked(approveNote).mockReset();
     vi.mocked(getNote).mockReset();
+    vi.mocked(openSitting).mockReset();
   });
 
   afterEach(() => {
@@ -285,6 +311,71 @@ describe("App", () => {
       stdin.write("\x1B");
       await waitFor(() => !useAppStore.getState().isNotesOverlayOpen);
       expect(useChatStore.getState()).toEqual(chatBeforeEsc);
+    });
+  });
+
+  describe("remember sitting overlay dispatch", () => {
+    it("opens the sitting overlay when /remember is submitted", async () => {
+      vi.mocked(openSitting).mockResolvedValue({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "What is a SYN?",
+        sittingComplete: false,
+      });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
+
+      expect(lastFrame()).toContain("1 Forgot");
+      expect(sendMessage).not.toHaveBeenCalled();
+      expect(openSitting).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes the sitting overlay on ESC and resets the sitting store", async () => {
+      vi.mocked(openSitting).mockResolvedValue({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "What is a SYN?",
+        sittingComplete: false,
+      });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
+
+      stdin.write("\x1B");
+      await waitFor(() => !(lastFrame() ?? "").includes("What is a SYN?"));
+
+      const sitting = useSittingStore.getState();
+      expect(sitting.phase).toBe("opening");
+      expect(sitting.sittingId).toBeNull();
+      expect(sitting.cardId).toBeNull();
+      expect(sitting.front).toBeNull();
+    });
+
+    it("blocks capture input while the sitting overlay is open", async () => {
+      vi.mocked(openSitting).mockResolvedValue({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "What is a SYN?",
+        sittingComplete: false,
+      });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
+
+      await submitMessage(stdin, "hello while overlay open");
+
+      expect(sendMessage).not.toHaveBeenCalled();
+      expect(lastFrame()).toContain("What is a SYN?");
     });
   });
 });
