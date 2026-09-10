@@ -1,7 +1,7 @@
 import createClient from "openapi-fetch";
 import type { paths } from "./generated/schema.js";
 
-async function delegatedFetch(
+export async function delegatedFetch(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response> {

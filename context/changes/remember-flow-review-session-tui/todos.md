@@ -33,6 +33,10 @@ updated: 2026-09-10
 #### Triage
 
 - [x] 2.2 R1-F2 Sitting API uses raw fetch instead of openapi client — 043b0cd
+- [x] 2.3 R2-F1 api/client.ts modified outside any phase's Changes Required
+- [x] 2.4 R2-F2 Untested cross-cutting change to the shared fetch delegate
+- [x] 2.5 R2-F3 openSitting raises on the backend's own "just completed, no card" response (proof: 48ebc3f)
+- [x] 2.6 R2-F5 Private helper declared before the public functions that use it
 
 ### Phase 3: Sitting store stubs
 
@@ -49,6 +53,11 @@ updated: 2026-09-10
 #### Automated
 
 - [x] 4.1 Fill `open`/`toggleBack`/`moveSelection`/`submitGrade`/`retry`/`reset` — beceb42
+
+#### Triage
+
+- [ ] 4.2 R2-F4 submitGrade has no re-entrancy guard (proof: 48ebc3f)
+- [ ] 4.3 R2-F7 toggleBack has no re-entrancy guard on the first reveal (proof: 48ebc3f)
 
 ### Phase 5: Sitting overlay stubs
 
@@ -77,6 +86,10 @@ updated: 2026-09-10
 
 - [x] 7.1 Fill nothing-due and complete state rendering — c2b8fc5
 - [x] 7.2 Fill error-state rendering and the retry keypress — c2b8fc5
+
+#### Triage
+
+- [ ] 7.3 R2-F6 Private render helpers declared before the public default export
 
 ### Phase 8: Wire `/remember` into the app shell
 

@@ -5,8 +5,8 @@ export type Grade = "forgot" | "hard" | "good" | "easy";
 export type OpenedSitting = {
   kind: "opened";
   sittingId: string;
-  cardId: string;
-  front: string;
+  cardId: string | null;
+  front: string | null;
   sittingComplete: boolean;
 };
 
@@ -36,22 +36,6 @@ export class SittingHttpError extends Error {
   }
 }
 
-function throwOnClientError(
-  error: unknown,
-  response: Response,
-  fallbackMessage: string,
-): never {
-  const body = error as { code?: string; detail?: string } | undefined;
-  if (
-    body &&
-    typeof body.code === "string" &&
-    typeof body.detail === "string"
-  ) {
-    throw new SittingHttpError(body.code, body.detail, response.status);
-  }
-  throw new Error(`${fallbackMessage}: ${response.status}`);
-}
-
 export async function openSitting(): Promise<OpenedSitting | NothingDue> {
   const { data, error, response } = await client.POST("/review-sittings");
   if (error || !data) {
@@ -67,7 +51,7 @@ export async function openSitting(): Promise<OpenedSitting | NothingDue> {
   }
 
   const { sitting_id, card_id, front, sitting_complete } = data;
-  if (card_id == null || front == null) {
+  if ((card_id == null || front == null) && !sitting_complete) {
     throw new Error("Incomplete opened sitting response");
   }
 
@@ -122,4 +106,20 @@ export async function gradeCard(
     nextCardId: data.next_card_id,
     nextFront: data.next_front,
   };
+}
+
+function throwOnClientError(
+  error: unknown,
+  response: Response,
+  fallbackMessage: string,
+): never {
+  const body = error as { code?: string; detail?: string } | undefined;
+  if (
+    body &&
+    typeof body.code === "string" &&
+    typeof body.detail === "string"
+  ) {
+    throw new SittingHttpError(body.code, body.detail, response.status);
+  }
+  throw new Error(`${fallbackMessage}: ${response.status}`);
 }
