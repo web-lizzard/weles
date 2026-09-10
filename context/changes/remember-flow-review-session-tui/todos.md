@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 1
-next_step: 1.2
-next_command: /implement remember-flow-review-session-tui phase 1
+current_phase: 3
+next_step: 3.1
+next_command: /implement remember-flow-review-session-tui phase 3
 updated: 2026-09-10
 ---
 
@@ -20,11 +20,11 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — ada396b
 
 #### Automated
 
-- [ ] 2.1 Fill `openSitting`/`revealBack`/`gradeCard` bodies and the `SittingHttpError` throw path
+- [x] 2.1 Fill `openSitting`/`revealBack`/`gradeCard` bodies and the `SittingHttpError` throw path
 
 ### Phase 3: Sitting store stubs
 
