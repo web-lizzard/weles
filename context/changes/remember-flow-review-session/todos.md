@@ -128,14 +128,14 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 9.1 Fill the three in-memory remember repositories with snapshot and restore
-- [x] 9.2 Fill the remember unit of work with a shared asyncio.Lock, and the system clock
+- [x] 9.1 Fill the three in-memory remember repositories with snapshot and restore — 546ab61
+- [x] 9.2 Fill the remember unit of work with a shared asyncio.Lock, and the system clock — 546ab61
 - [x] 9.3 Write one behavioural contract suite per remember repository port — 6c316a6
 
 #### Manual
 
-- [x] 9.4 Confirm each contract suite reports its cases under the in_memory id
-- [x] 9.5 Confirm a second UoW waits on the shared lock until the first window exits
+- [x] 9.4 Confirm each contract suite reports its cases under the in_memory id — 546ab61
+- [x] 9.5 Confirm a second UoW waits on the shared lock until the first window exits — 546ab61
 
 ### Phase 10: Review catalog stub
 
