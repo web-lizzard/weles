@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 3
-next_step: 3.5
-next_command: /implement remember-flow-due-count phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement remember-flow-due-count phase 4
 updated: 2026-09-10
 ---
 
@@ -27,14 +27,14 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 3.1 Add DuePartitionDTO and DueCountDTO, and the defaulted due field on PresentedCardDTO and GradeAppliedDTO
-- [x] 3.2 Add DueCountQuery with ports injected directly
-- [x] 3.3 Add GET /due-cards/count and the get_due_count_query factory in compose
-- [x] 3.4 Add the due_count seam to InMemoryRememberComposition
+- [x] 3.1 Add DuePartitionDTO and DueCountDTO, and the defaulted due field on PresentedCardDTO and GradeAppliedDTO — 4b38f60
+- [x] 3.2 Add DueCountQuery with ports injected directly — 4b38f60
+- [x] 3.3 Add GET /due-cards/count and the get_due_count_query factory in compose — 4b38f60
+- [x] 3.4 Add the due_count seam to InMemoryRememberComposition — 4b38f60
 
 #### Manual
 
-- [x] 3.5 Curl /due-cards/count against a running backend and confirm a zero partition with HTTP 200
+- [x] 3.5 Curl /due-cards/count against a running backend and confirm a zero partition with HTTP 200 — 4b38f60
 
 ### Phase 4: Acceptance layer for AC-14 and AC-15
 
