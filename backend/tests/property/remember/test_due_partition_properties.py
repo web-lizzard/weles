@@ -184,3 +184,155 @@ def test_seen_still_owed_counts_at_most_one_per_outstanding_card(
 
     assert partition.seen_still_owed <= len(outstanding)
     assert partition.not_yet_seen <= len(outstanding)
+
+
+@st.composite
+def _sitting_scenario(
+    draw: st.DrawFn,
+) -> tuple[
+    frozenset[CardId],
+    dict[CardId, SchedulingState],
+    Sitting,
+    tuple[ReviewEvent, ...],
+]:
+    live, states = draw(_live_and_states())
+    sitting_cards = draw(
+        st.sets(
+            st.sampled_from(sorted(live, key=lambda c: c.value) if live else []),
+            min_size=1,
+            max_size=min(5, len(live) or 1),
+        ).map(frozenset)
+        if live
+        else _card_ids(min_size=1, max_size=3)
+    )
+    if not live:
+        live = sitting_cards
+        for card_id in sitting_cards:
+            states[card_id] = SchedulingState(
+                card_id=card_id,
+                due_at=_AS_OF + timedelta(days=1),
+                scheduler_state=OpaqueSchedulerState(payload={}),
+                stamp=_STAMP,
+            )
+    limit = draw(st.integers(min_value=1, max_value=4))
+    sitting = _sitting(sitting_cards, limit=limit)
+    present = sitting.visible(live)
+    if not present:
+        return live, states, sitting, ()
+    graded = draw(
+        st.lists(
+            st.tuples(
+                st.sampled_from(sorted(present, key=lambda c: c.value)),
+                _GRADES,
+            ),
+            min_size=0,
+            max_size=8,
+        )
+    )
+    events = tuple(
+        _event(card_id, sitting.id, grade=grade) for card_id, grade in graded
+    )
+    return live, states, sitting, events
+
+
+@settings(max_examples=100, deadline=30_000)
+@given(scenario=_sitting_scenario())
+def test_with_scheduler_states_total_matches_due_union_outstanding_cardinality(
+    scenario: tuple[
+        frozenset[CardId],
+        dict[CardId, SchedulingState],
+        Sitting,
+        tuple[ReviewEvent, ...],
+    ],
+) -> None:
+    live, states, sitting, events = scenario
+    present = sitting.visible(live)
+    outstanding = sitting.outstanding(present, events)
+    due = due_card_ids(live, states, _AS_OF, _STAMP)
+    expected_total = len(due | outstanding)
+
+    partition = partition_due(live, states, sitting, events, _AS_OF, _STAMP)
+
+    assert partition.total == expected_total
+    assert (
+        partition.not_yet_seen
+        + partition.seen_still_owed
+        + partition.ripe_outside_sitting
+        == partition.total
+    )
+
+
+@settings(max_examples=100, deadline=30_000)
+@given(scenario=_sitting_scenario())
+def test_outstanding_members_split_exactly_between_not_yet_seen_and_seen_still_owed(
+    scenario: tuple[
+        frozenset[CardId],
+        dict[CardId, SchedulingState],
+        Sitting,
+        tuple[ReviewEvent, ...],
+    ],
+) -> None:
+    live, states, sitting, events = scenario
+    present = sitting.visible(live)
+    outstanding = sitting.outstanding(present, events)
+    due = due_card_ids(live, states, _AS_OF, _STAMP)
+    total_set = due | outstanding
+
+    partition = partition_due(live, states, sitting, events, _AS_OF, _STAMP)
+
+    shown_in_sitting = frozenset(
+        card_id
+        for card_id in outstanding
+        if any(
+            event.card_id == card_id and event.sitting_id == sitting.id
+            for event in events
+        )
+    )
+    unshown_outstanding = outstanding - shown_in_sitting
+    ripe = total_set - outstanding
+
+    assert partition.seen_still_owed == len(shown_in_sitting)
+    assert partition.not_yet_seen == len(unshown_outstanding)
+    assert partition.ripe_outside_sitting == len(ripe)
+
+
+@st.composite
+def _sitting_scenario_with_noise(
+    draw: st.DrawFn,
+) -> tuple[
+    frozenset[CardId],
+    dict[CardId, SchedulingState],
+    Sitting,
+    tuple[ReviewEvent, ...],
+    tuple[ReviewEvent, ...],
+]:
+    live, states, sitting, events = draw(_sitting_scenario())
+    noise_cards = draw(
+        st.lists(
+            st.uuids().map(lambda value: CardId(value=value)),
+            min_size=0,
+            max_size=4,
+            unique=True,
+        )
+    )
+    noise = tuple(
+        _event(card_id, sitting.id, grade=Grade.GOOD) for card_id in noise_cards
+    )
+    return live, states, sitting, events, noise
+
+
+@settings(max_examples=100, deadline=30_000)
+@given(scenario=_sitting_scenario_with_noise())
+def test_partition_is_unchanged_when_events_for_cards_not_in_the_sitting_are_appended(
+    scenario: tuple[
+        frozenset[CardId],
+        dict[CardId, SchedulingState],
+        Sitting,
+        tuple[ReviewEvent, ...],
+        tuple[ReviewEvent, ...],
+    ],
+) -> None:
+    live, states, sitting, events, noise = scenario
+    baseline = partition_due(live, states, sitting, events, _AS_OF, _STAMP)
+    with_noise = partition_due(live, states, sitting, events + noise, _AS_OF, _STAMP)
+    assert baseline == with_noise
