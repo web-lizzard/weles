@@ -3,7 +3,7 @@ change_id: remember-flow-due-count
 title: Users can see how many cards are due without opening a review
 status: implementing
 created: 2026-09-10
-updated: 2026-09-10
+updated: 2026-09-11
 archived_at: null
 origin: remember-pillar
 effort_id: remember-flow
