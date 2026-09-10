@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 7
-next_step: 7.0
-next_command: /unit-test remember-flow-session-resume phase 7
+current_phase: 9
+next_step: 9.tests
+next_command: /unit-test remember-flow-session-resume phase 9
 updated: 2026-09-10
 ---
 
@@ -78,18 +78,18 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8193efe
 
 #### Automated
 
-- [ ] 7.1 Accept the resumed kind and map outstanding_count in openSitting
-- [ ] 7.2 Map outstanding_count in gradeCard
+- [x] 7.1 Accept the resumed kind and map outstanding_count in openSitting
+- [x] 7.2 Map outstanding_count in gradeCard
 
 ### Phase 8: TUI store stubs
 
 #### Automated
 
-- [ ] 8.1 Add isResumed, outstandingCount and notice to the store state
+- [x] 8.1 Add isResumed, outstandingCount and notice to the store state
 
 ### Phase 9: TUI store behaviour
 
