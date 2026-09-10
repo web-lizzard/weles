@@ -1,4 +1,5 @@
 from application.remember.dto import PresentedCardDTO
+from application.remember.ports import Clock
 from domain.remember.exceptions import CardNotReviewableError, SittingNotFoundError
 from domain.remember.ports import ReviewCatalog, ReviewEventStore, SittingRepository
 from domain.remember.value_objects import SittingId
@@ -10,10 +11,12 @@ class CurrentCardQuery:
         sittings: SittingRepository,
         events: ReviewEventStore,
         catalog: ReviewCatalog,
+        clock: Clock,
     ) -> None:
         self._sittings: SittingRepository = sittings
         self._events: ReviewEventStore = events
         self._catalog: ReviewCatalog = catalog
+        self._clock: Clock = clock
 
     async def handle(self, sitting_id: SittingId) -> PresentedCardDTO:
         """Load the sitting and return the stable next draw. Read-only.

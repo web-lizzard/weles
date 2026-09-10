@@ -1,4 +1,5 @@
 from application.remember.dto import RevealedCardDTO
+from application.remember.ports import Clock
 from domain.remember.exceptions import (
     CardNotInSittingError,
     CardNotReviewableError,
@@ -13,9 +14,11 @@ class RevealBackQuery:
         self,
         sittings: SittingRepository,
         catalog: ReviewCatalog,
+        clock: Clock,
     ) -> None:
         self._sittings: SittingRepository = sittings
         self._catalog: ReviewCatalog = catalog
+        self._clock: Clock = clock
 
     async def handle(self, sitting_id: SittingId, card_id: CardId) -> RevealedCardDTO:
         """Return front and back for a sitting member. Read-only; no UnitOfWork."""

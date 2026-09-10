@@ -107,10 +107,12 @@ class InMemoryRememberComposition:
         )
 
     def current_card(self) -> CurrentCardQuery:
-        return CurrentCardQuery(self.sittings, self.review_events, self.catalog)
+        return CurrentCardQuery(
+            self.sittings, self.review_events, self.catalog, self.clock
+        )
 
     def reveal_back(self) -> RevealBackQuery:
-        return RevealBackQuery(self.sittings, self.catalog)
+        return RevealBackQuery(self.sittings, self.catalog, self.clock)
 
     def dependency_overrides(
         self,

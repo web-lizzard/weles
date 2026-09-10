@@ -281,9 +281,12 @@ def get_grade_card_command() -> GradeCardCommand:
 
 def get_current_card_query() -> CurrentCardQuery:
     return CurrentCardQuery(
-        _remember_sittings, _remember_review_events, _remember_catalog
+        _remember_sittings,
+        _remember_review_events,
+        _remember_catalog,
+        _remember_clock,
     )
 
 
 def get_reveal_back_query() -> RevealBackQuery:
-    return RevealBackQuery(_remember_sittings, _remember_catalog)
+    return RevealBackQuery(_remember_sittings, _remember_catalog, _remember_clock)
