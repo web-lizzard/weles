@@ -39,22 +39,20 @@ acceptance scenarios and four port contract suites.
 
 **In scope:** the sitting aggregate and its two named rules, the review log, per-card memoized
 scheduling state, replay from the log, the four application flows, five in-memory adapters plus
-the real `fsrs` adapter, the HTTP surface, an acceptance layer grown to the frame's
-behaviours, and the four handler unit-test modules moved off their hand-rolled doubles.
+the real `fsrs` adapter, the HTTP surface, and an acceptance layer grown to the frame's
+behaviours.
 
 **Out of scope:** AC-10…AC-22 (resume, expiry, due count, capture prompt, rejection, source
 jump, capture entry), sitting expiry, scoped or timeboxed selection, any substitutable
 selection or completion policy, SQL/Notion adapters, a SQL-row lock for concurrent grades
-(the in-memory UoW lock is Phase 9), and the TUI.
+(the in-memory UoW lock is Phase 8), and the TUI.
 
 ## Architecture / Approach
 
 Inside out. Domain rules first (they depend on nothing), then the application flows that
 compose them, then the adapters satisfying their ports, then HTTP. The acceptance layer grows
 at the very top so the frame's behaviours are red before any body is written, and the step
-definitions move onto the real adapters at the very bottom, once those adapters exist — and
-with them the four handler unit-test modules, which today hand-roll twenty doubles between
-them.
+definitions move onto the real adapters at the very bottom, once those adapters exist.
 
 ```
 HTTP router → command/query handlers → Sitting + SittingCompletion + seeded draw
@@ -72,31 +70,21 @@ HTTP router → command/query handlers → Sitting + SittingCompletion + seeded 
 | 4. Replay | `SchedulingReplay.replay` | Event ordering must be by `reviewed_at`, not insertion |
 | 5. Open sitting | `OpenSittingCommand` | Nothing-due must write nothing at all |
 | 6. Reveal & current | `RevealBackQuery`, `CurrentCardQuery` | Presentation must survive a reread |
-| 7. Grade | `GradeCardCommand` | Guard order; event saved before memo; lock lives on the Phase 9 UoW |
-| 8. Adapter stubs | Package, three repositories, UoW, clock — signatures only | A body slipping in early makes the next phase's tests vacuous |
-| 9. Fill adapters & contracts | Snapshot/restore, shared asyncio.Lock, contract suites | Snapshot/restore must cover all three stores; lock must be composition-scoped |
-| 10. Catalog stub | `InMemoryReviewCatalog` signature | — |
-| 11. Fill catalog | `ReviewCatalog` over distill, contract suite | Discarded cards must vanish from both methods |
-| 12. FSRS dep & stub | `fsrs==6.3.2` pinned, `FsrsScheduler` signature | `uv sync` must run here or the next phase cannot import |
-| 13. Fill FSRS adapter | Grade mapping, seeded fuzz, repeatability test | Fuzz reproducibility is unproven until the library is installed |
-| 14. HTTP & compose stubs | Four route signatures, providers, router included | — |
-| 15. Fill HTTP & compose | Four routes, full wiring, route tests | `ShowingLimit` must reach only `OpenSittingCommand` |
-| 16. Migrate BDD & handler tests | Doubles retired from the step module and the four handler modules | AC-07 assertion must move from multiplier to growing interval; the stale-stamp test still needs a forced stamp |
+| 7. Grade | `GradeCardCommand` | Guard order; event saved before memo; lock lives on the Phase 8 UoW |
+| 8. Adapters & contracts | Three repositories, UoW with shared asyncio.Lock, clock, contract suites | Snapshot/restore must cover all three stores; lock must be composition-scoped |
+| 9. Catalog | `ReviewCatalog` over distill | Discarded cards must vanish from both methods |
+| 10. FSRS adapter | `fsrs==6.3.2`, grade mapping, seeded fuzz | Fuzz reproducibility is unproven until the library is installed |
+| 11. HTTP & compose | Four routes, full wiring | `ShowingLimit` must reach only `OpenSittingCommand` |
+| 12. Migrate BDD steps | Doubles retired from the step module | AC-07 assertion must move from multiplier to growing interval |
 
-**Prerequisites:** none beyond the closed frame and contracts. Phase 12 pins `fsrs` and runs
-`uv sync`; Phase 13's tests depend on it.
+**Prerequisites:** none beyond the closed frame and contracts. Phase 10 needs `uv sync` after
+the dependency is added.
 
-**Estimated effort:** large — sixteen phases, five new seams, one new runtime dependency.
-
-**Phase shape.** Domain and application phases fill bodies into signatures the closed contract
-session already wrote, so each is one phase with its own tests. That session never reached the
-adapters or HTTP, so those five units are each a stubs phase (signatures, no tests) followed by
-a behaviour phase (tests) — otherwise a phase's tests import symbols that do not exist and fail
-on collection rather than on assertions.
+**Estimated effort:** large — twelve phases, five new seams, one new runtime dependency.
 
 ## Open Risks & Assumptions
 
-- `fsrs` is not yet installed, so its fuzz behaviour is taken from `research.md:56`. Phase 13
+- `fsrs` is not yet installed, so its fuzz behaviour is taken from `research.md:56`. Phase 10
   either confirms the seeding approach or falls back to `enable_fuzzing=False` with the
   adapter's own `random.Random` fuzz.
 - Seeding the global generator assumes the scheduler port is driven from the event-loop thread.
@@ -105,7 +93,7 @@ on collection rather than on assertions.
   whole backlog. Accepted — the frame caps nothing.
 - Reaching completion is not the first-run path; a large first due set will not be exhausted.
 - Two overlapping grades of the same in-front card both pass `next_card` until the first
-  commit is visible. Phase 9 serializes that window with a shared `asyncio.Lock` on the
+  commit is visible. Phase 8 serializes that window with a shared `asyncio.Lock` on the
   in-memory UoW. A later SQL adapter maps the same window to a database lock.
 
 ## Success Criteria (Summary)

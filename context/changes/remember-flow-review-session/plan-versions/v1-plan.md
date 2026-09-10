@@ -1,7 +1,5 @@
 # Review Sitting Core Implementation Plan
 
-> Revision 1 (2026-09-10): the five unstarted adapter and delivery phases are split into stubs-then-behavior pairs, because the closed contract session shaped only domain and application — every adapter symbol was still absent when its `#### Tests` row fired, so the generated tests failed on collection rather than on assertions. The acceptance-migration phase additionally absorbs the handler unit tests. Phases 1–7 and the whole domain and application design survive untouched. Prior version: plan-versions/v1-plan.md
-
 ## Overview
 
 Deliver the first review sitting end to end: opening a session over everything due,
@@ -81,7 +79,7 @@ repeatability test.
 - Any substitutable policy for selection or completion, and any field on the sitting
   recording which policy it began under.
 - A SQL or Notion adapter for any of the five seams. In-memory only, per `InMemoryFirst`.
-- A database lock (`SELECT … FOR UPDATE` or equivalent) for concurrent grades. Phase 9's
+- A database lock (`SELECT … FOR UPDATE` or equivalent) for concurrent grades. Phase 8's
   in-memory UoW holds an `asyncio.Lock`; SQL takes the same exclusion when that adapter exists.
 - `fsrs[optimizer]`, `Scheduler.to_dict()` persistence, and the library's own `ReviewLog`.
 - Any TUI surface.
@@ -93,14 +91,6 @@ nothing), then the application flows that compose them, then the adapters that s
 their ports, then HTTP. The acceptance layer is grown first, at the very top of the plan,
 so the frame-derived behaviours are red before any body is written — and the step
 definitions are migrated onto the real adapters last, once those adapters exist.
-
-The domain and application phases fill bodies into signatures a closed `/discover-contracts`
-session already put on disk, so each is a single phase carrying its own `#### Tests` row. That
-session never reached the adapters or the HTTP surface: every symbol there is still absent, so
-those five units are each planned as a stubs phase followed by a behaviour phase. The stubs
-phase materializes modules, classes, and method signatures with `...` bodies and carries no
-`#### Tests` row; the behaviour phase that follows fills them against tests that import real
-names rather than failing on collection.
 
 Two decisions from the planning interview change what is on disk:
 
@@ -129,7 +119,7 @@ the sitting's event log, so a second grade of the same showing is refused only a
 first commit is visible. Two overlapping `handle` calls on the same in-front card both pass
 `card_id == next_card` and both append events unless the whole read-then-write window is
 serialized. `SchedulerStamp` does not close this — it marks memoized scheduler state stale
-after an algorithm or parameter bump. Phase 9's in-memory unit of work takes a shared
+after an algorithm or parameter bump. Phase 8's in-memory unit of work takes a shared
 `asyncio.Lock` on `__aenter__` and releases it on `__aexit__` (commit or rollback), covering
 open and grade because both already own that UoW window. The lock is constructed once at
 composition and passed into every UoW instance — a per-instance lock would not exclude a
@@ -183,7 +173,7 @@ sitting's grades and never from a card's next-due date.
 **Intent**: Add the steps those scenarios need, appending to the existing module.
 
 **Contract**: New `@given` / `@when` / `@then` functions only. The existing fixture and
-doubles stay as they are — Phase 16 replaces them once the real adapters exist. No new
+doubles stay as they are — Phase 12 replaces them once the real adapters exist. No new
 pytest marker: every tag reuses an `AC-nn` already registered in `pyproject.toml`.
 
 ### Success Criteria:
@@ -453,7 +443,7 @@ clock.now()` is captured once and used for both the event and the scheduler.
 `previous` is the memoized state when its stamp matches `scheduler.stamp()`, otherwise
 `SchedulingReplay.replay` over the card's prior events. One UoW saves the event first, then
 the scheduling state, then commits. The DTO carries the recomputed next front, or completion.
-The sitting-log guards are sequential, not a concurrency control. Phase 9 serializes the
+The sitting-log guards are sequential, not a concurrency control. Phase 8 serializes the
 UoW window with a shared `asyncio.Lock`; this command does not take a lock of its own.
 
 ### Success Criteria:
@@ -468,70 +458,11 @@ UoW window with a shared `asyncio.Lock`; this command does not take a lock of it
 
 ---
 
-## Phase 8: In-memory adapter stubs
+## Phase 8: In-memory adapters, unit of work, and port contracts
 
 ### Overview
 
-Materialize every symbol the three transactional seams need — modules, classes, and method
-signatures with `...` bodies — so the behaviour phase that follows can be driven by tests that
-import real names. No logic is written here.
-
-### Changes Required:
-
-#### 1. Package
-
-**File**: `backend/src/adapters/out/in_memory/remember/__init__.py`
-
-**Intent**: The remember adapter package exists alongside `capture/` and `distill/`.
-
-**Contract**: Empty module.
-
-#### 2. Repository stubs
-
-**File**: `backend/src/adapters/out/in_memory/remember/sitting_repository.py`
-
-**Contract**: `class InMemorySittingRepository` with `__init__`, `async def save(self, sitting: Sitting) -> None`,
-`async def get(self, sitting_id: SittingId) -> Sitting | None`, `def snapshot(self) -> dict[SittingId, Sitting]`,
-`def restore(self, snapshot: dict[SittingId, Sitting]) -> None`. Bodies are `...`.
-
-**File**: `backend/src/adapters/out/in_memory/remember/review_event_store.py`
-
-**Contract**: `class InMemoryReviewEventStore` with `save(event)`, `list_by_card(card_id)`,
-`list_by_sitting(sitting_id)`, `snapshot()`, `restore(snapshot)`. Bodies are `...`.
-
-**File**: `backend/src/adapters/out/in_memory/remember/scheduling_state_repository.py`
-
-**Contract**: `class InMemorySchedulingStateRepository` with `save(state)`, `get(card_id)`,
-`get_many(card_ids)`, `snapshot()`, `restore(snapshot)`. Bodies are `...`.
-
-#### 3. Unit of work and clock stubs
-
-**File**: `backend/src/adapters/out/in_memory/remember/unit_of_work.py`
-
-**Contract**: `class InMemoryUnitOfWork` taking the three repositories and an `asyncio.Lock`,
-with `__aenter__`, `__aexit__`, and `commit()`. Bodies are `...`.
-
-**File**: `backend/src/adapters/out/in_memory/remember/clock.py`
-
-**Contract**: `class SystemClock` with `def now(self) -> datetime`. Body is `...`.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run ruff check src`
-- `cd backend && uv run basedpyright src`
-- `cd backend && uv run python -c "import adapters.out.in_memory.remember.unit_of_work"`
-
-#### Manual Verification:
-- Confirm every method body in the new package is `...` — no logic landed early.
-
----
-
-## Phase 9: Fill the in-memory adapters, the unit of work, and the port contracts
-
-### Overview
-
-Give the three transactional seams real behaviour and the behavioural contract suite each port
+Give the three transactional seams real adapters and the behavioural contract suite each port
 owes, so the flows stop being proven against hand-rolled doubles.
 
 ### Changes Required:
@@ -543,21 +474,21 @@ owes, so the flows stop being proven against hand-rolled doubles.
 **Intent**: Round-trip the whole aggregate, `showing_limit` included, so a later env change
 cannot retcon an open sitting.
 
-**Contract**: `save(sitting)` stores by id; `get(sitting_id)` returns `None` when absent;
-`snapshot()` / `restore()` copy the store shallowly, as the aggregate is frozen.
+**Contract**: `save(sitting)`, `get(sitting_id)`, plus `snapshot()` / `restore()` for the UoW.
 
 **File**: `backend/src/adapters/out/in_memory/remember/review_event_store.py`
 
 **Intent**: The log answers by card for replay and by sitting for the sitting's own reads.
 
-**Contract**: `list_by_card(card_id)` and `list_by_sitting(sitting_id)` both return
-chronological order by `reviewed_at`.
+**Contract**: `save(event)`, `list_by_card(card_id)` and `list_by_sitting(sitting_id)` both
+chronological by `reviewed_at`, plus `snapshot()` / `restore()`.
 
 **File**: `backend/src/adapters/out/in_memory/remember/scheduling_state_repository.py`
 
 **Intent**: Memoized state keyed by card, with the batch read the open path needs.
 
-**Contract**: `get_many(card_ids)` returns only the ids it holds — never a `None` placeholder.
+**Contract**: `save(state)`, `get(card_id)`, `get_many(card_ids)` returning only the ids it
+holds, plus `snapshot()` / `restore()`.
 
 #### 2. Unit of work and clock
 
@@ -589,14 +520,6 @@ stops two overlapping `GradeCardCommand.handle` calls from both seeing the same 
 **Contract**: `_IMPLEMENTATIONS: list[Callable[[], Port]]` with `ids=["in_memory"]`, per
 `context/foundation/rules/contract-testing.md`.
 
-**File**: `backend/tests/unit/remember/test_unit_of_work.py`
-
-**Intent**: The rollback and the mutual exclusion are behaviour, not wiring.
-
-**Contract**: An exception inside the window leaves all three repositories at their entry
-state; a committed window keeps its writes; a second `__aenter__` does not return until the
-first `__aexit__` has released the shared lock.
-
 ### Success Criteria:
 
 #### Automated Verification:
@@ -611,35 +534,7 @@ first `__aexit__` has released the shared lock.
 
 ---
 
-## Phase 10: Review catalog stub
-
-### Overview
-
-Put the catalog's symbol on disk so its contract suite can import it before it does anything.
-
-### Changes Required:
-
-#### 1. Catalog stub
-
-**File**: `backend/src/adapters/out/in_memory/remember/review_catalog.py`
-
-**Contract**: `class InMemoryReviewCatalog` taking `note_repository` and `card_repository`, with
-`async def list_reviewable(self) -> Sequence[ReviewableCard]` and
-`async def get_reviewable(self, card_id: CardId) -> ReviewableCard | None`. Bodies are `...`.
-The port takes no scope argument.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run ruff check src && uv run basedpyright src`
-- `cd backend && uv run python -c "import adapters.out.in_memory.remember.review_catalog"`
-
-#### Manual Verification:
-- Confirm both method bodies are `...`.
-
----
-
-## Phase 11: Fill the catalog and its contract suite
+## Phase 9: The catalog onto distill
 
 ### Overview
 
@@ -655,11 +550,12 @@ learning anything about distill's model.
 **Intent**: The one place a distill card becomes a remember card; a discarded card simply is
 not offered.
 
-**Contract**: `list_reviewable()` walks `NoteRepository.list_all()` then
+**Contract**: `InMemoryReviewCatalog(note_repository, card_repository)` implements
+`ReviewCatalog`. `list_reviewable()` walks `NoteRepository.list_all()` then
 `CardRepository.list_by_note`, keeps `card.discard is None`, and maps each to
 `ReviewableCard(id=CardId(value=card.id.value), front=..., back=...)` — remember's own
 `CardId`, never distill's type. `get_reviewable(card_id)` returns `None` for an unknown or
-discarded card.
+discarded card. The port takes no scope argument.
 
 #### 2. Contract suite
 
@@ -681,12 +577,12 @@ discarded card.
 
 ---
 
-## Phase 12: FSRS dependency and scheduler stub
+## Phase 10: The FSRS scheduler adapter
 
 ### Overview
 
-Pin the scheduling library and put the adapter's symbol on disk, so the behaviour phase can be
-driven by a repeatability test that imports a real name.
+Put the only code that knows the scheduling library's vocabulary behind the scheduling port,
+and make its fuzz reproducible from each event's own recorded facts.
 
 ### Changes Required:
 
@@ -696,46 +592,16 @@ driven by a repeatability test that imports a real name.
 
 **Intent**: Pin the library, because a bump is what invalidates memoized state.
 
-**Contract**: `"fsrs==6.3.2"` added to `[project] dependencies`, then `uv sync`.
+**Contract**: `"fsrs==6.3.2"` added to `[project] dependencies`.
 
-#### 2. Adapter stub
-
-**File**: `backend/src/adapters/out/fsrs/__init__.py`, `backend/src/adapters/out/fsrs/scheduler.py`
-
-**Contract**: `class FsrsScheduler` implementing `Scheduler`, with
-`def stamp(self) -> SchedulerStamp` and
-`def review(self, previous: SchedulingState | None, card_id: CardId, grade: Grade, reviewed_at: datetime) -> SchedulingState`.
-Bodies are `...`.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv sync`
-- `cd backend && uv run ruff check src && uv run basedpyright src`
-- `cd backend && uv run python -c "import fsrs; import adapters.out.fsrs.scheduler"`
-
-#### Manual Verification:
-- Confirm `uv.lock` records `fsrs==6.3.2` and both method bodies are `...`.
-
----
-
-## Phase 13: Fill the FSRS scheduler and prove repeatability
-
-### Overview
-
-Put the only code that knows the scheduling library's vocabulary behind the scheduling port,
-and make its fuzz reproducible from each event's own recorded facts.
-
-### Changes Required:
-
-#### 1. Adapter
+#### 2. Adapter
 
 **File**: `backend/src/adapters/out/fsrs/scheduler.py`
 
 **Intent**: Wrap `fsrs` so the domain holds an indexable `due_at` and an opaque blob it never
 interprets.
 
-**Contract**: `stamp()` returns
+**Contract**: `FsrsScheduler` implements `Scheduler`. `stamp()` returns
 `SchedulerStamp(algorithm=SchedulerAlgorithm.FSRS, parameter_version="fsrs-6.3.2-defaults")`.
 `review(previous, card_id, grade, reviewed_at)` builds `fsrs.Card()` on a first review or
 `fsrs.Card.from_dict(previous.scheduler_state.payload)` otherwise, maps
@@ -757,7 +623,7 @@ finally:
 The region holds no `await`, so it is atomic against the event loop; a comment must record
 that this assumes the port is driven from the loop thread.
 
-#### 2. Repeatability test
+#### 3. Repeatability test
 
 **File**: `backend/tests/unit/remember/test_fsrs_scheduler.py`
 
@@ -770,6 +636,7 @@ fuzzed.
 ### Success Criteria:
 
 #### Automated Verification:
+- `cd backend && uv sync`
 - `cd backend && uv run pytest tests/unit/remember -v`
 - `cd backend && uv run pytest tests/bdd -m "remember-flow and AC-07" -v`
 
@@ -779,50 +646,7 @@ fuzzed.
 
 ---
 
-## Phase 14: HTTP and composition stubs
-
-### Overview
-
-Put the router, its four handlers, and every composition provider on disk as signatures, so the
-route tests of the next phase import real names rather than failing on collection.
-
-### Changes Required:
-
-#### 1. Router stub
-
-**File**: `backend/src/adapters/http/remember.py`
-
-**Contract**: `router = APIRouter()` plus four `async def` handlers carrying their final
-decorators, paths, response models, and `Depends(...)` parameters, with `...` bodies:
-`POST /review-sittings`, `GET /review-sittings/{sitting_id}/current-card`,
-`GET /review-sittings/{sitting_id}/cards/{card_id}/back`,
-`POST /review-sittings/{sitting_id}/cards/{card_id}/grade`.
-
-#### 2. Composition stubs
-
-**File**: `backend/src/adapters/compose.py`
-
-**Contract**: `get_open_sitting_command`, `get_grade_card_command`, `get_current_card_query`,
-`get_reveal_back_query`, and `_remember_unit_of_work` declared with their return annotations
-and `...` bodies. No singleton is constructed yet.
-
-**File**: `backend/src/main.py`
-
-**Contract**: `app.include_router(remember_router)`.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run ruff check src && uv run basedpyright src`
-- `cd backend && uv run python -c "from adapters.http.remember import router"`
-
-#### Manual Verification:
-- `cd backend && uv run fastapi dev src/main.py` and confirm the four routes appear in
-  `/docs` — bodies still `...`.
-
----
-
-## Phase 15: Fill the HTTP surface and composition
+## Phase 11: HTTP surface and composition
 
 ### Overview
 
@@ -841,10 +665,10 @@ reread for a request that carries only a sitting id.
 **Contract**: `POST /review-sittings` → `SittingOpenedDTO | NothingDueDTO`;
 `GET /review-sittings/{sitting_id}/current-card` → `PresentedCardDTO`;
 `GET /review-sittings/{sitting_id}/cards/{card_id}/back` → `RevealedCardDTO`;
-`POST /review-sittings/{sitting_id}/cards/{card_id}/grade` → `GradeAppliedDTO`. Handlers take
-their handler through `Depends(...)` off `adapters.compose`, and return the application DTO
-unmapped. No exception is caught here — `core_exception_handler` already maps every remember
-code.
+`POST /review-sittings/{sitting_id}/cards/{card_id}/grade` → `GradeAppliedDTO`. Handlers are
+`async def`, take their handler through `Depends(...)` off `adapters.compose`, and return the
+application DTO unmapped. No exception is caught here — `core_exception_handler` already maps
+every remember code.
 
 #### 2. Composition
 
@@ -853,10 +677,17 @@ code.
 **Intent**: One place binds settings and adapters; no handler reads the environment.
 
 **Contract**: Module-level singletons for the three repositories, the catalog over the
-existing distill repositories, `FsrsScheduler`, `SystemClock`, and one shared `asyncio.Lock`;
-`_remember_unit_of_work()` mirrors `_distill_unit_of_work()` and passes that lock.
+existing distill repositories, `FsrsScheduler`, and `SystemClock`; a `_remember_unit_of_work()`
+factory mirroring `_distill_unit_of_work()`; and `get_open_sitting_command`,
+`get_grade_card_command`, `get_current_card_query`, `get_reveal_back_query` providers.
 `ShowingLimit(value=_settings.sitting_max_showings)` is built once and injected into
 `OpenSittingCommand` only.
+
+**File**: `backend/src/main.py`
+
+**Intent**: The router is reachable.
+
+**Contract**: `app.include_router(remember_router)`.
 
 #### 3. Route tests
 
@@ -881,14 +712,12 @@ unknown sitting and 409 on grading a card that is not in front.
 
 ---
 
-## Phase 16: Migrate the acceptance steps and the handler unit tests onto the real adapters
+## Phase 12: Migrate the acceptance steps onto the real adapters
 
 ### Overview
 
-Retire the doubles now that every port has a real in-memory implementation — in the acceptance
-step module and in the four handler unit-test modules alike — so both layers prove the
-behaviour that actually ships. This phase's deliverable is tests, so it does not go through
-`/unit-test`.
+Retire the doubles inside the step module now that every port has a real in-memory
+implementation, so the scenarios prove the behaviour that actually ships.
 
 ### Changes Required:
 
@@ -896,12 +725,12 @@ behaviour that actually ships. This phase's deliverable is tests, so it does not
 
 **File**: `backend/tests/integration/support/in_memory_remember.py`
 
-**Intent**: One composition reused by acceptance, integration, and unit suites, as capture and
-distill already do.
+**Intent**: One composition reused by acceptance and integration suites, as capture and distill
+already do.
 
 **Contract**: `InMemoryRememberComposition.create()` returns the three repositories, the
-catalog over an in-memory distill pair, `FsrsScheduler`, a fixed clock, the UoW factory over a
-shared lock, and the four handlers, plus `dependency_overrides()`.
+catalog over an in-memory distill pair, `FsrsScheduler`, a fixed clock, the UoW factory, and
+the four handlers, plus `dependency_overrides()`.
 
 #### 2. Step module
 
@@ -916,46 +745,6 @@ state the real clock cannot reach on demand. `_FakeScheduler` is removed; the sc
 `FsrsScheduler`, and the AC-07 step asserts a growing interval rather than a multiplier. Step
 names and Gherkin text are unchanged.
 
-#### 3. Shared handler fixtures
-
-**File**: `backend/tests/unit/remember/conftest.py`
-
-**Intent**: The four handler modules hand-roll twenty double classes between them — one setup
-belongs in one place.
-
-**Contract**: Fixtures building `InMemoryRememberComposition` and each of the four handlers
-over it, plus the `ReviewableCard` and `SchedulingState` builders currently duplicated as
-module-level `_card_id`, `_reviewable`, `_open_sitting`, `_stamp`, `_state` helpers.
-
-#### 4. Handler unit tests onto the real adapters
-
-**File**: `backend/tests/unit/remember/test_open_sitting_command.py`,
-`test_grade_card_command.py`, `test_current_card_query.py`, `test_reveal_back_query.py`
-
-**Intent**: A handler test that passes against a double it also wrote proves the double.
-
-**Contract**: `_Catalog`, `_SittingRepository`, `_ReviewEventStore`,
-`_SchedulingStateRepository` and `_UnitOfWork` are removed in favour of the conftest fixtures.
-`_Scheduler` and `_RecordingScheduler` give way to `FsrsScheduler` **except** where a test must
-force a value the real adapter cannot produce on demand — the stale-stamp path of phase 7
-needs a stamp that deliberately mismatches `FsrsScheduler.stamp()`, and a failure path needs a
-raising scheduler. Those two cases keep a narrow double, named for what it forces. `_Clock`
-stays for the same reason `_FixedClock` does. Test names and assertions are unchanged except
-where a real scheduler makes a multiplier assertion meaningless, which becomes a growing
-interval as in AC-07.
-
-#### 5. Unit-of-work boundary assertions
-
-**File**: `backend/tests/unit/remember/test_grade_card_command.py`,
-`test_open_sitting_command.py`
-
-**Intent**: The doubles never enforced the commit boundary, so nothing today would catch a
-handler that commits twice or leaks a write past an exception.
-
-**Contract**: Each command asserts it commits exactly once on the happy path, and that a
-raising collaborator leaves all three repositories at their pre-`handle` state. The queries
-take no UoW and assert nothing here, per `context/foundation/rules/cqrs-lite.md`.
-
 ### Success Criteria:
 
 #### Automated Verification:
@@ -966,11 +755,8 @@ take no UoW and assert nothing here, per `context/foundation/rules/cqrs-lite.md`
 #### Manual Verification:
 - `cd backend && grep -n "_Fake\|_InMemory" tests/bdd/steps/remember_review.py` and confirm only
   `_FixedClock` remains.
-- `cd backend && grep -rn "^class _" tests/unit/remember/*.py` and confirm only the doubles that
-  force a value `FsrsScheduler` cannot produce survive, each named for what it forces.
 
 ---
-
 
 ## Testing Strategy
 
@@ -1001,8 +787,8 @@ history, and replay runs only when a stamp mismatches.
 ## Migration Notes
 
 No data migration: nothing persists yet. `card_is_due` gains a required third parameter, which
-touches only `OpenSittingCommand` and its tests. `fsrs==6.3.2` is a new runtime dependency,
-pinned in Phase 12; `uv sync` must run there before Phase 13's tests will pass.
+touches only `OpenSittingCommand` and its tests. `fsrs==6.3.2` is a new runtime dependency and
+requires `uv sync` before Phase 10's tests will run.
 
 ## References
 
