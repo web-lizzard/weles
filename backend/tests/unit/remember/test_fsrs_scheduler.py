@@ -1,5 +1,10 @@
+import json
+import os
 import random
+import subprocess
+import sys
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 from adapters.out.fsrs.scheduler import FsrsScheduler
@@ -53,6 +58,67 @@ def _review_sequentially(
         )
     assert previous is not None
     return previous
+
+
+_SRC = Path(__file__).parents[3] / "src"
+
+_REPLAY_PROBE = """
+import json
+import sys
+from datetime import datetime
+
+from adapters.out.fsrs.scheduler import FsrsScheduler
+from domain.remember.ports import SchedulingReplay
+from domain.remember.review_event import ReviewEvent
+from domain.remember.value_objects import CardId, Grade, SittingId
+
+log = json.load(sys.stdin)
+card_id = CardId(value=log["card_id"])
+events = tuple(
+    ReviewEvent(
+        card_id=card_id,
+        reviewed_at=datetime.fromisoformat(event["reviewed_at"]),
+        grade=Grade(event["grade"]),
+        sitting_id=SittingId(value=event["sitting_id"]),
+    )
+    for event in log["events"]
+)
+state = SchedulingReplay(FsrsScheduler()).replay(card_id, events)
+assert state is not None
+sys.stdout.write(state.due_at.isoformat())
+"""
+
+
+def _replayed_due_at_in_a_fresh_interpreter(
+    card_id: CardId, events: tuple[ReviewEvent, ...], *, hash_seed: str
+) -> str:
+    """Replay the log in a separate interpreter under a chosen hash salt.
+
+    A seed derived with hash() over str survives only inside one process,
+    so this is the only place the difference is observable.
+    """
+    payload = json.dumps(
+        {
+            "card_id": str(card_id.value),
+            "events": [
+                {
+                    "reviewed_at": event.reviewed_at.isoformat(),
+                    "grade": event.grade.value,
+                    "sitting_id": str(event.sitting_id.value),
+                }
+                for event in events
+            ],
+        }
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", _REPLAY_PROBE],
+        input=payload,
+        capture_output=True,
+        text=True,
+        check=True,
+        env={**os.environ, "PYTHONHASHSEED": hash_seed, "PYTHONPATH": str(_SRC)},
+    )
+    return completed.stdout
 
 
 def test_stamp_names_the_fsrs_algorithm_and_the_pinned_parameter_version() -> None:
@@ -131,3 +197,17 @@ def test_review_leaves_the_global_random_generator_state_untouched() -> None:
 
     assert state.due_at > reviewed_at
     assert random.getstate() == before
+
+
+def test_replay_reproduces_the_due_at_in_a_later_process_under_a_different_salt() -> (
+    None
+):
+    card_id = _card_id()
+    events = _growing_log(card_id, datetime(2026, 1, 1, tzinfo=UTC))
+
+    live = _review_sequentially(FsrsScheduler(), card_id, events)
+    first = _replayed_due_at_in_a_fresh_interpreter(card_id, events, hash_seed="1")
+    second = _replayed_due_at_in_a_fresh_interpreter(card_id, events, hash_seed="2")
+
+    assert first == live.due_at.isoformat()
+    assert second == first
