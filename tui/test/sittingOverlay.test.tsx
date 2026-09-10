@@ -1,0 +1,196 @@
+import { render } from "ink-testing-library";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { gradeCard, openSitting, revealBack } from "../src/api/sittings";
+import SittingOverlay from "../src/screens/SittingOverlay";
+import { useSittingStore } from "../src/store/sitting";
+
+const DOWN_ARROW = "\x1B[B";
+const ENTER = "\r";
+
+async function pressKey(
+  stdin: { write: (data: string) => void },
+  key: string,
+): Promise<void> {
+  stdin.write(key);
+  await vi.advanceTimersByTimeAsync(30);
+}
+
+vi.mock("../src/api/sittings", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/api/sittings")>();
+  return {
+    ...actual,
+    openSitting: vi.fn(),
+    revealBack: vi.fn(),
+    gradeCard: vi.fn(),
+  };
+});
+
+const sittingId = "00000000-0000-4000-8000-000000000001";
+const cardId = "00000000-0000-4000-8000-000000000101";
+const nextCardId = "00000000-0000-4000-8000-000000000102";
+
+function resetStore() {
+  useSittingStore.setState({
+    phase: "opening",
+    sittingId: null,
+    cardId: null,
+    front: null,
+    back: null,
+    isBackVisible: false,
+    selectedGradeIndex: 0,
+    isSubmitting: false,
+    error: null,
+    lastAction: null,
+  });
+}
+
+describe("SittingOverlay", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    resetStore();
+    vi.mocked(openSitting).mockReset();
+    vi.mocked(revealBack).mockReset();
+    vi.mocked(gradeCard).mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("calls openSitting on mount and shows a loading indicator until the card front appears", async () => {
+    let resolveOpen!: (value: Awaited<ReturnType<typeof openSitting>>) => void;
+    vi.mocked(openSitting).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveOpen = resolve;
+        }),
+    );
+
+    const { lastFrame } = render(<SittingOverlay />);
+
+    expect(openSitting).toHaveBeenCalledTimes(1);
+    expect(lastFrame()).toContain("Loading");
+
+    resolveOpen({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "What is a SYN?",
+      sittingComplete: false,
+    });
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toContain("What is a SYN?");
+  });
+
+  it("shows the card back after t is pressed and hides it when t is pressed again", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(revealBack).toHaveBeenCalledWith(sittingId, cardId);
+    expect(lastFrame()).toContain("Back line");
+
+    await pressKey(stdin, "t");
+    expect(lastFrame()).not.toContain("Back line");
+    expect(lastFrame()).toContain("Front line");
+  });
+
+  it("submits good when 3 is pressed while only the front is visible", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+    });
+    vi.mocked(gradeCard).mockResolvedValue({
+      sittingId,
+      sittingComplete: true,
+      nextCardId: null,
+      nextFront: null,
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "3");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(gradeCard).toHaveBeenCalledWith(sittingId, cardId, "good");
+  });
+
+  it("still submits a grade when the back is showing", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(gradeCard).mockResolvedValue({
+      sittingId,
+      sittingComplete: true,
+      nextCardId: null,
+      nextFront: null,
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "2");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(gradeCard).toHaveBeenCalledWith(sittingId, cardId, "hard");
+  });
+
+  it("moves the highlighted grade with arrows, submits on Enter, and shows the next card front", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "First front",
+      sittingComplete: false,
+    });
+    vi.mocked(gradeCard).mockResolvedValue({
+      sittingId,
+      sittingComplete: false,
+      nextCardId,
+      nextFront: "Second front",
+    });
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, DOWN_ARROW);
+    await pressKey(stdin, DOWN_ARROW);
+    await pressKey(stdin, ENTER);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(gradeCard).toHaveBeenCalledWith(sittingId, cardId, "good");
+    expect(lastFrame()).toContain("Second front");
+  });
+});
