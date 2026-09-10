@@ -197,9 +197,9 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 14.1 Write the four review-sitting route signatures with `...` bodies
-- [x] 14.2 Declare the four remember providers and the UoW factory in compose.py
-- [x] 14.3 Include the remember router in main.py
+- [x] 14.1 Write the four review-sitting route signatures with `...` bodies — 6709cf2
+- [x] 14.2 Declare the four remember providers and the UoW factory in compose.py — 6709cf2
+- [x] 14.3 Include the remember router in main.py — 6709cf2
 
 #### Manual
 
