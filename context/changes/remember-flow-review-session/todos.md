@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 8
-next_step: 8.1
-next_command: /implement remember-flow-review-session phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /unit-test remember-flow-review-session phase 9
 updated: 2026-09-10
 ---
 
@@ -112,13 +112,13 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 8.1 Create the remember in-memory adapter package
-- [ ] 8.2 Write the three repository classes as signatures with `...` bodies
-- [ ] 8.3 Write the unit of work and system clock as signatures with `...` bodies
+- [x] 8.1 Create the remember in-memory adapter package
+- [x] 8.2 Write the three repository classes as signatures with `...` bodies
+- [x] 8.3 Write the unit of work and system clock as signatures with `...` bodies
 
 #### Manual
 
-- [ ] 8.4 Confirm every method body in the new package is still `...`
+- [x] 8.4 Confirm every method body in the new package is still `...`
 
 ### Phase 9: Fill the in-memory adapters, the unit of work, and the port contracts
 
