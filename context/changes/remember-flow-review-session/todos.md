@@ -236,7 +236,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [x] 15.5 R4-F2 The whole-suite gate `uv run pytest` exits non-zero at phase 15
+- [x] 15.5 R4-F2 The whole-suite gate `uv run pytest` exits non-zero at phase 15 — b4ceab0
 
 ### Phase 16: Migrate the acceptance steps and the handler unit tests onto the real adapters
 
