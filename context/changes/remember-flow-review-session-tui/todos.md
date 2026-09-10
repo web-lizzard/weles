@@ -89,7 +89,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [ ] 7.3 R2-F6 Private render helpers declared before the public default export
+- [x] 7.3 R2-F6 Private render helpers declared before the public default export — 4ebca7a
 
 ### Phase 8: Wire `/remember` into the app shell
 
