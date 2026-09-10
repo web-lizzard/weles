@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 1
-next_step: 1.4
-next_command: /implement remember-flow-review-session phase 1
+current_phase: 15
+next_step: 15.4
+next_command: /implement remember-flow-review-session phase 15
 updated: 2026-09-10
 ---
 
@@ -104,7 +104,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [ ] 6.4 R4-F4 CurrentCardQuery raises instead of reporting sitting_complete on the DTO (proof: cb66884)
+- [x] 6.4 R4-F4 CurrentCardQuery raises instead of reporting sitting_complete on the DTO (proof: cb66884)
 
 ### Phase 7: Application — grading a card
 
@@ -124,7 +124,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [ ] 7.5 R4-F5 The grade write saves event and scheduling state concurrently, not in order
+- [ ] 7.5 R4-F5 The grade write saves event and scheduling state concurrently, not in order — DISMISSED: the TaskGroup concurrency is a deliberate decision, not a defect
 
 ### Phase 8: In-memory adapter stubs
 
