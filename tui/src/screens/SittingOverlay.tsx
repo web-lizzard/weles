@@ -12,7 +12,7 @@ function renderOpening(): JSX.Element {
 }
 
 function renderNothingDue(): JSX.Element {
-  return <Text>nothing_due</Text>;
+  return <Text>Nothing due for review.</Text>;
 }
 
 function renderPresented(
@@ -40,11 +40,16 @@ function renderPresented(
 }
 
 function renderComplete(): JSX.Element {
-  return <Text>complete</Text>;
+  return <Text>Sitting complete</Text>;
 }
 
-function renderError(): JSX.Element {
-  return <Text>error</Text>;
+function renderError(error: { code: string; detail: string }): JSX.Element {
+  return (
+    <Box flexDirection="column" gap={1}>
+      <Text color="red">{error.detail}</Text>
+      <Text>Press r to retry.</Text>
+    </Box>
+  );
 }
 
 export default function SittingOverlay(): JSX.Element {
@@ -57,12 +62,21 @@ export default function SittingOverlay(): JSX.Element {
   const toggleBack = useSittingStore((s) => s.toggleBack);
   const moveSelection = useSittingStore((s) => s.moveSelection);
   const submitGrade = useSittingStore((s) => s.submitGrade);
+  const error = useSittingStore((s) => s.error);
+  const retry = useSittingStore((s) => s.retry);
 
   useEffect(() => {
     void open();
   }, [open]);
 
   useInput((input, key) => {
+    if (phase === "error") {
+      if (input === "r") {
+        void retry();
+      }
+      return;
+    }
+
     if (phase !== "presented") {
       return;
     }
@@ -108,7 +122,12 @@ export default function SittingOverlay(): JSX.Element {
       body = renderComplete();
       break;
     case "error":
-      body = renderError();
+      body =
+        error !== null ? (
+          renderError(error)
+        ) : (
+          <Text color="red">Unknown error</Text>
+        );
       break;
   }
 
