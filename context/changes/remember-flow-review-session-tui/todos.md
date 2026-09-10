@@ -56,8 +56,8 @@ updated: 2026-09-10
 
 #### Triage
 
-- [ ] 4.2 R2-F4 submitGrade has no re-entrancy guard (proof: 48ebc3f)
-- [ ] 4.3 R2-F7 toggleBack has no re-entrancy guard on the first reveal (proof: 48ebc3f)
+- [x] 4.2 R2-F4 submitGrade has no re-entrancy guard (proof: 48ebc3f) — 1754a81
+- [x] 4.3 R2-F7 toggleBack has no re-entrancy guard on the first reveal (proof: 48ebc3f) — 1754a81
 
 ### Phase 5: Sitting overlay stubs
 
