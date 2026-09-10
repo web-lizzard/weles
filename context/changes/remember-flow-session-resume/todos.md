@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 3
-next_step: 3.3
-next_command: /implement remember-flow-session-resume phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement remember-flow-session-resume phase 4
 updated: 2026-09-10
 ---
 
@@ -39,7 +39,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 3.3 Confirm two consecutive opens return the same sitting marked resumed
+- [x] 3.3 Confirm two consecutive opens return the same sitting marked resumed — 955cfc0
 
 ### Phase 4: Expiry stubs
 
