@@ -68,7 +68,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 6.1 Add ResumedSitting, SITTING_EXPIRED and outstandingCount to the client types
+- [x] 6.1 Add ResumedSitting, SITTING_EXPIRED and outstandingCount to the client types — 8c05a5e
 
 #### Manual
 
