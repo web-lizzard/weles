@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-due-count
 title: Users can see how many cards are due without opening a review
-status: preparing
+status: planned
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null
