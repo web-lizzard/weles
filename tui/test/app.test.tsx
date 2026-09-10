@@ -9,10 +9,19 @@ import {
   startCaptureSession,
 } from "../src/api/stream";
 import App from "../src/app";
+import { useDuePolling } from "../src/hooks/useDuePolling";
 import { useChatStore } from "../src/store/chat";
+import { useDueStore } from "../src/store/due";
 import { useAppStore } from "../src/store/index";
 import { useNotesStore } from "../src/store/notes";
 import { useSittingStore } from "../src/store/sitting";
+
+const DUE_PARTITION = {
+  total: 4,
+  notYetSeen: 4,
+  seenStillOwed: 0,
+  ripeOutsideSitting: 0,
+};
 
 const DOWN_ARROW = "\x1B[B";
 const ENTER = "\r";
@@ -46,6 +55,10 @@ vi.mock("../src/api/stream", async (importOriginal) => {
 
 vi.mock("../src/hooks/useNotesPolling", () => ({
   useNotesPolling: vi.fn(),
+}));
+
+vi.mock("../src/hooks/useDuePolling", () => ({
+  useDuePolling: vi.fn(),
 }));
 
 vi.mock("../src/api/notes", async (importOriginal) => {
@@ -133,6 +146,8 @@ describe("App", () => {
       error: null,
       lastAction: null,
     });
+    useDueStore.setState({ partition: null, isStale: false });
+    vi.mocked(useDuePolling).mockReset();
     vi.mocked(startCaptureSession).mockResolvedValue({ sessionId: "sess-1" });
     vi.mocked(sendMessage).mockReset();
     vi.mocked(approveNote).mockReset();
@@ -312,6 +327,70 @@ describe("App", () => {
       stdin.write("\x1B");
       await waitFor(() => !useAppStore.getState().isNotesOverlayOpen);
       expect(useChatStore.getState()).toEqual(chatBeforeEsc);
+    });
+  });
+
+  describe("due count shell row", () => {
+    it("starts due polling at fifteen seconds when the shell mounts", () => {
+      render(<App />);
+
+      expect(useDuePolling).toHaveBeenCalledWith(15_000);
+    });
+
+    it("shows no due-count line while the partition is still null", () => {
+      const { lastFrame } = render(<App />);
+
+      expect(lastFrame() ?? "").not.toMatch(/\d+ cards due/);
+    });
+
+    it("shows the partition total in a header row above the capture screen", () => {
+      useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
+
+      const { lastFrame } = render(<App />);
+      const frame = lastFrame() ?? "";
+
+      expect(frame).toContain("4 cards due");
+      expect(frame.indexOf("4 cards due")).toBeLessThan(frame.indexOf("Weles"));
+    });
+
+    it("keeps the due-count row visible above the notes overlay", async () => {
+      useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/notes");
+      await waitFor(() => useAppStore.getState().isNotesOverlayOpen);
+
+      const frame = lastFrame() ?? "";
+      const dueIndex = frame.indexOf("4 cards due");
+      const escIndex = frame.indexOf("← ESC to go back");
+
+      expect(dueIndex).toBeGreaterThanOrEqual(0);
+      expect(escIndex).toBeGreaterThan(dueIndex);
+    });
+
+    it("keeps the due-count row visible above the sitting overlay", async () => {
+      useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
+      vi.mocked(openSitting).mockResolvedValue({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "What is a SYN?",
+        sittingComplete: false,
+        outstandingCount: 0,
+      });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
+
+      const frame = lastFrame() ?? "";
+      const dueIndex = frame.indexOf("4 cards due");
+      const cardIndex = frame.indexOf("What is a SYN?");
+
+      expect(dueIndex).toBeGreaterThanOrEqual(0);
+      expect(cardIndex).toBeGreaterThan(dueIndex);
     });
   });
 
