@@ -30,7 +30,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 3.1 Write `store/sitting.ts` state and action signatures
+- [x] 3.1 Write `store/sitting.ts` state and action signatures — 00ed6c3
 
 ### Phase 4: Sitting store behaviour
 
