@@ -1,4 +1,5 @@
 import { client } from "./client.js";
+import { type DuePartition, toDuePartition } from "./due.js";
 
 export const SITTING_EXPIRED = "sitting_expired";
 
@@ -10,6 +11,7 @@ type PresentedSittingFields = {
   front: string | null;
   sittingComplete: boolean;
   outstandingCount: number;
+  due?: DuePartition;
 };
 
 export type OpenedSitting = PresentedSittingFields & {
@@ -35,6 +37,7 @@ export type GradeApplied = {
   outstandingCount: number;
   nextCardId: string | null;
   nextFront: string | null;
+  due?: DuePartition;
 };
 
 export class SittingHttpError extends Error {
@@ -75,6 +78,7 @@ export async function openSitting(): Promise<
     front,
     sittingComplete: sitting_complete,
     outstandingCount: outstanding_count,
+    ...(data.due != null ? { due: toDuePartition(data.due) } : {}),
   };
 
   if (data.kind === "resumed") {
@@ -126,6 +130,7 @@ export async function gradeCard(
     outstandingCount: data.outstanding_count,
     nextCardId: data.next_card_id,
     nextFront: data.next_front,
+    ...(data.due != null ? { due: toDuePartition(data.due) } : {}),
   };
 }
 
