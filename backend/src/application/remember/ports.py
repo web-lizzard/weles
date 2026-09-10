@@ -10,7 +10,7 @@ from domain.remember.ports import (
 
 class Clock(Protocol):
     def now(self) -> datetime:
-        """Timezone-aware UTC. The only source of reviewed_at and opened_at."""
+        """Timezone-aware UTC. opened_at, reviewed_at, and horizon as_of."""
         ...
 
 

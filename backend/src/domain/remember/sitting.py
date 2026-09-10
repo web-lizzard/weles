@@ -9,7 +9,9 @@ from domain.remember.exceptions import EmptySittingError
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import (
     FINISHING_GRADES,
+    MIN_RESUME_HORIZON,
     CardId,
+    ResumeHorizon,
     ShowingLimit,
     SittingId,
 )
@@ -21,6 +23,8 @@ class Sitting(BaseModel, frozen=True):
     opened_at: datetime
     showing_limit: ShowingLimit
     """Snapshotted at open. Repository round-trips it; later commands never read env."""
+    resume_horizon: ResumeHorizon = ResumeHorizon(value=MIN_RESUME_HORIZON)
+    """Snapshotted at open. Same reason as showing_limit: the sitting outlives env."""
 
     @model_validator(mode="after")
     def _validate_intent(self) -> "Sitting":
@@ -35,12 +39,14 @@ class Sitting(BaseModel, frozen=True):
         card_ids: frozenset[CardId],
         opened_at: datetime,
         showing_limit: ShowingLimit,
+        resume_horizon: ResumeHorizon | None = None,
     ) -> "Sitting":
         return cls(
             id=SittingId.new(),
             card_ids=card_ids,
             opened_at=opened_at,
             showing_limit=showing_limit,
+            resume_horizon=resume_horizon or ResumeHorizon(value=MIN_RESUME_HORIZON),
         )
 
     def contains(self, card_id: CardId) -> bool:
@@ -72,6 +78,26 @@ class Sitting(BaseModel, frozen=True):
         return all(
             self._card_is_finished(card_id, sitting_events) for card_id in present
         )
+
+    def outstanding(
+        self,
+        present: frozenset[CardId],
+        events: Sequence[ReviewEvent],
+    ) -> frozenset[CardId]:
+        """Present members not yet finished under this sitting's showing_limit.
+
+        Size is the remaining count. Lowest-grade cards stay in the set.
+        """
+        sitting_events = self._sitting_events(events)
+        return frozenset(
+            card_id
+            for card_id in present
+            if not self._card_is_finished(card_id, sitting_events)
+        )
+
+    def is_offered(self, as_of: datetime) -> bool:
+        """True iff as_of < opened_at + resume_horizon.value. Finish is not this."""
+        return as_of < self.opened_at + self.resume_horizon.value
 
     def _eligible_pool(
         self,

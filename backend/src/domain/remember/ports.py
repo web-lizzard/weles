@@ -25,10 +25,18 @@ class ReviewCatalog(Protocol):
 
 class SittingRepository(Protocol):
     async def save(self, sitting: Sitting) -> None:
-        """Whole aggregate, including showing_limit."""
+        """Whole aggregate, including showing_limit and resume_horizon. Write-once."""
         ...
 
     async def get(self, sitting_id: SittingId) -> Sitting | None: ...
+
+    async def latest(self) -> Sitting | None:
+        """The sitting with the greatest opened_at, or None if none stored.
+
+        Offer and finish are not this port's filter. Uniqueness at mint
+        means this is the only sitting that can still be resumable.
+        """
+        ...
 
 
 class ReviewEventStore(Protocol):

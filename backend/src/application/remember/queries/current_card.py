@@ -16,7 +16,12 @@ class CurrentCardQuery:
         self._catalog: ReviewCatalog = catalog
 
     async def handle(self, sitting_id: SittingId) -> PresentedCardDTO:
-        """Load the sitting and return the stable next draw. Read-only."""
+        """Load the sitting and return the stable next draw. Read-only.
+
+        Resume-slice contract (not wired as a separate path): also
+        outstanding_count from sitting.outstanding. Does not evaluate
+        is_offered — caller already holds the id.
+        """
         sitting = await self._sittings.get(sitting_id)
         if sitting is None:
             raise SittingNotFoundError
@@ -27,12 +32,14 @@ class CurrentCardQuery:
         present = sitting.visible(live)
         card_id = sitting.next_card(present, sitting_events)
         sitting_complete = sitting.is_finished(present, sitting_events)
+        outstanding_count = len(sitting.outstanding(present, sitting_events))
         if card_id is None:
             return PresentedCardDTO(
                 sitting_id=sitting_id.value,
                 card_id=None,
                 front=None,
                 sitting_complete=sitting_complete,
+                outstanding_count=outstanding_count,
             )
 
         card = await self._catalog.get_reviewable(card_id)
@@ -44,4 +51,5 @@ class CurrentCardQuery:
             card_id=card_id.value,
             front=card.front,
             sitting_complete=sitting_complete,
+            outstanding_count=outstanding_count,
         )

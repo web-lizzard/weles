@@ -115,11 +115,14 @@ class GradeCardCommand:
         event: ReviewEvent,
         by_id: Mapping[CardId, ReviewableCard],
     ) -> GradeAppliedDTO:
+        # Resume-slice: outstanding_count from sitting.outstanding after the event.
         events_after = (*sitting_events, event)
+        outstanding_count = len(sitting.outstanding(present, events_after))
         if sitting.is_finished(present, events_after):
             return GradeAppliedDTO(
                 sitting_id=sitting_id.value,
                 sitting_complete=True,
+                outstanding_count=outstanding_count,
                 next_card_id=None,
                 next_front=None,
             )
@@ -129,6 +132,7 @@ class GradeCardCommand:
         return GradeAppliedDTO(
             sitting_id=sitting_id.value,
             sitting_complete=False,
+            outstanding_count=outstanding_count,
             next_card_id=next_card_id.value,
             next_front=next_card.front,
         )

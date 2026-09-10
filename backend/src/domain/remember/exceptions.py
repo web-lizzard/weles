@@ -9,6 +9,10 @@ class InvalidShowingLimitError(CoreException):
     pass
 
 
+class InvalidResumeHorizonError(CoreException):
+    pass
+
+
 class SittingNotFoundError(NotFoundError):
     pass
 
