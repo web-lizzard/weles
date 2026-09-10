@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 8
-next_step: 8.1
-next_command: /implement remember-flow-due-count phase 8
+current_phase: 9
+next_step: tests
+next_command: /unit-test remember-flow-due-count phase 9
 updated: 2026-09-11
 ---
 
@@ -94,10 +94,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 8.1 Map the nested due object in one shared helper used by due.ts and sittings.ts
-- [ ] 8.2 Keep the last partition and set isStale on a failed fetch
-- [ ] 8.3 Start and stop the 15-second poll idempotently
-- [ ] 8.4 Push the due object from open and grade responses into dueStore
+- [x] 8.1 Map the nested due object in one shared helper used by due.ts and sittings.ts — 4e28612
+- [x] 8.2 Keep the last partition and set isStale on a failed fetch — 4e28612
+- [x] 8.3 Start and stop the 15-second poll idempotently — 4e28612
+- [x] 8.4 Push the due object from open and grade responses into dueStore — 4e28612
 
 ### Phase 9: Shell row and overlay geometry
 
