@@ -1,10 +1,10 @@
 ---
 change_id: remember-flow-review-session
 title: Users can work through every due card in one review sitting — graded cards reschedule themselves
-status: implemented
+status: archived
 created: 2026-09-09
 updated: 2026-09-10
-archived_at: null
+archived_at: 2026-09-10T14:48:59Z
 origin: remember-pillar
 effort_id: remember-flow
 slice_ref: S-01
