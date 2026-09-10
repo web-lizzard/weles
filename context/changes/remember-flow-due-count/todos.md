@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 1
-next_step: 1.1
-next_command: /implement remember-flow-due-count phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test remember-flow-due-count phase 2
 updated: 2026-09-10
 ---
 
@@ -10,7 +10,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 1.1 Add DuePartition and the partition_due signature in domain/remember/due_partition.py
+- [x] 1.1 Add DuePartition and the partition_due signature in domain/remember/due_partition.py
 
 ### Phase 2: Due partition behaviour
 
