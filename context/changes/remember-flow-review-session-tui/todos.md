@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 3
-next_step: 3.1
-next_command: /implement remember-flow-review-session-tui phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test remember-flow-review-session-tui phase 4
 updated: 2026-09-10
 ---
 
@@ -30,7 +30,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 3.1 Write `store/sitting.ts` state and action signatures
+- [x] 3.1 Write `store/sitting.ts` state and action signatures
 
 ### Phase 4: Sitting store behaviour
 
