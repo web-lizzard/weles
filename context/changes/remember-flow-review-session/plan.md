@@ -197,6 +197,15 @@ pytest marker: every tag reuses an `AC-nn` already registered in `pyproject.toml
 This phase has no Automated Verification subsection on purpose: authoring these scenarios is
 `/bdd`'s work, and the pass that authors a test never also satisfies it.
 
+### Review r4
+
+Artifact: `reviews/2026-09-10-r4-impl-review.md`
+
+- `R4-F1` — Four remember-flow step phrases resolve under no registered keyword
+  Fix: Every step phrase appearing in `backend/tests/features/remember-flow/*.feature` must resolve to a step definition registered under the keyword the scenario writes it under; a phrase reachable as both `Given` and `When` needs both registrations.
+- `R4-F3` — The card-in-front step asserts the outcome of a seeded coin flip
+  Fix: No acceptance step may assert which of several equally-eligible cards the seeded draw presents. A scenario that needs a named card in front must either reduce the eligible pool to one card or read the drawn card and name it, never assume it.
+
 ---
 
 ## Phase 2: Domain — membership and due-ness
@@ -443,6 +452,13 @@ with the catalog through `visible`, and returns `sitting.next_card(...)` as a
 - `cd backend && uv run pytest tests/unit/remember/test_current_card_query.py -v` and confirm
   two consecutive handles over the same sitting return the same `card_id`.
 
+### Review r4
+
+Artifact: `reviews/2026-09-10-r4-impl-review.md`
+
+- `R4-F4` — CurrentCardQuery raises instead of reporting sitting_complete on the DTO
+  Fix: `CurrentCardQuery` must report completion through `PresentedCardDTO.sitting_complete` as the phase contract states; if a DTO cannot carry a null `card_id`, change the DTO rather than the reporting channel — a field no code path can set true is not a contract.
+
 ---
 
 ## Phase 7: Application — grading a card
@@ -480,6 +496,13 @@ UoW window with a shared `asyncio.Lock`; this command does not take a lock of it
 #### Manual Verification:
 - `cd backend && uv run pytest tests/unit/remember/test_grade_card_command.py -v` and confirm
   the stale-stamp path asserts the replayed state was used, not the memoized one.
+
+### Review r4
+
+Artifact: `reviews/2026-09-10-r4-impl-review.md`
+
+- `R4-F5` — The grade write saves event and scheduling state concurrently, not in order
+  Fix: The grade write must save the review event before the memoized scheduling state, in that order, inside one unit-of-work window. Concurrency between the two is not an optimization the contract permits.
 
 ---
 
@@ -905,6 +928,13 @@ unknown sitting and 409 on grading a card that is not in front.
 - `cd backend && uv run fastapi dev src/main.py`, then
   `curl -X POST localhost:8000/review-sittings` and confirm the response carries a
   `sitting_id`, a `card_id`, and a front with no back.
+
+### Review r4
+
+Artifact: `reviews/2026-09-10-r4-impl-review.md`
+
+- `R4-F2` — The whole-suite gate `uv run pytest` exits non-zero at phase 15
+  Fix: `cd backend && uv run pytest` must exit zero before phase 15 counts closed; a phase whose Automated Verification is red is not done regardless of its row state.
 
 ---
 

@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 15
-next_step: 15.4
-next_command: /implement remember-flow-review-session phase 15
+current_phase: 1
+next_step: 1.4
+next_command: /implement remember-flow-review-session phase 1
 updated: 2026-09-10
 ---
 
@@ -12,6 +12,11 @@ updated: 2026-09-10
 
 - [x] 1.1 Author the frame-derived scenarios under existing AC tags via /bdd — c70dfe1
 - [x] 1.2 Confirm the remember-flow scenarios fail on assertions, not collection — c70dfe1
+
+#### Triage
+
+- [x] 1.3 R4-F1 Four remember-flow step phrases resolve under no registered keyword (proof: cb66884)
+- [ ] 1.4 R4-F3 The card-in-front step asserts the outcome of a seeded coin flip (proof: cb66884)
 
 ### Phase 2: Domain — membership and due-ness
 
@@ -97,6 +102,10 @@ updated: 2026-09-10
 
 - [x] 6.3 Confirm two consecutive handles over one sitting return the same card — 05a0782
 
+#### Triage
+
+- [ ] 6.4 R4-F4 CurrentCardQuery raises instead of reporting sitting_complete on the DTO (proof: cb66884)
+
 ### Phase 7: Application — grading a card
 
 #### Tests
@@ -112,6 +121,10 @@ updated: 2026-09-10
 #### Manual
 
 - [x] 7.4 Confirm the stale-stamp path uses the replayed state, not the memoized one — aa65e20
+
+#### Triage
+
+- [ ] 7.5 R4-F5 The grade write saves event and scheduling state concurrently, not in order
 
 ### Phase 8: In-memory adapter stubs
 
@@ -220,6 +233,10 @@ updated: 2026-09-10
 #### Manual
 
 - [ ] 15.4 Open a sitting over the running app and confirm a front with no back
+
+#### Triage
+
+- [ ] 15.5 R4-F2 The whole-suite gate `uv run pytest` exits non-zero at phase 15
 
 ### Phase 16: Migrate the acceptance steps and the handler unit tests onto the real adapters
 
