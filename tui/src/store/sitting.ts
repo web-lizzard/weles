@@ -7,6 +7,7 @@ import {
   SITTING_EXPIRED,
   SittingHttpError,
 } from "../api/sittings.js";
+import { useDueStore } from "./due.js";
 
 type SittingPhase =
   | "opening"
@@ -135,6 +136,9 @@ export const useSittingStore = create<SittingState & SittingActions>(
           });
           return;
         }
+        if (result.due != null) {
+          useDueStore.getState().applyPartition(result.due);
+        }
         set({
           phase: "presented",
           sittingId: result.sittingId,
@@ -221,6 +225,9 @@ export const useSittingStore = create<SittingState & SittingActions>(
       });
       try {
         const result = await gradeCard(sittingId, cardId, grade);
+        if (result.due != null) {
+          useDueStore.getState().applyPartition(result.due);
+        }
         if (result.sittingComplete || result.nextCardId === null) {
           set({
             phase: "complete",
