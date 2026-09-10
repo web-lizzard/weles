@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 14
-next_step: 14.4
-next_command: /implement remember-flow-review-session phase 14
+current_phase: 15
+next_step: 15.1
+next_command: /unit-test remember-flow-review-session phase 15
 updated: 2026-09-10
 ---
 
@@ -203,7 +203,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 14.4 Confirm the four routes appear in /docs while their bodies are still `...`
+- [x] 14.4 Confirm the four routes appear in /docs while their bodies are still `...`
 
 ### Phase 15: Fill the HTTP surface and composition
 
