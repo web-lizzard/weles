@@ -242,13 +242,13 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 16.1 Write InMemoryRememberComposition in the integration support package
-- [x] 16.2 Replace the step module's doubles with that composition
-- [x] 16.3 Move the AC-07 assertion from a multiplier to a growing interval
-- [x] 16.4 Add tests/unit/remember/conftest.py with the shared handler fixtures and builders
-- [x] 16.5 Repoint the four handler unit-test modules onto the real in-memory adapters
-- [x] 16.6 Drive the handler tests through FsrsScheduler except where a value must be forced
-- [x] 16.7 Assert one commit on the happy path and no leaked write past an exception
+- [x] 16.1 Write InMemoryRememberComposition in the integration support package — 4e296eb
+- [x] 16.2 Replace the step module's doubles with that composition — 4e296eb
+- [x] 16.3 Move the AC-07 assertion from a multiplier to a growing interval — 4e296eb
+- [x] 16.4 Add tests/unit/remember/conftest.py with the shared handler fixtures and builders — 4e296eb
+- [x] 16.5 Repoint the four handler unit-test modules onto the real in-memory adapters — 4e296eb
+- [x] 16.6 Drive the handler tests through FsrsScheduler except where a value must be forced — 4e296eb
+- [x] 16.7 Assert one commit on the happy path and no leaked write past an exception — 4e296eb
 
 #### Manual
 
