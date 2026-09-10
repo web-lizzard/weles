@@ -1,6 +1,11 @@
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { gradeCard, openSitting, revealBack } from "../src/api/sittings";
+import {
+  gradeCard,
+  openSitting,
+  revealBack,
+  SittingHttpError,
+} from "../src/api/sittings";
 import SittingOverlay from "../src/screens/SittingOverlay";
 import { useSittingStore } from "../src/store/sitting";
 
@@ -192,5 +197,79 @@ describe("SittingOverlay", () => {
 
     expect(gradeCard).toHaveBeenCalledWith(sittingId, cardId, "good");
     expect(lastFrame()).toContain("Second front");
+  });
+
+  it("shows a nothing-due message when opening finds no cards due for review", async () => {
+    vi.mocked(openSitting).mockResolvedValue({ kind: "nothing_due" });
+
+    const { lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toMatch(/nothing due/i);
+    expect(lastFrame()).not.toContain("nothing_due");
+  });
+
+  it("shows a completion message after the last card is graded", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Last card",
+      sittingComplete: false,
+    });
+    vi.mocked(gradeCard).mockResolvedValue({
+      sittingId,
+      sittingComplete: true,
+      nextCardId: null,
+      nextFront: null,
+    });
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "3");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toContain("Sitting complete");
+  });
+
+  it("shows the HTTP error detail and a retry hint when open fails", async () => {
+    vi.mocked(openSitting).mockRejectedValue(
+      new SittingHttpError("sitting_not_found", "Sitting was not found.", 404),
+    );
+
+    const { lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toContain("Sitting was not found.");
+    expect(lastFrame()).toMatch(/press r/i);
+  });
+
+  it("calls retry when r is pressed in the error phase", async () => {
+    vi.mocked(openSitting)
+      .mockRejectedValueOnce(
+        new SittingHttpError(
+          "network_error",
+          "Could not reach the server.",
+          503,
+        ),
+      )
+      .mockResolvedValueOnce({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "Recovered front",
+        sittingComplete: false,
+      });
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(lastFrame()).toContain("Could not reach the server.");
+
+    await pressKey(stdin, "r");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(openSitting).toHaveBeenCalledTimes(2);
+    expect(lastFrame()).toContain("Recovered front");
   });
 });
