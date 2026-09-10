@@ -14,7 +14,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [x] 1.2 Regenerate `schema.d.ts` against a running backend and confirm the three review-sitting paths are present
+- [x] 1.2 Regenerate `schema.d.ts` against a running backend and confirm the three review-sitting paths are present — 0c0fd6c
 
 #### Triage
 
