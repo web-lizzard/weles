@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
 current_phase: 7
-next_step: tests
-next_command: /unit-test remember-flow-review-session phase 7
+next_step: 7.4
+next_command: /implement remember-flow-review-session phase 7
 updated: 2026-09-10
 ---
 
@@ -96,13 +96,13 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8920945
 
 #### Automated
 
-- [ ] 7.1 Fill the grade guards in order, ending at CardNotPresentableError
-- [ ] 7.2 Capture reviewed_at once and save the event before the memoized state
-- [ ] 7.3 Rebuild from the log when the memoized stamp does not match
+- [x] 7.1 Fill the grade guards in order, ending at CardNotPresentableError
+- [x] 7.2 Capture reviewed_at once and save the event before the memoized state
+- [x] 7.3 Rebuild from the log when the memoized stamp does not match
 
 #### Manual
 
