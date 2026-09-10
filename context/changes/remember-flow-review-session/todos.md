@@ -186,8 +186,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 13.1 Fill FsrsScheduler with the grade mapping and due_at outside the blob
-- [x] 13.2 Seed the fuzz from each event's own facts and restore the generator
+- [x] 13.1 Fill FsrsScheduler with the grade mapping and due_at outside the blob — 4020add
+- [x] 13.2 Seed the fuzz from each event's own facts and restore the generator — 4020add
 
 #### Manual
 
