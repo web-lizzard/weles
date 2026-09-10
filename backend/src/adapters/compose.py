@@ -285,7 +285,9 @@ def get_current_card_query() -> CurrentCardQuery:
         _remember_sittings,
         _remember_review_events,
         _remember_catalog,
+        _remember_scheduling_states,
         _remember_clock,
+        _remember_scheduler,
     )
 
 

@@ -1,11 +1,13 @@
 from collections.abc import Callable
 
 from application.remember.dto import (
+    DuePartitionDTO,
     NothingDueDTO,
     SittingOpenedDTO,
     SittingResumedDTO,
 )
 from application.remember.ports import Clock, UnitOfWork
+from domain.remember.due_partition import partition_due
 from domain.remember.ports import ReviewCatalog, Scheduler
 from domain.remember.scheduling_state import due_card_ids
 from domain.remember.sitting import Sitting
@@ -59,12 +61,23 @@ class OpenSittingCommand:
                     reviewable = by_id[card_id]
                     sitting_complete = latest.is_finished(present, sitting_events)
                     outstanding_count = len(latest.outstanding(present, sitting_events))
+                    due = DuePartitionDTO.from_domain(
+                        partition_due(
+                            frozenset(by_id),
+                            states,
+                            latest,
+                            sitting_events,
+                            as_of,
+                            live_stamp,
+                        )
+                    )
                     return SittingResumedDTO(
                         sitting_id=latest.id.value,
                         card_id=card_id.value,
                         front=reviewable.front,
                         sitting_complete=sitting_complete,
                         outstanding_count=outstanding_count,
+                        due=due,
                     )
 
             due = due_card_ids(frozenset(by_id), states, as_of, live_stamp)
@@ -83,6 +96,16 @@ class OpenSittingCommand:
             reviewable = by_id[card_id]
             sitting_complete = sitting.is_finished(present, events=[])
             outstanding_count = len(sitting.outstanding(present, events=[]))
+            due_partition = DuePartitionDTO.from_domain(
+                partition_due(
+                    frozenset(by_id),
+                    states,
+                    sitting,
+                    (),
+                    as_of,
+                    live_stamp,
+                )
+            )
             await uow.sittings.save(sitting)
             await uow.commit()
 
@@ -92,4 +115,5 @@ class OpenSittingCommand:
             front=reviewable.front,
             sitting_complete=sitting_complete,
             outstanding_count=outstanding_count,
+            due=due_partition,
         )

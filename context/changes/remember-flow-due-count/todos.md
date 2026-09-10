@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
 current_phase: 6
-next_step: 6.1
-next_command: /unit-test remember-flow-due-count phase 6
+next_step: 6.4
+next_command: /implement remember-flow-due-count phase 6
 updated: 2026-09-10
 ---
 
@@ -63,13 +63,13 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — d30ee6b
 
 #### Automated
 
-- [ ] 6.1 Populate due on the open and resume responses in OpenSittingCommand
-- [ ] 6.2 Populate due on the grade response in GradeCardCommand
-- [ ] 6.3 Populate due on the current-card response in CurrentCardQuery
+- [x] 6.1 Populate due on the open and resume responses in OpenSittingCommand
+- [x] 6.2 Populate due on the grade response in GradeCardCommand
+- [x] 6.3 Populate due on the current-card response in CurrentCardQuery
 
 #### Manual
 
