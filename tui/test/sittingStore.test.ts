@@ -3,6 +3,7 @@ import {
   gradeCard,
   openSitting,
   revealBack,
+  SITTING_EXPIRED,
   SittingHttpError,
 } from "../src/api/sittings";
 import { useSittingStore } from "../src/store/sitting";
@@ -196,5 +197,99 @@ describe("useSittingStore", () => {
     expect(openSitting).toHaveBeenCalledTimes(2);
     expect(useSittingStore.getState().phase).toBe("presented");
     expect(useSittingStore.getState().front).toBe("Recovered");
+  });
+
+  it("sets isResumed and outstandingCount when openSitting returns a resumed sitting", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "resumed",
+      sittingId,
+      cardId,
+      front: "Resumed front",
+      sittingComplete: false,
+      outstandingCount: 3,
+    });
+
+    await useSittingStore.getState().open();
+    await vi.advanceTimersByTimeAsync(0);
+
+    const state = useSittingStore.getState();
+    expect(state.phase).toBe("presented");
+    expect(state.isResumed).toBe(true);
+    expect(state.outstandingCount).toBe(3);
+  });
+
+  it("clears isResumed and updates outstandingCount on the first grade after a resume", async () => {
+    vi.mocked(gradeCard).mockResolvedValue({
+      sittingId,
+      outstandingCount: 2,
+      sittingComplete: false,
+      nextCardId,
+      nextFront: "Next front",
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Resumed front",
+      isResumed: true,
+      outstandingCount: 3,
+    });
+
+    await useSittingStore.getState().submitGrade("good");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const state = useSittingStore.getState();
+    expect(state.isResumed).toBe(false);
+    expect(state.outstandingCount).toBe(2);
+  });
+
+  it("re-opens once with a notice when gradeCard returns sitting_expired instead of entering error", async () => {
+    vi.mocked(gradeCard).mockRejectedValue(
+      new SittingHttpError(SITTING_EXPIRED, "Sitting no longer offered", 409),
+    );
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId: "00000000-0000-4000-8000-000000000002",
+      cardId,
+      front: "Fresh front",
+      sittingComplete: false,
+      outstandingCount: 1,
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Stale front",
+    });
+
+    await useSittingStore.getState().submitGrade("good");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const state = useSittingStore.getState();
+    expect(state.phase).not.toBe("error");
+    expect(state.error).toBeNull();
+    expect(state.notice).toMatch(/expired/i);
+    expect(openSitting).toHaveBeenCalledTimes(1);
+    expect(state.front).toBe("Fresh front");
+    expect(state.outstandingCount).toBe(1);
+  });
+
+  it("enters error when gradeCard fails with a code other than sitting_expired", async () => {
+    vi.mocked(gradeCard).mockRejectedValue(
+      new SittingHttpError("empty_sitting", "No cards due", 409),
+    );
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Front",
+    });
+
+    await useSittingStore.getState().submitGrade("good");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useSittingStore.getState().phase).toBe("error");
+    expect(useSittingStore.getState().notice).toBeNull();
+    expect(openSitting).not.toHaveBeenCalled();
   });
 });
