@@ -22,6 +22,7 @@ from application.remember.dto import (
 )
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.reveal_back import RevealBackQuery
+from domain.remember.value_objects import CardId, SittingId
 
 router = APIRouter()
 
@@ -29,14 +30,16 @@ router = APIRouter()
 @router.post("/review-sittings")
 async def open_sitting(
     command: Annotated[OpenSittingCommand, Depends(get_open_sitting_command)],
-) -> SittingOpenedDTO | NothingDueDTO: ...
+) -> SittingOpenedDTO | NothingDueDTO:
+    return await command.handle()
 
 
 @router.get("/review-sittings/{sitting_id}/current-card")
 async def current_card(
     sitting_id: UUID,
     query: Annotated[CurrentCardQuery, Depends(get_current_card_query)],
-) -> PresentedCardDTO: ...
+) -> PresentedCardDTO:
+    return await query.handle(SittingId(value=sitting_id))
 
 
 @router.get("/review-sittings/{sitting_id}/cards/{card_id}/back")
@@ -44,7 +47,8 @@ async def reveal_back(
     sitting_id: UUID,
     card_id: UUID,
     query: Annotated[RevealBackQuery, Depends(get_reveal_back_query)],
-) -> RevealedCardDTO: ...
+) -> RevealedCardDTO:
+    return await query.handle(SittingId(value=sitting_id), CardId(value=card_id))
 
 
 @router.post("/review-sittings/{sitting_id}/cards/{card_id}/grade")
@@ -53,4 +57,7 @@ async def grade_card(
     card_id: UUID,
     body: GradeRequestDTO,
     command: Annotated[GradeCardCommand, Depends(get_grade_card_command)],
-) -> GradeAppliedDTO: ...
+) -> GradeAppliedDTO:
+    return await command.handle(
+        SittingId(value=sitting_id), CardId(value=card_id), body.grade
+    )

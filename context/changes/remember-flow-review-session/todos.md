@@ -2,7 +2,7 @@
 change_id: remember-flow-review-session
 current_phase: 15
 next_step: 15.1
-next_command: /unit-test remember-flow-review-session phase 15
+next_command: /implement remember-flow-review-session phase 15
 updated: 2026-09-10
 ---
 
@@ -209,13 +209,13 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 817e596
 
 #### Automated
 
-- [ ] 15.1 Fill the four routes returning application DTOs unmapped
-- [ ] 15.2 Wire every remember seam in compose.py over one shared lock
-- [ ] 15.3 Write the route tests for the happy loop and the 404 and 409 paths
+- [x] 15.1 Fill the four routes returning application DTOs unmapped
+- [x] 15.2 Wire every remember seam in compose.py over one shared lock
+- [x] 15.3 Write the route tests for the happy loop and the 404 and 409 paths — 817e596
 
 #### Manual
 
