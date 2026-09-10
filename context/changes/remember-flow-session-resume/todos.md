@@ -89,7 +89,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 8.1 Add isResumed, outstandingCount and notice to the store state
+- [x] 8.1 Add isResumed, outstandingCount and notice to the store state — 4957fc6
 
 ### Phase 9: TUI store behaviour
 
