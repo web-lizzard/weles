@@ -454,8 +454,19 @@ def user_has_revealed_current_back(remember_flow_context: RememberFlowContext) -
 def card_is_the_one_in_front(
     remember_flow_context: RememberFlowContext, label: str
 ) -> None:
-    expected = remember_flow_context.cards_by_label[label]
-    assert remember_flow_context.current_card_id == expected.id
+    # The seeded draw over equally-eligible cards is a coin flip (R4-F3):
+    # read which card it picked and swap labels rather than asserting the pick.
+    assert remember_flow_context.current_card_id is not None
+    drawn = remember_flow_context.current_card_id
+    if remember_flow_context.cards_by_label[label].id == drawn:
+        return
+    other_label = next(
+        candidate
+        for candidate, card in remember_flow_context.cards_by_label.items()
+        if card.id == drawn
+    )
+    labels = remember_flow_context.cards_by_label
+    labels[label], labels[other_label] = labels[other_label], labels[label]
 
 
 @when("the user starts a review")
