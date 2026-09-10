@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8000";
+import { client } from "./client.js";
 
 export type Grade = "forgot" | "hard" | "good" | "easy";
 
@@ -36,53 +36,38 @@ export class SittingHttpError extends Error {
   }
 }
 
-async function requestJson(url: string, init?: RequestInit): Promise<unknown> {
-  const response = await fetch(url, init);
-  const body: unknown = await response.json();
-  if (!response.ok) {
-    const errorBody = body as { code?: string; detail?: string };
-    if (
-      typeof errorBody.code === "string" &&
-      typeof errorBody.detail === "string"
-    ) {
-      throw new SittingHttpError(
-        errorBody.code,
-        errorBody.detail,
-        response.status,
-      );
-    }
-    throw new Error(`Request failed: ${response.status}`);
+function throwOnClientError(
+  error: unknown,
+  response: Response,
+  fallbackMessage: string,
+): never {
+  const body = error as { code?: string; detail?: string } | undefined;
+  if (
+    body &&
+    typeof body.code === "string" &&
+    typeof body.detail === "string"
+  ) {
+    throw new SittingHttpError(body.code, body.detail, response.status);
   }
-  return body;
+  throw new Error(`${fallbackMessage}: ${response.status}`);
 }
 
 export async function openSitting(): Promise<OpenedSitting | NothingDue> {
-  const body = (await requestJson(`${API_BASE_URL}/review-sittings`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  })) as {
-    kind: string;
-    sitting_id?: string;
-    card_id?: string;
-    front?: string;
-    sitting_complete?: boolean;
-  };
+  const { data, error, response } = await client.POST("/review-sittings");
+  if (error || !data) {
+    throwOnClientError(error, response, "openSitting failed");
+  }
 
-  if (body.kind === "nothing_due") {
+  if (data.kind === "nothing_due") {
     return { kind: "nothing_due" };
   }
 
-  if (body.kind !== "opened") {
+  if (data.kind !== "opened") {
     throw new Error("Unexpected open sitting response");
   }
 
-  const { sitting_id, card_id, front, sitting_complete } = body;
-  if (
-    sitting_id === undefined ||
-    card_id === undefined ||
-    front === undefined ||
-    sitting_complete === undefined
-  ) {
+  const { sitting_id, card_id, front, sitting_complete } = data;
+  if (card_id == null || front == null) {
     throw new Error("Incomplete opened sitting response");
   }
 
@@ -99,20 +84,19 @@ export async function revealBack(
   sittingId: string,
   cardId: string,
 ): Promise<RevealedCard> {
-  const body = (await requestJson(
-    `${API_BASE_URL}/review-sittings/${sittingId}/cards/${cardId}/back`,
-  )) as {
-    sitting_id: string;
-    card_id: string;
-    front: string;
-    back: string;
-  };
+  const { data, error, response } = await client.GET(
+    "/review-sittings/{sitting_id}/cards/{card_id}/back",
+    { params: { path: { sitting_id: sittingId, card_id: cardId } } },
+  );
+  if (error || !data) {
+    throwOnClientError(error, response, "revealBack failed");
+  }
 
   return {
-    sittingId: body.sitting_id,
-    cardId: body.card_id,
-    front: body.front,
-    back: body.back,
+    sittingId: data.sitting_id,
+    cardId: data.card_id,
+    front: data.front,
+    back: data.back,
   };
 }
 
@@ -121,24 +105,21 @@ export async function gradeCard(
   cardId: string,
   grade: Grade,
 ): Promise<GradeApplied> {
-  const body = (await requestJson(
-    `${API_BASE_URL}/review-sittings/${sittingId}/cards/${cardId}/grade`,
+  const { data, error, response } = await client.POST(
+    "/review-sittings/{sitting_id}/cards/{card_id}/grade",
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ grade }),
+      params: { path: { sitting_id: sittingId, card_id: cardId } },
+      body: { grade },
     },
-  )) as {
-    sitting_id: string;
-    sitting_complete: boolean;
-    next_card_id: string | null;
-    next_front: string | null;
-  };
+  );
+  if (error || !data) {
+    throwOnClientError(error, response, "gradeCard failed");
+  }
 
   return {
-    sittingId: body.sitting_id,
-    sittingComplete: body.sitting_complete,
-    nextCardId: body.next_card_id,
-    nextFront: body.next_front,
+    sittingId: data.sitting_id,
+    sittingComplete: data.sitting_complete,
+    nextCardId: data.next_card_id,
+    nextFront: data.next_front,
   };
 }
