@@ -43,6 +43,8 @@ type SittingActions = {
 
 const GRADE_COUNT = 4;
 
+let revealBackInFlight = false;
+
 const initialState: SittingState = {
   phase: "opening",
   sittingId: null,
@@ -133,6 +135,11 @@ export const useSittingStore = create<SittingState & SittingActions>(
         return;
       }
 
+      if (revealBackInFlight) {
+        return;
+      }
+
+      revealBackInFlight = true;
       set({ lastAction: { type: "reveal" }, error: null });
       try {
         const revealed = await revealBack(state.sittingId, state.cardId);
@@ -143,6 +150,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
         } else {
           throw error;
         }
+      } finally {
+        revealBackInFlight = false;
       }
     },
     moveSelection: (delta: 1 | -1) => {
@@ -152,11 +161,15 @@ export const useSittingStore = create<SittingState & SittingActions>(
       }));
     },
     submitGrade: async (grade: Grade) => {
-      const { sittingId, cardId } = get();
-      if (sittingId === null || cardId === null) {
+      const state = get();
+      if (state.sittingId === null || state.cardId === null) {
+        return;
+      }
+      if (state.isSubmitting) {
         return;
       }
 
+      const { sittingId, cardId } = state;
       set({
         lastAction: { type: "grade", grade },
         error: null,
@@ -211,6 +224,7 @@ export const useSittingStore = create<SittingState & SittingActions>(
       }
     },
     reset: () => {
+      revealBackInFlight = false;
       set({ ...initialState });
     },
   }),
