@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 7
-next_step: 7.1
-next_command: /unit-test remember-flow-review-session-tui phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test remember-flow-review-session-tui phase 8
 updated: 2026-09-10
 ---
 
@@ -63,12 +63,12 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — ccf47a8
 
 #### Automated
 
-- [ ] 7.1 Fill nothing-due and complete state rendering
-- [ ] 7.2 Fill error-state rendering and the retry keypress
+- [x] 7.1 Fill nothing-due and complete state rendering — c2b8fc5
+- [x] 7.2 Fill error-state rendering and the retry keypress — c2b8fc5
 
 ### Phase 8: Wire `/remember` into the app shell
 
