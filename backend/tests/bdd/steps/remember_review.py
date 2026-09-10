@@ -437,6 +437,7 @@ def user_has_started_review(remember_flow_context: RememberFlowContext) -> None:
 
 
 @given("the user has revealed the current card's back")
+@when("the user has revealed the current card's back")
 def user_has_revealed_current_back(remember_flow_context: RememberFlowContext) -> None:
     assert remember_flow_context.sitting_id is not None
     assert remember_flow_context.current_card_id is not None
@@ -458,6 +459,7 @@ def card_is_the_one_in_front(
 
 
 @when("the user starts a review")
+@when("the user starts a review again")
 def user_starts_review(remember_flow_context: RememberFlowContext) -> None:
     if remember_flow_context.sitting_id is not None:
         remember_flow_context.prior_sitting_id = remember_flow_context.sitting_id
@@ -482,6 +484,7 @@ def user_reveals_current_back(remember_flow_context: RememberFlowContext) -> Non
     remember_flow_context.last_reveal_result = result
 
 
+@given(parsers.parse('the user grades the current card as "{grade_name}"'))
 @when(parsers.parse('the user grades the current card as "{grade_name}"'))
 def user_grades_current_card(
     remember_flow_context: RememberFlowContext, grade_name: str
@@ -532,6 +535,7 @@ def sitting_live_membership_is_read(
 
 
 @when("the user reads the current card")
+@when("the user reads the current card again")
 def user_reads_current_card(remember_flow_context: RememberFlowContext) -> None:
     assert remember_flow_context.sitting_id is not None
     result = asyncio.run(
