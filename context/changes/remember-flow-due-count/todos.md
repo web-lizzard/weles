@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test remember-flow-due-count phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement remember-flow-due-count phase 3
 updated: 2026-09-10
 ---
 
@@ -16,12 +16,12 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 0be2699
 
 #### Automated
 
-- [ ] 2.1 Compute the total and the three buckets over due union outstanding
-- [ ] 2.2 Branch the no-sitting case to put the whole total in not_yet_seen
+- [x] 2.1 Compute the total and the three buckets over due union outstanding
+- [x] 2.2 Branch the no-sitting case to put the whole total in not_yet_seen
 
 ### Phase 3: DTO, query, route and composition stubs
 
