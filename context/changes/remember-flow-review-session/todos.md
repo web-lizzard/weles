@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-review-session
 current_phase: 12
-next_step: 12.1
+next_step: 12.3
 next_command: /implement remember-flow-review-session phase 12
 updated: 2026-09-10
 ---
@@ -171,8 +171,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 12.1 Pin fsrs==6.3.2 as a backend dependency and run uv sync
-- [ ] 12.2 Write FsrsScheduler as a signature with `...` bodies
+- [x] 12.1 Pin fsrs==6.3.2 as a backend dependency and run uv sync
+- [x] 12.2 Write FsrsScheduler as a signature with `...` bodies
 
 #### Manual
 

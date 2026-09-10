@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Weles backend service"
 requires-python = ">=3.12"
 dependencies = [
+    "fsrs==6.3.2",
     "fastapi[standard]>=0.115.0",
     "pydantic-settings>=2.0.0",
     "sqlalchemy[asyncio]>=2.0.0",
