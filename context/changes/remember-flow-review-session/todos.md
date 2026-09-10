@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 12
-next_step: 12.3
-next_command: /implement remember-flow-review-session phase 12
+current_phase: 13
+next_step: 13.1
+next_command: /unit-test remember-flow-review-session phase 13
 updated: 2026-09-10
 ---
 
@@ -171,12 +171,12 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 12.1 Pin fsrs==6.3.2 as a backend dependency and run uv sync
-- [x] 12.2 Write FsrsScheduler as a signature with `...` bodies
+- [x] 12.1 Pin fsrs==6.3.2 as a backend dependency and run uv sync — 9866f4e
+- [x] 12.2 Write FsrsScheduler as a signature with `...` bodies — 9866f4e
 
 #### Manual
 
-- [ ] 12.3 Confirm uv.lock records fsrs==6.3.2 and both bodies are still `...`
+- [x] 12.3 Confirm uv.lock records fsrs==6.3.2 and both bodies are still `...` — 9866f4e
 
 ### Phase 13: Fill the FSRS scheduler and prove repeatability
 
