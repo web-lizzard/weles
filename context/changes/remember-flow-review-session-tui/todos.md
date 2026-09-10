@@ -32,7 +32,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [x] 2.2 R1-F2 Sitting API uses raw fetch instead of openapi client
+- [x] 2.2 R1-F2 Sitting API uses raw fetch instead of openapi client — 043b0cd
 
 ### Phase 3: Sitting store stubs
 
