@@ -100,9 +100,9 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 7.1 Fill the grade guards in order, ending at CardNotPresentableError
-- [x] 7.2 Capture reviewed_at once and save the event before the memoized state
-- [x] 7.3 Rebuild from the log when the memoized stamp does not match
+- [x] 7.1 Fill the grade guards in order, ending at CardNotPresentableError — 8db7fc5
+- [x] 7.2 Capture reviewed_at once and save the event before the memoized state — 8db7fc5
+- [x] 7.3 Rebuild from the log when the memoized stamp does not match — 8db7fc5
 
 #### Manual
 
