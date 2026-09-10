@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 13
-next_step: 13.3
-next_command: /implement remember-flow-review-session phase 13
+current_phase: 14
+next_step: 14.1
+next_command: /implement remember-flow-review-session phase 14
 updated: 2026-09-10
 ---
 
@@ -191,7 +191,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 13.3 Run the repeatability test twice and confirm the replayed due_at matches
+- [x] 13.3 Run the repeatability test twice and confirm the replayed due_at matches — 4020add
 
 ### Phase 14: HTTP and composition stubs
 
