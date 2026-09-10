@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 9
-next_step: 9.1
-next_command: /unit-test remember-flow-review-session phase 9
+current_phase: 10
+next_step: 10.1
+next_command: /implement remember-flow-review-session phase 10
 updated: 2026-09-10
 ---
 
@@ -124,18 +124,18 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 6c316a6
 
 #### Automated
 
-- [ ] 9.1 Fill the three in-memory remember repositories with snapshot and restore
-- [ ] 9.2 Fill the remember unit of work with a shared asyncio.Lock, and the system clock
-- [ ] 9.3 Write one behavioural contract suite per remember repository port
+- [x] 9.1 Fill the three in-memory remember repositories with snapshot and restore
+- [x] 9.2 Fill the remember unit of work with a shared asyncio.Lock, and the system clock
+- [x] 9.3 Write one behavioural contract suite per remember repository port — 6c316a6
 
 #### Manual
 
-- [ ] 9.4 Confirm each contract suite reports its cases under the in_memory id
-- [ ] 9.5 Confirm a second UoW waits on the shared lock until the first window exits
+- [x] 9.4 Confirm each contract suite reports its cases under the in_memory id
+- [x] 9.5 Confirm a second UoW waits on the shared lock until the first window exits
 
 ### Phase 10: Review catalog stub
 
