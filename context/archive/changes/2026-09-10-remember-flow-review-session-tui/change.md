@@ -1,10 +1,10 @@
 ---
 change_id: remember-flow-review-session-tui
 title: Remember flow review session TUI
-status: implemented
+status: archived
 created: 2026-09-10
 updated: 2026-09-10
-archived_at: null
+archived_at: 2026-09-10T14:49:21Z
 origin: remember-flow-review-session
 ---
 
