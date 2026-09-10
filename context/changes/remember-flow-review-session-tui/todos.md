@@ -18,7 +18,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [x] 1.3 R1-F1 OpenAPI schema lacks review-sitting paths (proof: e9a4f2e)
+- [x] 1.3 R1-F1 OpenAPI schema lacks review-sitting paths (proof: e9a4f2e) — d36b28a
 
 ### Phase 2: API client behaviour
 
