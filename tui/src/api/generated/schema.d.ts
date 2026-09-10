@@ -327,6 +327,11 @@ export interface components {
       sitting_id: string;
       /** Sitting Complete */
       sitting_complete: boolean;
+      /**
+       * Outstanding Count
+       * @default 0
+       */
+      outstanding_count: number;
       /** Next Card Id */
       next_card_id: string | null;
       /** Next Front */
@@ -464,6 +469,11 @@ export interface components {
       front: string | null;
       /** Sitting Complete */
       sitting_complete: boolean;
+      /**
+       * Outstanding Count
+       * @default 0
+       */
+      outstanding_count: number;
     };
     /** ReplyDeltaEvent */
     ReplyDeltaEvent: {
@@ -542,11 +552,41 @@ export interface components {
       /** Sitting Complete */
       sitting_complete: boolean;
       /**
+       * Outstanding Count
+       * @default 0
+       */
+      outstanding_count: number;
+      /**
        * Kind
        * @default opened
        * @constant
        */
       kind: "opened";
+    };
+    /** SittingResumedDTO */
+    SittingResumedDTO: {
+      /**
+       * Sitting Id
+       * Format: uuid
+       */
+      sitting_id: string;
+      /** Card Id */
+      card_id: string | null;
+      /** Front */
+      front: string | null;
+      /** Sitting Complete */
+      sitting_complete: boolean;
+      /**
+       * Outstanding Count
+       * @default 0
+       */
+      outstanding_count: number;
+      /**
+       * Kind
+       * @default resumed
+       * @constant
+       */
+      kind: "resumed";
     };
     /** StartCaptureSessionResponseDTO */
     StartCaptureSessionResponseDTO: {
@@ -785,6 +825,7 @@ export interface operations {
         content: {
           "application/json":
             | components["schemas"]["SittingOpenedDTO"]
+            | components["schemas"]["SittingResumedDTO"]
             | components["schemas"]["NothingDueDTO"];
         };
       };
