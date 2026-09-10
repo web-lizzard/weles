@@ -5,6 +5,7 @@ export type NoteTab = "note" | "cards";
 
 type AppState = {
   isNotesOverlayOpen: boolean;
+  isSittingOverlayOpen: boolean;
   selectedIndex: number;
   isDetailOpen: boolean;
   selectedNoteId: string | null;
@@ -16,6 +17,8 @@ type AppState = {
 type AppActions = {
   openNotes: () => void;
   closeNotes: () => void;
+  openSittingOverlay: () => void;
+  closeSittingOverlay: () => void;
   setSelectedIndex: (index: number) => void;
   openDetail: (noteId: string) => void;
   closeDetail: () => void;
@@ -33,6 +36,7 @@ const clearedNoteView = {
 
 export const useAppStore = create<AppState & AppActions>((set) => ({
   isNotesOverlayOpen: false,
+  isSittingOverlayOpen: false,
   selectedIndex: 0,
   isDetailOpen: false,
   selectedNoteId: null,
@@ -46,6 +50,8 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
       selectedNoteId: null,
       ...clearedNoteView,
     }),
+  openSittingOverlay: () => set({ isSittingOverlayOpen: true }),
+  closeSittingOverlay: () => set({ isSittingOverlayOpen: false }),
   setSelectedIndex: (index) => set({ selectedIndex: index }),
   openDetail: (noteId) =>
     set({

@@ -58,7 +58,6 @@ export default function SittingOverlay(): JSX.Element {
   const back = useSittingStore((s) => s.back);
   const isBackVisible = useSittingStore((s) => s.isBackVisible);
   const selectedGradeIndex = useSittingStore((s) => s.selectedGradeIndex);
-  const open = useSittingStore((s) => s.open);
   const toggleBack = useSittingStore((s) => s.toggleBack);
   const moveSelection = useSittingStore((s) => s.moveSelection);
   const submitGrade = useSittingStore((s) => s.submitGrade);
@@ -66,8 +65,8 @@ export default function SittingOverlay(): JSX.Element {
   const retry = useSittingStore((s) => s.retry);
 
   useEffect(() => {
-    void open();
-  }, [open]);
+    void useSittingStore.getState().open();
+  }, []);
 
   useInput((input, key) => {
     if (phase === "error") {
