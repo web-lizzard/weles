@@ -33,10 +33,10 @@ updated: 2026-09-10
 #### Triage
 
 - [x] 2.2 R1-F2 Sitting API uses raw fetch instead of openapi client — 043b0cd
-- [x] 2.3 R2-F1 api/client.ts modified outside any phase's Changes Required
-- [x] 2.4 R2-F2 Untested cross-cutting change to the shared fetch delegate
-- [x] 2.5 R2-F3 openSitting raises on the backend's own "just completed, no card" response (proof: 48ebc3f)
-- [x] 2.6 R2-F5 Private helper declared before the public functions that use it
+- [x] 2.3 R2-F1 api/client.ts modified outside any phase's Changes Required — 28847ba
+- [x] 2.4 R2-F2 Untested cross-cutting change to the shared fetch delegate — 28847ba
+- [x] 2.5 R2-F3 openSitting raises on the backend's own "just completed, no card" response (proof: 48ebc3f) — 28847ba
+- [x] 2.6 R2-F5 Private helper declared before the public functions that use it — 28847ba
 
 ### Phase 3: Sitting store stubs
 
