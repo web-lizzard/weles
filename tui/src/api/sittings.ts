@@ -63,27 +63,32 @@ export async function openSitting(): Promise<
     return { kind: "nothing_due" };
   }
 
-  if (data.kind !== "opened") {
+  if (data.kind !== "opened" && data.kind !== "resumed") {
     throw new Error("Unexpected open sitting response");
   }
 
   const { sitting_id, card_id, front, sitting_complete } = data;
   if ((card_id == null || front == null) && !sitting_complete) {
-    throw new Error("Incomplete opened sitting response");
+    throw new Error("Incomplete open sitting response");
   }
 
   const outstandingCount = readOutstandingCount(
     data as { outstanding_count?: number },
   );
 
-  return {
-    kind: "opened",
+  const presented = {
     sittingId: sitting_id,
     cardId: card_id,
     front,
     sittingComplete: sitting_complete,
     outstandingCount,
   };
+
+  if (data.kind === "resumed") {
+    return { kind: "resumed", ...presented };
+  }
+
+  return { kind: "opened", ...presented };
 }
 
 export async function revealBack(
