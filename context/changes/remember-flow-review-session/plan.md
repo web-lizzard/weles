@@ -321,6 +321,21 @@ Artifact: `reviews/2026-09-10-r1-property-test-phases-2-3-4-.md`
 - `R1-F1` — Foreign sitting events change the drawn next card
   Fix: The shrunk two-card example with sitting `5ab7c383-a883-4fdf-ab28-0d827faaea53` must fail the pin until `_draw_seed` / `_seeded_pick` use only this sitting's events, then remain as regression.
 
+### Review r2
+
+Artifact: `reviews/2026-09-10-r2-mutation-test-phases-2-3-4-.md`
+
+- `R2-F1` — Eligible pool must exclude members above the minimum showing count
+  Fix: When one member has been shown more than another unfinished member, `next_card` must draw only from those at the minimum showing count.
+- `R2-F2` — Draw seed must incorporate the sitting id
+  Fix: Two sittings with identical card sets and event sequences must not be assumed to draw the same card unless their sitting ids match.
+- `R2-F3` — Draw seed must sort events before hashing
+  Fix: Appending a later `reviewed_at` event must change the draw when multiple unfinished cards tie on showing count.
+- `R2-F4` — Draw seed must incorporate each event's card id
+  Fix: Each sitting event's own `card_id` must contribute to the draw seed so reviews on different cards diverge.
+- `R2-F5` — Draw seed must use eight big-endian digest bytes
+  Fix: The seeded draw must derive from exactly the first eight big-endian bytes of the SHA-256 digest over the joined parts.
+
 ---
 
 ## Phase 4: Domain — reconstruction from the log

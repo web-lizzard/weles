@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -171,3 +171,110 @@ def test_the_same_sitting_and_events_pick_the_same_next_card() -> None:
 
     assert first_pick == second_pick
     assert first_pick in present
+
+
+def _pinned_sitting(
+    sitting_id: str,
+    card_ids: tuple[str, ...],
+    *,
+    showing_limit: int = 2,
+) -> Sitting:
+    return Sitting(
+        id=SittingId(value=UUID(sitting_id)),
+        card_ids=frozenset(CardId(value=UUID(card_id)) for card_id in card_ids),
+        opened_at=datetime(2026, 1, 1, tzinfo=UTC),
+        showing_limit=ShowingLimit(value=showing_limit),
+    )
+
+
+def _pinned_event(
+    card_id: str,
+    sitting_id: str,
+    reviewed_at: datetime,
+    grade: Grade = Grade.FORGOT,
+) -> ReviewEvent:
+    return ReviewEvent(
+        card_id=CardId(value=UUID(card_id)),
+        reviewed_at=reviewed_at,
+        grade=grade,
+        sitting_id=SittingId(value=UUID(sitting_id)),
+    )
+
+
+def test_the_next_card_is_the_unshown_member_when_one_has_been_shown() -> None:
+    sitting_id = "00000000-1111-1111-1111-111111111111"
+    shown = "6513270e-269e-0d37-f2a7-4de452e6b438"
+    unshown = "d23f0824-128b-2f33-0c5c-7fd0a6a3a450"
+    sitting = _pinned_sitting(sitting_id, (shown, unshown))
+    present = sitting.card_ids
+    events = (_pinned_event(shown, sitting_id, datetime(2026, 1, 1, tzinfo=UTC)),)
+
+    assert sitting.next_card(present, events) == CardId(value=UUID(unshown))
+
+
+def test_two_sittings_with_the_same_cards_do_not_share_a_draw() -> None:
+    card_ids = (
+        "6513270e-269e-0d37-f2a7-4de452e6b438",
+        "d23f0824-128b-2f33-0c5c-7fd0a6a3a450",
+    )
+    cards = frozenset(CardId(value=UUID(card_id)) for card_id in card_ids)
+    sitting_a = _pinned_sitting("11111111-1111-1111-1111-111111111111", card_ids)
+    sitting_b = _pinned_sitting("22222222-2222-2222-2222-222222222222", card_ids)
+
+    pick_a = sitting_a.next_card(cards, ())
+    pick_b = sitting_b.next_card(cards, ())
+
+    assert pick_a is not None
+    assert pick_b is not None
+    assert pick_a != pick_b
+
+
+def test_event_insertion_order_does_not_change_the_next_card() -> None:
+    sitting_id = "5ab7c383-a883-4fdf-ab28-0d827faaea53"
+    card_a = "6513270e-269e-0d37-f2a7-4de452e6b438"
+    card_b = "d23f0824-128b-2f33-0c5c-7fd0a6a3a450"
+    sitting = _pinned_sitting(sitting_id, (card_a, card_b))
+    present = sitting.card_ids
+    event_a = _pinned_event(card_a, sitting_id, datetime(2026, 1, 2, tzinfo=UTC))
+    event_b = _pinned_event(card_b, sitting_id, datetime(2026, 1, 1, tzinfo=UTC))
+
+    pick_b_first = sitting.next_card(present, (event_b, event_a))
+    pick_a_first = sitting.next_card(present, (event_a, event_b))
+
+    assert pick_b_first == pick_a_first
+    assert pick_b_first == CardId(value=UUID(card_a))
+
+
+def test_reviews_on_different_cards_change_the_draw_when_counts_tie() -> None:
+    sitting_id = "11111111-1111-1111-1111-111111111111"
+    card_a = "6513270e-269e-0d37-f2a7-4de452e6b438"
+    card_b = "d23f0824-128b-2f33-0c5c-7fd0a6a3a450"
+    sitting = _pinned_sitting(sitting_id, (card_a, card_b))
+    present = sitting.card_ids
+    reviewed_early = datetime(2026, 1, 1, tzinfo=UTC)
+    reviewed_late = datetime(2026, 1, 2, tzinfo=UTC)
+    card_a_first = (
+        _pinned_event(card_a, sitting_id, reviewed_early),
+        _pinned_event(card_b, sitting_id, reviewed_late),
+    )
+    card_b_first = (
+        _pinned_event(card_b, sitting_id, reviewed_early),
+        _pinned_event(card_a, sitting_id, reviewed_late),
+    )
+
+    assert sitting.next_card(present, card_a_first) != sitting.next_card(
+        present, card_b_first
+    )
+
+
+def test_the_seeded_draw_matches_a_pinned_outcome_for_an_empty_log() -> None:
+    sitting_id = "5ab7c383-a883-4fdf-ab28-0d827faaea53"
+    card_ids = (
+        "6513270e-269e-0d37-f2a7-4de452e6b438",
+        "d23f0824-128b-2f33-0c5c-7fd0a6a3a450",
+    )
+    sitting = _pinned_sitting(sitting_id, card_ids)
+
+    assert sitting.next_card(sitting.card_ids, ()) == CardId(
+        value=UUID("6513270e-269e-0d37-f2a7-4de452e6b438")
+    )
