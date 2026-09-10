@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
 current_phase: 13
-next_step: 13.1
-next_command: /unit-test remember-flow-review-session phase 13
+next_step: 13.3
+next_command: /implement remember-flow-review-session phase 13
 updated: 2026-09-10
 ---
 
@@ -182,12 +182,12 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f8261d1
 
 #### Automated
 
-- [ ] 13.1 Fill FsrsScheduler with the grade mapping and due_at outside the blob
-- [ ] 13.2 Seed the fuzz from each event's own facts and restore the generator
+- [x] 13.1 Fill FsrsScheduler with the grade mapping and due_at outside the blob
+- [x] 13.2 Seed the fuzz from each event's own facts and restore the generator
 
 #### Manual
 
