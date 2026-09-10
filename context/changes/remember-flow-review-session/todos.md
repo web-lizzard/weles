@@ -2,7 +2,7 @@
 change_id: remember-flow-review-session
 current_phase: 8
 next_step: 8.1
-next_command: /unit-test remember-flow-review-session phase 8
+next_command: /implement remember-flow-review-session phase 8
 updated: 2026-09-10
 ---
 
@@ -108,7 +108,19 @@ updated: 2026-09-10
 
 - [x] 7.4 Confirm the stale-stamp path uses the replayed state, not the memoized one — aa65e20
 
-### Phase 8: In-memory adapters, unit of work, and port contracts
+### Phase 8: In-memory adapter stubs
+
+#### Automated
+
+- [ ] 8.1 Create the remember in-memory adapter package
+- [ ] 8.2 Write the three repository classes as signatures with `...` bodies
+- [ ] 8.3 Write the unit of work and system clock as signatures with `...` bodies
+
+#### Manual
+
+- [ ] 8.4 Confirm every method body in the new package is still `...`
+
+### Phase 9: Fill the in-memory adapters, the unit of work, and the port contracts
 
 #### Tests
 
@@ -116,16 +128,26 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 8.1 Write the three in-memory remember repositories with snapshot and restore
-- [ ] 8.2 Write the remember unit of work with a shared asyncio.Lock, and the system clock
-- [ ] 8.3 Write one behavioural contract suite per remember repository port
+- [ ] 9.1 Fill the three in-memory remember repositories with snapshot and restore
+- [ ] 9.2 Fill the remember unit of work with a shared asyncio.Lock, and the system clock
+- [ ] 9.3 Write one behavioural contract suite per remember repository port
 
 #### Manual
 
-- [ ] 8.4 Confirm each contract suite reports its cases under the in_memory id
-- [ ] 8.5 Confirm a second UoW waits on the shared lock until the first window exits
+- [ ] 9.4 Confirm each contract suite reports its cases under the in_memory id
+- [ ] 9.5 Confirm a second UoW waits on the shared lock until the first window exits
 
-### Phase 9: The catalog onto distill
+### Phase 10: Review catalog stub
+
+#### Automated
+
+- [ ] 10.1 Write InMemoryReviewCatalog as a signature with `...` bodies
+
+#### Manual
+
+- [ ] 10.2 Confirm both catalog method bodies are still `...`
+
+### Phase 11: Fill the catalog and its contract suite
 
 #### Tests
 
@@ -133,14 +155,25 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 9.1 Write InMemoryReviewCatalog over NoteRepository.list_all
-- [ ] 9.2 Write the ReviewCatalog contract suite
+- [ ] 11.1 Fill InMemoryReviewCatalog over NoteRepository.list_all
+- [ ] 11.2 Write the ReviewCatalog contract suite
 
 #### Manual
 
-- [ ] 9.3 Confirm a discarded card is absent from both catalog methods
+- [ ] 11.3 Confirm a discarded card is absent from both catalog methods
 
-### Phase 10: The FSRS scheduler adapter
+### Phase 12: FSRS dependency and scheduler stub
+
+#### Automated
+
+- [ ] 12.1 Pin fsrs==6.3.2 as a backend dependency and run uv sync
+- [ ] 12.2 Write FsrsScheduler as a signature with `...` bodies
+
+#### Manual
+
+- [ ] 12.3 Confirm uv.lock records fsrs==6.3.2 and both bodies are still `...`
+
+### Phase 13: Fill the FSRS scheduler and prove repeatability
 
 #### Tests
 
@@ -148,15 +181,26 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 10.1 Pin fsrs==6.3.2 as a backend dependency
-- [ ] 10.2 Write FsrsScheduler with the grade mapping and due_at outside the blob
-- [ ] 10.3 Seed the fuzz from each event's own facts and restore the generator
+- [ ] 13.1 Fill FsrsScheduler with the grade mapping and due_at outside the blob
+- [ ] 13.2 Seed the fuzz from each event's own facts and restore the generator
 
 #### Manual
 
-- [ ] 10.4 Run the repeatability test twice and confirm the replayed due_at matches
+- [ ] 13.3 Run the repeatability test twice and confirm the replayed due_at matches
 
-### Phase 11: HTTP surface and composition
+### Phase 14: HTTP and composition stubs
+
+#### Automated
+
+- [ ] 14.1 Write the four review-sitting route signatures with `...` bodies
+- [ ] 14.2 Declare the four remember providers and the UoW factory in compose.py
+- [ ] 14.3 Include the remember router in main.py
+
+#### Manual
+
+- [ ] 14.4 Confirm the four routes appear in /docs while their bodies are still `...`
+
+### Phase 15: Fill the HTTP surface and composition
 
 #### Tests
 
@@ -164,22 +208,27 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 11.1 Write the four review-sitting routes returning application DTOs unmapped
-- [ ] 11.2 Wire every remember seam in compose.py and include the router
-- [ ] 11.3 Write the route tests for the happy loop and the 404 and 409 paths
+- [ ] 15.1 Fill the four routes returning application DTOs unmapped
+- [ ] 15.2 Wire every remember seam in compose.py over one shared lock
+- [ ] 15.3 Write the route tests for the happy loop and the 404 and 409 paths
 
 #### Manual
 
-- [ ] 11.4 Open a sitting over the running app and confirm a front with no back
+- [ ] 15.4 Open a sitting over the running app and confirm a front with no back
 
-### Phase 12: Migrate the acceptance steps onto the real adapters
+### Phase 16: Migrate the acceptance steps and the handler unit tests onto the real adapters
 
 #### Automated
 
-- [ ] 12.1 Write InMemoryRememberComposition in the integration support package
-- [ ] 12.2 Replace the step module's doubles with that composition
-- [ ] 12.3 Move the AC-07 assertion from a multiplier to a growing interval
+- [ ] 16.1 Write InMemoryRememberComposition in the integration support package
+- [ ] 16.2 Replace the step module's doubles with that composition
+- [ ] 16.3 Move the AC-07 assertion from a multiplier to a growing interval
+- [ ] 16.4 Add tests/unit/remember/conftest.py with the shared handler fixtures and builders
+- [ ] 16.5 Repoint the four handler unit-test modules onto the real in-memory adapters
+- [ ] 16.6 Drive the handler tests through FsrsScheduler except where a value must be forced
+- [ ] 16.7 Assert one commit on the happy path and no leaked write past an exception
 
 #### Manual
 
-- [ ] 12.4 Confirm only _FixedClock survives in the step module
+- [ ] 16.8 Confirm only _FixedClock survives in the step module
+- [ ] 16.9 Confirm every surviving double under tests/unit/remember is named for what it forces
