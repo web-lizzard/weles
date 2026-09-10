@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from domain.remember.value_objects import Grade
+
 
 class NothingDueDTO(BaseModel):
     kind: Literal["nothing_due"] = "nothing_due"
@@ -24,6 +26,10 @@ class RevealedCardDTO(BaseModel):
     card_id: UUID
     front: str
     back: str
+
+
+class GradeRequestDTO(BaseModel):
+    grade: Grade
 
 
 class GradeAppliedDTO(BaseModel):
