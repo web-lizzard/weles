@@ -343,17 +343,19 @@ describe("App", () => {
       expect(lastFrame() ?? "").not.toMatch(/\d+ cards due/);
     });
 
-    it("shows the partition total in a header row above the capture screen", () => {
+    it("shows the partition total in a footer row below the capture screen", () => {
       useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
 
       const { lastFrame } = render(<App />);
       const frame = lastFrame() ?? "";
 
       expect(frame).toContain("4 cards due");
-      expect(frame.indexOf("4 cards due")).toBeLessThan(frame.indexOf("Weles"));
+      expect(frame.indexOf("4 cards due")).toBeGreaterThan(
+        frame.indexOf("Weles"),
+      );
     });
 
-    it("keeps the due-count row visible above the notes overlay", async () => {
+    it("keeps the due-count row visible below the notes overlay", async () => {
       useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
 
       const { stdin, lastFrame } = render(<App />);
@@ -366,10 +368,10 @@ describe("App", () => {
       const escIndex = frame.indexOf("← ESC to go back");
 
       expect(dueIndex).toBeGreaterThanOrEqual(0);
-      expect(escIndex).toBeGreaterThan(dueIndex);
+      expect(dueIndex).toBeGreaterThan(escIndex);
     });
 
-    it("keeps the due-count row visible above the sitting overlay", async () => {
+    it("shows the due count in the sitting overlay footer instead of the shell row", async () => {
       useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
       vi.mocked(openSitting).mockResolvedValue({
         kind: "opened",
@@ -390,7 +392,8 @@ describe("App", () => {
       const cardIndex = frame.indexOf("What is a SYN?");
 
       expect(dueIndex).toBeGreaterThanOrEqual(0);
-      expect(cardIndex).toBeGreaterThan(dueIndex);
+      expect(dueIndex).toBeGreaterThan(cardIndex);
+      expect(frame.match(/4 cards due/g)?.length).toBe(1);
     });
   });
 

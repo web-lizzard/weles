@@ -9,16 +9,40 @@ export function duePartitionShowsBreakdown(partition: DuePartition): boolean {
   return partition.seenStillOwed > 0 || partition.ripeOutsideSitting > 0;
 }
 
-export function formatDueBreakdownLines(partition: DuePartition): string[] {
-  const lines: string[] = [];
+export type DueBreakdownEntry = {
+  key: "notYetSeen" | "seenStillOwed" | "ripeOutsideSitting";
+  count: number;
+  description: string;
+};
+
+export function dueBreakdownEntries(
+  partition: DuePartition,
+): DueBreakdownEntry[] {
+  const entries: DueBreakdownEntry[] = [];
   if (partition.notYetSeen > 0) {
-    lines.push(`${partition.notYetSeen} not yet seen`);
+    entries.push({
+      key: "notYetSeen",
+      count: partition.notYetSeen,
+      description: "not yet shown in this review",
+    });
   }
   if (partition.seenStillOwed > 0) {
-    lines.push(`${partition.seenStillOwed} seen and still owed`);
+    entries.push({
+      key: "seenStillOwed",
+      count: partition.seenStillOwed,
+      description: "graded, still in this review",
+    });
   }
   if (partition.ripeOutsideSitting > 0) {
-    lines.push(`${partition.ripeOutsideSitting} outside sitting`);
+    entries.push({
+      key: "ripeOutsideSitting",
+      count: partition.ripeOutsideSitting,
+      description: "due outside this review",
+    });
   }
-  return lines;
+  return entries;
 }
+
+/** Shown under the total when the sitting overlay has no bucket breakdown. */
+export const OVERLAY_DUE_TOTAL_HINT =
+  "Deck-wide due total (same as the line below when you exit review).";

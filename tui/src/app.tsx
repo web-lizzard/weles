@@ -54,47 +54,49 @@ export default function App() {
   });
 
   return (
-    <Box position="relative" flexDirection="column" height={rows}>
-      <DueCountHeader />
-      <CaptureScreen />
-      {isNotesOverlayOpen && (
-        <Box
-          position="absolute"
-          top={1}
-          left={0}
-          width={columns}
-          height={rows - 1}
-          flexDirection="column"
-          backgroundColor="black"
-          padding={1}
-        >
-          {isDetailOpen ? (
-            selectedCardId !== null ? (
-              <CardDetailScreen />
-            ) : activeNoteTab === "cards" ? (
-              <CardListScreen />
+    <Box flexDirection="column" height={rows}>
+      <Box position="relative" flexDirection="column" height={rows - 1}>
+        <CaptureScreen />
+        {isNotesOverlayOpen && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            width={columns}
+            height={rows - 1}
+            flexDirection="column"
+            backgroundColor="black"
+            padding={1}
+          >
+            {isDetailOpen ? (
+              selectedCardId !== null ? (
+                <CardDetailScreen />
+              ) : activeNoteTab === "cards" ? (
+                <CardListScreen />
+              ) : (
+                <NoteDetailScreen />
+              )
             ) : (
-              <NoteDetailScreen />
-            )
-          ) : (
-            <NoteListOverlay />
-          )}
-        </Box>
-      )}
-      {isSittingOverlayOpen && (
-        <Box
-          position="absolute"
-          top={1}
-          left={0}
-          width={columns}
-          height={rows - 1}
-          flexDirection="column"
-          backgroundColor="black"
-          padding={1}
-        >
-          <SittingOverlay />
-        </Box>
-      )}
+              <NoteListOverlay />
+            )}
+          </Box>
+        )}
+        {isSittingOverlayOpen && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            width={columns}
+            height={rows - 1}
+            flexDirection="column"
+            backgroundColor="black"
+            padding={1}
+          >
+            <SittingOverlay />
+          </Box>
+        )}
+      </Box>
+      {!isSittingOverlayOpen && <DueCountHeader />}
     </Box>
   );
 }

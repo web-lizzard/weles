@@ -78,9 +78,10 @@ describe("SittingOverlay due breakdown", () => {
     const frame = lastFrame() ?? "";
 
     expect(frame).toContain("3 cards due");
+    expect(frame).toContain("Deck-wide due total");
     expect(frame).not.toMatch(/\d+ left/i);
-    expect(frame).not.toMatch(/seen and still owed/i);
-    expect(frame).not.toMatch(/outside sitting/i);
+    expect(frame).not.toMatch(/graded, still in this review/i);
+    expect(frame).not.toMatch(/not yet shown in this review/i);
   });
 
   it("shows non-zero seen_still_owed and ripe_outside_sitting buckets beneath the total when a sitting is live", async () => {
@@ -96,9 +97,10 @@ describe("SittingOverlay due breakdown", () => {
     const frame = lastFrame() ?? "";
 
     expect(frame).toContain("5 cards due");
-    expect(frame).toMatch(/2 not yet seen/i);
-    expect(frame).toMatch(/1 seen and still owed/i);
-    expect(frame).toMatch(/2 outside sitting/i);
+    expect(frame).not.toContain("Why waiting:");
+    expect(frame).toMatch(/2 not yet shown in this review/i);
+    expect(frame).toMatch(/1 graded, still in this review/i);
+    expect(frame).toMatch(/2 due outside this review/i);
   });
 
   it("reads the footer total from dueStore rather than sittingStore outstandingCount", async () => {
