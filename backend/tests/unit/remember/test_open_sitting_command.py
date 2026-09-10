@@ -3,8 +3,16 @@ from datetime import timedelta
 
 from integration.support.in_memory_remember import InMemoryRememberComposition
 
+from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.dto import NothingDueDTO, SittingOpenedDTO, SittingResumedDTO
-from domain.remember.value_objects import Grade, ShowingLimit, SittingId
+from domain.remember.value_objects import (
+    MIN_RESUME_HORIZON,
+    CardId,
+    Grade,
+    ResumeHorizon,
+    ShowingLimit,
+    SittingId,
+)
 
 from .conftest import reviewable, stamp, state
 
@@ -145,14 +153,15 @@ async def test_a_resumed_sitting_reports_how_many_cards_remain_outstanding(
 async def test_resuming_after_one_grade_reports_one_card_still_outstanding(
     composition: InMemoryRememberComposition,
 ) -> None:
-    first = await reviewable(composition, front="Alpha")
+    _ = await reviewable(composition, front="Alpha")
     _ = await reviewable(composition, front="Beta")
 
     opened = await composition.open_sitting().handle()
     assert isinstance(opened, SittingOpenedDTO)
+    assert opened.card_id is not None
     _ = await composition.grade_card().handle(
         SittingId(value=opened.sitting_id),
-        first.id,
+        CardId(value=opened.card_id),
         Grade.GOOD,
     )
 
@@ -161,3 +170,47 @@ async def test_resuming_after_one_grade_reports_one_card_still_outstanding(
     assert isinstance(resumed, SittingResumedDTO)
     assert resumed.sitting_id == opened.sitting_id
     assert resumed.outstanding_count == 1
+
+
+async def test_open_sitting_without_resume_horizon_uses_min_resume_horizon(
+    composition: InMemoryRememberComposition,
+) -> None:
+    _ = await reviewable(composition)
+
+    command = OpenSittingCommand(
+        uow_factory=composition.unit_of_work,
+        catalog=composition.catalog,
+        clock=composition.clock,
+        showing_limit=composition.showing_limit,
+        scheduler=composition.scheduler,
+    )
+    result = await command.handle()
+
+    assert isinstance(result, SittingOpenedDTO)
+    sitting = await composition.sittings.get(SittingId(value=result.sitting_id))
+    assert sitting is not None
+    assert sitting.resume_horizon == ResumeHorizon(value=MIN_RESUME_HORIZON)
+
+
+async def test_a_resumed_sitting_carries_the_current_card_front(
+    composition: InMemoryRememberComposition,
+) -> None:
+    _ = await reviewable(composition, front="Resume me")
+
+    _ = await composition.open_sitting().handle()
+    resumed = await composition.open_sitting().handle()
+
+    assert isinstance(resumed, SittingResumedDTO)
+    assert resumed.front == "Resume me"
+
+
+async def test_an_opened_sitting_reports_how_many_cards_remain_outstanding(
+    composition: InMemoryRememberComposition,
+) -> None:
+    _ = await reviewable(composition, front="One")
+    _ = await reviewable(composition, front="Two")
+
+    opened = await composition.open_sitting().handle()
+
+    assert isinstance(opened, SittingOpenedDTO)
+    assert opened.outstanding_count == 2
