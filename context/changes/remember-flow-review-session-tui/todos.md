@@ -46,7 +46,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 5.1 Write `screens/SittingOverlay.tsx` component signature and per-phase render helper stubs
+- [x] 5.1 Write `screens/SittingOverlay.tsx` component signature and per-phase render helper stubs — 54c1dfa
 
 ### Phase 6: Sitting overlay — happy path behaviour
 
