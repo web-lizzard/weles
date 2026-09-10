@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
 current_phase: 10
-next_step: 10.2
-next_command: /implement remember-flow-due-count phase 10
+next_step: epilogue
+next_command: /implement remember-flow-due-count
 updated: 2026-09-11
 ---
 
@@ -123,8 +123,8 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 10.1 Replace the outstanding count footer with the total and its non-zero buckets
+- [x] 10.1 Replace the outstanding count footer with the total and its non-zero buckets — e8d7d68
 
 #### Manual
 
-- [x] 10.2 Grade a card hard in a live review and confirm header and overlay totals move together
+- [x] 10.2 Grade a card hard in a live review and confirm header and overlay totals move together — e8d7d68
