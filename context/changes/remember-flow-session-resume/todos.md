@@ -99,8 +99,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 9.1 Record the resume marker and the live outstanding count
-- [x] 9.2 Recover from sitting_expired by re-opening with a notice
+- [x] 9.1 Record the resume marker and the live outstanding count — d47a339
+- [x] 9.2 Recover from sitting_expired by re-opening with a notice — d47a339
 
 ### Phase 10: Overlay shows the return, the count, and the expiry
 
