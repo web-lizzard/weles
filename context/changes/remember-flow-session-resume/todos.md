@@ -19,12 +19,12 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 2.1 Add sitting_resume_horizon_hours to Settings
-- [x] 2.2 Compose ResumeHorizon and pass it to OpenSittingCommand
+- [x] 2.1 Add sitting_resume_horizon_hours to Settings — ce033a3
+- [x] 2.2 Compose ResumeHorizon and pass it to OpenSittingCommand — ce033a3
 
 #### Manual
 
-- [x] 2.3 Check a zero horizon is refused by the VO at compose time
+- [x] 2.3 Check a zero horizon is refused by the VO at compose time — ce033a3
 
 ### Phase 3: Convergent open returns a resumable sitting
 
