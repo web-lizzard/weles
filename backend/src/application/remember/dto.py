@@ -1,8 +1,9 @@
-from typing import Literal
+from typing import Literal, Self
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from domain.remember.due_partition import DuePartition
 from domain.remember.value_objects import Grade
 
 
@@ -11,6 +12,15 @@ class DuePartitionDTO(BaseModel):
     not_yet_seen: int = 0
     seen_still_owed: int = 0
     ripe_outside_sitting: int = 0
+
+    @classmethod
+    def from_domain(cls, partition: DuePartition) -> Self:
+        return cls(
+            total=partition.total,
+            not_yet_seen=partition.not_yet_seen,
+            seen_still_owed=partition.seen_still_owed,
+            ripe_outside_sitting=partition.ripe_outside_sitting,
+        )
 
 
 class DueCountDTO(BaseModel):

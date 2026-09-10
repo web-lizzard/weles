@@ -2,8 +2,9 @@ import asyncio
 from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 
-from application.remember.dto import GradeAppliedDTO
+from application.remember.dto import DuePartitionDTO, GradeAppliedDTO
 from application.remember.ports import Clock, UnitOfWork
+from domain.remember.due_partition import partition_due
 from domain.remember.exceptions import (
     CardNotInSittingError,
     CardNotPresentableError,
@@ -63,8 +64,27 @@ class GradeCardCommand:
             )
             previous = await self._previous_state(uow, card_id)
             next_state = self._scheduler.review(previous, card_id, grade, reviewed_at)
+            states = await uow.scheduling_states.get_many(tuple(by_id))
+            updated_states = dict(states)
+            updated_states[card_id] = next_state
+            events_after = (*sitting_events, event)
+            due = DuePartitionDTO.from_domain(
+                partition_due(
+                    frozenset(by_id),
+                    updated_states,
+                    sitting,
+                    events_after,
+                    reviewed_at,
+                    self._scheduler.stamp(),
+                )
+            )
             result = self._applied_dto(
-                sitting, sitting_id, present, sitting_events, event, by_id
+                sitting,
+                sitting_id,
+                present,
+                events_after,
+                by_id,
+                due,
             )
 
             async with asyncio.TaskGroup() as tg:
@@ -115,12 +135,10 @@ class GradeCardCommand:
         sitting: Sitting,
         sitting_id: SittingId,
         present: frozenset[CardId],
-        sitting_events: Sequence[ReviewEvent],
-        event: ReviewEvent,
+        events_after: Sequence[ReviewEvent],
         by_id: Mapping[CardId, ReviewableCard],
+        due: DuePartitionDTO,
     ) -> GradeAppliedDTO:
-        # Resume-slice: outstanding_count from sitting.outstanding after the event.
-        events_after = (*sitting_events, event)
         outstanding_count = len(sitting.outstanding(present, events_after))
         if sitting.is_finished(present, events_after):
             return GradeAppliedDTO(
@@ -129,6 +147,7 @@ class GradeCardCommand:
                 outstanding_count=outstanding_count,
                 next_card_id=None,
                 next_front=None,
+                due=due,
             )
         next_card_id = sitting.next_card(present, events_after)
         assert next_card_id is not None
@@ -139,4 +158,5 @@ class GradeCardCommand:
             outstanding_count=outstanding_count,
             next_card_id=next_card_id.value,
             next_front=next_card.front,
+            due=due,
         )

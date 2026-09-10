@@ -51,11 +51,4 @@ class DueCountQuery:
             as_of,
             self._scheduler.stamp(),
         )
-        return DueCountDTO(
-            due=DuePartitionDTO(
-                total=partition.total,
-                not_yet_seen=partition.not_yet_seen,
-                seen_still_owed=partition.seen_still_owed,
-                ripe_outside_sitting=partition.ripe_outside_sitting,
-            )
-        )
+        return DueCountDTO(due=DuePartitionDTO.from_domain(partition))

@@ -110,7 +110,12 @@ class InMemoryRememberComposition:
 
     def current_card(self) -> CurrentCardQuery:
         return CurrentCardQuery(
-            self.sittings, self.review_events, self.catalog, self.clock
+            self.sittings,
+            self.review_events,
+            self.catalog,
+            self.scheduling_states,
+            self.clock,
+            self.scheduler,
         )
 
     def due_count(self) -> DueCountQuery:
