@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 7
-next_step: 8.1
+current_phase: 8
+next_step: tests
 next_command: /unit-test remember-flow-due-count phase 8
 updated: 2026-09-11
 ---
