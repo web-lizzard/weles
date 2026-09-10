@@ -10,7 +10,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 1.1 Add DuePartition and the partition_due signature in domain/remember/due_partition.py
+- [x] 1.1 Add DuePartition and the partition_due signature in domain/remember/due_partition.py — 5038d5a
 
 ### Phase 2: Due partition behaviour
 
