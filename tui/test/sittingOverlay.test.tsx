@@ -4,6 +4,7 @@ import {
   gradeCard,
   openSitting,
   revealBack,
+  SITTING_EXPIRED,
   SittingHttpError,
 } from "../src/api/sittings";
 import SittingOverlay from "../src/screens/SittingOverlay";
@@ -48,6 +49,9 @@ function resetStore() {
     isSubmitting: false,
     error: null,
     lastAction: null,
+    isResumed: false,
+    outstandingCount: 0,
+    notice: null,
   });
 }
 
@@ -309,5 +313,77 @@ describe("SittingOverlay", () => {
 
     expect(openSitting).toHaveBeenCalledTimes(2);
     expect(lastFrame()).toContain("Recovered front");
+  });
+
+  it("shows a Resumed marker and the outstanding count when open returns a resumed sitting", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "resumed",
+      sittingId,
+      cardId,
+      front: "Pick up here",
+      sittingComplete: false,
+      outstandingCount: 3,
+    });
+
+    const { lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("Resumed");
+    expect(frame).toContain("Pick up here");
+    expect(frame).toMatch(/3 left/i);
+  });
+
+  it("shows the outstanding count without a Resumed marker on a freshly opened sitting", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "New session front",
+      sittingComplete: false,
+      outstandingCount: 2,
+    });
+
+    const { lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    const frame = lastFrame() ?? "";
+    expect(frame).not.toContain("Resumed");
+    expect(frame).toContain("New session front");
+    expect(frame).toMatch(/2 left/i);
+  });
+
+  it("shows an expiry notice alongside the card instead of replacing it", async () => {
+    vi.mocked(openSitting)
+      .mockResolvedValueOnce({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "Before expiry",
+        sittingComplete: false,
+        outstandingCount: 1,
+      })
+      .mockResolvedValueOnce({
+        kind: "opened",
+        sittingId: "00000000-0000-4000-8000-000000000002",
+        cardId,
+        front: "After recovery",
+        sittingComplete: false,
+        outstandingCount: 1,
+      });
+    vi.mocked(gradeCard).mockRejectedValue(
+      new SittingHttpError(SITTING_EXPIRED, "Sitting no longer offered", 409),
+    );
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "3");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const frame = lastFrame() ?? "";
+    expect(frame).toMatch(/expired/i);
+    expect(frame).toContain("After recovery");
+    expect(frame).not.toMatch(/press r/i);
   });
 });
