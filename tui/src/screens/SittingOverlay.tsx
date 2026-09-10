@@ -2,6 +2,12 @@ import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import type { Grade } from "../api/sittings.js";
+import {
+  duePartitionShowsBreakdown,
+  formatDueBreakdownLines,
+  formatDueLine,
+} from "../lib/dueFormat.js";
+import { useDueStore } from "../store/due.js";
 import { useAppStore } from "../store/index.js";
 import { useSittingStore } from "../store/sitting.js";
 
@@ -26,6 +32,7 @@ export default function SittingOverlay(): JSX.Element {
   const isResumed = useSittingStore((s) => s.isResumed);
   const outstandingCount = useSittingStore((s) => s.outstandingCount);
   const notice = useSittingStore((s) => s.notice);
+  const partition = useDueStore((s) => s.partition);
 
   useEffect(() => {
     void useSittingStore.getState().open();
@@ -102,7 +109,19 @@ export default function SittingOverlay(): JSX.Element {
   const footer =
     sittingId !== null ? (
       <Box flexDirection="column">
-        <Text color="yellow">{outstandingCount} left</Text>
+        {partition !== null ? (
+          <>
+            <Text color="yellow">{formatDueLine(partition.total)}</Text>
+            {duePartitionShowsBreakdown(partition) &&
+              formatDueBreakdownLines(partition).map((line) => (
+                <Text key={line} color="yellow">
+                  {line}
+                </Text>
+              ))}
+          </>
+        ) : (
+          <Text color="yellow">{outstandingCount} left</Text>
+        )}
         {phase === "presented" && (
           <Text color="yellow">{TOGGLE_CARD_HINT}</Text>
         )}
