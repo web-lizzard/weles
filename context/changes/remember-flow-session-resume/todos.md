@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 5
-next_step: 5.1
-next_command: /unit-test remember-flow-session-resume phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /implement remember-flow-session-resume phase 6
 updated: 2026-09-10
 ---
 
@@ -53,16 +53,16 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 9a36a36
 
 #### Automated
 
-- [ ] 5.1 Refuse an expired sitting in _guard_grade before any write
-- [ ] 5.2 Refuse an expired sitting in both read handlers
+- [x] 5.1 Refuse an expired sitting in _guard_grade before any write — 2789d70
+- [x] 5.2 Refuse an expired sitting in both read handlers — 2789d70
 
 #### Manual
 
-- [ ] 5.3 Confirm all three by-id routes return 409 sitting_expired past the horizon
+- [x] 5.3 Confirm all three by-id routes return 409 sitting_expired past the horizon — 2789d70
 
 ### Phase 6: TUI API client stubs
 
