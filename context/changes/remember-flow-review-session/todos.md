@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 7
-next_step: 7.4
-next_command: /implement remember-flow-review-session phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test remember-flow-review-session phase 8
 updated: 2026-09-10
 ---
 
@@ -106,7 +106,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 7.4 Confirm the stale-stamp path uses the replayed state, not the memoized one
+- [x] 7.4 Confirm the stale-stamp path uses the replayed state, not the memoized one
 
 ### Phase 8: In-memory adapters, unit of work, and port contracts
 
