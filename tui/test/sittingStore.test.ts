@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { DuePartition } from "../src/api/due";
 import {
   gradeCard,
   openSitting,
@@ -6,6 +7,7 @@ import {
   SITTING_EXPIRED,
   SittingHttpError,
 } from "../src/api/sittings";
+import { useDueStore } from "../src/store/due";
 import { useSittingStore } from "../src/store/sitting";
 
 vi.mock("../src/api/sittings", async (importOriginal) => {
@@ -21,6 +23,17 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
 const sittingId = "00000000-0000-4000-8000-000000000001";
 const cardId = "00000000-0000-4000-8000-000000000101";
 const nextCardId = "00000000-0000-4000-8000-000000000102";
+
+const DUE_PARTITION: DuePartition = {
+  total: 5,
+  notYetSeen: 2,
+  seenStillOwed: 1,
+  ripeOutsideSitting: 2,
+};
+
+function resetDueStore() {
+  useDueStore.setState({ partition: null, isStale: false });
+}
 
 function resetStore() {
   useSittingStore.setState({
@@ -43,6 +56,7 @@ function resetStore() {
 describe("useSittingStore", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    resetDueStore();
     resetStore();
     vi.mocked(openSitting).mockReset();
     vi.mocked(revealBack).mockReset();
@@ -51,6 +65,55 @@ describe("useSittingStore", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("pushes due from openSitting into dueStore on a successful open", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "What is a SYN?",
+      sittingComplete: false,
+      outstandingCount: 0,
+      due: DUE_PARTITION,
+    });
+
+    await useSittingStore.getState().open();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useDueStore.getState().partition).toEqual(DUE_PARTITION);
+    expect(useDueStore.getState().isStale).toBe(false);
+  });
+
+  it("pushes due from gradeCard into dueStore on a successful grade", async () => {
+    const updatedDue: DuePartition = {
+      total: 3,
+      notYetSeen: 0,
+      seenStillOwed: 2,
+      ripeOutsideSitting: 1,
+    };
+    vi.mocked(gradeCard).mockResolvedValue({
+      sittingId,
+      outstandingCount: 1,
+      sittingComplete: false,
+      nextCardId,
+      nextFront: "Next front",
+      due: updatedDue,
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Front",
+      selectedGradeIndex: 1,
+    });
+    useDueStore.setState({ partition: DUE_PARTITION, isStale: true });
+
+    await useSittingStore.getState().submitGrade("hard");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useDueStore.getState().partition).toEqual(updatedDue);
+    expect(useDueStore.getState().isStale).toBe(false);
   });
 
   it("enters presented with a fresh card when openSitting returns an opened sitting", async () => {

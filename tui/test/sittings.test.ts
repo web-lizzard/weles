@@ -28,6 +28,20 @@ describe("sittings API", () => {
     vi.restoreAllMocks();
   });
 
+  const duePartitionRaw = {
+    total: 5,
+    not_yet_seen: 2,
+    seen_still_owed: 1,
+    ripe_outside_sitting: 2,
+  };
+
+  const duePartition = {
+    total: 5,
+    notYetSeen: 2,
+    seenStillOwed: 1,
+    ripeOutsideSitting: 2,
+  };
+
   it("maps an opened sitting from snake_case to camelCase", async () => {
     mockFetchJson({
       kind: "opened",
@@ -36,6 +50,7 @@ describe("sittings API", () => {
       front: "What is a SYN?",
       sitting_complete: false,
       outstanding_count: 0,
+      due: duePartitionRaw,
     });
 
     const result = await openSitting();
@@ -47,6 +62,7 @@ describe("sittings API", () => {
       front: "What is a SYN?",
       sittingComplete: false,
       outstandingCount: 0,
+      due: duePartition,
     });
   });
 
@@ -120,6 +136,21 @@ describe("sittings API", () => {
     });
   });
 
+  it("maps due on gradeCard from the response body", async () => {
+    mockFetchJson({
+      sitting_id: sittingId,
+      sitting_complete: false,
+      outstanding_count: 1,
+      next_card_id: cardId,
+      next_front: "Next front",
+      due: duePartitionRaw,
+    });
+
+    const result = await gradeCard(sittingId, cardId, "good");
+
+    expect(result.due).toEqual(duePartition);
+  });
+
   it("posts the grade in the request body and maps gradeCard from snake_case", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
@@ -129,6 +160,7 @@ describe("sittings API", () => {
           outstanding_count: 0,
           next_card_id: null,
           next_front: null,
+          due: duePartitionRaw,
         }),
         {
           status: 200,
@@ -154,6 +186,7 @@ describe("sittings API", () => {
       outstandingCount: 0,
       nextCardId: null,
       nextFront: null,
+      due: duePartition,
     });
   });
 
