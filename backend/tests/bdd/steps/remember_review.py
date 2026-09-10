@@ -15,6 +15,7 @@ from application.remember.dto import (
     PresentedCardDTO,
     RevealedCardDTO,
     SittingOpenedDTO,
+    SittingResumedDTO,
 )
 from domain.distill.card import Card
 from domain.distill.note import Note
@@ -61,7 +62,7 @@ class RememberFlowContext:
     composition: InMemoryRememberComposition
     cards_by_label: dict[str, ReviewableCard] = field(default_factory=dict)
     distill_cards_by_label: dict[str, Card] = field(default_factory=dict)
-    last_open_result: SittingOpenedDTO | NothingDueDTO | None = None
+    last_open_result: SittingOpenedDTO | SittingResumedDTO | NothingDueDTO | None = None
     last_presented: PresentedCardDTO | None = None
     last_reveal_result: RevealedCardDTO | None = None
     last_grade_result: GradeAppliedDTO | None = None

@@ -15,10 +15,15 @@ class PresentedCardDTO(BaseModel):
     card_id: UUID | None
     front: str | None
     sitting_complete: bool
+    outstanding_count: int = 0
 
 
 class SittingOpenedDTO(PresentedCardDTO):
     kind: Literal["opened"] = "opened"
+
+
+class SittingResumedDTO(PresentedCardDTO):
+    kind: Literal["resumed"] = "resumed"
 
 
 class RevealedCardDTO(BaseModel):
@@ -35,5 +40,6 @@ class GradeRequestDTO(BaseModel):
 class GradeAppliedDTO(BaseModel):
     sitting_id: UUID
     sitting_complete: bool
+    outstanding_count: int = 0
     next_card_id: UUID | None
     next_front: str | None

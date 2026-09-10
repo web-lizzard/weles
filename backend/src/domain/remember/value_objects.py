@@ -1,9 +1,13 @@
+from datetime import timedelta
 from enum import StrEnum
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, model_validator
 
-from domain.remember.exceptions import InvalidShowingLimitError
+from domain.remember.exceptions import (
+    InvalidResumeHorizonError,
+    InvalidShowingLimitError,
+)
 
 
 class Grade(StrEnum):
@@ -71,4 +75,26 @@ class ShowingLimit(BaseModel, frozen=True):
     def _validate_positive(self) -> "ShowingLimit":
         if self.value < 1:
             raise InvalidShowingLimitError
+        return self
+
+
+MIN_RESUME_HORIZON = timedelta(days=1)
+"""Planned Settings default for ResumeHorizon. Not a type floor; /plan wires it."""
+
+
+class ResumeHorizon(BaseModel, frozen=True):
+    """How long a sitting stays offered for silent return.
+
+    Snapshotted on Sitting at open from settings, same as ShowingLimit.
+    Must be strictly positive. Compose wraps settings once; later
+    commands never read env. Default duration is MIN_RESUME_HORIZON
+    in Settings (plan), not this validator.
+    """
+
+    value: timedelta
+
+    @model_validator(mode="after")
+    def _validate_positive(self) -> "ResumeHorizon":
+        if self.value <= timedelta(0):
+            raise InvalidResumeHorizonError
         return self

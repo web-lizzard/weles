@@ -19,6 +19,7 @@ from application.remember.dto import (
     PresentedCardDTO,
     RevealedCardDTO,
     SittingOpenedDTO,
+    SittingResumedDTO,
 )
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.reveal_back import RevealBackQuery
@@ -30,7 +31,7 @@ router = APIRouter()
 @router.post("/review-sittings")
 async def open_sitting(
     command: Annotated[OpenSittingCommand, Depends(get_open_sitting_command)],
-) -> SittingOpenedDTO | NothingDueDTO:
+) -> SittingOpenedDTO | SittingResumedDTO | NothingDueDTO:
     return await command.handle()
 
 
