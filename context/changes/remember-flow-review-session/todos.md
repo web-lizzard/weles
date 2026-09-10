@@ -15,7 +15,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [x] 1.3 R4-F1 Four remember-flow step phrases resolve under no registered keyword (proof: cb66884)
+- [x] 1.3 R4-F1 Four remember-flow step phrases resolve under no registered keyword (proof: cb66884) — c56f18d
 - [ ] 1.4 R4-F3 The card-in-front step asserts the outcome of a seeded coin flip (proof: cb66884)
 
 ### Phase 2: Domain — membership and due-ness
