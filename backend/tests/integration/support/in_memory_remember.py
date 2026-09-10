@@ -5,6 +5,7 @@ from typing import cast
 
 from adapters.compose import (
     get_current_card_query,
+    get_due_count_query,
     get_grade_card_command,
     get_open_sitting_command,
     get_reveal_back_query,
@@ -28,6 +29,7 @@ from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.ports import Clock, UnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
+from application.remember.queries.due_count import DueCountQuery
 from application.remember.queries.reveal_back import RevealBackQuery
 from domain.remember.value_objects import (
     MIN_RESUME_HORIZON,
@@ -111,6 +113,16 @@ class InMemoryRememberComposition:
             self.sittings, self.review_events, self.catalog, self.clock
         )
 
+    def due_count(self) -> DueCountQuery:
+        return DueCountQuery(
+            self.sittings,
+            self.review_events,
+            self.catalog,
+            self.scheduling_states,
+            self.clock,
+            self.scheduler,
+        )
+
     def reveal_back(self) -> RevealBackQuery:
         return RevealBackQuery(self.sittings, self.catalog, self.clock)
 
@@ -121,5 +133,6 @@ class InMemoryRememberComposition:
             get_open_sitting_command: self.open_sitting,
             get_grade_card_command: self.grade_card,
             get_current_card_query: self.current_card,
+            get_due_count_query: self.due_count,
             get_reveal_back_query: self.reveal_back,
         }

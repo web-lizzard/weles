@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 
 from adapters.compose import (
     get_current_card_query,
+    get_due_count_query,
     get_grade_card_command,
     get_open_sitting_command,
     get_reveal_back_query,
@@ -13,6 +14,7 @@ from adapters.compose import (
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.dto import (
+    DueCountDTO,
     GradeAppliedDTO,
     GradeRequestDTO,
     NothingDueDTO,
@@ -22,10 +24,18 @@ from application.remember.dto import (
     SittingResumedDTO,
 )
 from application.remember.queries.current_card import CurrentCardQuery
+from application.remember.queries.due_count import DueCountQuery
 from application.remember.queries.reveal_back import RevealBackQuery
 from domain.remember.value_objects import CardId, SittingId
 
 router = APIRouter()
+
+
+@router.get("/due-cards/count")
+async def due_cards_count(
+    query: Annotated[DueCountQuery, Depends(get_due_count_query)],
+) -> DueCountDTO:
+    return await query.handle()
 
 
 @router.post("/review-sittings")

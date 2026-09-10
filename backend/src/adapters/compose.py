@@ -85,6 +85,7 @@ from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.ports import UnitOfWork as RememberUnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
+from application.remember.queries.due_count import DueCountQuery
 from application.remember.queries.reveal_back import RevealBackQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import Settings
@@ -285,6 +286,17 @@ def get_current_card_query() -> CurrentCardQuery:
         _remember_review_events,
         _remember_catalog,
         _remember_clock,
+    )
+
+
+def get_due_count_query() -> DueCountQuery:
+    return DueCountQuery(
+        _remember_sittings,
+        _remember_review_events,
+        _remember_catalog,
+        _remember_scheduling_states,
+        _remember_clock,
+        _remember_scheduler,
     )
 
 
