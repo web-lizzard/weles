@@ -1,0 +1,133 @@
+import random
+from datetime import UTC, datetime, timedelta
+from uuid import uuid4
+
+from adapters.out.fsrs.scheduler import FsrsScheduler
+from domain.remember.ports import SchedulingReplay
+from domain.remember.review_event import ReviewEvent
+from domain.remember.scheduling_state import SchedulingState
+from domain.remember.value_objects import (
+    CardId,
+    Grade,
+    SchedulerAlgorithm,
+    SittingId,
+)
+
+
+def _card_id() -> CardId:
+    return CardId(value=uuid4())
+
+
+def _event(card_id: CardId, *, reviewed_at: datetime, grade: Grade) -> ReviewEvent:
+    return ReviewEvent(
+        card_id=card_id,
+        reviewed_at=reviewed_at,
+        grade=grade,
+        sitting_id=SittingId.new(),
+    )
+
+
+def _growing_log(card_id: CardId, base: datetime) -> tuple[ReviewEvent, ...]:
+    """A log whose grades push the interval past the library's fuzz threshold."""
+    grades = (Grade.GOOD, Grade.GOOD, Grade.EASY, Grade.EASY, Grade.GOOD, Grade.EASY)
+    events: list[ReviewEvent] = []
+    reviewed_at = base
+    for index, grade in enumerate(grades):
+        events.append(_event(card_id, reviewed_at=reviewed_at, grade=grade))
+        reviewed_at = reviewed_at + timedelta(days=3 * (index + 1) + 1)
+    return tuple(events)
+
+
+def _review_sequentially(
+    scheduler: FsrsScheduler,
+    card_id: CardId,
+    events: tuple[ReviewEvent, ...],
+) -> SchedulingState:
+    previous: SchedulingState | None = None
+    for event in events:
+        previous = scheduler.review(
+            previous,
+            card_id,
+            event.grade,
+            event.reviewed_at,
+        )
+    assert previous is not None
+    return previous
+
+
+def test_stamp_names_the_fsrs_algorithm_and_the_pinned_parameter_version() -> None:
+    stamp = FsrsScheduler().stamp()
+
+    assert stamp.algorithm == SchedulerAlgorithm.FSRS
+    assert stamp.parameter_version == "fsrs-6.3.2-defaults"
+
+
+def test_review_of_a_first_showing_returns_a_state_due_after_the_review_moment() -> (
+    None
+):
+    scheduler = FsrsScheduler()
+    card_id = _card_id()
+    reviewed_at = datetime(2026, 5, 1, tzinfo=UTC)
+
+    state = scheduler.review(None, card_id, Grade.GOOD, reviewed_at)
+
+    assert state.card_id == card_id
+    assert state.stamp == scheduler.stamp()
+    assert state.due_at > reviewed_at
+    assert state.due_at.tzinfo is not None
+    assert state.scheduler_state.payload != {}
+
+
+def test_review_delays_a_card_further_for_each_better_grade_at_the_same_moment() -> (
+    None
+):
+    scheduler = FsrsScheduler()
+    card_id = _card_id()
+    reviewed_at = datetime(2026, 5, 1, tzinfo=UTC)
+
+    due_ats = [
+        scheduler.review(None, card_id, grade, reviewed_at).due_at
+        for grade in (Grade.FORGOT, Grade.HARD, Grade.GOOD, Grade.EASY)
+    ]
+
+    assert due_ats == sorted(due_ats)
+    assert len(set(due_ats)) == len(due_ats)
+
+
+def test_review_carrying_a_previous_state_delays_further_than_a_first_showing() -> None:
+    scheduler = FsrsScheduler()
+    card_id = _card_id()
+    first_at = datetime(2026, 5, 1, tzinfo=UTC)
+    second_at = first_at + timedelta(days=1)
+
+    first = scheduler.review(None, card_id, Grade.GOOD, first_at)
+    second = scheduler.review(first, card_id, Grade.GOOD, second_at)
+    fresh = scheduler.review(None, card_id, Grade.GOOD, second_at)
+
+    assert second.due_at - second_at > first.due_at - first_at
+    assert second.due_at > fresh.due_at
+
+
+def test_replay_over_fsrs_reproduces_the_due_at_of_the_sequential_live_path() -> None:
+    card_id = _card_id()
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    events = _growing_log(card_id, base)
+
+    live = _review_sequentially(FsrsScheduler(), card_id, events)
+    replayed = SchedulingReplay(FsrsScheduler()).replay(card_id, events)
+
+    assert replayed is not None
+    assert replayed.due_at - events[-1].reviewed_at > timedelta(days=3)
+    assert replayed.due_at == live.due_at
+
+
+def test_review_leaves_the_global_random_generator_state_untouched() -> None:
+    scheduler = FsrsScheduler()
+    reviewed_at = datetime(2026, 5, 1, tzinfo=UTC)
+    random.seed(1234)
+    before = random.getstate()
+
+    state = scheduler.review(None, _card_id(), Grade.GOOD, reviewed_at)
+
+    assert state.due_at > reviewed_at
+    assert random.getstate() == before
