@@ -175,3 +175,17 @@ async def test_a_discarded_member_is_excluded_from_the_draw() -> None:
     assert result.card_id == kept.id.value
     assert result.front == "Still reviewable"
     assert result.sitting_complete is False
+
+
+async def test_a_finished_sitting_reports_completion_through_the_dto() -> None:
+    """Phase 6 contract: sitting_complete comes from is_finished on the DTO."""
+    card = _reviewable(front="Finished by grade")
+    sitting = _open_sitting(card)
+    events = (_event(card.id, sitting.id, Grade.GOOD),)
+    catalog = _Catalog([card])
+    query, _ = await _saved_query(sitting=sitting, catalog=catalog, events=events)
+
+    result = await query.handle(sitting.id)
+
+    assert isinstance(result, PresentedCardDTO)
+    assert result.sitting_complete is True
