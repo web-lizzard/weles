@@ -44,6 +44,7 @@ describe("sittings API", () => {
       cardId,
       front: "What is a SYN?",
       sittingComplete: false,
+      outstandingCount: 0,
     });
   });
 
@@ -103,6 +104,7 @@ describe("sittings API", () => {
     expect(result).toEqual({
       sittingId,
       sittingComplete: true,
+      outstandingCount: 0,
       nextCardId: null,
       nextFront: null,
     });

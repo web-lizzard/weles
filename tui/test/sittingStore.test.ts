@@ -62,6 +62,7 @@ describe("useSittingStore", () => {
       cardId,
       front: "What is a SYN?",
       sittingComplete: false,
+      outstandingCount: 0,
     });
 
     await useSittingStore.getState().open();
@@ -124,12 +125,14 @@ describe("useSittingStore", () => {
     vi.mocked(gradeCard)
       .mockResolvedValueOnce({
         sittingId,
+        outstandingCount: 0,
         sittingComplete: false,
         nextCardId,
         nextFront: "Next front",
       })
       .mockResolvedValueOnce({
         sittingId,
+        outstandingCount: 0,
         sittingComplete: true,
         nextCardId: null,
         nextFront: null,
@@ -171,6 +174,7 @@ describe("useSittingStore", () => {
         cardId,
         front: "Recovered",
         sittingComplete: false,
+        outstandingCount: 0,
       });
 
     await useSittingStore.getState().open();

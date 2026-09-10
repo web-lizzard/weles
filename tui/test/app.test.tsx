@@ -323,6 +323,7 @@ describe("App", () => {
         cardId,
         front: "What is a SYN?",
         sittingComplete: false,
+        outstandingCount: 0,
       });
 
       const { stdin, lastFrame } = render(<App />);
@@ -344,6 +345,7 @@ describe("App", () => {
         cardId,
         front: "What is a SYN?",
         sittingComplete: false,
+        outstandingCount: 0,
       });
 
       const { stdin, lastFrame } = render(<App />);
@@ -368,6 +370,7 @@ describe("App", () => {
         cardId,
         front: "What is a SYN?",
         sittingComplete: false,
+        outstandingCount: 0,
       });
 
       const { stdin, lastFrame } = render(<App />);
