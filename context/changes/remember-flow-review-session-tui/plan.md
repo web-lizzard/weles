@@ -221,6 +221,19 @@ Artifact: `reviews/2026-09-10-r1-impl-review.md`
 - `R1-F2` — Sitting API bypasses the shared openapi-typed client
   Fix: Route sitting HTTP calls through `client` and the regenerated OpenAPI path types, keeping camelCase DTO mapping at the module boundary like `cards.ts` and `notes.ts`.
 
+### Review r2
+
+Artifact: `reviews/2026-09-10-r2-impl-review.md`
+
+- `R2-F1` — `api/client.ts` modified outside any phase's Changes Required
+  Fix: A fix that reaches into a shared, already-existing file outside the plan's Changes Required is out of scope for a phase whose Contract promises no new symbols; either amend the phase's Contract to name `client.ts` explicitly or land the shared-file change as its own reviewed step.
+- `R2-F2` — Untested cross-cutting change to the shared fetch delegate
+  Fix: A change to `api/client.ts`'s fetch delegate needs its own direct test coverage (not only indirect coverage through one domain's request-shape assertions) before it ships, since every other domain module depends on the same function.
+- `R2-F3` — `openSitting` raises on the backend's own "just completed, no card" response
+  Fix: `openSitting` must treat a `kind: "opened"` response carrying `card_id: null`/`front: null` with `sitting_complete: true` as a normal, non-raising outcome — per the plan's own stated premise — not as an error condition.
+- `R2-F5` — Private helper declared before the public functions that use it
+  Fix: Move `throwOnClientError` below `gradeCard`, after the public exports, per `context/foundation/rules/code-ordering.md`'s public-before-private rule and both cited siblings.
+
 ---
 
 ## Phase 3: Sitting store stubs
@@ -307,6 +320,15 @@ initial state (called on overlay close).
 - `cd tui && pnpm vitest run test/sittingStore.test.ts`
 - `cd tui && pnpm test`
 
+### Review r2
+
+Artifact: `reviews/2026-09-10-r2-impl-review.md`
+
+- `R2-F4` — `submitGrade` has no re-entrancy guard
+  Fix: `submitGrade` (and the `useInput` dispatch that calls it) must treat `isSubmitting: true` as a guard against re-entry, not just a display flag, so the same card cannot be graded twice from one rapid double keypress.
+- `R2-F7` — `toggleBack` has no re-entrancy guard on the first reveal
+  Fix: `toggleBack` needs an in-flight guard (e.g. checking `lastAction`/a pending flag) for the first-reveal window, not only the `back !== null` check, so the plan's Critical Implementation Details promise — "fetches the back at most once per presented card" — holds under rapid double-press too.
+
 ---
 
 ## Phase 5: Sitting overlay stubs
@@ -388,6 +410,13 @@ every other state — no extra affordance). `error` renders `{code, detail}` (pe
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/sittingOverlay.test.tsx`
 - `cd tui && pnpm test`
+
+### Review r2
+
+Artifact: `reviews/2026-09-10-r2-impl-review.md`
+
+- `R2-F6` — Private render helpers declared before the public default export
+  Fix: Move the five private render helpers below `SittingOverlay`'s default export, per `context/foundation/rules/code-ordering.md`'s public-before-private rule and both cited siblings.
 
 ---
 
