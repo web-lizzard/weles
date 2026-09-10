@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 6
-next_step: 6.4
-next_command: /implement remember-flow-due-count phase 6
+current_phase: 7
+next_step: 8.1
+next_command: /unit-test remember-flow-due-count phase 8
 updated: 2026-09-11
 ---
 
@@ -73,18 +73,18 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 6.4 Confirm seen_still_owed is zero on a fresh sitting and non-zero after a hard grade
+- [x] 6.4 Confirm seen_still_owed is zero on a fresh sitting and non-zero after a hard grade
 
 ### Phase 7: TUI API client and due store stubs
 
 #### Automated
 
-- [ ] 7.1 Add api/due.ts with DuePartition and the fetchDueCount signature
-- [ ] 7.2 Add store/due.ts and hooks/useDuePolling.ts on the notesStore polling shape
+- [x] 7.1 Add api/due.ts with DuePartition and the fetchDueCount signature
+- [x] 7.2 Add store/due.ts and hooks/useDuePolling.ts on the notesStore polling shape
 
 #### Manual
 
-- [ ] 7.3 Regenerate schema.d.ts against a running backend
+- [x] 7.3 Regenerate schema.d.ts against a running backend
 
 ### Phase 8: Due client and store behaviour
 
