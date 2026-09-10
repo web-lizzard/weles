@@ -33,6 +33,9 @@ function resetStore() {
     isSubmitting: false,
     error: null,
     lastAction: null,
+    isResumed: false,
+    outstandingCount: 0,
+    notice: null,
   });
 }
 

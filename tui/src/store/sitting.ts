@@ -30,6 +30,9 @@ type SittingState = {
   isSubmitting: boolean;
   error: { code: string; detail: string } | null;
   lastAction: LastAction | null;
+  isResumed: boolean;
+  outstandingCount: number;
+  notice: string | null;
 };
 
 type SittingActions = {
@@ -56,6 +59,9 @@ const initialState: SittingState = {
   isSubmitting: false,
   error: null,
   lastAction: null,
+  isResumed: false,
+  outstandingCount: 0,
+  notice: null,
 };
 
 function sittingHttpErrorState(error: SittingHttpError): Partial<SittingState> {
