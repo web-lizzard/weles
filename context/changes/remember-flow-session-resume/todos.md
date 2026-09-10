@@ -1,19 +1,19 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 1
-next_step: 1.1
-next_command: /implement remember-flow-session-resume phase 1
-updated: 2026-09-10
+current_phase: 2
+next_step: 2.1
+next_command: /implement remember-flow-session-resume phase 2
+updated: 2026-09-11
 ---
 
 ### Phase 1: Acceptance layer for AC-10 through AC-13
 
 #### Manual
 
-- [ ] 1.1 Add advance to _FixedClock and a resume_horizon seam on the test composition
-- [ ] 1.2 Author the AC-10/AC-11 and AC-12/AC-13 scenarios via /bdd
-- [ ] 1.3 Confirm the new scenarios fail on assertions, not collection
-- [ ] 1.4 Confirm the clock change breaks no existing remember-flow scenario
+- [x] 1.1 Add advance to _FixedClock and a resume_horizon seam on the test composition
+- [x] 1.2 Author the AC-10/AC-11 and AC-12/AC-13 scenarios via /bdd
+- [x] 1.3 Confirm the new scenarios fail on assertions, not collection
+- [x] 1.4 Confirm the clock change breaks no existing remember-flow scenario
 
 ### Phase 2: Settings and composition wiring
 
