@@ -331,6 +331,8 @@ describe("App", () => {
       await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
 
       expect(lastFrame()).toContain("1 Forgot");
+      expect(lastFrame()).toContain("← ESC to go back");
+      expect(lastFrame()).toContain("Press t to toggle card");
       expect(sendMessage).not.toHaveBeenCalled();
       expect(openSitting).toHaveBeenCalledTimes(1);
     });
