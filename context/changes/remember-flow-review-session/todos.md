@@ -203,7 +203,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [x] 14.4 Confirm the four routes appear in /docs while their bodies are still `...`
+- [x] 14.4 Confirm the four routes appear in /docs while their bodies are still `...` — fe93f8d
 
 ### Phase 15: Fill the HTTP surface and composition
 
