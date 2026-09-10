@@ -106,7 +106,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [x] 7.4 Confirm the stale-stamp path uses the replayed state, not the memoized one
+- [x] 7.4 Confirm the stale-stamp path uses the replayed state, not the memoized one — aa65e20
 
 ### Phase 8: In-memory adapters, unit of work, and port contracts
 
