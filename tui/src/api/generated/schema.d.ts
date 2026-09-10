@@ -123,6 +123,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/review-sittings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Open Sitting */
+    post: operations["open_sitting_review_sittings_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/review-sittings/{sitting_id}/current-card": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Current Card */
+    get: operations["current_card_review_sittings__sitting_id__current_card_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/review-sittings/{sitting_id}/cards/{card_id}/back": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Reveal Back */
+    get: operations["reveal_back_review_sittings__sitting_id__cards__card_id__back_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/review-sittings/{sitting_id}/cards/{card_id}/grade": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Grade Card */
+    post: operations["grade_card_review_sittings__sitting_id__cards__card_id__grade_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/_outbox": {
     parameters: {
       query?: never;
@@ -245,6 +313,29 @@ export interface components {
       /** Reused */
       reused: boolean;
     };
+    /**
+     * Grade
+     * @enum {string}
+     */
+    Grade: "forgot" | "hard" | "good" | "easy";
+    /** GradeAppliedDTO */
+    GradeAppliedDTO: {
+      /**
+       * Sitting Id
+       * Format: uuid
+       */
+      sitting_id: string;
+      /** Sitting Complete */
+      sitting_complete: boolean;
+      /** Next Card Id */
+      next_card_id: string | null;
+      /** Next Front */
+      next_front: string | null;
+    };
+    /** GradeRequestDTO */
+    GradeRequestDTO: {
+      grade: components["schemas"]["Grade"];
+    };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -328,6 +419,15 @@ export interface components {
        */
       last_updated_at: string;
     };
+    /** NothingDueDTO */
+    NothingDueDTO: {
+      /**
+       * Kind
+       * @default nothing_due
+       * @constant
+       */
+      kind: "nothing_due";
+    };
     /** OutboxEnvelopeDTO */
     OutboxEnvelopeDTO: {
       /**
@@ -350,6 +450,20 @@ export interface components {
       claimed_at: string | null;
       /** Claimed By */
       claimed_by: string | null;
+    };
+    /** PresentedCardDTO */
+    PresentedCardDTO: {
+      /**
+       * Sitting Id
+       * Format: uuid
+       */
+      sitting_id: string;
+      /** Card Id */
+      card_id: string | null;
+      /** Front */
+      front: string | null;
+      /** Sitting Complete */
+      sitting_complete: boolean;
     };
     /** ReplyDeltaEvent */
     ReplyDeltaEvent: {
@@ -392,10 +506,47 @@ export interface components {
       /** Detail */
       detail: string;
     };
+    /** RevealedCardDTO */
+    RevealedCardDTO: {
+      /**
+       * Sitting Id
+       * Format: uuid
+       */
+      sitting_id: string;
+      /**
+       * Card Id
+       * Format: uuid
+       */
+      card_id: string;
+      /** Front */
+      front: string;
+      /** Back */
+      back: string;
+    };
     /** SendMessageRequestDTO */
     SendMessageRequestDTO: {
       /** Content */
       content: string;
+    };
+    /** SittingOpenedDTO */
+    SittingOpenedDTO: {
+      /**
+       * Sitting Id
+       * Format: uuid
+       */
+      sitting_id: string;
+      /** Card Id */
+      card_id: string | null;
+      /** Front */
+      front: string | null;
+      /** Sitting Complete */
+      sitting_complete: boolean;
+      /**
+       * Kind
+       * @default opened
+       * @constant
+       */
+      kind: "opened";
     };
     /** StartCaptureSessionResponseDTO */
     StartCaptureSessionResponseDTO: {
@@ -604,6 +755,127 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["CardListItemDTO"][];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  open_sitting_review_sittings_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json":
+            | components["schemas"]["SittingOpenedDTO"]
+            | components["schemas"]["NothingDueDTO"];
+        };
+      };
+    };
+  };
+  current_card_review_sittings__sitting_id__current_card_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PresentedCardDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  reveal_back_review_sittings__sitting_id__cards__card_id__back_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+        card_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RevealedCardDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  grade_card_review_sittings__sitting_id__cards__card_id__grade_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+        card_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GradeRequestDTO"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GradeAppliedDTO"];
         };
       };
       /** @description Validation Error */

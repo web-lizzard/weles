@@ -181,6 +181,13 @@ export async function gradeCard(
   `"/review-sittings/{sitting_id}/cards/{card_id}/back"`, and
   `"/review-sittings/{sitting_id}/cards/{card_id}/grade"` are present.
 
+### Review r1
+
+Artifact: `reviews/2026-09-10-r1-impl-review.md`
+
+- `R1-F1` — OpenAPI schema lacks review-sitting paths
+  Fix: Regenerate `tui/src/api/generated/schema.d.ts` with `cd tui && pnpm generate:api` against a running backend that exposes the three review-sitting routes; do not hand-edit the generated file.
+
 ---
 
 ## Phase 2: API client behaviour
@@ -206,6 +213,13 @@ Fill `api/sittings.ts` bodies; prove the request/response mapping and error path
 #### Automated Verification:
 - `cd tui && pnpm vitest run test/sittings.test.ts`
 - `cd tui && pnpm test`
+
+### Review r1
+
+Artifact: `reviews/2026-09-10-r1-impl-review.md`
+
+- `R1-F2` — Sitting API bypasses the shared openapi-typed client
+  Fix: Route sitting HTTP calls through `client` and the regenerated OpenAPI path types, keeping camelCase DTO mapping at the module boundary like `cards.ts` and `notes.ts`.
 
 ---
 

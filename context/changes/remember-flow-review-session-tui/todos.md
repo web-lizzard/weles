@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 8
-next_step: 8.4
-next_command: /implement remember-flow-review-session-tui phase 8
+current_phase: 1
+next_step: 1.2
+next_command: /implement remember-flow-review-session-tui phase 1
 updated: 2026-09-10
 ---
 
@@ -16,6 +16,10 @@ updated: 2026-09-10
 
 - [ ] 1.2 Regenerate `schema.d.ts` against a running backend and confirm the three review-sitting paths are present
 
+#### Triage
+
+- [x] 1.3 R1-F1 OpenAPI schema lacks review-sitting paths (proof: e9a4f2e)
+
 ### Phase 2: API client behaviour
 
 #### Tests
@@ -25,6 +29,10 @@ updated: 2026-09-10
 #### Automated
 
 - [x] 2.1 Fill `openSitting`/`revealBack`/`gradeCard` bodies and the `SittingHttpError` throw path — 8dc751c
+
+#### Triage
+
+- [ ] 2.2 R1-F2 Sitting API uses raw fetch instead of openapi client
 
 ### Phase 3: Sitting store stubs
 
