@@ -160,8 +160,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 11.1 Fill InMemoryReviewCatalog over NoteRepository.list_all
-- [x] 11.2 Write the ReviewCatalog contract suite
+- [x] 11.1 Fill InMemoryReviewCatalog over NoteRepository.list_all — e78791c
+- [x] 11.2 Write the ReviewCatalog contract suite — e78791c
 
 #### Manual
 
