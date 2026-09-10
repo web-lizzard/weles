@@ -9,7 +9,7 @@ updated: 2026-09-10
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
 | S-01 | Users can work through every due card in one review sitting — graded cards reschedule themselves | remember-flow-review-session | done |
-| S-02 | Users can leave a review mid-way and pick up where they left off | remember-flow-session-resume | in_progress |
+| S-02 | Users can leave a review mid-way and pick up where they left off | remember-flow-session-resume | done |
 | S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | pending |
 | S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | pending |
 | S-05 | Users can jump from a card under review to its source passage | remember-flow-source-jump | pending |
@@ -42,7 +42,7 @@ flowchart LR
 - **Outcome:** Users can leave a review mid-way and pick up where they left off
 - **Acceptance criteria:** AC-10, AC-11, AC-12, AC-13
 - **Change ID:** remember-flow-session-resume
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-01
 - **Parallel with:** S-03, S-04, S-05, S-06
 
@@ -93,3 +93,4 @@ flowchart LR
 ## Done
 
 - **S-01: Users can work through every due card in one review sitting — graded cards reschedule themselves** — Archived 2026-09-10 → `context/archive/changes/2026-09-09-remember-flow-review-session/`. Lesson: —.
+- **S-02: Users can leave a review mid-way and pick up where they left off** — Archived 2026-09-10 → `context/archive/changes/2026-09-10-remember-flow-session-resume/`. Lesson: —.
