@@ -123,6 +123,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/due-cards/count": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Due Cards Count */
+    get: operations["due_cards_count_due_cards_count_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/review-sittings": {
     parameters: {
       query?: never;
@@ -313,6 +330,33 @@ export interface components {
       /** Reused */
       reused: boolean;
     };
+    /** DueCountDTO */
+    DueCountDTO: {
+      due?: components["schemas"]["DuePartitionDTO"];
+    };
+    /** DuePartitionDTO */
+    DuePartitionDTO: {
+      /**
+       * Total
+       * @default 0
+       */
+      total: number;
+      /**
+       * Not Yet Seen
+       * @default 0
+       */
+      not_yet_seen: number;
+      /**
+       * Seen Still Owed
+       * @default 0
+       */
+      seen_still_owed: number;
+      /**
+       * Ripe Outside Sitting
+       * @default 0
+       */
+      ripe_outside_sitting: number;
+    };
     /**
      * Grade
      * @enum {string}
@@ -336,6 +380,7 @@ export interface components {
       next_card_id: string | null;
       /** Next Front */
       next_front: string | null;
+      due?: components["schemas"]["DuePartitionDTO"];
     };
     /** GradeRequestDTO */
     GradeRequestDTO: {
@@ -474,6 +519,7 @@ export interface components {
        * @default 0
        */
       outstanding_count: number;
+      due?: components["schemas"]["DuePartitionDTO"];
     };
     /** ReplyDeltaEvent */
     ReplyDeltaEvent: {
@@ -556,6 +602,7 @@ export interface components {
        * @default 0
        */
       outstanding_count: number;
+      due?: components["schemas"]["DuePartitionDTO"];
       /**
        * Kind
        * @default opened
@@ -581,6 +628,7 @@ export interface components {
        * @default 0
        */
       outstanding_count: number;
+      due?: components["schemas"]["DuePartitionDTO"];
       /**
        * Kind
        * @default resumed
@@ -804,6 +852,26 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  due_cards_count_due_cards_count_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DueCountDTO"];
         };
       };
     };
