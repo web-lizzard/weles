@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 16
-next_step: 16.8
-next_command: /implement remember-flow-review-session phase 16
+current_phase: 15
+next_step: 15.4
+next_command: /implement remember-flow-review-session phase 15
 updated: 2026-09-10
 ---
 
@@ -252,5 +252,5 @@ updated: 2026-09-10
 
 #### Manual
 
-- [x] 16.8 Confirm only _FixedClock survives in the step module
-- [x] 16.9 Confirm every surviving double under tests/unit/remember is named for what it forces
+- [x] 16.8 Confirm only _FixedClock survives in the step module — 0d3574b
+- [x] 16.9 Confirm every surviving double under tests/unit/remember is named for what it forces — 0d3574b
