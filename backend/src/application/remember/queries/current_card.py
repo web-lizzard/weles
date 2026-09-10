@@ -1,9 +1,5 @@
 from application.remember.dto import PresentedCardDTO
-from domain.remember.exceptions import (
-    CardNotReviewableError,
-    SittingAlreadyCompleteError,
-    SittingNotFoundError,
-)
+from domain.remember.exceptions import CardNotReviewableError, SittingNotFoundError
 from domain.remember.ports import ReviewCatalog, ReviewEventStore, SittingRepository
 from domain.remember.value_objects import SittingId
 
@@ -32,7 +28,12 @@ class CurrentCardQuery:
         card_id = sitting.next_card(present, sitting_events)
         sitting_complete = sitting.is_finished(present, sitting_events)
         if card_id is None:
-            raise SittingAlreadyCompleteError
+            return PresentedCardDTO(
+                sitting_id=sitting_id.value,
+                card_id=None,
+                front=None,
+                sitting_complete=sitting_complete,
+            )
 
         card = await self._catalog.get_reviewable(card_id)
         if card is None:
