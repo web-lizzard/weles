@@ -10,7 +10,7 @@ updated: 2026-09-10
 |----|---------|-----------|--------|
 | S-01 | Users can work through every due card in one review sitting — graded cards reschedule themselves | remember-flow-review-session | done |
 | S-02 | Users can leave a review mid-way and pick up where they left off | remember-flow-session-resume | done |
-| S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | pending |
+| S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | in_progress |
 | S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | pending |
 | S-05 | Users can jump from a card under review to its source passage | remember-flow-source-jump | pending |
 | S-06 | Users can open a review from inside capture and return without losing the conversation | remember-flow-capture-entry | pending |
@@ -51,7 +51,7 @@ flowchart LR
 - **Outcome:** Users can see how many cards are due without opening a review
 - **Acceptance criteria:** AC-14, AC-15
 - **Change ID:** remember-flow-due-count
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-04, S-05, S-06
 
