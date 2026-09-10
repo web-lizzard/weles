@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import Callable, Mapping, Sequence
+from datetime import datetime
 
 from application.remember.dto import GradeAppliedDTO
 from application.remember.ports import Clock, UnitOfWork
@@ -7,6 +8,7 @@ from domain.remember.exceptions import (
     CardNotInSittingError,
     CardNotPresentableError,
     SittingAlreadyCompleteError,
+    SittingExpiredError,
     SittingNotFoundError,
 )
 from domain.remember.ports import (
@@ -51,9 +53,8 @@ class GradeCardCommand:
             sitting_events = await uow.review_events.list_by_sitting(sitting_id)
             by_id = await self._reviewable_by_id()
             present = sitting.visible(frozenset(by_id))
-            self._guard_grade(sitting, card_id, present, sitting_events)
-
             reviewed_at = self._clock.now()
+            self._guard_grade(sitting, card_id, present, sitting_events, reviewed_at)
             event = ReviewEvent(
                 card_id=card_id,
                 reviewed_at=reviewed_at,
@@ -89,7 +90,10 @@ class GradeCardCommand:
         card_id: CardId,
         present: frozenset[CardId],
         sitting_events: Sequence[ReviewEvent],
+        as_of: datetime,
     ) -> None:
+        if not sitting.is_offered(as_of):
+            raise SittingExpiredError
         if not sitting.contains(card_id):
             raise CardNotInSittingError
         if sitting.is_finished(present, sitting_events):
