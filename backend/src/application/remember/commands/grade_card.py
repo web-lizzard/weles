@@ -1,9 +1,23 @@
-# pyright: reportUnusedParameter=false
-from collections.abc import Callable
+import asyncio
+from collections.abc import Callable, Mapping, Sequence
 
 from application.remember.dto import GradeAppliedDTO
 from application.remember.ports import Clock, UnitOfWork
-from domain.remember.ports import ReviewCatalog, Scheduler
+from domain.remember.exceptions import (
+    CardNotInSittingError,
+    CardNotPresentableError,
+    SittingAlreadyCompleteError,
+    SittingNotFoundError,
+)
+from domain.remember.ports import (
+    ReviewableCard,
+    ReviewCatalog,
+    Scheduler,
+    SchedulingReplay,
+)
+from domain.remember.review_event import ReviewEvent
+from domain.remember.scheduling_state import SchedulingState
+from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, Grade, SittingId
 
 
@@ -23,23 +37,98 @@ class GradeCardCommand:
     async def handle(
         self, sitting_id: SittingId, card_id: CardId, grade: Grade
     ) -> GradeAppliedDTO:
+        """Record a grade on the card in front and return the next front, or completion.
+
+        Captures the clock once for both the event and the scheduler. Guards
+        membership, completion, and presentability before any write. Previous
+        scheduling state is the memoized record when its stamp matches, otherwise
+        a replay of the card's log. The event and memoized state are written
+        together in one unit of work. ShowingLimit comes from the sitting, not
+        compose.
         """
-        1. Load sitting or SittingNotFoundError. Load events.
-           present = sitting.visible(live).
-        2. Guard: sitting.contains(card_id) else CardNotInSittingError.
-        3. Guard: not sitting.is_finished(...) else SittingAlreadyCompleteError.
-        4. Guard: card_id == sitting.next_card(...) else CardNotPresentableError
-           (discarded, already finished, not least-shown, or not the seeded pick).
-        5. reviewed_at = clock.now() once. Build ReviewEvent with that instant.
-        6. previous = memoized state if stamp matches scheduler.stamp();
-           else SchedulingReplay.replay(card events excluding this one).
-        7. next_state = scheduler.review(previous, card_id, grade, reviewed_at).
-        8. One UoW: save event first, then scheduling state; commit.
-           Event is the write that must not be lost.
-        9. Recompute pool; if sitting.is_finished, return complete with no next card.
-           Else sitting.next_card(...) and return its front.
-        ShowingLimit comes from the sitting, not compose.
-        Scheduler.review must not receive sitting_id.
-        Replay reads only card_id, reviewed_at, grade.
-        """
-        ...
+        async with self._uow_factory() as uow:
+            sitting = await self._require_sitting(uow, sitting_id)
+            sitting_events = await uow.review_events.list_by_sitting(sitting_id)
+            by_id = await self._reviewable_by_id()
+            present = sitting.visible(frozenset(by_id))
+            self._guard_grade(sitting, card_id, present, sitting_events)
+
+            reviewed_at = self._clock.now()
+            event = ReviewEvent(
+                card_id=card_id,
+                reviewed_at=reviewed_at,
+                grade=grade,
+                sitting_id=sitting_id,
+            )
+            previous = await self._previous_state(uow, card_id)
+            next_state = self._scheduler.review(previous, card_id, grade, reviewed_at)
+            result = self._applied_dto(
+                sitting, sitting_id, present, sitting_events, event, by_id
+            )
+
+            async with asyncio.TaskGroup() as tg:
+                _ = tg.create_task(uow.review_events.save(event))
+                _ = tg.create_task(uow.scheduling_states.save(next_state))
+            await uow.commit()
+
+        return result
+
+    async def _require_sitting(self, uow: UnitOfWork, sitting_id: SittingId) -> Sitting:
+        sitting = await uow.sittings.get(sitting_id)
+        if sitting is None:
+            raise SittingNotFoundError
+        return sitting
+
+    async def _reviewable_by_id(self) -> dict[CardId, ReviewableCard]:
+        reviewable = await self._catalog.list_reviewable()
+        return {card.id: card for card in reviewable}
+
+    def _guard_grade(
+        self,
+        sitting: Sitting,
+        card_id: CardId,
+        present: frozenset[CardId],
+        sitting_events: Sequence[ReviewEvent],
+    ) -> None:
+        if not sitting.contains(card_id):
+            raise CardNotInSittingError
+        if sitting.is_finished(present, sitting_events):
+            raise SittingAlreadyCompleteError
+        if card_id != sitting.next_card(present, sitting_events):
+            raise CardNotPresentableError
+
+    async def _previous_state(
+        self, uow: UnitOfWork, card_id: CardId
+    ) -> SchedulingState | None:
+        memoized = await uow.scheduling_states.get(card_id)
+        if memoized is not None and memoized.stamp == self._scheduler.stamp():
+            return memoized
+        prior_events = await uow.review_events.list_by_card(card_id)
+        return SchedulingReplay(self._scheduler).replay(card_id, prior_events)
+
+    def _applied_dto(
+        self,
+        sitting: Sitting,
+        sitting_id: SittingId,
+        present: frozenset[CardId],
+        sitting_events: Sequence[ReviewEvent],
+        event: ReviewEvent,
+        by_id: Mapping[CardId, ReviewableCard],
+    ) -> GradeAppliedDTO:
+        events_after = (*sitting_events, event)
+        if sitting.is_finished(present, events_after):
+            return GradeAppliedDTO(
+                sitting_id=sitting_id.value,
+                sitting_complete=True,
+                next_card_id=None,
+                next_front=None,
+            )
+        next_card_id = sitting.next_card(present, events_after)
+        assert next_card_id is not None
+        next_card = by_id[next_card_id]
+        return GradeAppliedDTO(
+            sitting_id=sitting_id.value,
+            sitting_complete=False,
+            next_card_id=next_card_id.value,
+            next_front=next_card.front,
+        )
