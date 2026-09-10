@@ -274,6 +274,7 @@ def user_has_started_review(remember_flow_context: RememberFlowContext) -> None:
     assert isinstance(result, SittingOpenedDTO)
     remember_flow_context.last_open_result = result
     remember_flow_context.sitting_id = SittingId(value=result.sitting_id)
+    assert result.card_id is not None
     remember_flow_context.current_card_id = CardId(value=result.card_id)
     remember_flow_context.last_presented = result
 
@@ -320,6 +321,7 @@ def user_starts_review(remember_flow_context: RememberFlowContext) -> None:
     remember_flow_context.last_open_result = result
     if isinstance(result, SittingOpenedDTO):
         remember_flow_context.sitting_id = SittingId(value=result.sitting_id)
+        assert result.card_id is not None
         remember_flow_context.current_card_id = CardId(value=result.card_id)
         remember_flow_context.last_presented = result
 
@@ -411,6 +413,7 @@ def user_reads_current_card(remember_flow_context: RememberFlowContext) -> None:
     )
     remember_flow_context.current_card_reads.append(result)
     remember_flow_context.last_presented = result
+    assert result.card_id is not None
     remember_flow_context.current_card_id = CardId(value=result.card_id)
 
 
@@ -593,7 +596,9 @@ def no_sitting_was_created(remember_flow_context: RememberFlowContext) -> None:
 @then("the current card shows only the front")
 def current_card_shows_only_front(remember_flow_context: RememberFlowContext) -> None:
     assert remember_flow_context.last_presented is not None
-    assert remember_flow_context.last_presented.front.strip() != ""
+    front = remember_flow_context.last_presented.front
+    assert front is not None
+    assert front.strip() != ""
     assert remember_flow_context.last_reveal_result is None
 
 

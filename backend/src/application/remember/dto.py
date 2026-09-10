@@ -12,8 +12,8 @@ class NothingDueDTO(BaseModel):
 
 class PresentedCardDTO(BaseModel):
     sitting_id: UUID
-    card_id: UUID
-    front: str
+    card_id: UUID | None
+    front: str | None
     sitting_complete: bool
 
 
