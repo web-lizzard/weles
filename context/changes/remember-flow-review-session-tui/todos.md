@@ -24,7 +24,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 2.1 Fill `openSitting`/`revealBack`/`gradeCard` bodies and the `SittingHttpError` throw path
+- [x] 2.1 Fill `openSitting`/`revealBack`/`gradeCard` bodies and the `SittingHttpError` throw path — 8dc751c
 
 ### Phase 3: Sitting store stubs
 
