@@ -85,6 +85,10 @@ updated: 2026-09-10
 - [x] 7.1 Accept the resumed kind and map outstanding_count in openSitting
 - [x] 7.2 Map outstanding_count in gradeCard
 
+#### Triage
+
+- [x] 7.3 R2-F2 Generated outstanding_count is cast optional and defaulted to zero
+
 ### Phase 8: TUI store stubs
 
 #### Automated
@@ -115,3 +119,7 @@ updated: 2026-09-10
 #### Manual
 
 - [ ] 10.2 Walk resume and expiry recovery in the TUI against a live backend
+
+#### Triage
+
+- [ ] 10.3 R2-F1 Outstanding count renders only in the presented phase (proof: ea48ac6)

@@ -35,6 +35,7 @@ describe("sittings API", () => {
       card_id: cardId,
       front: "What is a SYN?",
       sitting_complete: false,
+      outstanding_count: 0,
     });
 
     const result = await openSitting();
@@ -125,6 +126,7 @@ describe("sittings API", () => {
         JSON.stringify({
           sitting_id: sittingId,
           sitting_complete: true,
+          outstanding_count: 0,
           next_card_id: null,
           next_front: null,
         }),
