@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import type { Grade } from "../api/sittings.js";
+import {
+  type Grade,
+  gradeCard,
+  openSitting,
+  revealBack,
+  SittingHttpError,
+} from "../api/sittings.js";
 
 type SittingPhase =
   | "opening"
@@ -35,6 +41,8 @@ type SittingActions = {
   reset: () => void;
 };
 
+const GRADE_COUNT = 4;
+
 const initialState: SittingState = {
   phase: "opening",
   sittingId: null,
@@ -48,12 +56,151 @@ const initialState: SittingState = {
   lastAction: null,
 };
 
-export const useSittingStore = create<SittingState & SittingActions>(() => ({
-  ...initialState,
-  open: async () => {},
-  toggleBack: async () => {},
-  moveSelection: (_delta: 1 | -1) => {},
-  submitGrade: async (_grade: Grade) => {},
-  retry: async () => {},
-  reset: () => {},
-}));
+function sittingHttpErrorState(error: SittingHttpError): Partial<SittingState> {
+  return {
+    phase: "error",
+    error: { code: error.code, detail: error.detail },
+    isSubmitting: false,
+  };
+}
+
+export const useSittingStore = create<SittingState & SittingActions>(
+  (set, get) => ({
+    ...initialState,
+    open: async () => {
+      set({ lastAction: { type: "open" }, error: null });
+      try {
+        const result = await openSitting();
+        if (result.kind === "nothing_due") {
+          set({
+            phase: "nothing_due",
+            sittingId: null,
+            cardId: null,
+            front: null,
+            back: null,
+            isBackVisible: false,
+            selectedGradeIndex: 0,
+            error: null,
+          });
+          return;
+        }
+        set({
+          phase: "presented",
+          sittingId: result.sittingId,
+          cardId: result.cardId,
+          front: result.front,
+          back: null,
+          isBackVisible: false,
+          selectedGradeIndex: 0,
+          error: null,
+        });
+      } catch (error) {
+        if (error instanceof SittingHttpError) {
+          set(sittingHttpErrorState(error));
+        } else {
+          throw error;
+        }
+      }
+    },
+    toggleBack: async () => {
+      const state = get();
+      if (
+        state.phase !== "presented" ||
+        state.sittingId === null ||
+        state.cardId === null
+      ) {
+        return;
+      }
+
+      if (state.isBackVisible) {
+        set({ isBackVisible: false });
+        return;
+      }
+
+      if (state.back !== null) {
+        set({ isBackVisible: true });
+        return;
+      }
+
+      set({ lastAction: { type: "reveal" }, error: null });
+      try {
+        const revealed = await revealBack(state.sittingId, state.cardId);
+        set({ isBackVisible: true, back: revealed.back });
+      } catch (error) {
+        if (error instanceof SittingHttpError) {
+          set(sittingHttpErrorState(error));
+        } else {
+          throw error;
+        }
+      }
+    },
+    moveSelection: (delta: 1 | -1) => {
+      set((state) => ({
+        selectedGradeIndex:
+          (state.selectedGradeIndex + delta + GRADE_COUNT) % GRADE_COUNT,
+      }));
+    },
+    submitGrade: async (grade: Grade) => {
+      const { sittingId, cardId } = get();
+      if (sittingId === null || cardId === null) {
+        return;
+      }
+
+      set({
+        lastAction: { type: "grade", grade },
+        error: null,
+        isSubmitting: true,
+      });
+      try {
+        const result = await gradeCard(sittingId, cardId, grade);
+        if (result.sittingComplete || result.nextCardId === null) {
+          set({
+            phase: "complete",
+            sittingId: result.sittingId,
+            cardId: null,
+            front: null,
+            back: null,
+            isBackVisible: false,
+            selectedGradeIndex: 0,
+            error: null,
+            isSubmitting: false,
+          });
+          return;
+        }
+        set({
+          phase: "presented",
+          sittingId: result.sittingId,
+          cardId: result.nextCardId,
+          front: result.nextFront,
+          back: null,
+          isBackVisible: false,
+          selectedGradeIndex: 0,
+          error: null,
+          isSubmitting: false,
+        });
+      } catch (error) {
+        if (error instanceof SittingHttpError) {
+          set(sittingHttpErrorState(error));
+        } else {
+          throw error;
+        }
+      }
+    },
+    retry: async () => {
+      const { lastAction } = get();
+      if (lastAction === null) {
+        return;
+      }
+      if (lastAction.type === "open") {
+        await get().open();
+      } else if (lastAction.type === "reveal") {
+        await get().toggleBack();
+      } else {
+        await get().submitGrade(lastAction.grade);
+      }
+    },
+    reset: () => {
+      set({ ...initialState });
+    },
+  }),
+);

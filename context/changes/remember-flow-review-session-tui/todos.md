@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 4
-next_step: 4.1
-next_command: /unit-test remember-flow-review-session-tui phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement remember-flow-review-session-tui phase 5
 updated: 2026-09-10
 ---
 
@@ -36,11 +36,11 @@ updated: 2026-09-10
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 37424de
 
 #### Automated
 
-- [ ] 4.1 Fill `open`/`toggleBack`/`moveSelection`/`submitGrade`/`retry`/`reset`
+- [x] 4.1 Fill `open`/`toggleBack`/`moveSelection`/`submitGrade`/`retry`/`reset`
 
 ### Phase 5: Sitting overlay stubs
 
