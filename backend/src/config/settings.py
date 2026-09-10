@@ -28,3 +28,4 @@ class Settings(BaseSettings):
     card_front_max: int = 200
     card_back_max: int = 600
     sitting_max_showings: int = 2
+    sitting_resume_horizon_hours: float = 24.0

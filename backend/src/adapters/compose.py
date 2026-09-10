@@ -1,4 +1,5 @@
 import asyncio
+from datetime import timedelta
 from typing import cast
 
 from adapters.out.fsrs.scheduler import FsrsScheduler
@@ -92,7 +93,7 @@ from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 from domain.distill.card_factory import CardFactory
 from domain.distill.value_objects import CardLengthPolicy
-from domain.remember.value_objects import ShowingLimit
+from domain.remember.value_objects import ResumeHorizon, ShowingLimit
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
 _store = InMemoryMessageStore()
@@ -142,6 +143,9 @@ _remember_catalog = InMemoryReviewCatalog(
 _remember_scheduler = FsrsScheduler()
 _remember_clock = SystemClock()
 _remember_showing_limit = ShowingLimit(value=_settings.sitting_max_showings)
+_remember_resume_horizon = ResumeHorizon(
+    value=timedelta(hours=_settings.sitting_resume_horizon_hours)
+)
 
 
 def _unit_of_work() -> UnitOfWork:
@@ -262,6 +266,7 @@ def get_open_sitting_command() -> OpenSittingCommand:
         clock=_remember_clock,
         showing_limit=_remember_showing_limit,
         scheduler=_remember_scheduler,
+        resume_horizon=_remember_resume_horizon,
     )
 
 
