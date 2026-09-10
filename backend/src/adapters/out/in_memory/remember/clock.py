@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 class SystemClock:
-    def now(self) -> datetime: ...
+    def now(self) -> datetime:
+        return datetime.now(UTC)
