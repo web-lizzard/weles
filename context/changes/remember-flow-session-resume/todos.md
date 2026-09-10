@@ -87,7 +87,7 @@ updated: 2026-09-10
 
 #### Triage
 
-- [x] 7.3 R2-F2 Generated outstanding_count is cast optional and defaulted to zero
+- [x] 7.3 R2-F2 Generated outstanding_count is cast optional and defaulted to zero — 7e231eb
 
 ### Phase 8: TUI store stubs
 
