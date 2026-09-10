@@ -1,5 +1,7 @@
+import asyncio
 from typing import cast
 
+from adapters.out.fsrs.scheduler import FsrsScheduler
 from adapters.out.in_memory.capture.capture_session_repository import (
     InMemoryCaptureSessionRepository,
 )
@@ -46,6 +48,16 @@ from adapters.out.in_memory.distill.note_repository import (
 from adapters.out.in_memory.distill.unit_of_work import (
     InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
 )
+from adapters.out.in_memory.remember.clock import SystemClock
+from adapters.out.in_memory.remember.review_catalog import InMemoryReviewCatalog
+from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
+from adapters.out.in_memory.remember.scheduling_state_repository import (
+    InMemorySchedulingStateRepository,
+)
+from adapters.out.in_memory.remember.sitting_repository import InMemorySittingRepository
+from adapters.out.in_memory.remember.unit_of_work import (
+    InMemoryUnitOfWork as InMemoryRememberUnitOfWork,
+)
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.claimer import InMemoryOutboxClaimer
 from adapters.out.in_memory.shared.outbox.envelope_query import (
@@ -80,6 +92,7 @@ from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 from domain.distill.card_factory import CardFactory
 from domain.distill.value_objects import CardLengthPolicy
+from domain.remember.value_objects import ShowingLimit
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
 _store = InMemoryMessageStore()
@@ -119,6 +132,16 @@ _vocabulary = VocabularyResolver(
         threshold=SimilarityScore(value=_settings.vocabulary_match_threshold)
     ),
 )
+_remember_sittings = InMemorySittingRepository()
+_remember_review_events = InMemoryReviewEventStore()
+_remember_scheduling_states = InMemorySchedulingStateRepository()
+_remember_lock = asyncio.Lock()
+_remember_catalog = InMemoryReviewCatalog(
+    _distill_note_repository, _distill_card_repository
+)
+_remember_scheduler = FsrsScheduler()
+_remember_clock = SystemClock()
+_remember_showing_limit = ShowingLimit(value=_settings.sitting_max_showings)
 
 
 def _unit_of_work() -> UnitOfWork:
@@ -217,16 +240,45 @@ def get_outbox_worker() -> OutboxWorker:
     return _outbox_worker
 
 
-def _remember_unit_of_work() -> RememberUnitOfWork: ...  # pyright: ignore[reportUnusedFunction]
+def _remember_unit_of_work() -> RememberUnitOfWork:
+    return cast(
+        RememberUnitOfWork,
+        cast(
+            object,
+            InMemoryRememberUnitOfWork(
+                _remember_sittings,
+                _remember_review_events,
+                _remember_scheduling_states,
+                _remember_lock,
+            ),
+        ),
+    )
 
 
-def get_open_sitting_command() -> OpenSittingCommand: ...
+def get_open_sitting_command() -> OpenSittingCommand:
+    return OpenSittingCommand(
+        uow_factory=_remember_unit_of_work,
+        catalog=_remember_catalog,
+        clock=_remember_clock,
+        showing_limit=_remember_showing_limit,
+        scheduler=_remember_scheduler,
+    )
 
 
-def get_grade_card_command() -> GradeCardCommand: ...
+def get_grade_card_command() -> GradeCardCommand:
+    return GradeCardCommand(
+        uow_factory=_remember_unit_of_work,
+        catalog=_remember_catalog,
+        scheduler=_remember_scheduler,
+        clock=_remember_clock,
+    )
 
 
-def get_current_card_query() -> CurrentCardQuery: ...
+def get_current_card_query() -> CurrentCardQuery:
+    return CurrentCardQuery(
+        _remember_sittings, _remember_review_events, _remember_catalog
+    )
 
 
-def get_reveal_back_query() -> RevealBackQuery: ...
+def get_reveal_back_query() -> RevealBackQuery:
+    return RevealBackQuery(_remember_sittings, _remember_catalog)
