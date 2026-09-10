@@ -10,5 +10,9 @@ export default function DueCountHeader() {
     return null;
   }
 
-  return <Text dimColor={isStale}>{formatDueLine(partition.total)}</Text>;
+  return (
+    <Text color="yellow" dimColor={isStale}>
+      {formatDueLine(partition.total)}
+    </Text>
+  );
 }

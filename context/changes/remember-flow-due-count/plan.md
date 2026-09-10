@@ -505,6 +505,24 @@ is non-zero.
 #### Manual Verification:
 - Grade a card `hard` in a live review and confirm the overlay total and the header total move together and never disagree
 
+### Post-phase polish (conscious, after live TUI review)
+
+These adjustments deliberately extend Phase 9–10 UX without changing backend contracts or
+`dueStore` semantics. They are not plan drift — they respond to manual review of readability
+and shell geometry.
+
+- **Shell row position** (`tui/src/app.tsx`): the deck-wide total moves from a reserved top
+  row to the **bottom** of the terminal (yellow), matching the overlay footer anchor. Overlays
+  use the upper `rows - 1`; the shell due line stays visible under the notes overlay and is
+  **hidden during review** so the sitting overlay footer is the single due surface (no duplicate
+  total).
+- **Overlay footer component** (`tui/src/components/DueOverlayFooter.tsx`,
+  `tui/src/lib/dueFormat.ts`): breakdown buckets render as **count + inline description** on one
+  line (cyan count, dim description), not a separate legend block. Copy names user-visible
+  meaning (`not yet shown in this review`, `graded, still in this review`, `due outside this
+  review`) instead of internal bucket names. Toggle hint stays yellow, separated by margin from
+  due lines.
+
 ---
 
 ## Testing Strategy
