@@ -514,7 +514,9 @@ def opened_sitting_excludes_not_due_cards(
 def opened_sitting_contains_named_due_card(
     remember_flow_context: RememberFlowContext, label: str
 ) -> None:
-    assert isinstance(remember_flow_context.last_open_result, SittingOpenedDTO)
+    assert isinstance(
+        remember_flow_context.last_open_result, (SittingOpenedDTO, SittingResumedDTO)
+    )
     card = remember_flow_context.cards_by_label[label]
     sitting = asyncio.run(
         remember_flow_context.composition.sittings.get(

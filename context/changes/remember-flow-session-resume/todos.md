@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-session-resume
 current_phase: 3
-next_step: 3.1
+next_step: 3.3
 next_command: /implement remember-flow-session-resume phase 3
 updated: 2026-09-10
 ---
@@ -34,8 +34,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 3.1 Return a resumed sitting from the convergent branch of handle
-- [ ] 3.2 Replace the inline due comprehension with due_card_ids
+- [x] 3.1 Return a resumed sitting from the convergent branch of handle
+- [x] 3.2 Replace the inline due comprehension with due_card_ids
 
 #### Manual
 

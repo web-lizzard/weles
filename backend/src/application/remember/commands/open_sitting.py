@@ -7,7 +7,7 @@ from application.remember.dto import (
 )
 from application.remember.ports import Clock, UnitOfWork
 from domain.remember.ports import ReviewCatalog, Scheduler
-from domain.remember.scheduling_state import card_is_due
+from domain.remember.scheduling_state import due_card_ids
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import (
     MIN_RESUME_HORIZON,
@@ -38,17 +38,8 @@ class OpenSittingCommand:
     async def handle(self) -> SittingOpenedDTO | SittingResumedDTO | NothingDueDTO:
         """Open one sitting over every card due at this instant, or write nothing.
 
-        Resume-slice contract (not replacing this body yet):
-
-        1. sittings.latest() inside the unit of work.
-        2. If present: is_offered(as_of), visible(live catalog) + events.
-           Resumable iff offered and not is_finished.
-        3. Resumable: return SittingResumedDTO (kind=resumed, outstanding_count
-           from sitting.outstanding, next front from next_card). No save.
-        4. Else: this mint path — due set empty → NothingDueDTO; else
-           Sitting.open(..., resume_horizon=self._resume_horizon).
-
-        Live path below is still mint-only (S-01).
+        If the latest sitting is still offered and unfinished, return it without
+        writing. Otherwise mint a new sitting over the due set, or nothing due.
         """
         as_of = self._clock.now()
         candidates = await self._catalog.list_reviewable()
@@ -57,11 +48,26 @@ class OpenSittingCommand:
 
         async with self._uow_factory() as uow:
             states = await uow.scheduling_states.get_many(tuple(by_id))
-            due = frozenset(
-                card_id
-                for card_id in by_id
-                if card_is_due(states.get(card_id), as_of, live_stamp)
-            )
+
+            latest = await uow.sittings.latest()
+            if latest is not None and latest.is_offered(as_of):
+                present = latest.visible(frozenset(by_id))
+                sitting_events = await uow.review_events.list_by_sitting(latest.id)
+                if not latest.is_finished(present, sitting_events):
+                    card_id = latest.next_card(present, sitting_events)
+                    assert card_id is not None
+                    reviewable = by_id[card_id]
+                    sitting_complete = latest.is_finished(present, sitting_events)
+                    outstanding_count = len(latest.outstanding(present, sitting_events))
+                    return SittingResumedDTO(
+                        sitting_id=latest.id.value,
+                        card_id=card_id.value,
+                        front=reviewable.front,
+                        sitting_complete=sitting_complete,
+                        outstanding_count=outstanding_count,
+                    )
+
+            due = due_card_ids(frozenset(by_id), states, as_of, live_stamp)
             if not due:
                 return NothingDueDTO()
 
@@ -70,7 +76,10 @@ class OpenSittingCommand:
             )
             present = sitting.visible(frozenset(by_id))
             card_id = sitting.next_card(present, events=[])
-            assert card_id is not None
+
+            if card_id is None:
+                return NothingDueDTO()
+
             reviewable = by_id[card_id]
             sitting_complete = sitting.is_finished(present, events=[])
             outstanding_count = len(sitting.outstanding(present, events=[]))
