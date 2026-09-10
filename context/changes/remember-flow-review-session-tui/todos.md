@@ -105,4 +105,4 @@ updated: 2026-09-10
 
 #### Manual
 
-- [x] 8.4 Run the TUI against the live backend and work through a full sitting end to end
+- [x] 8.4 Run the TUI against the live backend and work through a full sitting end to end — ee69975
