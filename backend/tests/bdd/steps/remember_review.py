@@ -157,16 +157,15 @@ class _FakeScheduler:
         grade: Grade,
         reviewed_at: datetime,
     ) -> SchedulingState:
-        prior_interval = timedelta(days=0)
+        base_days = 1
         if previous is not None:
-            prior_interval = previous.due_at - reviewed_at
+            base_days = cast(int, previous.scheduler_state.payload["step"])
         multiplier = {
             Grade.FORGOT: 1,
             Grade.HARD: 2,
             Grade.GOOD: 4,
             Grade.EASY: 8,
         }[grade]
-        base_days = 1 if prior_interval <= timedelta(days=0) else prior_interval.days
         next_days = max(1, base_days * multiplier)
         due_at = reviewed_at + timedelta(days=next_days)
         return SchedulingState(
@@ -423,7 +422,8 @@ def card_has_two_prior_good_grades(remember_flow_context: RememberFlowContext) -
         asyncio.run(remember_flow_context.scheduling_states.save(state))
         if sitting_id == sitting_two:
             remember_flow_context.second_good_grade_due_at = state.due_at
-    _mark_due(remember_flow_context, card.id, due_at=remember_flow_context.clock.now())
+    due_state = state.model_copy(update={"due_at": remember_flow_context.clock.now()})
+    asyncio.run(remember_flow_context.scheduling_states.save(due_state))
 
 
 @given("the user has started a review")
