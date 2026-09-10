@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from integration.support.in_memory_remember import InMemoryRememberComposition
@@ -11,13 +11,25 @@ from domain.remember.exceptions import (
     CardNotInSittingError,
     CardNotPresentableError,
     SittingAlreadyCompleteError,
+    SittingExpiredError,
     SittingNotFoundError,
 )
 from domain.remember.ports import SchedulingReplay
 from domain.remember.review_event import ReviewEvent
-from domain.remember.value_objects import Grade, SchedulerStamp, SittingId
+from domain.remember.value_objects import (
+    Grade,
+    ResumeHorizon,
+    SchedulerStamp,
+    SittingId,
+)
 
-from .conftest import open_sitting, reviewable, stamp
+from .conftest import (
+    clock_after_resume_horizon,
+    open_sitting,
+    reviewable,
+    sitting_past_resume_horizon,
+    stamp,
+)
 
 
 class _RaisingScheduler:
@@ -47,6 +59,42 @@ def _event(
         grade=grade,
         sitting_id=sitting_id,
     )
+
+
+async def test_a_sitting_past_its_horizon_raises_expired_before_any_write(
+    make_composition: Callable[..., InMemoryRememberComposition],
+) -> None:
+    opened_at = datetime(2026, 4, 10, 9, 0, tzinfo=UTC)
+    horizon = ResumeHorizon(value=timedelta(hours=1))
+    composition = make_composition(instant=clock_after_resume_horizon(opened_at))
+    card = await reviewable(composition)
+    sitting = sitting_past_resume_horizon(
+        card, opened_at=opened_at, resume_horizon=horizon
+    )
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingExpiredError):
+        _ = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+
+    assert await composition.review_events.list_by_card(card.id) == []
+    assert await composition.scheduling_states.get(card.id) is None
+
+
+async def test_expiry_on_grade_is_checked_before_membership(
+    make_composition: Callable[..., InMemoryRememberComposition],
+) -> None:
+    opened_at = datetime(2026, 4, 10, 9, 0, tzinfo=UTC)
+    horizon = ResumeHorizon(value=timedelta(hours=1))
+    composition = make_composition(instant=clock_after_resume_horizon(opened_at))
+    member = await reviewable(composition)
+    outsider = await reviewable(composition)
+    sitting = sitting_past_resume_horizon(
+        member, opened_at=opened_at, resume_horizon=horizon
+    )
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingExpiredError):
+        _ = await composition.grade_card().handle(sitting.id, outsider.id, Grade.GOOD)
 
 
 async def test_an_unknown_sitting_raises_sitting_not_found(
