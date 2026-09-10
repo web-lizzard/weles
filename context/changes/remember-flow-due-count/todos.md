@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-due-count
 current_phase: 10
-next_step: Tests
+next_step: 10.1
 next_command: /unit-test remember-flow-due-count phase 10
 updated: 2026-09-11
 ---
@@ -107,13 +107,13 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 9.1 Add DueCountHeader rendering the total, dimmed when stale
-- [x] 9.2 Mount the header and the poll in app.tsx and shift both overlays to top 1
-- [x] 9.3 Update app, noteListOverlay and sittingOverlay tests to the shifted geometry
+- [x] 9.1 Add DueCountHeader rendering the total, dimmed when stale — 03df582
+- [x] 9.2 Mount the header and the poll in app.tsx and shift both overlays to top 1 — 03df582
+- [x] 9.3 Update app, noteListOverlay and sittingOverlay tests to the shifted geometry — 03df582
 
 #### Manual
 
-- [x] 9.4 Confirm the count row survives both overlays against a live backend
+- [x] 9.4 Confirm the count row survives both overlays against a live backend — 03df582
 
 ### Phase 10: Breakdown in the sitting overlay
 
