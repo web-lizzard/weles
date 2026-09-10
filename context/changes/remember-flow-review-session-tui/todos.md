@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
 current_phase: 8
-next_step: 8.4
-next_command: /implement remember-flow-review-session-tui phase 8
+next_step:
+next_command: /archive remember-flow-review-session-tui
 updated: 2026-09-10
 ---
 
@@ -105,4 +105,4 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 8.4 Run the TUI against the live backend and work through a full sitting end to end
+- [x] 8.4 Run the TUI against the live backend and work through a full sitting end to end
