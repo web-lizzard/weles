@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-review-session-tui
 current_phase: 1
-next_step: 1.1
+next_step: 1.2
 next_command: /implement remember-flow-review-session-tui phase 1
 updated: 2026-09-10
 ---
@@ -10,7 +10,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 1.1 Write `api/sittings.ts` type and function signatures
+- [x] 1.1 Write `api/sittings.ts` type and function signatures
 
 #### Manual
 
