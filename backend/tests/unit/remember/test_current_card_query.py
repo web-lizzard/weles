@@ -1,14 +1,20 @@
-from datetime import UTC, datetime
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from integration.support.in_memory_remember import InMemoryRememberComposition
 
 from application.remember.dto import PresentedCardDTO
-from domain.remember.exceptions import SittingNotFoundError
+from domain.remember.exceptions import SittingExpiredError, SittingNotFoundError
 from domain.remember.review_event import ReviewEvent
-from domain.remember.value_objects import Grade, SittingId
+from domain.remember.value_objects import Grade, ResumeHorizon, SittingId
 
-from .conftest import open_sitting, reviewable
+from .conftest import (
+    clock_after_resume_horizon,
+    open_sitting,
+    reviewable,
+    sitting_past_resume_horizon,
+)
 
 
 def _event(card_id: object, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
@@ -18,6 +24,22 @@ def _event(card_id: object, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
         grade=grade,
         sitting_id=sitting_id,
     )
+
+
+async def test_a_sitting_past_its_horizon_raises_expired_on_current_card(
+    make_composition: Callable[..., InMemoryRememberComposition],
+) -> None:
+    opened_at = datetime(2026, 4, 10, 9, 0, tzinfo=UTC)
+    horizon = ResumeHorizon(value=timedelta(hours=1))
+    composition = make_composition(instant=clock_after_resume_horizon(opened_at))
+    card = await reviewable(composition, front="Past horizon")
+    sitting = sitting_past_resume_horizon(
+        card, opened_at=opened_at, resume_horizon=horizon
+    )
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingExpiredError):
+        _ = await composition.current_card().handle(sitting.id)
 
 
 async def test_the_current_card_is_the_next_draw_from_the_sitting_log(

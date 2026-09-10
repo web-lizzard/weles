@@ -1,7 +1,7 @@
 """Shared fixtures and builders for remember handler unit tests."""
 
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
@@ -30,6 +30,7 @@ from domain.remember.sitting import Sitting
 from domain.remember.value_objects import (
     CardId,
     OpaqueSchedulerState,
+    ResumeHorizon,
     SchedulerAlgorithm,
     SchedulerStamp,
     ShowingLimit,
@@ -51,10 +52,12 @@ def make_composition() -> Callable[..., InMemoryRememberComposition]:
     def _make(
         instant: datetime | None = None,
         showing_limit: ShowingLimit | None = None,
+        resume_horizon: ResumeHorizon | None = None,
     ) -> InMemoryRememberComposition:
         return InMemoryRememberComposition.create(
             clock=_Clock(instant or datetime.now(UTC)),
             showing_limit=showing_limit or ShowingLimit(value=2),
+            resume_horizon=resume_horizon,
         )
 
     return _make
@@ -117,6 +120,25 @@ def open_sitting(
         datetime.now(UTC),
         showing_limit or ShowingLimit(value=2),
     )
+
+
+def sitting_past_resume_horizon(
+    *cards: ReviewableCard,
+    opened_at: datetime,
+    resume_horizon: ResumeHorizon,
+    showing_limit: ShowingLimit | None = None,
+) -> Sitting:
+    """Sitting past horizon when the clock is at opened_at + 2h."""
+    return Sitting.open(
+        frozenset(card.id for card in cards),
+        opened_at,
+        showing_limit or ShowingLimit(value=2),
+        resume_horizon=resume_horizon,
+    )
+
+
+def clock_after_resume_horizon(opened_at: datetime) -> datetime:
+    return opened_at + timedelta(hours=2)
 
 
 def stamp(parameter_version: str = PARAMETER_VERSION) -> SchedulerStamp:

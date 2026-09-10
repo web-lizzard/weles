@@ -1,14 +1,39 @@
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from integration.support.in_memory_remember import InMemoryRememberComposition
 
 from domain.remember.exceptions import (
     CardNotInSittingError,
     CardNotReviewableError,
+    SittingExpiredError,
     SittingNotFoundError,
 )
-from domain.remember.value_objects import SittingId
+from domain.remember.value_objects import ResumeHorizon, SittingId
 
-from .conftest import open_sitting, reviewable
+from .conftest import (
+    clock_after_resume_horizon,
+    open_sitting,
+    reviewable,
+    sitting_past_resume_horizon,
+)
+
+
+async def test_a_sitting_past_its_horizon_raises_expired_on_reveal_back(
+    make_composition: Callable[..., InMemoryRememberComposition],
+) -> None:
+    opened_at = datetime(2026, 4, 10, 9, 0, tzinfo=UTC)
+    horizon = ResumeHorizon(value=timedelta(hours=1))
+    composition = make_composition(instant=clock_after_resume_horizon(opened_at))
+    card = await reviewable(composition, front="Stale front", back="Stale back")
+    sitting = sitting_past_resume_horizon(
+        card, opened_at=opened_at, resume_horizon=horizon
+    )
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingExpiredError):
+        _ = await composition.reveal_back().handle(sitting.id, card.id)
 
 
 async def test_a_sitting_member_returns_its_front_and_back(
