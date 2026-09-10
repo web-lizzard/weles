@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session
-current_phase: 15
-next_step: 15.4
-next_command: /implement remember-flow-review-session phase 15
+current_phase: 16
+next_step:
+next_command: /archive remember-flow-review-session
 updated: 2026-09-10
 ---
 
@@ -232,7 +232,7 @@ updated: 2026-09-10
 
 #### Manual
 
-- [ ] 15.4 Open a sitting over the running app and confirm a front with no back
+- [x] 15.4 Open a sitting over the running app and confirm a front with no back
 
 #### Triage
 
