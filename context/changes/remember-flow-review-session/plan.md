@@ -772,6 +772,16 @@ finally:
 The region holds no `await`, so it is atomic against the event loop; a comment must record
 that this assumes the port is driven from the loop thread.
 
+> **Deviation at implementation (2026-09-10, phase 13):** the `seed = hash(...)` line above was
+> not implemented as written. `hash()` over `str` is salted per interpreter process, so the fuzz
+> draw is stable only within one process and a later reconstruction draws a different interval —
+> which breaks `frame.md`'s "fully reconstructible from the review log alone ... interval fuzz
+> included". The shipped adapter derives the seed the way `Sitting._draw_seed` already does, pinned
+> by R2-F5: `int.from_bytes(sha256("<card id>|<reviewed_at iso>|<grade>").digest()[:8], "big")`.
+> Everything else in this contract — the seed's derivation from the event's own facts, the
+> `getstate`/`setstate` pair, the await-free region, the loop-thread comment, and storing neither
+> seed nor interval — is implemented as specified.
+
 #### 2. Repeatability test
 
 **File**: `backend/tests/unit/remember/test_fsrs_scheduler.py`
@@ -780,7 +790,9 @@ that this assumes the port is driven from the loop thread.
 
 **Contract**: Replaying a card's events through `SchedulingReplay` over `FsrsScheduler`
 reproduces the same `due_at` as the sequential live path, for an interval long enough to be
-fuzzed.
+fuzzed. Because the seed above must survive a restart, one case replays the
+log in separate interpreter processes under differing `PYTHONHASHSEED` values and asserts the
+`due_at` still matches the live path.
 
 ### Success Criteria:
 
