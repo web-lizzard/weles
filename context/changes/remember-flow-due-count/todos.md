@@ -3,7 +3,7 @@ change_id: remember-flow-due-count
 current_phase: 3
 next_step: 3.1
 next_command: /implement remember-flow-due-count phase 3
-updated: 2026-09-10
+updated: 2026-09-11
 ---
 
 ### Phase 1: Due partition stubs
@@ -20,8 +20,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [x] 2.1 Compute the total and the three buckets over due union outstanding
-- [x] 2.2 Branch the no-sitting case to put the whole total in not_yet_seen
+- [x] 2.1 Compute the total and the three buckets over due union outstanding — 73ec3a3
+- [x] 2.2 Branch the no-sitting case to put the whole total in not_yet_seen — 73ec3a3
 
 ### Phase 3: DTO, query, route and composition stubs
 
