@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
 current_phase: 10
-next_step: 10.1
-next_command: /unit-test remember-flow-due-count phase 10
+next_step: 10.2
+next_command: /implement remember-flow-due-count phase 10
 updated: 2026-09-11
 ---
 
@@ -119,12 +119,12 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f0c9e3d
 
 #### Automated
 
-- [ ] 10.1 Replace the outstanding count footer with the total and its non-zero buckets
+- [x] 10.1 Replace the outstanding count footer with the total and its non-zero buckets
 
 #### Manual
 
-- [ ] 10.2 Grade a card hard in a live review and confirm header and overlay totals move together
+- [x] 10.2 Grade a card hard in a live review and confirm header and overlay totals move together
