@@ -68,6 +68,11 @@ from application.distill.ports import UnitOfWork as DistillUnitOfWork
 from application.distill.queries.get_note import GetNoteQueryPort
 from application.distill.queries.list_cards_for_note import ListCardsForNoteQueryPort
 from application.distill.queries.list_notes import ListNotesQueryPort
+from application.remember.commands.grade_card import GradeCardCommand
+from application.remember.commands.open_sitting import OpenSittingCommand
+from application.remember.ports import UnitOfWork as RememberUnitOfWork
+from application.remember.queries.current_card import CurrentCardQuery
+from application.remember.queries.reveal_back import RevealBackQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import Settings
 from domain.capture.ports import CaptureSessionRepository
@@ -210,3 +215,18 @@ def get_list_cards_for_note_query() -> ListCardsForNoteQueryPort:
 
 def get_outbox_worker() -> OutboxWorker:
     return _outbox_worker
+
+
+def _remember_unit_of_work() -> RememberUnitOfWork: ...  # pyright: ignore[reportUnusedFunction]
+
+
+def get_open_sitting_command() -> OpenSittingCommand: ...
+
+
+def get_grade_card_command() -> GradeCardCommand: ...
+
+
+def get_current_card_query() -> CurrentCardQuery: ...
+
+
+def get_reveal_back_query() -> RevealBackQuery: ...

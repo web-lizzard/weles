@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-review-session
 current_phase: 14
-next_step: 14.1
+next_step: 14.4
 next_command: /implement remember-flow-review-session phase 14
 updated: 2026-09-10
 ---
@@ -197,9 +197,9 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 14.1 Write the four review-sitting route signatures with `...` bodies
-- [ ] 14.2 Declare the four remember providers and the UoW factory in compose.py
-- [ ] 14.3 Include the remember router in main.py
+- [x] 14.1 Write the four review-sitting route signatures with `...` bodies
+- [x] 14.2 Declare the four remember providers and the UoW factory in compose.py
+- [x] 14.3 Include the remember router in main.py
 
 #### Manual
 
