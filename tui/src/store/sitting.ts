@@ -4,6 +4,7 @@ import {
   gradeCard,
   openSitting,
   revealBack,
+  SITTING_EXPIRED,
   SittingHttpError,
 } from "../api/sittings.js";
 
@@ -46,7 +47,36 @@ type SittingActions = {
 
 const GRADE_COUNT = 4;
 
+const SITTING_EXPIRED_NOTICE =
+  "Your previous review session expired; that grade was not recorded.";
+
 let revealBackInFlight = false;
+
+type SittingStoreSet = (
+  partial:
+    | Partial<SittingState>
+    | ((state: SittingState) => Partial<SittingState>),
+) => void;
+
+type SittingStoreGet = () => SittingState & SittingActions;
+
+async function recoverFromSittingExpired(
+  set: SittingStoreSet,
+  get: SittingStoreGet,
+): Promise<void> {
+  set({
+    sittingId: null,
+    cardId: null,
+    front: null,
+    back: null,
+    isBackVisible: false,
+    isSubmitting: false,
+    error: null,
+    notice: SITTING_EXPIRED_NOTICE,
+    phase: "opening",
+  });
+  await get().open();
+}
 
 const initialState: SittingState = {
   phase: "opening",
@@ -100,6 +130,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
             isBackVisible: false,
             selectedGradeIndex: 0,
             error: null,
+            isResumed: false,
+            outstandingCount: 0,
           });
           return;
         }
@@ -112,6 +144,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
           isBackVisible: false,
           selectedGradeIndex: 0,
           error: null,
+          isResumed: result.kind === "resumed",
+          outstandingCount: result.outstandingCount,
         });
       } catch (error) {
         if (error instanceof SittingHttpError) {
@@ -152,7 +186,11 @@ export const useSittingStore = create<SittingState & SittingActions>(
         set({ isBackVisible: true, back: revealed.back });
       } catch (error) {
         if (error instanceof SittingHttpError) {
-          set(sittingHttpErrorState(error));
+          if (error.code === SITTING_EXPIRED) {
+            await recoverFromSittingExpired(set, get);
+          } else {
+            set(sittingHttpErrorState(error));
+          }
         } else {
           throw error;
         }
@@ -194,6 +232,9 @@ export const useSittingStore = create<SittingState & SittingActions>(
             selectedGradeIndex: 0,
             error: null,
             isSubmitting: false,
+            isResumed: false,
+            outstandingCount: result.outstandingCount,
+            notice: null,
           });
           return;
         }
@@ -207,10 +248,17 @@ export const useSittingStore = create<SittingState & SittingActions>(
           selectedGradeIndex: 0,
           error: null,
           isSubmitting: false,
+          isResumed: false,
+          outstandingCount: result.outstandingCount,
+          notice: null,
         });
       } catch (error) {
         if (error instanceof SittingHttpError) {
-          set(sittingHttpErrorState(error));
+          if (error.code === SITTING_EXPIRED) {
+            await recoverFromSittingExpired(set, get);
+          } else {
+            set(sittingHttpErrorState(error));
+          }
         } else {
           throw error;
         }

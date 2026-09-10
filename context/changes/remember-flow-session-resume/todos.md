@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-session-resume
-current_phase: 9
-next_step: 9.1
-next_command: /implement remember-flow-session-resume phase 9
+current_phase: 10
+next_step: 10.1
+next_command: /unit-test remember-flow-session-resume phase 10
 updated: 2026-09-10
 ---
 
@@ -99,8 +99,8 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 9.1 Record the resume marker and the live outstanding count
-- [ ] 9.2 Recover from sitting_expired by re-opening with a notice
+- [x] 9.1 Record the resume marker and the live outstanding count
+- [x] 9.2 Recover from sitting_expired by re-opening with a notice
 
 ### Phase 10: Overlay shows the return, the count, and the expiry
 
