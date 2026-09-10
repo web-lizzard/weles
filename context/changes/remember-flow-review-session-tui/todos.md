@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-review-session-tui
-current_phase: 5
-next_step: 5.1
-next_command: /implement remember-flow-review-session-tui phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test remember-flow-review-session-tui phase 6
 updated: 2026-09-10
 ---
 
@@ -46,7 +46,7 @@ updated: 2026-09-10
 
 #### Automated
 
-- [ ] 5.1 Write `screens/SittingOverlay.tsx` component signature and per-phase render helper stubs
+- [x] 5.1 Write `screens/SittingOverlay.tsx` component signature and per-phase render helper stubs
 
 ### Phase 6: Sitting overlay — happy path behaviour
 
