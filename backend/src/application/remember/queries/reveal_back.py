@@ -3,6 +3,7 @@ from application.remember.ports import Clock
 from domain.remember.exceptions import (
     CardNotInSittingError,
     CardNotReviewableError,
+    SittingExpiredError,
     SittingNotFoundError,
 )
 from domain.remember.ports import ReviewCatalog, SittingRepository
@@ -25,6 +26,8 @@ class RevealBackQuery:
         sitting = await self._sittings.get(sitting_id)
         if sitting is None:
             raise SittingNotFoundError
+        if not sitting.is_offered(self._clock.now()):
+            raise SittingExpiredError
 
         if not sitting.contains(card_id):
             raise CardNotInSittingError

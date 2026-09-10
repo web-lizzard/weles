@@ -1,6 +1,10 @@
 from application.remember.dto import PresentedCardDTO
 from application.remember.ports import Clock
-from domain.remember.exceptions import CardNotReviewableError, SittingNotFoundError
+from domain.remember.exceptions import (
+    CardNotReviewableError,
+    SittingExpiredError,
+    SittingNotFoundError,
+)
 from domain.remember.ports import ReviewCatalog, ReviewEventStore, SittingRepository
 from domain.remember.value_objects import SittingId
 
@@ -21,13 +25,14 @@ class CurrentCardQuery:
     async def handle(self, sitting_id: SittingId) -> PresentedCardDTO:
         """Load the sitting and return the stable next draw. Read-only.
 
-        Resume-slice contract (not wired as a separate path): also
-        outstanding_count from sitting.outstanding. Does not evaluate
-        is_offered — caller already holds the id.
+        Refuses sittings past their resume horizon. Also returns
+        outstanding_count from sitting.outstanding.
         """
         sitting = await self._sittings.get(sitting_id)
         if sitting is None:
             raise SittingNotFoundError
+        if not sitting.is_offered(self._clock.now()):
+            raise SittingExpiredError
 
         sitting_events = await self._events.list_by_sitting(sitting_id)
         reviewable = await self._catalog.list_reviewable()
