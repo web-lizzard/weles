@@ -121,6 +121,11 @@ updated: 2026-09-11
 
 - [ ] 9.4 Press t then s in a live review: fragment highlighted in context, Esc returns to the card, second Esc leaves the sitting
 
+#### Triage
+
+- [ ] 9.5 R3-F2 Card source probe state lives in the sitting store, not overlay-local state
+- [ ] 9.6 R3-F3 cardSourceProbe.ts is outside every phase's Changes Required
+
 ### Phase 10: Expansion and the viewport
 
 #### Tests
@@ -148,3 +153,7 @@ updated: 2026-09-11
 - [x] 11.1 Feature suite passes — e37f3fa
 - [x] 11.2 Remember step coverage check passes — e37f3fa
 - [x] 11.3 Full backend suite passes — e37f3fa
+
+#### Triage
+
+- [ ] 11.4 R3-F1 Phase 11 Automated Verification command collects no tests
