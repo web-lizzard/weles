@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-embedding-tracer
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test llm-adapter-embedding-tracer phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement llm-adapter-embedding-tracer phase 4
 updated: 2026-09-12
 ---
 
@@ -34,18 +34,18 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 12cbced
 
 #### Automated
 
-- [ ] 3.1 Map the provider vector into Embedding through Embedder.embed_query
-- [ ] 3.2 Pass the configured dimensions through EmbeddingSettings only when set
-- [ ] 3.3 Emit one observation span per embed with the Langfuse attribute vocabulary
-- [ ] 3.4 Mark the span ERROR on provider failure and let the exception propagate unchanged
+- [x] 3.1 Map the provider vector into Embedding through Embedder.embed_query — 9fe8498
+- [x] 3.2 Pass the configured dimensions through EmbeddingSettings only when set — 9fe8498
+- [x] 3.3 Emit one observation span per embed with the Langfuse attribute vocabulary — 9fe8498
+- [x] 3.4 Mark the span ERROR on provider failure and let the exception propagate unchanged — 9fe8498
 
 #### Manual
 
-- [ ] 3.5 Read the new test names and confirm they describe behaviour, not implementation shape
+- [x] 3.5 Read the new test names and confirm they describe behaviour, not implementation shape — 9fe8498
 
 ### Phase 4: Telemetry bootstrap and composition wiring
 
