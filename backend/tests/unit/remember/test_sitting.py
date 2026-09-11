@@ -6,7 +6,13 @@ import pytest
 from domain.remember.exceptions import EmptySittingError
 from domain.remember.review_event import ReviewEvent
 from domain.remember.sitting import Sitting
-from domain.remember.value_objects import CardId, Grade, ShowingLimit, SittingId
+from domain.remember.value_objects import (
+    CardId,
+    Grade,
+    Rejected,
+    ShowingLimit,
+    SittingId,
+)
 
 
 def _card_id() -> CardId:
@@ -30,6 +36,15 @@ def _event(
         card_id=card_id,
         reviewed_at=datetime.now(UTC),
         outcome=grade,
+        sitting_id=sitting_id,
+    )
+
+
+def _rejection(card_id: CardId, sitting_id: SittingId) -> ReviewEvent:
+    return ReviewEvent(
+        card_id=card_id,
+        reviewed_at=datetime.now(UTC),
+        outcome=Rejected.REJECTED,
         sitting_id=sitting_id,
     )
 
@@ -265,6 +280,28 @@ def test_reviews_on_different_cards_change_the_draw_when_counts_tie() -> None:
     assert sitting.next_card(present, card_a_first) != sitting.next_card(
         present, card_b_first
     )
+
+
+def test_a_rejection_finishes_its_card_and_clears_it_from_outstanding() -> None:
+    card = _card_id()
+    sitting = _open_sitting(card)
+    present = frozenset({card})
+    events = (_rejection(card, sitting.id),)
+
+    assert sitting.is_finished(present, events) is True
+    assert sitting.outstanding(present, events) == frozenset()
+
+
+def test_a_rejected_card_is_not_drawn_again_while_another_card_remains() -> None:
+    rejected = _card_id()
+    remaining = _card_id()
+    sitting = _open_sitting(rejected, remaining)
+    present = frozenset({rejected, remaining})
+    events = (_rejection(rejected, sitting.id),)
+
+    assert sitting.is_finished(present, events) is False
+    assert sitting.outstanding(present, events) == frozenset({remaining})
+    assert sitting.next_card(present, events) == remaining
 
 
 def test_the_seeded_draw_matches_a_pinned_outcome_for_an_empty_log() -> None:
