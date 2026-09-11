@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 4
-next_step: 4.4
-next_command: /implement remember-flow-card-rejection phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement remember-flow-card-rejection phase 5
 updated: 2026-09-11
 ---
 
@@ -69,7 +69,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 4.4 Curl a rejection then read /_outbox and confirm a card_rejected envelope that later reads consumed
+- [x] 4.4 Curl a rejection then read /_outbox and confirm a card_rejected envelope that later reads consumed
 
 ### Phase 5: Distill discard stubs
 
