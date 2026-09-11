@@ -194,7 +194,7 @@ describe("SittingOverlay", () => {
       front: "Next front",
       sittingComplete: false,
       outstandingCount: 0,
-      due: null,
+      due: undefined,
     });
 
     const { stdin } = render(<SittingOverlay />);

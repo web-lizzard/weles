@@ -9,7 +9,8 @@ from domain.remember.exceptions import (
     SittingNotFoundError,
 )
 from domain.remember.ports import ReviewCatalog
-from domain.remember.value_objects import CardId, SittingId
+from domain.remember.review_event import ReviewEvent
+from domain.remember.value_objects import CardId, Reveal, SittingId
 
 
 class RevealBackCommand:
@@ -24,7 +25,7 @@ class RevealBackCommand:
         self._clock: Clock = clock
 
     async def handle(self, sitting_id: SittingId, card_id: CardId) -> RevealedCardDTO:
-        """Return front and back for a sitting member. Read-only; no commit."""
+        """Record that the back was revealed and return front and back text."""
         async with self._uow_factory() as uow:
             sitting = await uow.sittings.get(sitting_id)
             if sitting is None:
@@ -39,9 +40,29 @@ class RevealBackCommand:
             if reviewable is None:
                 raise CardNotReviewableError
 
-            return RevealedCardDTO(
+            result = RevealedCardDTO(
                 sitting_id=sitting_id.value,
                 card_id=card_id.value,
                 front=reviewable.front,
                 back=reviewable.back,
             )
+
+            sitting_events = await uow.review_events.list_by_sitting(sitting_id)
+            already_revealed = any(
+                event.card_id == card_id and isinstance(event.payload, Reveal)
+                for event in sitting_events
+            )
+            if already_revealed:
+                return result
+
+            reviewed_at = self._clock.now()
+            event = ReviewEvent(
+                card_id=card_id,
+                reviewed_at=reviewed_at,
+                payload=Reveal(),
+                sitting_id=sitting_id,
+            )
+            await uow.review_events.save(event)
+            await uow.commit()
+
+            return result

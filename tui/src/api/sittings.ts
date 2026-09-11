@@ -101,7 +101,7 @@ export async function revealBack(
   sittingId: string,
   cardId: string,
 ): Promise<RevealedCard> {
-  const { data, error, response } = await client.GET(
+  const { data, error, response } = await client.POST(
     "/review-sittings/{sitting_id}/cards/{card_id}/back",
     { params: { path: { sitting_id: sittingId, card_id: cardId } } },
   );

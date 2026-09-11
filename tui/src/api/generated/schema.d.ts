@@ -181,8 +181,25 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    get?: never;
+    put?: never;
     /** Reveal Back */
-    get: operations["reveal_back_review_sittings__sitting_id__cards__card_id__back_get"];
+    post: operations["reveal_back_review_sittings__sitting_id__cards__card_id__back_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/review-sittings/{sitting_id}/cards/{card_id}/source": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Card Source */
+    get: operations["card_source_review_sittings__sitting_id__cards__card_id__source_get"];
     put?: never;
     post?: never;
     delete?: never;
@@ -293,6 +310,12 @@ export interface components {
        * Format: date-time
        */
       created_at: string;
+    };
+    /** CardSourceDTO */
+    CardSourceDTO: {
+      /** Blocks */
+      blocks: components["schemas"]["SourceBlockDTO"][];
+      span: components["schemas"]["SourceSpanDTO"];
     };
     /** DraftDeltaEvent */
     DraftDeltaEvent: {
@@ -653,6 +676,22 @@ export interface components {
        */
       kind: "resumed";
     };
+    /** SourceBlockDTO */
+    SourceBlockDTO: {
+      /** Index */
+      index: number;
+      /** Text */
+      text: string;
+    };
+    /** SourceSpanDTO */
+    SourceSpanDTO: {
+      /** Block Index */
+      block_index: number;
+      /** Start */
+      start: number;
+      /** End */
+      end: number;
+    };
     /** StartCaptureSessionResponseDTO */
     StartCaptureSessionResponseDTO: {
       /**
@@ -947,7 +986,7 @@ export interface operations {
       };
     };
   };
-  reveal_back_review_sittings__sitting_id__cards__card_id__back_get: {
+  reveal_back_review_sittings__sitting_id__cards__card_id__back_post: {
     parameters: {
       query?: never;
       header?: never;
@@ -966,6 +1005,38 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RevealedCardDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  card_source_review_sittings__sitting_id__cards__card_id__source_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sitting_id: string;
+        card_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CardSourceDTO"];
         };
       };
       /** @description Validation Error */
