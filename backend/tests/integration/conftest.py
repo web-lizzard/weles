@@ -118,6 +118,7 @@ class RememberTestContext:
     client: TestClient
     notes: InMemoryDistillNoteRepository
     cards: InMemoryCardRepository
+    outbox_store: InMemoryOutboxStore
 
 
 @pytest.fixture
@@ -129,6 +130,9 @@ def remember_client() -> Iterator[RememberTestContext]:
     app.dependency_overrides.update(composition.dependency_overrides())
     with TestClient(app) as client:
         yield RememberTestContext(
-            client=client, notes=composition.notes, cards=composition.cards
+            client=client,
+            notes=composition.notes,
+            cards=composition.cards,
+            outbox_store=composition.outbox_store,
         )
     app.dependency_overrides.clear()
