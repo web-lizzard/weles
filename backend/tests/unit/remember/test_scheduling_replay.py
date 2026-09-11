@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from domain.remember.ports import SchedulingReplay
 from domain.remember.review_event import ReviewEvent
@@ -200,6 +200,26 @@ def test_replay_of_a_mixed_log_matches_replaying_the_grades_alone() -> None:
     assert mixed_result is not None
     assert [call[2] for call in mixed_scheduler.calls] == [Grade.FORGOT, Grade.GOOD]
     assert Rejected.REJECTED not in [call[2] for call in mixed_scheduler.calls]
+
+
+def test_replay_for_one_card_ignores_another_cards_grades_in_the_sequence() -> None:
+    card_a = CardId(value=UUID("e3e70682-c209-4cac-629f-6fbed82c07cd"))
+    card_b = CardId(value=UUID("f728b4fa-4248-5e3a-0a5d-2f346baa9455"))
+    base = datetime(2026, 8, 1, tzinfo=UTC)
+    mixed = (
+        _event(card_a, reviewed_at=base, grade=Grade.FORGOT),
+        _event(card_b, reviewed_at=base + timedelta(hours=1), grade=Grade.FORGOT),
+    )
+    card_a_only = (mixed[0],)
+    mixed_scheduler = _RecordingScheduler()
+    scoped_scheduler = _RecordingScheduler()
+
+    mixed_result = SchedulingReplay(mixed_scheduler).replay(card_a, mixed)
+    scoped_result = SchedulingReplay(scoped_scheduler).replay(card_a, card_a_only)
+
+    assert mixed_result == scoped_result
+    assert len(mixed_scheduler.calls) == 1
+    assert mixed_scheduler.calls[0][1:] == (card_a, Grade.FORGOT, base)
 
 
 def test_replay_ignores_each_event_sitting_id_when_calling_the_scheduler() -> None:

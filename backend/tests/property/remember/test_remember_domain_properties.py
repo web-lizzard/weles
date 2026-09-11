@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from typing import cast
 from uuid import UUID, uuid4
 
-from hypothesis import given, settings
+from hypothesis import example, given, settings
 from hypothesis import strategies as st
 
 from domain.remember.ports import SchedulingReplay
@@ -179,7 +179,7 @@ def test_foreign_sitting_events_do_not_change_next_card_or_finish_state(
     assert finished_without == finished_with
 
 
-def test_R1_F1_foreign_sitting_events_must_not_change_the_drawn_next_card() -> None:
+def test_foreign_sitting_events_must_not_change_the_drawn_next_card() -> None:
     card_ids = frozenset(
         {
             CardId(value=UUID("6513270e-269e-0d37-f2a7-4de452e6b438")),
@@ -295,3 +295,44 @@ def test_next_card_never_returns_a_finished_card(
                 or sum(1 for event in sitting_events if event.card_id == pick) >= limit
             )
             assert not finished
+
+
+@settings(max_examples=100, deadline=None)
+@given(
+    card_a=st.uuids().map(lambda value: CardId(value=value)),
+    card_b=st.uuids().map(lambda value: CardId(value=value)),
+    grade_a=_GRADES,
+    grade_b=_GRADES,
+)
+@example(
+    card_a=CardId(value=UUID("e3e70682-c209-4cac-629f-6fbed82c07cd")),
+    card_b=CardId(value=UUID("f728b4fa-4248-5e3a-0a5d-2f346baa9455")),
+    grade_a=Grade.FORGOT,
+    grade_b=Grade.FORGOT,
+)
+def test_replay_ignores_grades_belonging_to_other_cards(
+    card_a: CardId,
+    card_b: CardId,
+    grade_a: Grade,
+    grade_b: Grade,
+) -> None:
+    if card_a.value == card_b.value:
+        return
+    base = datetime(2026, 8, 1, tzinfo=UTC)
+    events = (
+        ReviewEvent(
+            card_id=card_a,
+            reviewed_at=base,
+            outcome=grade_a,
+            sitting_id=SittingId.new(),
+        ),
+        ReviewEvent(
+            card_id=card_b,
+            reviewed_at=base + timedelta(hours=1),
+            outcome=grade_b,
+            sitting_id=SittingId.new(),
+        ),
+    )
+    replay = SchedulingReplay(_LinearScheduler())
+    scoped = tuple(event for event in events if event.card_id == card_a)
+    assert replay.replay(card_a, events) == replay.replay(card_a, scoped)

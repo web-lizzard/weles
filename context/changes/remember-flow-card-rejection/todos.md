@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 3
-next_step: 3.1
-next_command: /implement remember-flow-card-rejection phase 3
+current_phase: 2
+next_step: 2.5
+next_command: /implement remember-flow-card-rejection phase 2
 updated: 2026-09-11
 ---
 
@@ -33,6 +33,10 @@ updated: 2026-09-11
 - [x] 2.2 Keep a rejected card out of next_card for the rest of the sitting
 - [x] 2.3 Return None from SchedulingReplay.replay for a log holding only rejections
 - [x] 2.4 Fold only the graded events when a card's log mixes grades and a rejection
+
+#### Triage
+
+- [ ] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 3f99e12)
 
 ### Phase 3: Rejection write-path stubs
 
