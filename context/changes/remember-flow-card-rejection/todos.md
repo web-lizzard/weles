@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 3
-next_step: 3.6
-next_command: /implement remember-flow-card-rejection phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test remember-flow-card-rejection phase 4
 updated: 2026-09-11
 ---
 
@@ -53,7 +53,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 3.6 Curl the rejection route against a running backend and confirm HTTP 204 with an empty body
+- [x] 3.6 Curl the rejection route against a running backend and confirm HTTP 204 with an empty body
 
 ### Phase 4: Reject command behaviour
 
