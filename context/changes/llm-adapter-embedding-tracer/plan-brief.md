@@ -14,8 +14,8 @@ inherited by every later slice.
 
 `DeterministicEmbeddingAdapter` hashes text into 32 dimensions and cannot fail;
 `adapters/out/llm/` does not exist and nothing in the tree configures OpenTelemetry.
-`pydantic-ai-slim` resolves to 2.35.3 — embeddings are already there — but without the
-`[openai]` extra that its OpenAI embedding module needs.
+`pydantic-ai-slim` resolves to 2.35.3 — embeddings are already there, though the current
+release is 2.41.0 — but without the `[openai]` extra that its OpenAI embedding module needs.
 
 ## Desired End State
 
@@ -31,6 +31,7 @@ over MCP.
 | Provider | OpenRouter for embeddings and later chat | One key and one billing surface across the whole effort. | Plan |
 | Library | pydantic-ai `Embedder` + `OpenAIEmbeddingModel` + `OpenRouterProvider` | Already a dependency and already ADR-committed for LLM adapters. | Research |
 | Extra | `pydantic-ai-slim[openai]`, not `[openrouter]` | The OpenAI embeddings module imports `tiktoken` at import time, which `[openrouter]` does not pull. | Research |
+| Version floor | `>=2.41.0`, lock moves 2.35.3 → 2.41.0 | Nothing under `src/` imports pydantic-ai yet, so the upgrade is free and the floor stays unambiguous. | Plan |
 | Tracing dependency | OpenTelemetry API in adapters; Langfuse only at composition | Adapters stay vendor-neutral, and a future domain-side span port reuses the same vocabulary. | Plan |
 | Langfuse hosting | Cloud Hobby, tracing only | Zero infra, and one observation per embed stays far under the 50k unit cap. | Research |
 | Granularity | One observation per `embed()` | Nests naturally under a conversation trace in S-05 without doubling billable units. | Plan |
@@ -72,7 +73,7 @@ Adapters know OpenTelemetry; only `adapters/telemetry.py` knows Langfuse.
 
 | Phase | What it delivers | Key risk |
 | --- | --- | --- |
-| 1. Dependencies, settings, environment | `[openai]` extra, OTel packages, every new config field | The lock's loose `>=0.0.14` bound hides how new the real requirement is |
+| 1. Dependencies, settings, environment | `[openai]` extra, OTel packages, every new config field | Adding an extra rewrites the lock; the floor is pinned at 2.41.0 so the resolution is not left to chance |
 | 2. `adapters/out/llm/` stubs | Tracing helper and adapter signatures Phase 3 imports | Attribute vocabulary chosen here is inherited by four later seams |
 | 3. Adapter behaviour and span emission | Vector mapping, dimension setting, one Langfuse-shaped span per call | Span attribute names must match Langfuse's mapping exactly or the observation renders blank |
 | 4. Telemetry bootstrap and wiring | OTLP exporter to Langfuse, provider switch honoured | A default-on provider reaching the test suite or CI |
