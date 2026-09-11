@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,12 @@ import pytest
 _TESTS_ROOT = Path(__file__).resolve().parent
 _FEATURES_LOADER = _TESTS_ROOT / "features" / "test_bdd.py"
 _BDD_SHIM = _TESTS_ROOT / "bdd" / "test_features.py"
+
+
+def pytest_configure(_config: pytest.Config) -> None:
+    # Keep the suite offline: production defaults to OpenRouter + tracing on.
+    _ = os.environ.setdefault("EMBEDDING_PROVIDER", "deterministic")
+    _ = os.environ.setdefault("TRACING_ENABLED", "false")
 
 
 def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
