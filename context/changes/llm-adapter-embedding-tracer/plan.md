@@ -38,8 +38,9 @@ attribute vocabulary unchanged.
 - `adapters/out/` holds `in_memory/`, `fsrs/`, `worker/`. There is **no `llm/` package** and
   **no OpenTelemetry configuration anywhere** in the tree.
 - `pydantic-ai-slim` resolves to **2.35.3** in `backend/uv.lock` — well past the version that
-  introduced embeddings — but the `[openai]` extra is absent, so neither `openai` nor
-  `tiktoken` is installed today.
+  introduced embeddings, and behind the current **2.41.0** — but the `[openai]` extra is
+  absent, so neither `openai` nor `tiktoken` is installed today. No module under
+  `backend/src` imports `pydantic-ai`, so nothing constrains the version upwards.
 - The embedding contract suite parametrizes over the deterministic adapter only
   (`backend/tests/unit/capture/contracts/test_embedding_contract.py:11-12`).
 
@@ -59,7 +60,8 @@ the Langfuse server as connected.
 ### Key Discoveries
 
 - **pydantic-ai already has everything.** `Embedder`, `OpenAIEmbeddingModel`,
-  `EmbeddingSettings`, and the fake `TestEmbeddingModel` all ship in the installed 2.35.3.
+  `EmbeddingSettings`, and the fake `TestEmbeddingModel` all ship in the installed 2.35.3, and
+  nothing in 2.36–2.41 changes that surface.
   `OpenRouterProvider` (`pydantic_ai/providers/openrouter.py`) is an accepted provider for
   `OpenAIEmbeddingModel`, so no OpenAI-direct account is needed.
 - **The `[openai]` extra is mandatory, not `[openrouter]`.** `pydantic_ai/embeddings/openai.py`
@@ -153,13 +155,20 @@ Everything the later phases import or read, and nothing else. No behaviour.
 **Intent**: Make the pydantic-ai embeddings path and a plain OTLP exporter importable. The
 `[openai]` extra is what pulls `openai` and `tiktoken`, both absent from the lock today.
 
-**Contract**: `dependencies` gains `pydantic-ai-slim[openai]>=2.0.0` (replacing the bare
+**Contract**: `dependencies` gains `pydantic-ai-slim[openai]>=2.41.0` (replacing the bare
 `pydantic-ai-slim>=0.0.14`, whose lower bound predates embeddings entirely), plus
-`opentelemetry-api`, `opentelemetry-sdk`, and `opentelemetry-exporter-otlp-proto-http`.
+`opentelemetry-api`, `opentelemetry-sdk`, and `opentelemetry-exporter-otlp-proto-http`. The
+lock moves 2.35.3 → 2.41.0 in the same step.
 
 ```bash
-cd backend && uv add "pydantic-ai-slim[openai]>=2.0.0" opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+cd backend && uv add "pydantic-ai-slim[openai]>=2.41.0" opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
 ```
+
+Pinning the floor at the current release rather than at the oldest version that would work
+removes the ambiguity of whether adding an extra re-resolves the locked version. Nothing in
+2.36–2.41 touches embeddings, so this is not a functional requirement — but no production
+module imports `pydantic-ai` yet, so the upgrade's blast radius is zero and the effort starts
+on the current release instead of drifting onto it later.
 
 #### 2. Settings
 
