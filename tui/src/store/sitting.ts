@@ -22,7 +22,8 @@ type LastAction =
   | { type: "open" }
   | { type: "reveal" }
   | { type: "grade"; grade: Grade }
-  | { type: "reject" };
+  | { type: "reject" }
+  | { type: "reject_reread" };
 
 type SittingState = {
   phase: SittingPhase;
@@ -105,6 +106,62 @@ function sittingHttpErrorState(error: SittingHttpError): Partial<SittingState> {
     error: { code: error.code, detail: error.detail },
     isSubmitting: false,
   };
+}
+
+async function applyCurrentCardAfterReject(
+  set: SittingStoreSet,
+  get: SittingStoreGet,
+  sittingId: string,
+): Promise<void> {
+  try {
+    const result = await currentCard(sittingId);
+    if (result.due != null) {
+      useDueStore.getState().applyPartition(result.due);
+    }
+    if (result.sittingComplete || result.cardId === null) {
+      set({
+        phase: "complete",
+        sittingId: result.sittingId,
+        cardId: null,
+        front: null,
+        back: null,
+        isBackVisible: false,
+        selectedGradeIndex: 0,
+        error: null,
+        isSubmitting: false,
+        isResumed: false,
+        outstandingCount: result.outstandingCount,
+        notice: null,
+        lastAction: null,
+      });
+      return;
+    }
+    set({
+      phase: "presented",
+      sittingId: result.sittingId,
+      cardId: result.cardId,
+      front: result.front,
+      back: null,
+      isBackVisible: false,
+      selectedGradeIndex: 0,
+      error: null,
+      isSubmitting: false,
+      isResumed: false,
+      outstandingCount: result.outstandingCount,
+      notice: null,
+      lastAction: null,
+    });
+  } catch (error) {
+    if (error instanceof SittingHttpError) {
+      if (error.code === SITTING_EXPIRED) {
+        await recoverFromSittingExpired(set, get);
+      } else {
+        set(sittingHttpErrorState(error));
+      }
+    } else {
+      throw error;
+    }
+  }
 }
 
 export const useSittingStore = create<SittingState & SittingActions>(
@@ -292,41 +349,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
       });
       try {
         await rejectCard(sittingId, cardId);
-        const result = await currentCard(sittingId);
-        if (result.due != null) {
-          useDueStore.getState().applyPartition(result.due);
-        }
-        if (result.sittingComplete || result.cardId === null) {
-          set({
-            phase: "complete",
-            sittingId: result.sittingId,
-            cardId: null,
-            front: null,
-            back: null,
-            isBackVisible: false,
-            selectedGradeIndex: 0,
-            error: null,
-            isSubmitting: false,
-            isResumed: false,
-            outstandingCount: result.outstandingCount,
-            notice: null,
-          });
-          return;
-        }
-        set({
-          phase: "presented",
-          sittingId: result.sittingId,
-          cardId: result.cardId,
-          front: result.front,
-          back: null,
-          isBackVisible: false,
-          selectedGradeIndex: 0,
-          error: null,
-          isSubmitting: false,
-          isResumed: false,
-          outstandingCount: result.outstandingCount,
-          notice: null,
-        });
+        set({ lastAction: { type: "reject_reread" } });
+        await applyCurrentCardAfterReject(set, get, sittingId);
       } catch (error) {
         if (error instanceof SittingHttpError) {
           if (error.code === SITTING_EXPIRED) {
@@ -340,7 +364,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
       }
     },
     retry: async () => {
-      const { lastAction } = get();
+      const state = get();
+      const { lastAction } = state;
       if (lastAction === null) {
         return;
       }
@@ -348,6 +373,12 @@ export const useSittingStore = create<SittingState & SittingActions>(
         await get().open();
       } else if (lastAction.type === "reveal") {
         await get().toggleBack();
+      } else if (lastAction.type === "reject_reread") {
+        if (state.sittingId === null) {
+          return;
+        }
+        set({ error: null, isSubmitting: true });
+        await applyCurrentCardAfterReject(set, get, state.sittingId);
       } else if (lastAction.type === "reject") {
         await get().rejectCurrentCard();
       } else {

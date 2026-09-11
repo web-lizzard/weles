@@ -142,6 +142,10 @@ updated: 2026-09-11
 
 - [ ] 9.5 Reject a card in the running TUI and confirm the next card appears with no further keystroke
 
+#### Triage
+
+- [ ] 9.6 R6-F1 Retry re-issues a rejection the backend already recorded (proof: 2e4a84e)
+
 ### Phase 10: Overlay gesture behind the reveal gate
 
 #### Tests
