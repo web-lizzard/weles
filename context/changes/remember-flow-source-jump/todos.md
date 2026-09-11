@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
 current_phase: 7
-next_step: 7 tests
-next_command: /unit-test remember-flow-source-jump phase 7
+next_step: 7.1
+next_command: /implement remember-flow-source-jump phase 7
 updated: 2026-09-11
 ---
 
@@ -84,7 +84,7 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 6aca593
 
 #### Automated
 

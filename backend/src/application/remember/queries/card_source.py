@@ -1,7 +1,13 @@
-from application.remember.dto import CardSourceDTO
+from application.remember.dto import CardSourceDTO, SourceBlockDTO, SourceSpanDTO
 from application.remember.ports import Clock
+from domain.remember.exceptions import (
+    CardNotInSittingError,
+    SittingExpiredError,
+    SittingNotFoundError,
+    SourceNotAvailableError,
+)
 from domain.remember.ports import CardSourceLocator, ReviewEventStore, SittingRepository
-from domain.remember.value_objects import CardId, SittingId
+from domain.remember.value_objects import CardId, Reveal, SittingId
 
 
 class CardSourceQuery:
@@ -19,5 +25,34 @@ class CardSourceQuery:
 
     async def handle(self, sitting_id: SittingId, card_id: CardId) -> CardSourceDTO:
         """Return blocks and span when the back was revealed and source resolves."""
-        _ = (sitting_id, card_id)
-        raise NotImplementedError
+        sitting = await self._sittings.get(sitting_id)
+        if sitting is None:
+            raise SittingNotFoundError
+        if not sitting.is_offered(self._clock.now()):
+            raise SittingExpiredError
+        if not sitting.contains(card_id):
+            raise CardNotInSittingError
+
+        sitting_events = await self._events.list_by_sitting(sitting_id)
+        revealed = any(
+            event.card_id == card_id and isinstance(event.payload, Reveal)
+            for event in sitting_events
+        )
+        if not revealed:
+            raise SourceNotAvailableError
+
+        located = await self._locator.locate(card_id)
+        if located is None:
+            raise SourceNotAvailableError
+
+        return CardSourceDTO(
+            blocks=[
+                SourceBlockDTO(index=block.index, text=block.text)
+                for block in located.blocks
+            ],
+            span=SourceSpanDTO(
+                block_index=located.span.block_index,
+                start=located.span.start,
+                end=located.span.end,
+            ),
+        )

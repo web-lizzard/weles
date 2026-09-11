@@ -275,6 +275,21 @@ commit all stay as they are.
 - `cd backend && uv run pytest -q` passes
 - `cd backend && uv run basedpyright src` reports no new errors
 
+### Review r1
+
+Artifact: `reviews/2026-09-11-r1-mutation-test-phases-2-3-.md`
+
+- `R1-F7` — partition_due must receive scheduler stamp from GradeCardCommand.handle
+  Fix: `partition_due` must receive the live `Scheduler.stamp()` from `GradeCardCommand.handle`
+- `R1-F8` — GradeAppliedDTO omits outstanding_count when sitting completes
+  Fix: complete `GradeAppliedDTO` includes `outstanding_count`
+- `R1-F9` — GradeAppliedDTO omits due when sitting completes
+  Fix: complete `GradeAppliedDTO` includes `due`
+- `R1-F10` — GradeAppliedDTO omits next_front when another card remains
+  Fix: incomplete `GradeAppliedDTO` carries the next card front text
+- `R1-F11` — GradeAppliedDTO omits outstanding_count when sitting continues
+  Fix: incomplete `GradeAppliedDTO` includes `outstanding_count`
+
 ---
 
 ## Phase 3: Non-accounting payloads stop counting

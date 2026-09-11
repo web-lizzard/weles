@@ -91,6 +91,7 @@ from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.commands.reject_card import RejectCardCommand
 from application.remember.commands.reveal_back import RevealBackCommand
 from application.remember.ports import UnitOfWork as RememberUnitOfWork
+from application.remember.queries.card_source import CardSourceQuery
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
@@ -326,6 +327,15 @@ def get_due_count_query() -> DueCountQuery:
 
 def get_card_source_locator() -> CardSourceLocator:
     return _remember_card_source_locator
+
+
+def get_card_source_query() -> CardSourceQuery:
+    return CardSourceQuery(
+        _remember_sittings,
+        _remember_review_events,
+        _remember_card_source_locator,
+        _remember_clock,
+    )
 
 
 def get_reveal_back_command() -> RevealBackCommand:
