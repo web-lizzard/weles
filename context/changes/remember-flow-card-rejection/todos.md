@@ -133,10 +133,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 9.1 Resolve rejectCard on a 204 and raise SittingHttpError on a client error
-- [x] 9.2 Re-read current-card after a rejection and apply the presented card to the store
-- [x] 9.3 Push the re-read partition through applyPartition so the poll cannot clobber it
-- [x] 9.4 Route a sitting_expired rejection into recoverFromSittingExpired
+- [x] 9.1 Resolve rejectCard on a 204 and raise SittingHttpError on a client error — 0cb65da
+- [x] 9.2 Re-read current-card after a rejection and apply the presented card to the store — 0cb65da
+- [x] 9.3 Push the re-read partition through applyPartition so the poll cannot clobber it — 0cb65da
+- [x] 9.4 Route a sitting_expired rejection into recoverFromSittingExpired — 0cb65da
 
 #### Manual
 
