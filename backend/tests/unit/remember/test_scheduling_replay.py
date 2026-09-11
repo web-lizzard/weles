@@ -8,6 +8,7 @@ from domain.remember.value_objects import (
     CardId,
     Grade,
     OpaqueSchedulerState,
+    Rejected,
     SchedulerAlgorithm,
     SchedulerStamp,
     SittingId,
@@ -36,6 +37,20 @@ def _event(
         card_id=card_id,
         reviewed_at=reviewed_at,
         outcome=grade,
+        sitting_id=sitting_id or SittingId.new(),
+    )
+
+
+def _rejection(
+    card_id: CardId,
+    *,
+    reviewed_at: datetime,
+    sitting_id: SittingId | None = None,
+) -> ReviewEvent:
+    return ReviewEvent(
+        card_id=card_id,
+        reviewed_at=reviewed_at,
+        outcome=Rejected.REJECTED,
         sitting_id=sitting_id or SittingId.new(),
     )
 
@@ -146,6 +161,45 @@ def test_replay_of_n_events_matches_n_sequential_live_reviews() -> None:
     assert actual == expected
     assert actual is not None
     assert actual.due_at == base + timedelta(days=5)
+
+
+def test_a_rejection_only_log_replays_to_none_without_scheduling() -> None:
+    card_id = _card_id()
+    events = (
+        _rejection(card_id, reviewed_at=datetime(2026, 5, 1, tzinfo=UTC)),
+        _rejection(card_id, reviewed_at=datetime(2026, 5, 2, tzinfo=UTC)),
+    )
+    scheduler = _RecordingScheduler()
+    replay = SchedulingReplay(scheduler)
+
+    assert replay.replay(card_id, events) is None
+    assert scheduler.calls == []
+
+
+def test_replay_of_a_mixed_log_matches_replaying_the_grades_alone() -> None:
+    card_id = _card_id()
+    first_grade_at = datetime(2026, 6, 1, tzinfo=UTC)
+    rejected_at = datetime(2026, 6, 2, tzinfo=UTC)
+    second_grade_at = datetime(2026, 6, 3, tzinfo=UTC)
+    mixed = (
+        _event(card_id, reviewed_at=first_grade_at, grade=Grade.FORGOT),
+        _rejection(card_id, reviewed_at=rejected_at),
+        _event(card_id, reviewed_at=second_grade_at, grade=Grade.GOOD),
+    )
+    grades_only = (
+        _event(card_id, reviewed_at=first_grade_at, grade=Grade.FORGOT),
+        _event(card_id, reviewed_at=second_grade_at, grade=Grade.GOOD),
+    )
+    mixed_scheduler = _RecordingScheduler()
+    grades_scheduler = _RecordingScheduler()
+
+    mixed_result = SchedulingReplay(mixed_scheduler).replay(card_id, mixed)
+    grades_result = SchedulingReplay(grades_scheduler).replay(card_id, grades_only)
+
+    assert mixed_result == grades_result
+    assert mixed_result is not None
+    assert [call[2] for call in mixed_scheduler.calls] == [Grade.FORGOT, Grade.GOOD]
+    assert Rejected.REJECTED not in [call[2] for call in mixed_scheduler.calls]
 
 
 def test_replay_ignores_each_event_sitting_id_when_calling_the_scheduler() -> None:
