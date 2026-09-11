@@ -10,6 +10,11 @@ class Environment(StrEnum):
     PROD = "prod"
 
 
+class EmbeddingProvider(StrEnum):
+    DETERMINISTIC = "deterministic"
+    OPENROUTER = "openrouter"
+
+
 class Settings(BaseSettings):
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file=".env",
@@ -29,3 +34,11 @@ class Settings(BaseSettings):
     card_back_max: int = 600
     sitting_max_showings: int = 2
     sitting_resume_horizon_hours: float = 24.0
+    embedding_provider: EmbeddingProvider = EmbeddingProvider.OPENROUTER
+    openrouter_api_key: str | None = None
+    embedding_model: str = "openai/text-embedding-3-small"
+    embedding_dimensions: int | None = None
+    tracing_enabled: bool = True
+    langfuse_public_key: str | None = None
+    langfuse_secret_key: str | None = None
+    langfuse_otlp_endpoint: str = "https://cloud.langfuse.com/api/public/otel/v1/traces"

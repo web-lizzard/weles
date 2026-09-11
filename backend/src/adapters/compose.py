@@ -68,16 +68,18 @@ from adapters.out.in_memory.shared.outbox.envelope_query import (
     InMemoryOutboxEnvelopeQueryAdapter,
 )
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from adapters.out.llm.capture.embedding import OpenRouterEmbeddingAdapter
 from adapters.out.worker.handlers.card_discard import CardDiscardHandler
 from adapters.out.worker.handlers.flashcard_gen import FlashcardGenHandler
 from adapters.out.worker.handlers.note_save import SaveNoteHandler
 from adapters.out.worker.outbox_worker import OutboxWorker
+from adapters.telemetry import configure_tracing
 from application.capture.commands.approve_note import ApproveNoteCommand
 from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
-from application.capture.ports import UnitOfWork
+from application.capture.ports import EmbeddingPort, UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
 from application.distill.commands.discard_card import DiscardCardCommand
 from application.distill.commands.generate_cards import GenerateCardsCommand
@@ -95,7 +97,7 @@ from application.remember.queries.card_source import CardSourceQuery
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
-from config.settings import Settings
+from config.settings import EmbeddingProvider, Settings
 from domain.capture.ports import CaptureSessionRepository
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
@@ -105,6 +107,7 @@ from domain.remember.ports import CardSourceLocator
 from domain.remember.value_objects import ResumeHorizon, ShowingLimit
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
+configure_tracing(_settings)
 _store = InMemoryMessageStore()
 _capture_session_repository = InMemoryCaptureSessionRepository()
 _message_repository = InMemoryMessageRepository(_store)
@@ -135,7 +138,29 @@ _transcript_query = InMemoryTranscriptQueryAdapter(_store)
 _topic_extraction = DeterministicTopicExtractionAdapter()
 _confidence_assessment = DeterministicConfidenceAssessmentAdapter()
 _reply_generation = DeterministicReplyGenerationAdapter()
-_embedding = DeterministicEmbeddingAdapter()
+
+
+def _build_embedding_port(settings: Settings) -> EmbeddingPort:
+    if settings.embedding_provider == EmbeddingProvider.DETERMINISTIC:
+        return DeterministicEmbeddingAdapter()
+    from pydantic_ai.embeddings import Embedder
+    from pydantic_ai.embeddings.openai import OpenAIEmbeddingModel
+    from pydantic_ai.providers.openrouter import OpenRouterProvider
+
+    embedder = Embedder(
+        OpenAIEmbeddingModel(
+            settings.embedding_model,
+            provider=OpenRouterProvider(api_key=settings.openrouter_api_key),
+        )
+    )
+    return OpenRouterEmbeddingAdapter(
+        embedder,
+        settings.embedding_model,
+        settings.embedding_dimensions,
+    )
+
+
+_embedding = _build_embedding_port(_settings)
 _vocabulary = VocabularyResolver(
     _embedding,
     MatchCriteria(
