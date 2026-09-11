@@ -35,7 +35,7 @@
 - **Proposed pin**: `test_replay_for_one_card_ignores_another_cards_grades_in_the_sequence` in `backend/tests/unit/remember/test_scheduling_replay.py` (unit regression; hunt was Hypothesis, pin lives with other replay tests)
 - **Committed property**: `test_replay_ignores_grades_belonging_to_other_cards` in `backend/tests/property/remember/test_remember_domain_properties.py` (`@example` carries the shrunk vector; `@given` keeps hunting); run `cd backend && uv run pytest tests/property/remember/test_remember_domain_properties.py -k replay_ignores_grades -v`
 - **Fix**: The shrunk two-card log must make `SchedulingReplay.replay(card_a, events)` equal `replay(card_a, events)` with only `card_a` events until the bug is fixed; the unit pin and this property stay as regression afterward.
-- **Evidence:** `(proof: 3f99e12)`
+- **Evidence:** `(proof: 882047a)`
 
 ## Classified (not triaged)
 
