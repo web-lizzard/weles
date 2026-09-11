@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 10
-next_step: epilogue
-next_command: /implement remember-flow-due-count
+current_phase: 8
+next_step: 8.5
+next_command: /implement remember-flow-due-count phase 8
 updated: 2026-09-11
 ---
 
@@ -35,6 +35,10 @@ updated: 2026-09-11
 #### Manual
 
 - [x] 3.5 Curl /due-cards/count against a running backend and confirm a zero partition with HTTP 200 — 4b38f60
+
+#### Triage
+
+- [x] 3.6 R4-F2 Three phases verify with a checker this project does not install
 
 ### Phase 4: Acceptance layer for AC-14 and AC-15
 
@@ -98,6 +102,10 @@ updated: 2026-09-11
 - [x] 8.2 Keep the last partition and set isStale on a failed fetch — 4e28612
 - [x] 8.3 Start and stop the 15-second poll idempotently — 4e28612
 - [x] 8.4 Push the due object from open and grade responses into dueStore — 4e28612
+
+#### Triage
+
+- [ ] 8.5 R4-F1 A poll answering after a grade overwrites the fresher partition (proof: 2cbae57)
 
 ### Phase 9: Shell row and overlay geometry
 
