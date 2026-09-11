@@ -182,9 +182,6 @@ GRADING_OUTCOMES: frozenset[ReviewOutcome] = frozenset({*Grade, Rejected.REJECTE
 - `cd backend && uv run pytest tests/unit/remember -q` passes unchanged
 - `cd backend && uv run basedpyright src/domain/remember` reports no new errors
 
-#### Manual Verification:
-- `cd backend && uv run python -c "from domain.remember.value_objects import GRADING_OUTCOMES, Revealed; print(sorted(GRADING_OUTCOMES)); print(Revealed.REVEALED)"` prints five accounting outcomes and the new member
-
 ---
 
 ## Phase 2: Narrow showing count and draw seed to accounting outcomes
@@ -217,9 +214,6 @@ current signatures and read the narrowed helpers.
 - `cd backend && uv run pytest tests/unit/remember/test_sitting.py -q` passes with existing tests unmodified
 - `cd backend && uv run pytest tests/property/remember -q` passes
 - `cd backend && uv run pytest tests/unit/remember tests/integration -q` passes
-
-#### Manual Verification:
-- `cd backend && uv run pytest tests/unit/remember/test_sitting.py -v -k "seed or shown or finished"` and confirm the pinned draw-seed cases report the same values as before the change
 
 ---
 
@@ -299,9 +293,6 @@ as `"source_not_available": 404`.
 - `cd backend && uv run basedpyright src` reports no new errors
 - `cd backend && uv run ruff check src` passes
 - `cd backend && uv run pytest tests/integration/test_remember_routes.py -q` passes with the reveal calls switched to POST
-
-#### Manual Verification:
-- `cd backend && uv run uvicorn main:app --port 8000`, then `curl -s localhost:8000/openapi.json | jq '.paths | keys'` lists the `/source` path and shows `post` on the `/back` path
 
 ---
 
@@ -393,9 +384,6 @@ the card's quote back into the in-memory note repository after the card was mint
 - `cd backend && uv run pytest tests/unit/remember/contracts/test_card_source_locator_contract.py -q` passes
 - `cd backend && uv run pytest tests/unit/remember -q` passes
 - `cd backend && uv run basedpyright src/adapters/out/in_memory/remember` reports no new errors
-
-#### Manual Verification:
-- `cd backend && uv run pytest tests/unit/remember/contracts/test_card_source_locator_contract.py -v` and confirm both the resolving and the rewritten-note cases are named and green
 
 ---
 
@@ -493,8 +481,6 @@ rendering a window plus "more above"/"more below" markers. Unimplemented body.
 - `cd tui && pnpm typecheck` passes
 - `cd tui && pnpm lint` passes
 - `cd tui && pnpm vitest run` passes unchanged
-
-#### Manual Verification:
 - `cd tui && pnpm build` completes, confirming the new modules resolve
 
 ---
@@ -613,9 +599,6 @@ and registered per the existing `pytest_plugins` convention.
 - `cd backend && uv run pytest tests/features -q` passes
 - `cd backend && uv run pytest tests/bdd/test_remember_step_coverage.py -q` passes
 - `cd backend && uv run pytest -q` passes
-
-#### Manual Verification:
-- `cd backend && uv run pytest -m "AC-18 or AC-19 or AC-20" -v` lists a scenario for each
 
 ---
 
