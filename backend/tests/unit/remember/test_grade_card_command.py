@@ -18,6 +18,7 @@ from domain.remember.ports import SchedulingReplay
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import (
     Grade,
+    Graded,
     ResumeHorizon,
     SchedulerStamp,
     SittingId,
@@ -56,7 +57,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,  # pyright: ignore[reportArgumentType]
         reviewed_at=reviewed_at or datetime.now(UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 
@@ -239,6 +240,6 @@ async def test_grading_persists_exactly_the_one_submitted_write(
     assert isinstance(result, GradeAppliedDTO)
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
-    assert events[0].outcome == Grade.GOOD
+    assert events[0].payload == Graded(grade=Grade.GOOD)
     state_saved = await composition.scheduling_states.get(card.id)
     assert state_saved is not None

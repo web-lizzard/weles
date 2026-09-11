@@ -14,6 +14,7 @@ from domain.remember.scheduling_state import SchedulingState
 from domain.remember.value_objects import (
     CardId,
     Grade,
+    Graded,
     SchedulerAlgorithm,
     SittingId,
 )
@@ -27,7 +28,7 @@ def _event(card_id: CardId, *, reviewed_at: datetime, grade: Grade) -> ReviewEve
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=reviewed_at,
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=SittingId.new(),
     )
 
@@ -50,12 +51,12 @@ def _review_sequentially(
 ) -> SchedulingState:
     previous: SchedulingState | None = None
     for event in events:
-        outcome = event.outcome
-        assert isinstance(outcome, Grade)
+        payload = event.payload
+        assert isinstance(payload, Graded)
         previous = scheduler.review(
             previous,
             card_id,
-            outcome,
+            payload.grade,
             event.reviewed_at,
         )
     assert previous is not None
@@ -72,7 +73,7 @@ from datetime import datetime
 from adapters.out.fsrs.scheduler import FsrsScheduler
 from domain.remember.ports import SchedulingReplay
 from domain.remember.review_event import ReviewEvent
-from domain.remember.value_objects import CardId, Grade, SittingId
+from domain.remember.value_objects import CardId, Grade, Graded, SittingId
 
 log = json.load(sys.stdin)
 card_id = CardId(value=log["card_id"])
@@ -80,7 +81,7 @@ events = tuple(
     ReviewEvent(
         card_id=card_id,
         reviewed_at=datetime.fromisoformat(event["reviewed_at"]),
-        outcome=Grade(event["grade"]),
+        payload=Graded(grade=Grade(event["grade"])),
         sitting_id=SittingId(value=event["sitting_id"]),
     )
     for event in log["events"]
@@ -105,7 +106,9 @@ def _replayed_due_at_in_a_fresh_interpreter(
             "events": [
                 {
                     "reviewed_at": event.reviewed_at.isoformat(),
-                    "grade": event.outcome.value,
+                    "grade": event.payload.grade.value
+                    if isinstance(event.payload, Graded)
+                    else event.payload.kind,
                     "sitting_id": str(event.sitting_id.value),
                 }
                 for event in events

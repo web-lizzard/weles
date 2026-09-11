@@ -13,10 +13,12 @@ from domain.remember.exceptions import (
     SittingExpiredError,
 )
 from domain.remember.review_event import ReviewEvent
+from domain.remember.review_payload import is_finishing
 from domain.remember.value_objects import (
-    FINISHING_OUTCOMES,
     MIN_RESUME_HORIZON,
     CardId,
+    Graded,
+    Rejection,
     ResumeHorizon,
     ShowingLimit,
     SittingId,
@@ -152,8 +154,7 @@ class Sitting(BaseModel, frozen=True):
 
     def _card_is_finished(self, card_id: CardId, events: Sequence[ReviewEvent]) -> bool:
         if any(
-            event.card_id == card_id and event.outcome in FINISHING_OUTCOMES
-            for event in events
+            event.card_id == card_id and is_finishing(event.payload) for event in events
         ):
             return True
         return self._showing_count(card_id, events) >= self.showing_limit.value
@@ -166,21 +167,28 @@ class Sitting(BaseModel, frozen=True):
 
     def _draw_seed(self, events: Sequence[ReviewEvent]) -> int:
         parts = [str(self.id.value)]
+        accounted: list[tuple[ReviewEvent, str]] = []
+        for event in self._sitting_events(events):
+            payload = event.payload
+            if isinstance(payload, Graded):
+                accounted.append((event, payload.grade))
+            elif isinstance(payload, Rejection):
+                accounted.append((event, "rejected"))
         ordered = sorted(
-            self._sitting_events(events),
-            key=lambda event: (
-                event.reviewed_at,
-                event.card_id.value,
-                event.outcome,
-                event.sitting_id.value,
+            accounted,
+            key=lambda item: (
+                item[0].reviewed_at,
+                item[0].card_id.value,
+                item[1],
+                item[0].sitting_id.value,
             ),
         )
-        for event in ordered:
+        for event, token in ordered:
             parts.extend(
                 (
                     str(event.card_id.value),
                     event.reviewed_at.isoformat(),
-                    event.outcome,
+                    token,
                     str(event.sitting_id.value),
                 )
             )

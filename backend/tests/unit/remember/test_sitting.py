@@ -11,7 +11,8 @@ from domain.remember.sitting import Sitting
 from domain.remember.value_objects import (
     CardId,
     Grade,
-    Rejected,
+    Graded,
+    Rejection,
     ResumeHorizon,
     ShowingLimit,
     SittingId,
@@ -38,7 +39,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=datetime.now(UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 
@@ -47,7 +48,7 @@ def _rejection(card_id: CardId, sitting_id: SittingId) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=datetime.now(UTC),
-        outcome=Rejected.REJECTED,
+        payload=Rejection(),
         sitting_id=sitting_id,
     )
 
@@ -97,13 +98,13 @@ def test_grades_from_another_sitting_do_not_finish_this_one_or_hide_its_next_car
         ReviewEvent(
             card_id=first,
             reviewed_at=datetime.now(UTC),
-            outcome=Grade.GOOD,
+            payload=Graded(grade=Grade.GOOD),
             sitting_id=SittingId.new(),
         ),
         ReviewEvent(
             card_id=second,
             reviewed_at=datetime.now(UTC),
-            outcome=Grade.GOOD,
+            payload=Graded(grade=Grade.GOOD),
             sitting_id=SittingId.new(),
         ),
     )
@@ -214,7 +215,7 @@ def _pinned_event(
     return ReviewEvent(
         card_id=CardId(value=UUID(card_id)),
         reviewed_at=reviewed_at,
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=SittingId(value=UUID(sitting_id)),
     )
 
@@ -320,23 +321,38 @@ def test_the_seeded_draw_matches_a_pinned_outcome_for_an_empty_log() -> None:
     )
 
 
+def _accounted_seed_parts(
+    sitting: Sitting, events: tuple[ReviewEvent, ...]
+) -> list[tuple[ReviewEvent, str]]:
+    accounted: list[tuple[ReviewEvent, str]] = []
+    for event in events:
+        if event.sitting_id != sitting.id:
+            continue
+        payload = event.payload
+        if isinstance(payload, Graded):
+            accounted.append((event, payload.grade))
+        elif isinstance(payload, Rejection):
+            accounted.append((event, "rejected"))
+    return accounted
+
+
 def _expected_draw_seed(sitting: Sitting, events: tuple[ReviewEvent, ...]) -> int:
     parts = [str(sitting.id.value)]
     ordered = sorted(
-        (event for event in events if event.sitting_id == sitting.id),
-        key=lambda event: (
-            event.reviewed_at,
-            event.card_id.value,
-            event.outcome,
-            event.sitting_id.value,
+        _accounted_seed_parts(sitting, events),
+        key=lambda item: (
+            item[0].reviewed_at,
+            item[0].card_id.value,
+            item[1],
+            item[0].sitting_id.value,
         ),
     )
-    for event in ordered:
+    for event, token in ordered:
         parts.extend(
             (
                 str(event.card_id.value),
                 event.reviewed_at.isoformat(),
-                event.outcome,
+                token,
                 str(event.sitting_id.value),
             )
         )
@@ -364,7 +380,7 @@ def test_draw_seed_includes_event_sitting_id_in_hash_input() -> None:
         str(sitting.id.value),
         str(event.card_id.value),
         event.reviewed_at.isoformat(),
-        event.outcome,
+        _accounted_seed_parts(sitting, events)[0][1],
         "None",
     ]
     wrong_digest = hashlib.sha256("|".join(parts_without_sitting_id).encode()).digest()

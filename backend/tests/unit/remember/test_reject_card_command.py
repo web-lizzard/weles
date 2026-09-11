@@ -15,7 +15,8 @@ from domain.remember.outbox import CARD_REJECTED, CardRejectedPayload
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import (
     Grade,
-    Rejected,
+    Graded,
+    Rejection,
     ResumeHorizon,
     SittingId,
 )
@@ -41,7 +42,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,  # pyright: ignore[reportArgumentType]
         reviewed_at=reviewed_at or datetime.now(UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 
@@ -135,7 +136,7 @@ async def test_rejection_persists_a_rejected_event_and_card_rejected_envelope_to
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
-    assert events[0].outcome == Rejected.REJECTED
+    assert events[0].payload == Rejection()
     assert events[0].reviewed_at == instant
     assert events[0].sitting_id == sitting.id
 
@@ -165,7 +166,7 @@ async def test_rejection_leaves_scheduling_state_untouched_when_one_already_exis
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
-    assert events[0].outcome == Rejected.REJECTED
+    assert events[0].payload == Rejection()
     assert await composition.scheduling_states.get(card.id) == memoized
 
 

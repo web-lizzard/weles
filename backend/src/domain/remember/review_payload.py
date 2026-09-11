@@ -22,9 +22,3 @@ def is_finishing(payload: ReviewEventPayload) -> bool:
     if isinstance(payload, Rejection):
         return True
     return False
-
-
-def seed_token(payload: Graded | Rejection) -> str:
-    if isinstance(payload, Graded):
-        return payload.grade
-    return "rejected"

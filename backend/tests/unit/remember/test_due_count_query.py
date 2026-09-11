@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from integration.support.in_memory_remember import InMemoryRememberComposition
 
 from domain.remember.review_event import ReviewEvent
-from domain.remember.value_objects import Grade, ResumeHorizon, SittingId
+from domain.remember.value_objects import Grade, Graded, ResumeHorizon, SittingId
 
 from .conftest import (
     clock_after_resume_horizon,
@@ -20,7 +20,7 @@ def _event(card_id: object, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,  # pyright: ignore[reportArgumentType]
         reviewed_at=datetime.now(UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 

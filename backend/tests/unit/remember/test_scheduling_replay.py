@@ -7,8 +7,9 @@ from domain.remember.scheduling_state import SchedulingState
 from domain.remember.value_objects import (
     CardId,
     Grade,
+    Graded,
     OpaqueSchedulerState,
-    Rejected,
+    Rejection,
     SchedulerAlgorithm,
     SchedulerStamp,
     SittingId,
@@ -36,7 +37,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=reviewed_at,
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id or SittingId.new(),
     )
 
@@ -50,7 +51,7 @@ def _rejection(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=reviewed_at,
-        outcome=Rejected.REJECTED,
+        payload=Rejection(),
         sitting_id=sitting_id or SittingId.new(),
     )
 
@@ -91,12 +92,12 @@ def _replay_sequential(
     ordered = sorted(events, key=lambda event: event.reviewed_at)
     previous: SchedulingState | None = None
     for event in ordered:
-        outcome = event.outcome
-        assert isinstance(outcome, Grade)
+        payload = event.payload
+        assert isinstance(payload, Graded)
         previous = scheduler.review(
             previous,
             card_id,
-            outcome,
+            payload.grade,
             event.reviewed_at,
         )
     return previous
@@ -199,7 +200,7 @@ def test_replay_of_a_mixed_log_matches_replaying_the_grades_alone() -> None:
     assert mixed_result == grades_result
     assert mixed_result is not None
     assert [call[2] for call in mixed_scheduler.calls] == [Grade.FORGOT, Grade.GOOD]
-    assert Rejected.REJECTED not in [call[2] for call in mixed_scheduler.calls]
+    assert Rejection() not in [call[2] for call in mixed_scheduler.calls]
 
 
 def test_replay_skips_foreign_cards_without_stopping_on_later_target_grades() -> None:

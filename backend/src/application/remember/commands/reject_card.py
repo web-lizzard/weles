@@ -6,7 +6,7 @@ from domain.remember.outbox import CardRejectedPayload
 from domain.remember.ports import ReviewableCard, ReviewCatalog
 from domain.remember.review_event import ReviewEvent
 from domain.remember.sitting import Sitting
-from domain.remember.value_objects import CardId, Rejected, SittingId
+from domain.remember.value_objects import CardId, Rejection, SittingId
 
 
 class RejectCardCommand:
@@ -31,7 +31,7 @@ class RejectCardCommand:
             event = ReviewEvent(
                 card_id=card_id,
                 reviewed_at=reviewed_at,
-                outcome=Rejected.REJECTED,
+                payload=Rejection(),
                 sitting_id=sitting_id,
             )
             envelope = CardRejectedPayload(
