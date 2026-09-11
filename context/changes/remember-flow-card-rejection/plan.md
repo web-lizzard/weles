@@ -394,6 +394,13 @@ one unit of work before committing. `uow.scheduling_states` is never touched.
   `card_rejected` envelope, and that a second read shows it `consumed` rather than
   `pending`
 
+### Review r5
+
+Artifact: `reviews/2026-09-11-r5-impl-review.md`
+
+- `R5-F1` — card_rejected payload re-stamps rejected_at after model_dump
+  Fix: An outbox payload's `to_envelope` must hand `self.model_dump(mode="json")` to `OutboxEnvelope.pending` unmodified; no field may be re-serialized after the dump. A non-default wire form belongs in a pydantic field serializer on the payload, not in a post-dump mutation.
+
 ---
 
 ## Phase 5: Distill discard stubs
