@@ -5,6 +5,7 @@ topic_slug: null
 container_id: llm-adapter-embedding-tracer
 tags: [research, llm-adapter, embedding, langfuse, hobby-cost, vocabulary]
 last_updated: 2026-09-11
+last_updated_note: "OpenRouter embedding API, model catalog, and pydantic-ai routing"
 ---
 
 # Research: Hobby-project cost model for S-01 embedding and Langfuse tracing
@@ -112,3 +113,56 @@ At hobby embedding volumes, **observation-only** or **trace+observation** both u
 - Default settings: OpenAI direct vs OpenRouter/OpenAI-compatible local endpoint (same unit economics if list prices differ per provider)?
 - Langfuse shape for S-01: single observation per `embed()` vs one trace wrapping vocabulary resolve for a whole draft reply?
 - Hobby deployment default: **Langfuse Cloud EU Hobby** vs **local Docker Compose** alongside the backend dev environment?
+
+## Follow-up Research 2026-09-11
+
+### Research Question
+
+czy OpenRouter oferuje embeddingowe modele?
+
+### Summary
+
+**Yes.** OpenRouter exposes a dedicated **Embeddings API** (`POST /api/v1/embeddings`) and a separate catalog endpoint (`GET /api/v1/embeddings/models`). Models are listed with `output_modalities` including **`embeddings`**; the public collection includes OpenAI `text-embedding-3-small` / `text-embedding-3-large`, Qwen3 embedding variants, Google Gemini Embedding (including multimodal Gemini Embedding 2), Voyage, Mistral Embed, Perplexity embed models, and others—not only OpenAI reroutes.
+
+For Weles S-01, **`openai/text-embedding-3-small`** on OpenRouter is the natural OpenRouter pick: docs example pricing shows **`prompt: "0.00000002"`** per token (**$0.02 / 1M**), aligned with OpenAI list pricing for the same model id. Hobby spend stays in the sub-cent range described in the main document; the main difference vs OpenAI direct is **one API key and one billing surface** for later chat slices on OpenRouter, plus optional **`provider`** routing (order, fallbacks, data-collection policy).
+
+Pydantic AI can reach OpenRouter embeddings via **`OpenAIEmbeddingModel` + `OpenRouterProvider`** (OpenAI-compatible `/embeddings` on `https://openrouter.ai/api/v1`), matching how chat models already use OpenRouter in pydantic-ai docs—model string uses OpenRouter slugs (e.g. `text-embedding-3-small` with OpenRouter provider, or verify exact id `openai/text-embedding-3-small` in the list API). Official pydantic-ai embedding docs still emphasize OpenAI/Azure/Ollama examples; OpenRouter is documented for chat and fits the **OpenAI-compatible provider** pattern for embeddings.
+
+### Findings
+
+#### OpenRouter product surface
+
+- Unified embeddings router: POST **`https://openrouter.ai/api/v1/embeddings`** with `model`, `input`, optional `dimensions`, `input_type`, `provider`, and multimodal `input` blocks for image-capable models ([embeddings overview](https://openrouter.ai/docs/api_reference/embeddings)).
+- Model discovery: **`GET /api/v1/embeddings/models`** (paginated `limit` up to 1000) returns embedding-only catalog entries; general **`GET /api/v1/models?output_modalities=embeddings`** also filters embedding-capable models ([list embeddings models](https://openrouter.ai/docs/api/api-reference/embeddings/list-embeddings-models), [models guide](https://openrouter.ai/docs/guides/overview/models)).
+- Response includes OpenAI-style **`usage.prompt_tokens`** and OpenRouter **`usage.cost`** in credits ([create embeddings API](https://openrouter.ai/docs/api/api-reference/embeddings/create-embeddings)).
+- **Provider routing** on embedding requests mirrors chat: `provider.order`, `allow_fallbacks`, `data_collection` ([embeddings guide — provider routing](https://openrouter.ai/docs/api_reference/embeddings)).
+
+#### Catalog snapshot (illustrative, not exhaustive)
+
+OpenRouter’s **Text Embedding Models** collection ranks by weekly usage; documented examples include:
+
+| OpenRouter model id (examples) | Notes |
+| --- | --- |
+| `openai/text-embedding-3-small` | Default cheap path; 8192 context in API example |
+| `openai/text-embedding-3-large` | Higher quality, higher $/token on OpenRouter listing |
+| `qwen/qwen3-embedding-8b` (and smaller Qwen3 embedding variants) | Non-OpenAI alternative |
+| Google Gemini Embedding / Gemini Embedding 2 | Text and multimodal (text+image) embeddings |
+| `voyage-*`, Mistral Embed, Perplexity `pplx-embed-*` | Third-party embedding families |
+
+Browse live prices and dimensions: <https://openrouter.ai/models?fmt=cards&output_modalities=embeddings> and <https://openrouter.ai/collections/embedding-models>.
+
+#### Implications for llm-adapter-embedding-tracer
+
+- **Open question partial answer:** OpenRouter is a viable default provider for hobby if the author already plans OpenRouter for S-05/S-06—embedding labels through the same key avoids a second vendor for S-01.
+- **Quality/dimension contract:** Weles stores whatever vector `EmbeddingPort` returns; switching from deterministic 32-dim hashes to **1536-dim** (default for `text-embedding-3-small`) is an adapter concern—the embedding contract requires stable nonzero dimension, not a fixed size (`backend/tests/unit/capture/contracts/test_embedding_contract.py`).
+- **Multimodal OpenRouter embeddings** are irrelevant to S-01 (`Label` text only in `VocabularyResolver`).
+
+### External References
+
+- <https://openrouter.ai/docs/api_reference/embeddings> — embeddings API, batch input, multimodal input, semantic search example
+- <https://openrouter.ai/docs/api/api-reference/embeddings/list-embeddings-models> — `GET /embeddings/models`; example `openai/text-embedding-3-small` with `prompt: "0.00000002"`
+- <https://openrouter.ai/docs/api/api-reference/embeddings/create-embeddings> — `POST /embeddings`, usage.cost, dimensions parameter
+- <https://openrouter.ai/collections/embedding-models> — curated embedding model collection
+- <https://openrouter.ai/models?fmt=cards&output_modalities=embeddings> — filter UI for embedding output modality
+- <https://pydantic.dev/docs/ai/guides/embeddings/#openai-compatible-providers> — `OpenAIEmbeddingModel` with custom `OpenAIProvider` base URL (same pattern as OpenRouter)
+- <https://ai.pydantic.dev/models/openrouter/> — OpenRouter chat integration via `OpenRouterProvider` (shared provider stack with embeddings)
