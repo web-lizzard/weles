@@ -16,6 +16,7 @@ import { useAppStore } from "../src/store/index";
 import { useSittingStore } from "../src/store/sitting";
 
 const DOWN_ARROW = "\x1B[B";
+const PAGE_DOWN = "\x1B[6~";
 const ENTER = "\r";
 const ESC = "\x1B";
 const INVERSE_ON = "\u001b[7m";
@@ -28,6 +29,29 @@ const SOURCE_WITH_NEIGHBOURING_BLOCKS: CardSource = {
     { index: 2, text: "Paragraph below the quote." },
   ],
   span: { blockIndex: 1, start: 5, end: 11 },
+};
+
+const SOURCE_WITH_DISTANT_BLOCKS: CardSource = {
+  blocks: [
+    { index: 0, text: "Distant block far from the span." },
+    { index: 1, text: "Neighbour above the span." },
+    { index: 2, text: "Span block with quoted text inside." },
+    { index: 3, text: "Neighbour below the span." },
+    { index: 4, text: "Another distant block at the end." },
+  ],
+  span: { blockIndex: 2, start: 12, end: 19 },
+};
+
+const SOURCE_WITH_MANY_LINES: CardSource = {
+  blocks: [
+    {
+      index: 0,
+      text: Array.from({ length: 12 }, (_, i) => `scroll-line-${i + 1}`).join(
+        "\n",
+      ),
+    },
+  ],
+  span: { blockIndex: 0, start: 0, end: 12 },
 };
 
 async function pressKey(
@@ -735,5 +759,151 @@ describe("SittingOverlay", () => {
     const frame = lastFrame() ?? "";
     expect(frame).toContain("Paragraph above the quote.");
     expect(frame).not.toContain("Front line");
+  });
+
+  it("shows distant blocks only after e expands the source view from its collapsed neighbours", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(SOURCE_WITH_DISTANT_BLOCKS);
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "s");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const collapsed = lastFrame() ?? "";
+    expect(collapsed).toContain("Neighbour above the span.");
+    expect(collapsed).not.toContain("Distant block far from the span.");
+
+    await pressKey(stdin, "e");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const expanded = lastFrame() ?? "";
+    expect(expanded).toContain("Distant block far from the span.");
+    expect(expanded).toContain("Another distant block at the end.");
+  });
+
+  it("returns to the collapsed neighbour window when e is pressed again after expanding", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(SOURCE_WITH_DISTANT_BLOCKS);
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await pressKey(stdin, "s");
+    await pressKey(stdin, "e");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(lastFrame()).toContain("Distant block far from the span.");
+
+    await pressKey(stdin, "e");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const collapsedAgain = lastFrame() ?? "";
+    expect(collapsedAgain).not.toContain("Distant block far from the span.");
+    expect(collapsedAgain).toContain("Neighbour above the span.");
+  });
+
+  it("scrolls down by line and by page so the last line is visible without a more-below marker", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(SOURCE_WITH_MANY_LINES);
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await pressKey(stdin, "s");
+    await pressKey(stdin, "e");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toMatch(/more below/i);
+    expect(lastFrame()).not.toContain("scroll-line-12");
+
+    for (let i = 0; i < 4; i += 1) {
+      await pressKey(stdin, DOWN_ARROW);
+    }
+    await pressKey(stdin, PAGE_DOWN);
+    await vi.advanceTimersByTimeAsync(0);
+
+    const atBottom = lastFrame() ?? "";
+    expect(atBottom).toContain("scroll-line-12");
+    expect(atBottom).not.toMatch(/more below/i);
+  });
+
+  it("closes the source view on Esc from the expanded state instead of collapsing to neighbours", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(SOURCE_WITH_DISTANT_BLOCKS);
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await pressKey(stdin, "s");
+    await pressKey(stdin, "e");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(lastFrame()).toContain("Distant block far from the span.");
+
+    await pressKey(stdin, ESC);
+    await vi.advanceTimersByTimeAsync(0);
+
+    const afterEsc = lastFrame() ?? "";
+    expect(afterEsc).toContain("Back line");
+    expect(afterEsc).not.toContain("Distant block far from the span.");
+    expect(afterEsc).not.toContain("Neighbour above the span.");
+    expect(useAppStore.getState().isSittingOverlayOpen).toBe(true);
   });
 });
