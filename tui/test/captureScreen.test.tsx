@@ -7,6 +7,7 @@ import {
 } from "../src/api/stream";
 import CaptureScreen from "../src/screens/CaptureScreen";
 import { useChatStore } from "../src/store/chat";
+import { useAppStore } from "../src/store/index";
 
 const WELES_TAGLINE = "wisdom through questions";
 const COVERAGE_BANNER_TEXT =
@@ -572,5 +573,27 @@ describe("CaptureScreen", () => {
     expect(frame).toContain("I think we should approve this plan");
     expect(sendMessage).toHaveBeenCalled();
     expect(approveNote).not.toHaveBeenCalled();
+  });
+
+  it("sends prose containing the word remember as a normal turn instead of opening a review", async () => {
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield {
+        type: "done",
+        messageId: "m1",
+        content: "Ok",
+        topic: "Session topic",
+        coverageConfidence: 0,
+      };
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+    await submitMessage(stdin, "remember to ask me about TCP windows");
+
+    const frame = await waitForFrame(lastFrame, (f) =>
+      f.includes("remember to ask me about TCP windows"),
+    );
+    expect(frame).toContain("remember to ask me about TCP windows");
+    expect(sendMessage).toHaveBeenCalled();
+    expect(useAppStore.getState().isSittingOverlayOpen).toBe(false);
   });
 });
