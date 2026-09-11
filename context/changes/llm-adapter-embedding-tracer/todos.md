@@ -10,7 +10,7 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 1.1 Add pydantic-ai-slim[openai]>=2.41.0 and OpenTelemetry packages to backend dependencies
+- [ ] 1.1 Pin pydantic-ai-slim[openai]==2.39.0 and the three OpenTelemetry packages at ==1.44.0
 - [ ] 1.2 Declare EmbeddingProvider enum and provider, model, and Langfuse settings fields
 - [ ] 1.3 Record the new environment keys in .env.example
 
