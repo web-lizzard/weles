@@ -17,7 +17,7 @@ updated: 2026-09-12
 
 #### Manual
 
-- [x] 1.5 Confirm Settings() defaults to the openrouter provider with no .env override
+- [x] 1.5 Confirm Settings() defaults to the openrouter provider with no .env override — aab6507
 
 ### Phase 2: `adapters/out/llm/` stubs and interfaces
 
