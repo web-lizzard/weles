@@ -1,7 +1,7 @@
 ---
 change_id: llm-adapter-embedding-tracer
 title: Vocabulary reuse runs on a real embedding model, traced in Langfuse
-status: implementing
+status: implemented
 created: 2026-09-11
 updated: 2026-09-12
 archived_at: null
