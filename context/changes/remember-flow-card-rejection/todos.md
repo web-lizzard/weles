@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 7
-next_step: 7.1
-next_command: /implement remember-flow-card-rejection phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /implement remember-flow-card-rejection phase 8
 updated: 2026-09-11
 ---
 
@@ -98,13 +98,13 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 7.1 Register markers AC-16 through AC-23 in pyproject.toml
+- [x] 7.1 Register markers AC-16 through AC-23 in pyproject.toml
 
 #### Manual
 
-- [ ] 7.2 Author the AC-17 and AC-23 scenarios via /bdd
-- [ ] 7.3 Confirm the new scenarios fail on assertions, not on undefined steps or collection
-- [ ] 7.4 Confirm no existing remember-flow scenario regressed
+- [x] 7.2 Author the AC-17 and AC-23 scenarios via /bdd
+- [x] 7.3 Confirm the new scenarios fail on assertions, not on undefined steps or collection
+- [x] 7.4 Confirm no existing remember-flow scenario regressed
 
 ### Phase 8: TUI client, store and binding stubs
 
