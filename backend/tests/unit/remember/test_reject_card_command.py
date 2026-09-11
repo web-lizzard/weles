@@ -11,7 +11,7 @@ from domain.remember.exceptions import (
     SittingAlreadyCompleteError,
     SittingExpiredError,
 )
-from domain.remember.outbox import CARD_REJECTED
+from domain.remember.outbox import CARD_REJECTED, CardRejectedPayload
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import (
     Grade,
@@ -142,8 +142,9 @@ async def test_rejection_persists_a_rejected_event_and_card_rejected_envelope_to
     envelopes = composition.outbox_store.all()
     assert len(envelopes) == 1
     assert envelopes[0].type == CARD_REJECTED
-    assert envelopes[0].payload["card_id"] == str(card.id.value)
-    assert envelopes[0].payload["rejected_at"] == instant.isoformat()
+    assert envelopes[0].payload == CardRejectedPayload(
+        card_id=card.id.value, rejected_at=instant
+    ).model_dump(mode="json")
 
 
 async def test_rejection_leaves_scheduling_state_untouched_when_one_already_exists(
