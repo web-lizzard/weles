@@ -16,6 +16,9 @@ from adapters.out.in_memory.distill.card_repository import InMemoryCardRepositor
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
+from adapters.out.in_memory.distill.unit_of_work import (
+    InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
+)
 from adapters.out.in_memory.remember.clock import SystemClock
 from adapters.out.in_memory.remember.review_catalog import InMemoryReviewCatalog
 from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
@@ -27,7 +30,12 @@ from adapters.out.in_memory.remember.unit_of_work import (
     InMemoryUnitOfWork,
 )
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.claimer import InMemoryOutboxClaimer
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from adapters.out.worker.handlers.card_discard import CardDiscardHandler
+from adapters.out.worker.outbox_worker import OutboxWorker
+from application.distill.commands.discard_card import DiscardCardCommand
+from application.distill.ports import UnitOfWork as DistillUnitOfWork
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.commands.reject_card import RejectCardCommand
@@ -42,6 +50,9 @@ from domain.remember.value_objects import (
 )
 
 _DEFAULT_SHOWING_LIMIT = 2
+_OUTBOX_BATCH_SIZE = 10
+_OUTBOX_MAX_ATTEMPTS = 3
+_OUTBOX_WORKER_ID = "remember-test-worker"
 
 
 @dataclass
@@ -99,6 +110,30 @@ class InMemoryRememberComposition:
                     self.lock,
                 ),
             ),
+        )
+
+    def distill_unit_of_work(self) -> DistillUnitOfWork:
+        return cast(
+            DistillUnitOfWork,
+            cast(
+                object,
+                InMemoryDistillUnitOfWork(
+                    self.notes, self.cards, self.outbox_store, self.outbox
+                ),
+            ),
+        )
+
+    def worker(self) -> OutboxWorker:
+        card_discard_handler = CardDiscardHandler(
+            DiscardCardCommand(uow_factory=self.distill_unit_of_work)
+        )
+        claimer = InMemoryOutboxClaimer(self.outbox_store)
+        return OutboxWorker(
+            claimer,
+            [card_discard_handler],
+            worker_id=_OUTBOX_WORKER_ID,
+            batch_size=_OUTBOX_BATCH_SIZE,
+            max_attempts=_OUTBOX_MAX_ATTEMPTS,
         )
 
     def open_sitting(self) -> OpenSittingCommand:
