@@ -147,7 +147,7 @@ def partition_due(
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pyright src/domain/remember/due_partition.py` reports no errors
+- `cd backend && uv run basedpyright src/domain/remember/due_partition.py` reports no errors
 - `cd backend && uv run pytest tests/unit/remember` still passes
 
 ---
@@ -179,7 +179,7 @@ each member is bucketed by whether it is outstanding and whether it carries at l
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/remember/test_due_partition.py` passes
 - `cd backend && uv run pytest tests/unit/remember` passes
-- `cd backend && uv run pyright src` reports no errors
+- `cd backend && uv run basedpyright src` reports no errors
 
 ---
 
@@ -238,12 +238,22 @@ the four existing handlers.
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pyright src tests` reports no errors
+- `cd backend && uv run basedpyright src tests` reports no errors
 - `cd backend && uv run pytest` passes
 - `cd backend && uv run python -c "from adapters.compose import get_due_count_query; get_due_count_query()"` constructs
 
 #### Manual Verification:
 - `cd backend && uv run uvicorn main:app` then `curl localhost:8000/due-cards/count` returns a zero partition with HTTP 200
+
+### Review r4
+
+Artifact: `reviews/2026-09-11-r4-impl-review.md`
+
+- `R4-F2` — Three phases verify with a checker this project does not install
+  Fix: a phase's Automated Verification bullet must name a command this repository can
+  actually run. Correct the `uv run pyright` bullets on Phases 1, 2 and 3 to the installed
+  checker (`basedpyright`) rather than adding a `pyright` shim or dependency to satisfy the
+  prose.
 
 ---
 
@@ -429,6 +439,15 @@ successful response.
 
 #### Manual Verification:
 - Stop the backend with the TUI running and confirm the header keeps its last number rather than clearing, then restore the backend and confirm it un-dims
+
+### Review r4
+
+Artifact: `reviews/2026-09-11-r4-impl-review.md`
+
+- `R4-F1` — A poll answering after a grade overwrites the fresher partition
+  Fix: the store's partition must never move backwards in time — a `fetchDue` result may
+  only be written when no newer partition has been applied since that request left. Order
+  the writes; do not lengthen or shorten the poll interval to hide the window.
 
 ---
 
