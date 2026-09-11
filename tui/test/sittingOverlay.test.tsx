@@ -1,7 +1,9 @@
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  type CardSource,
   currentCard,
+  fetchCardSource,
   gradeCard,
   openSitting,
   rejectCard,
@@ -16,6 +18,17 @@ import { useSittingStore } from "../src/store/sitting";
 const DOWN_ARROW = "\x1B[B";
 const ENTER = "\r";
 const ESC = "\x1B";
+const INVERSE_ON = "\u001b[7m";
+const INVERSE_OFF = "\u001b[27m";
+
+const SOURCE_WITH_NEIGHBOURING_BLOCKS: CardSource = {
+  blocks: [
+    { index: 0, text: "Paragraph above the quote." },
+    { index: 1, text: "Lead quoted span tail" },
+    { index: 2, text: "Paragraph below the quote." },
+  ],
+  span: { blockIndex: 1, start: 5, end: 12 },
+};
 
 async function pressKey(
   stdin: { write: (data: string) => void },
@@ -34,6 +47,7 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
     gradeCard: vi.fn(),
     rejectCard: vi.fn(),
     currentCard: vi.fn(),
+    fetchCardSource: vi.fn(),
   };
 });
 
@@ -69,6 +83,7 @@ describe("SittingOverlay", () => {
     vi.mocked(gradeCard).mockReset();
     vi.mocked(rejectCard).mockReset();
     vi.mocked(currentCard).mockReset();
+    vi.mocked(fetchCardSource).mockReset();
   });
 
   afterEach(() => {
@@ -545,5 +560,178 @@ describe("SittingOverlay", () => {
     expect(frame).toMatch(/expired/i);
     expect(frame).toContain("After recovery");
     expect(frame).not.toMatch(/press r/i);
+  });
+
+  it("calls fetchCardSource once after the back is revealed and shows the source hint when a source exists", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(
+      SOURCE_WITH_NEIGHBOURING_BLOCKS,
+    );
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(fetchCardSource).toHaveBeenCalledTimes(1);
+    expect(fetchCardSource).toHaveBeenCalledWith(sittingId, cardId);
+    expect(lastFrame()).toMatch(/press s to view source/i);
+  });
+
+  it("opens the source view on s with the span highlighted and neighbouring blocks visible", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(
+      SOURCE_WITH_NEIGHBOURING_BLOCKS,
+    );
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "s");
+    await vi.advanceTimersByTimeAsync(0);
+
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("Paragraph above the quote.");
+    expect(frame).toContain("Paragraph below the quote.");
+    expect(frame).toContain(`Lead ${INVERSE_ON}quoted${INVERSE_OFF} span tail`);
+  });
+
+  it("omits the source hint and ignores s when fetchCardSource returns null", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(null);
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    const frameBeforeS = lastFrame() ?? "";
+    expect(frameBeforeS).not.toMatch(/press s to view source/i);
+
+    await pressKey(stdin, "s");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toBe(frameBeforeS);
+  });
+
+  it("closes only the source view on Esc and leaves the sitting open until Esc is pressed again", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(
+      SOURCE_WITH_NEIGHBOURING_BLOCKS,
+    );
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "s");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(lastFrame()).toContain("Paragraph above the quote.");
+
+    await pressKey(stdin, ESC);
+    await vi.advanceTimersByTimeAsync(0);
+
+    const afterSourceEsc = lastFrame() ?? "";
+    expect(afterSourceEsc).toContain("Back line");
+    expect(afterSourceEsc).not.toContain("Paragraph above the quote.");
+    expect(useAppStore.getState().isSittingOverlayOpen).toBe(true);
+
+    await pressKey(stdin, ESC);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useAppStore.getState().isSittingOverlayOpen).toBe(false);
+  });
+
+  it("does not submit a grade or toggle the card while the source view is open", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(fetchCardSource).mockResolvedValue(
+      SOURCE_WITH_NEIGHBOURING_BLOCKS,
+    );
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "s");
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "3");
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(gradeCard).not.toHaveBeenCalled();
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("Paragraph above the quote.");
+    expect(frame).not.toContain("Front line");
   });
 });
