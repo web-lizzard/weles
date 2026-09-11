@@ -35,6 +35,31 @@ def _sample_card(note_id: NoteId, discard: Discard | None = None) -> Card:
 
 
 @pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_get_returns_none_for_an_unknown_card_id(
+    make_repository: Callable[[], CardRepository],
+) -> None:
+    repository = make_repository()
+
+    result = await repository.get(CardId(value=uuid4()))
+
+    assert result is None
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_get_returns_a_saved_card(
+    make_repository: Callable[[], CardRepository],
+) -> None:
+    repository = make_repository()
+    note_id = NoteId(value=uuid4())
+    card = _sample_card(note_id)
+
+    await repository.save(card)
+    result = await repository.get(card.id)
+
+    assert result == card
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_save_then_list_by_note_returns_the_saved_card(
     make_repository: Callable[[], CardRepository],
 ) -> None:
