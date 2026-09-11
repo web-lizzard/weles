@@ -61,6 +61,8 @@ const SITTING_EXPIRED_NOTICE =
   "Your previous review session expired; that grade was not recorded.";
 
 let revealBackInFlight = false;
+let openInFlight = false;
+let openEpoch = 0;
 
 type SittingStoreSet = (
   partial:
@@ -199,12 +201,18 @@ export const useSittingStore = create<SittingState & SittingActions>(
       ) {
         return;
       }
-      if (state.phase === "opening" && state.lastAction?.type === "open") {
+      if (openInFlight) {
         return;
       }
+
+      const epochAtStart = openEpoch;
+      openInFlight = true;
       set({ lastAction: { type: "open" }, error: null });
       try {
         const result = await openSitting();
+        if (epochAtStart !== openEpoch) {
+          return;
+        }
         if (result.kind === "nothing_due") {
           set({
             phase: "nothing_due",
@@ -237,10 +245,17 @@ export const useSittingStore = create<SittingState & SittingActions>(
           ...clearCardSourceState(),
         });
       } catch (error) {
+        if (epochAtStart !== openEpoch) {
+          return;
+        }
         if (error instanceof SittingHttpError) {
           set(sittingHttpErrorState(error));
         } else {
           throw error;
+        }
+      } finally {
+        if (epochAtStart === openEpoch) {
+          openInFlight = false;
         }
       }
     },
@@ -416,6 +431,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
     },
     reset: () => {
       revealBackInFlight = false;
+      openEpoch += 1;
+      openInFlight = false;
       set({ ...initialState });
     },
   }),

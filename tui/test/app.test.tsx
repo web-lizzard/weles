@@ -447,6 +447,52 @@ describe("App", () => {
       expect(sitting.front).toBeNull();
     });
 
+    it("opens a new sitting after ESC during loading left a stale open in flight", async () => {
+      let resolveOpen: (
+        value: Awaited<ReturnType<typeof openSitting>>,
+      ) => void = () => {};
+      vi.mocked(openSitting)
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveOpen = resolve;
+            }),
+        )
+        .mockResolvedValueOnce({
+          kind: "opened",
+          sittingId,
+          cardId,
+          front: "After reopen",
+          sittingComplete: false,
+          outstandingCount: 0,
+        });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("Loading..."));
+
+      stdin.write("\x1B");
+      await waitFor(() => !(lastFrame() ?? "").includes("Loading..."));
+
+      resolveOpen({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "Stale card",
+        sittingComplete: false,
+        outstandingCount: 0,
+      });
+      await waitFor(
+        () => useAppStore.getState().isSittingOverlayOpen === false,
+      );
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("After reopen"));
+
+      expect(openSitting).toHaveBeenCalledTimes(2);
+    });
+
     it("closes the source view on ESC before leaving the sitting overlay", async () => {
       vi.mocked(openSitting).mockResolvedValue({
         kind: "opened",

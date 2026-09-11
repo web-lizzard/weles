@@ -40,21 +40,7 @@ function resetDueStore() {
 }
 
 function resetStore() {
-  useSittingStore.setState({
-    phase: "opening",
-    sittingId: null,
-    cardId: null,
-    front: null,
-    back: null,
-    isBackVisible: false,
-    selectedGradeIndex: 0,
-    isSubmitting: false,
-    error: null,
-    lastAction: null,
-    isResumed: false,
-    outstandingCount: 0,
-    notice: null,
-  });
+  useSittingStore.getState().reset();
 }
 
 describe("useSittingStore", () => {
@@ -266,6 +252,48 @@ describe("useSittingStore", () => {
     expect(openSitting).toHaveBeenCalledTimes(2);
     expect(useSittingStore.getState().phase).toBe("presented");
     expect(useSittingStore.getState().front).toBe("Recovered");
+  });
+
+  it("opens a sitting after reset while the previous openSitting call is still in flight", async () => {
+    let resolveFirst: (value: Awaited<ReturnType<typeof openSitting>>) => void =
+      () => {};
+    const firstOpen = new Promise<Awaited<ReturnType<typeof openSitting>>>(
+      (resolve) => {
+        resolveFirst = resolve;
+      },
+    );
+    vi.mocked(openSitting)
+      .mockImplementationOnce(() => firstOpen)
+      .mockResolvedValueOnce({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "Second open",
+        sittingComplete: false,
+        outstandingCount: 0,
+      });
+
+    const first = useSittingStore.getState().open();
+    useSittingStore.getState().reset();
+
+    const second = useSittingStore.getState().open();
+    await vi.advanceTimersByTimeAsync(0);
+
+    resolveFirst({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Stale first open",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    await first;
+    await second;
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(openSitting).toHaveBeenCalledTimes(2);
+    expect(useSittingStore.getState().phase).toBe("presented");
+    expect(useSittingStore.getState().front).toBe("Second open");
   });
 
   it("sets isResumed and outstandingCount when openSitting returns a resumed sitting", async () => {
