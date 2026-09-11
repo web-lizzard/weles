@@ -31,6 +31,17 @@ export type RevealedCard = {
   back: string;
 };
 
+export type SourceSpan = {
+  blockIndex: number;
+  start: number;
+  end: number;
+};
+
+export type CardSource = {
+  blocks: { index: number; text: string }[];
+  span: SourceSpan;
+};
+
 export type GradeApplied = {
   sittingId: string;
   sittingComplete: boolean;
@@ -95,6 +106,34 @@ export async function openSitting(): Promise<
   }
 
   return { kind: "opened", ...presented };
+}
+
+export async function fetchCardSource(
+  sittingId: string,
+  cardId: string,
+): Promise<CardSource | null> {
+  const { data, error, response } = await client.GET(
+    "/review-sittings/{sitting_id}/cards/{card_id}/source",
+    { params: { path: { sitting_id: sittingId, card_id: cardId } } },
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  if (error || !data) {
+    throwOnClientError(error, response, "fetchCardSource failed");
+  }
+
+  return {
+    blocks: data.blocks.map((block) => ({
+      index: block.index,
+      text: block.text,
+    })),
+    span: {
+      blockIndex: data.span.block_index,
+      start: data.span.start,
+      end: data.span.end,
+    },
+  };
 }
 
 export async function revealBack(

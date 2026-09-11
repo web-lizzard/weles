@@ -1,7 +1,7 @@
 import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Grade } from "../api/sittings.js";
+import type { CardSource, Grade } from "../api/sittings.js";
 import DueOverlayFooter from "../components/DueOverlayFooter.js";
 import { useDueStore } from "../store/due.js";
 import { useAppStore } from "../store/index.js";
@@ -13,7 +13,15 @@ const ESC_HINT = "← ESC to go back";
 const TOGGLE_CARD_HINT = "Press t to toggle card";
 const REJECT_HINT = "Press x to turn down this card";
 const REJECT_CONFIRM_HINT = "Turn down this card? y confirm · n cancel";
+const SOURCE_HINT = "Press s to view source";
+const EXPAND_SOURCE_HINT = "Press e to expand to the whole note";
 const RESUMED_BANNER = "Resumed — picking up where you left off";
+
+type SourceViewState = {
+  source: CardSource;
+  isExpanded: boolean;
+  offset: number;
+};
 
 export default function SittingOverlay(): JSX.Element {
   const phase = useSittingStore((s) => s.phase);
@@ -34,6 +42,33 @@ export default function SittingOverlay(): JSX.Element {
   const partition = useDueStore((s) => s.partition);
   const dueIsStale = useDueStore((s) => s.isStale);
   const [isRejectConfirmPending, setRejectConfirmPending] = useState(false);
+  const [sourceView, setSourceView] = useState<SourceViewState | null>(null);
+  const [isSourceAvailable, setIsSourceAvailable] = useState(false);
+
+  const closeSourceView = (): void => {};
+
+  const openSourceView = (): void => {};
+
+  const probeSourceAvailability = async (): Promise<void> => {};
+
+  const toggleSourceExpanded = (): void => {};
+
+  const moveSourceOffset = (_delta: number): void => {};
+
+  const phase8SourceScaffold = {
+    sourceView,
+    isSourceAvailable,
+    hints: { source: SOURCE_HINT, expand: EXPAND_SOURCE_HINT },
+    handlers: {
+      closeSourceView,
+      openSourceView,
+      probeSourceAvailability,
+      toggleSourceExpanded,
+      moveSourceOffset,
+    },
+    setters: { setSourceView, setIsSourceAvailable },
+  };
+  void phase8SourceScaffold;
 
   useEffect(() => {
     void useSittingStore.getState().open();
