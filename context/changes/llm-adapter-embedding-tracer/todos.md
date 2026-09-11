@@ -75,11 +75,11 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 6.1 Add .mcp.json pointing at the hosted Langfuse MCP endpoint
-- [x] 6.2 Add .cursor/mcp.json with the same server
-- [x] 6.3 Document LANGFUSE_MCP_AUTH derivation in .env.example and README
+- [x] 6.1 Add .mcp.json pointing at the hosted Langfuse MCP endpoint — d9b33a4
+- [x] 6.2 Add .cursor/mcp.json with the same server — d9b33a4
+- [x] 6.3 Document LANGFUSE_MCP_AUTH derivation in .env.example and README — d9b33a4
 
 #### Manual
 
-- [x] 6.4 Confirm /mcp in Claude Code lists langfuse connected and returns recent observations
-- [x] 6.5 Confirm Cursor connects and record whether it expanded the header variable
+- [x] 6.4 Confirm /mcp in Claude Code lists langfuse connected and returns recent observations — d9b33a4
+- [x] 6.5 Confirm Cursor connects and record whether it expanded the header variable — d9b33a4
