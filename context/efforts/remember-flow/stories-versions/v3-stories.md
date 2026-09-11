@@ -1,6 +1,6 @@
 ---
 status: draft
-version: 4
+version: 3
 created: 2026-09-09
 effort_id: remember-flow
 ---
@@ -10,8 +10,6 @@ effort_id: remember-flow
 > Revision 2 (2026-09-09): adds US-12 over the PRD's new FR-017 and FR-018, covering entry into a review from an in-flight capture session and the guarantee that free text cannot trigger one. Purely additive — US-01 through US-11 and AC-01 through AC-20 are unchanged. Prior version: stories-versions/v1-stories.md
 
 > Revision 3 (2026-09-11): brings FR-014 under US-09 as AC-23, so the user/generation-time distinction on a rejection has an acceptance authority instead of sitting uncovered. Purely additive — US-01 through US-12 and AC-01 through AC-22 are unchanged. Prior version: stories-versions/v2-stories.md
-
-> Revision 4 (2026-09-11): retires US-08 and AC-16 following the PRD v2 drop of FR-012. Subtractive only — every other story and AC keeps its number; AC-16 is retired, not reused. Prior version: stories-versions/v3-stories.md
 
 ## Stories
 
@@ -79,6 +77,14 @@ Realizes: FR-010, FR-011
 - AC-14: The user can see how many cards are due without a review session being started.
 - AC-15: While Weles is open, that number keeps up with cards becoming due, without the user leaving and re-entering the view.
 
+### US-08 — Told at the moment capture ends
+
+I want to hear about waiting cards as a capture session closes, so that I learn it at the one moment I am already in Weles and free to switch gears.
+
+Realizes: FR-012
+
+- AC-16: On closing a capture session, the user learns whether cards are waiting to be reviewed.
+
 ### US-09 — Turn down a bad card where you meet it
 
 I want to reject a card during a review, so that a bad card leaves circulation instead of coming back to be graded lowest over and over, and so that my turning it down is not confused with the system having thrown it out on its own.
@@ -113,10 +119,6 @@ Realizes: FR-017, FR-018
 
 - AC-21: A review opened from within a capture session leaves that conversation intact to return to.
 - AC-22: Free text typed into a capture conversation never opens a review.
-
-## Retired
-
-- **US-08 — Told at the moment capture ends** (AC-16). Retired at revision 4 with PRD v2's drop of FR-012; see that PRD's Non-Goals. AC-16 is not reused.
 
 ## Uncovered Requirements
 
