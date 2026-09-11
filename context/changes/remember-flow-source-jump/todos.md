@@ -100,10 +100,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 8.1 TUI typecheck passes
-- [x] 8.2 TUI lint passes
-- [x] 8.3 TUI test suite passes unchanged
-- [x] 8.4 TUI build completes, confirming the new modules resolve
+- [x] 8.1 TUI typecheck passes — e5b05dc
+- [x] 8.2 TUI lint passes — e5b05dc
+- [x] 8.3 TUI test suite passes unchanged — e5b05dc
+- [x] 8.4 TUI build completes, confirming the new modules resolve — e5b05dc
 
 ### Phase 9: The source view and the Esc ladder
 
