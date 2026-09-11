@@ -31,9 +31,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 3.1 test_sitting.py passes with existing tests unmodified
-- [x] 3.2 Remember property suite passes
-- [x] 3.3 Remember unit and integration suites pass
+- [x] 3.1 test_sitting.py passes with existing tests unmodified — f8f56fc
+- [x] 3.2 Remember property suite passes — f8f56fc
+- [x] 3.3 Remember unit and integration suites pass — f8f56fc
 
 ### Phase 4: Source port, DTO, route and wiring
 
