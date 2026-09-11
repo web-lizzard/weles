@@ -1,8 +1,11 @@
+import logging
 from collections.abc import Callable
 from datetime import datetime
 
 from application.distill.ports import UnitOfWork
-from domain.distill.value_objects import CardId, DiscardReason
+from domain.distill.value_objects import CardId, Discard, DiscardReason
+
+logger = logging.getLogger(__name__)
 
 
 class DiscardCardCommand:
@@ -16,4 +19,19 @@ class DiscardCardCommand:
         detail: str | None,
         discarded_at: datetime,
     ) -> None:
-        _ = (card_id, reason, detail, discarded_at)
+        async with self._uow_factory() as uow:
+            card = await uow.cards.get(card_id)
+            if card is None:
+                logger.info("card %s not found, skipping as no-op", card_id.value)
+                return
+            if card.discard is not None:
+                logger.info("card %s redelivered, skipping as no-op", card_id.value)
+                return
+
+            card.discard = Discard(
+                reason=reason,
+                detail=detail,
+                discarded_at=discarded_at,
+            )
+            await uow.cards.save(card)
+            await uow.commit()

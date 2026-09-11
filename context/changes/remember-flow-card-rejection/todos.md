@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 6
-next_step: 6.1
-next_command: /unit-test remember-flow-card-rejection phase 6
+current_phase: 7
+next_step: 7.1
+next_command: /implement remember-flow-card-rejection phase 7
 updated: 2026-09-11
 ---
 
@@ -85,14 +85,14 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8564061
 
 #### Automated
 
-- [ ] 6.1 Stamp a user_audit Discard carrying the envelope's rejected_at
-- [ ] 6.2 No-op on a card that already carries any Discard
-- [ ] 6.3 No-op on a card id that names no card
-- [ ] 6.4 Log and ack a malformed card_rejected payload without calling the command
+- [x] 6.1 Stamp a user_audit Discard carrying the envelope's rejected_at
+- [x] 6.2 No-op on a card that already carries any Discard
+- [x] 6.3 No-op on a card id that names no card
+- [x] 6.4 Log and ack a malformed card_rejected payload without calling the command
 
 ### Phase 7: Acceptance layer for AC-17 and AC-23
 
