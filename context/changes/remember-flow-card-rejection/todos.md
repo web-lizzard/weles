@@ -71,6 +71,10 @@ updated: 2026-09-11
 
 - [x] 4.4 Curl a rejection then read /_outbox and confirm a card_rejected envelope that later reads consumed
 
+#### Triage
+
+- [x] 4.5 R5-F1 card_rejected payload re-stamps rejected_at after model_dump — ca10e39
+
 ### Phase 5: Distill discard stubs
 
 #### Automated
