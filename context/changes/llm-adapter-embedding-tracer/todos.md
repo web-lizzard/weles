@@ -1,7 +1,7 @@
 ---
 change_id: llm-adapter-embedding-tracer
 current_phase: 4
-next_step: 4.1
+next_step: 4.4
 next_command: /implement llm-adapter-embedding-tracer phase 4
 updated: 2026-09-12
 ---
@@ -51,9 +51,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 4.1 Add adapters/telemetry.py with configure_tracing and the Langfuse OTLP exporter
-- [ ] 4.2 Honour embedding_provider in compose.py and start tracing before adapters are built
-- [ ] 4.3 Pin the test environment to the deterministic provider with tracing off
+- [x] 4.1 Add adapters/telemetry.py with configure_tracing and the Langfuse OTLP exporter — a53c8a2
+- [x] 4.2 Honour embedding_provider in compose.py and start tracing before adapters are built — a53c8a2
+- [x] 4.3 Pin the test environment to the deterministic provider with tracing off — a53c8a2
 
 #### Manual
 
