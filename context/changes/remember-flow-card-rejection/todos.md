@@ -45,11 +45,11 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 3.1 Add outbox to remember's UnitOfWork port and to the in-memory unit of work
-- [x] 3.2 Add RejectCardCommand with no Scheduler dependency
-- [x] 3.3 Add POST /review-sittings/{sitting_id}/cards/{card_id}/rejection returning 204
-- [x] 3.4 Add get_reject_card_command in compose and thread the outbox store into the remember unit of work
-- [x] 3.5 Add the outbox store, appender and reject seam to InMemoryRememberComposition
+- [x] 3.1 Add outbox to remember's UnitOfWork port and to the in-memory unit of work — 3b6177a
+- [x] 3.2 Add RejectCardCommand with no Scheduler dependency — 3b6177a
+- [x] 3.3 Add POST /review-sittings/{sitting_id}/cards/{card_id}/rejection returning 204 — 3b6177a
+- [x] 3.4 Add get_reject_card_command in compose and thread the outbox store into the remember unit of work — 3b6177a
+- [x] 3.5 Add the outbox store, appender and reject seam to InMemoryRememberComposition — 3b6177a
 
 #### Manual
 
