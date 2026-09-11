@@ -185,12 +185,10 @@ own data instead of forcing an optional field onto every event.
 **Contract**: New frozen models, each carrying a literal tag: `Graded`
 (`kind: Literal["graded"]`, `grade: Grade`), `Rejection` (`kind: Literal["rejected"]`)
 and `Reveal` (`kind: Literal["revealed"]`). `ReviewEventPayload` is the pydantic
-discriminated union over them on `kind`. Two module-level predicates replace the
-`FINISHING_OUTCOMES` frozenset's job: `is_accounting(payload)` — true for `Graded`
-and `Rejection`, the kinds that mean the card was dealt with — and
-`is_finishing(payload)` — true for `Graded` with `GOOD` or `EASY`, and for
-`Rejection`. `Grade` keeps its members and its meaning; `Rejected`, `ReviewOutcome`
-and `FINISHING_OUTCOMES` stay in place untouched for now and are removed in Phase 2.
+discriminated union over them on `kind`. `Grade` keeps its members and its meaning;
+`Rejected`, `ReviewOutcome` and `FINISHING_OUTCOMES` stay in place untouched for now
+and are removed in Phase 2. Payload predicates and draw-seed mapping live in
+`review_payload.py` (see below), not on the value-object types.
 
 ```python
 ReviewEventPayload = Annotated[
@@ -198,18 +196,20 @@ ReviewEventPayload = Annotated[
 ]
 ```
 
-#### 2. Draw-seed token
+#### 2. Payload domain services
 
-**File**: `backend/src/domain/remember/value_objects.py`
+**File**: `backend/src/domain/remember/review_payload.py`
 
-**Intent**: The seed that picks the next card must keep producing the values it
-produces today, or every pinned draw test becomes a re-pinning exercise that proves
-nothing.
+**Intent**: Classification and draw-seed string mapping are stateless domain
+operations on `ReviewEventPayload`; they do not belong on individual value objects.
+`is_accounting` and `is_finishing` replace the `FINISHING_OUTCOMES` frozenset's job:
+accounting means `Graded` or `Rejection`; finishing means `Graded` with `GOOD` or
+`EASY`, or any `Rejection`.
 
-**Contract**: `seed_token(payload) -> str` returns `payload.grade` for `Graded` and
-`"rejected"` for `Rejection` — byte-identical to the strings `_draw_seed` hashes
-today. `Reveal` never reaches it, because Phase 3 filters non-accounting payloads
-out before hashing.
+**Contract**: `seed_token(payload) -> str` (accounting payloads only) returns
+`payload.grade` for `Graded` and `"rejected"` for `Rejection` — byte-identical to
+the strings `_draw_seed` hashes today. `Reveal` never reaches it, because Phase 3
+filters non-accounting payloads out before hashing.
 
 ### Success Criteria:
 
@@ -247,9 +247,11 @@ reads them.
 
 **Intent**: Move the readers without changing what any of them decide.
 
-**Contract**: `_card_is_finished` calls `is_finishing(event.payload)` where it tested
-`event.outcome in FINISHING_OUTCOMES`. `_draw_seed` hashes `seed_token(event.payload)`
-in both the sort key and the joined parts, in place of `event.outcome`.
+**Contract**: `_card_is_finished` imports `is_finishing` from `review_payload` and
+calls `is_finishing(event.payload)` where it tested `event.outcome in
+FINISHING_OUTCOMES`. `_draw_seed` imports `seed_token` from `review_payload` and
+hashes `seed_token(event.payload)` in both the sort key and the joined parts, in
+place of `event.outcome`.
 `SchedulingReplay.replay` matches `isinstance(event.payload, Graded)` and reads
 `payload.grade`, in place of `isinstance(outcome, Grade)`. `due_partition` follows
 the same substitution. No signature changes anywhere.

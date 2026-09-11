@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 1
-next_step: 1.1
-next_command: /implement remember-flow-source-jump phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement remember-flow-source-jump phase 2
 updated: 2026-09-11
 ---
 
@@ -10,9 +10,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 1.1 Remember unit suite passes unchanged
-- [ ] 1.2 basedpyright reports no new errors in domain/remember
-- [ ] 1.3 ruff check passes on src
+- [x] 1.1 Remember unit suite passes unchanged
+- [x] 1.2 basedpyright reports no new errors in domain/remember
+- [x] 1.3 ruff check passes on src
 
 ### Phase 2: Migrate the review log to payloads
 
