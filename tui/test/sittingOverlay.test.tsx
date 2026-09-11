@@ -1,8 +1,10 @@
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  currentCard,
   gradeCard,
   openSitting,
+  rejectCard,
   revealBack,
   SITTING_EXPIRED,
   SittingHttpError,
@@ -65,6 +67,8 @@ describe("SittingOverlay", () => {
     vi.mocked(openSitting).mockReset();
     vi.mocked(revealBack).mockReset();
     vi.mocked(gradeCard).mockReset();
+    vi.mocked(rejectCard).mockReset();
+    vi.mocked(currentCard).mockReset();
   });
 
   afterEach(() => {
@@ -120,6 +124,102 @@ describe("SittingOverlay", () => {
 
     expect(useAppStore.getState().isSittingOverlayOpen).toBe(false);
     expect(useSittingStore.getState().sittingId).toBeNull();
+  });
+
+  it("does not call rejectCard when x is pressed while only the front is showing", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "x");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(rejectCard).not.toHaveBeenCalled();
+  });
+
+  it("calls rejectCard when x is pressed while the back is showing", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+    vi.mocked(rejectCard).mockResolvedValue(undefined);
+    vi.mocked(currentCard).mockResolvedValue({
+      sittingId,
+      cardId: nextCardId,
+      front: "Next front",
+      sittingComplete: false,
+      outstandingCount: 0,
+      due: null,
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "x");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(rejectCard).toHaveBeenCalledWith(sittingId, cardId);
+  });
+
+  it("omits the reject hint while only the front is showing", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+
+    const { lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).not.toMatch(/press x to reject/i);
+  });
+
+  it("shows the reject hint alongside the back after t reveals it", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+
+    const { stdin, lastFrame } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(lastFrame()).toMatch(/press x to reject/i);
   });
 
   it("shows the card back after t is pressed and hides it when t is pressed again", async () => {
