@@ -1,14 +1,14 @@
 ---
 effort_id: llm-adapter
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-09-12
 ---
 
 ## At a glance
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | Vocabulary reuse runs on a real embedding model, traced in Langfuse | llm-adapter-embedding-tracer | in_progress |
+| S-01 | Vocabulary reuse runs on a real embedding model, traced in Langfuse | llm-adapter-embedding-tracer | done |
 | S-02 | A capture session moves between conversing and note drafting on the user's word | llm-adapter-capture-modes | pending |
 | S-03 | Capture's instructions are domain artifacts that cannot dispatch without their context | llm-adapter-instruction-context | pending |
 | S-04 | The model reaches the domain only through tools that never mutate an aggregate | llm-adapter-domain-tools | pending |
@@ -36,7 +36,7 @@ flowchart LR
 - **Outcome:** Vocabulary reuse runs on a real embedding model, traced in Langfuse
 - **Acceptance criteria:** FR-08
 - **Change ID:** llm-adapter-embedding-tracer
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-02
 - **Research:** current-context, pydantic-ai, langfuse
 
@@ -137,3 +137,5 @@ abstractions are not capture-shaped. Verified by the author's own manual use, tr
 Langfuse.
 
 ## Done
+
+- **S-01: Vocabulary reuse runs on a real embedding model, traced in Langfuse** — Archived 2026-09-12 → `context/archive/changes/2026-09-11-llm-adapter-embedding-tracer/`. Lesson: —.
