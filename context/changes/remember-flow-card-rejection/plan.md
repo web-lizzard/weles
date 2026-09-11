@@ -271,6 +271,17 @@ Artifact: `reviews/2026-09-11-r1-property-test-phase-2.md`
 - SchedulingReplay folds grades belonging to other cards
   Fix: The shrunk two-card log must make `SchedulingReplay.replay(card_a, events)` equal `replay(card_a, events)` with only `card_a` events until the bug is fixed; `test_replay_for_one_card_ignores_another_cards_grades_in_the_sequence` (unit pin) and `test_replay_ignores_grades_belonging_to_other_cards` (property) stay as regression.
 
+### Review r2
+
+Artifact: `reviews/2026-09-11-r2-mutation-test-phase-2.md`
+
+- `R2-F2` — Draw seed must include each event sitting_id in the hash input
+  Fix: `_draw_seed` must include each event's real `sitting_id` in the hash input so `next_card` picks change when sitting identity in the log changes.
+- `R2-F3` — Draw seed uses exactly eight digest bytes big-endian
+  Fix: Draw seed must use exactly the first eight SHA-256 digest bytes (big-endian), not nine.
+- `R2-F4` — is_offered is false at exactly opened_at plus resume_horizon
+  Fix: `is_offered` must be false at exactly `opened_at + resume_horizon` (strict `<`, not inclusive).
+
 ---
 
 ## Phase 3: Rejection write-path stubs

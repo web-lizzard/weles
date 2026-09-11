@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 3
-next_step: 3.1
-next_command: /implement remember-flow-card-rejection phase 3
+current_phase: 2
+next_step: 2.6
+next_command: /implement remember-flow-card-rejection phase 2
 updated: 2026-09-11
 ---
 
@@ -37,6 +37,9 @@ updated: 2026-09-11
 #### Triage
 
 - [x] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 882047a) — 5251732
+- [ ] 2.6 R2-F2 Draw seed must include each event sitting_id in the hash input
+- [ ] 2.7 R2-F3 Draw seed uses exactly eight digest bytes big-endian
+- [ ] 2.8 R2-F4 is_offered is false at exactly opened_at plus resume_horizon
 
 ### Phase 3: Rejection write-path stubs
 

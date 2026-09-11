@@ -202,6 +202,26 @@ def test_replay_of_a_mixed_log_matches_replaying_the_grades_alone() -> None:
     assert Rejected.REJECTED not in [call[2] for call in mixed_scheduler.calls]
 
 
+def test_replay_skips_foreign_cards_without_stopping_on_later_target_grades() -> None:
+    """Foreign card_id must continue the loop, not break it."""
+    card_a = CardId(value=UUID("a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"))
+    card_b = CardId(value=UUID("b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"))
+    base = datetime(2026, 9, 1, tzinfo=UTC)
+    events = (
+        _event(card_a, reviewed_at=base, grade=Grade.FORGOT),
+        _event(card_b, reviewed_at=base + timedelta(hours=1), grade=Grade.FORGOT),
+        _event(card_a, reviewed_at=base + timedelta(hours=2), grade=Grade.GOOD),
+    )
+    scheduler = _RecordingScheduler()
+    replay = SchedulingReplay(scheduler)
+
+    result = replay.replay(card_a, events)
+
+    assert result is not None
+    assert len(scheduler.calls) == 2
+    assert [call[2] for call in scheduler.calls] == [Grade.FORGOT, Grade.GOOD]
+
+
 def test_replay_for_one_card_ignores_another_cards_grades_in_the_sequence() -> None:
     card_a = CardId(value=UUID("e3e70682-c209-4cac-629f-6fbed82c07cd"))
     card_b = CardId(value=UUID("f728b4fa-4248-5e3a-0a5d-2f346baa9455"))
