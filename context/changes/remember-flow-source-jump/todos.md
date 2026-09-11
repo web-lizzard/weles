@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 5
-next_step: Tests
-next_command: /unit-test remember-flow-source-jump phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test remember-flow-source-jump phase 6
 updated: 2026-09-11
 ---
 
@@ -55,18 +55,18 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f7e2d0a
 
 #### Automated
 
-- [ ] 5.1 test_reveal_back_command.py passes
-- [ ] 5.2 Remember unit and integration suites pass
-- [ ] 5.3 TUI sittings api and sitting store tests pass
-- [ ] 5.4 TUI typecheck passes
+- [x] 5.1 test_reveal_back_command.py passes — 025a887
+- [x] 5.2 Remember unit and integration suites pass — 025a887
+- [x] 5.3 TUI sittings api and sitting store tests pass — 025a887
+- [x] 5.4 TUI typecheck passes — 025a887
 
 #### Manual
 
-- [ ] 5.5 POST to the back route returns the back and stays at one reveal event when repeated
+- [x] 5.5 POST to the back route returns the back and stays at one reveal event when repeated — 025a887
 
 ### Phase 6: The locator resolves the fragment
 
