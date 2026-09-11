@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 6
-next_step: 6.1
-next_command: /implement remember-flow-source-jump phase 6
+current_phase: 7
+next_step: 7 tests
+next_command: /unit-test remember-flow-source-jump phase 7
 updated: 2026-09-11
 ---
 
@@ -76,9 +76,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 6.1 test_card_source_locator_contract.py passes
-- [ ] 6.2 Remember unit suite passes
-- [ ] 6.3 basedpyright reports no new errors in the remember in-memory adapters
+- [x] 6.1 test_card_source_locator_contract.py passes — cf7773d
+- [x] 6.2 Remember unit suite passes — cf7773d
+- [x] 6.3 basedpyright reports no new errors in the remember in-memory adapters — cf7773d
 
 ### Phase 7: The source route and the AC-18 gate
 
