@@ -14,6 +14,7 @@ from domain.remember.value_objects import (
     Graded,
     Rejection,
     ResumeHorizon,
+    Reveal,
     ShowingLimit,
     SittingId,
 )
@@ -49,6 +50,15 @@ def _rejection(card_id: CardId, sitting_id: SittingId) -> ReviewEvent:
         card_id=card_id,
         reviewed_at=datetime.now(UTC),
         payload=Rejection(),
+        sitting_id=sitting_id,
+    )
+
+
+def _reveal(card_id: CardId, sitting_id: SittingId) -> ReviewEvent:
+    return ReviewEvent(
+        card_id=card_id,
+        reviewed_at=datetime.now(UTC),
+        payload=Reveal(),
         sitting_id=sitting_id,
     )
 
@@ -408,6 +418,53 @@ def test_draw_seed_uses_exactly_eight_digest_bytes_big_endian() -> None:
     assert sitting.next_card(present, events) == _card_from_seed(
         present, eight_byte_seed
     )
+
+
+def test_a_forgot_grade_and_a_reveal_do_not_finish_a_card_at_the_showing_limit() -> (
+    None
+):
+    card = _card_id()
+    sitting = _open_sitting(card)
+    present = frozenset({card})
+    events = (
+        _event(card, sitting.id, Grade.FORGOT),
+        _reveal(card, sitting.id),
+    )
+
+    assert sitting.is_finished(present, events) is False
+    assert sitting.next_card(present, events) == card
+
+
+def test_two_reveals_do_not_finish_a_card_at_the_showing_limit() -> None:
+    card = _card_id()
+    sitting = _open_sitting(card)
+    present = frozenset({card})
+    events = (_reveal(card, sitting.id), _reveal(card, sitting.id))
+
+    assert sitting.is_finished(present, events) is False
+    assert sitting.outstanding(present, events) == present
+    assert sitting.next_card(present, events) == card
+
+
+def test_a_reveal_does_not_change_the_next_card_of_an_otherwise_empty_log() -> None:
+    sitting_id = "5ab7c383-a883-4fdf-ab28-0d827faaea53"
+    card_ids = (
+        "6513270e-269e-0d37-f2a7-4de452e6b438",
+        "d23f0824-128b-2f33-0c5c-7fd0a6a3a450",
+    )
+    sitting = _pinned_sitting(sitting_id, card_ids)
+    present = sitting.card_ids
+    without_reveal = sitting.next_card(present, ())
+    revealed = (
+        ReviewEvent(
+            card_id=CardId(value=UUID(card_ids[0])),
+            reviewed_at=datetime(2026, 1, 1, tzinfo=UTC),
+            payload=Reveal(),
+            sitting_id=SittingId(value=UUID(sitting_id)),
+        ),
+    )
+
+    assert sitting.next_card(present, revealed) == without_reveal
 
 
 def test_is_offered_is_false_at_opened_at_plus_resume_horizon() -> None:
