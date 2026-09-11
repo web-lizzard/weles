@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-due-count
-current_phase: 8
-next_step: 8.5
-next_command: /implement remember-flow-due-count phase 8
+current_phase: 10
+next_step:
+next_command: /archive remember-flow-due-count
 updated: 2026-09-11
 ---
 
@@ -105,7 +105,7 @@ updated: 2026-09-11
 
 #### Triage
 
-- [ ] 8.5 R4-F1 A poll answering after a grade overwrites the fresher partition (proof: 2cbae57)
+- [x] 8.5 R4-F1 A poll answering after a grade overwrites the fresher partition (proof: 2cbae57) — 2c851b9
 
 ### Phase 9: Shell row and overlay geometry
 
