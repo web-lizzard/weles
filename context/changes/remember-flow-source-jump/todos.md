@@ -23,6 +23,14 @@ updated: 2026-09-11
 - [x] 2.3 Full backend suite passes — 35861b3
 - [x] 2.4 basedpyright reports no new errors across src — 35861b3
 
+#### Triage
+
+- [x] 2.5 R1-F7 partition_due must receive scheduler stamp from GradeCardCommand.handle — d82b28e
+- [x] 2.6 R1-F8 GradeAppliedDTO omits outstanding_count when sitting completes — d82b28e
+- [x] 2.7 R1-F9 GradeAppliedDTO omits due when sitting completes — d82b28e
+- [x] 2.8 R1-F10 GradeAppliedDTO omits next_front when another card remains — d82b28e
+- [x] 2.9 R1-F11 GradeAppliedDTO omits outstanding_count when sitting continues — d82b28e
+
 ### Phase 3: Non-accounting payloads stop counting
 
 #### Tests
