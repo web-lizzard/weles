@@ -560,19 +560,44 @@ Materialize every client symbol Phases 9-10 implement against.
 `client.GET("/review-sittings/{sitting_id}/cards/{card_id}/source", …)`, returning
 `null` on a 404 and routing every other failure through `throwOnClientError`.
 
-#### 2. Overlay view state
+#### 2. Sitting store probe fields
+
+**File**: `tui/src/store/sitting.ts`
+
+**Intent**: Cache whether a source exists for the current card once the back is
+revealed, without duplicating network work across overlay remounts.
+
+**Contract**: State `cardSource: CardSource | null` and
+`isCardSourceProbeComplete: boolean`, reset whenever the sitting or card identity
+changes. On first successful reveal (`toggleBack` when the back becomes visible),
+call `probeCardSource` once and set both fields from the result (`null` source still
+marks the probe complete).
+
+#### 3. In-flight probe deduplication
+
+**File**: `tui/src/lib/cardSourceProbe.ts`
+
+**Intent**: Concurrent reveal or remount must not issue duplicate GETs for the same
+sitting/card pair.
+
+**Contract**: `probeCardSource(sittingId, cardId)` returns a shared in-flight
+`Promise<CardSource | null>` keyed by sitting and card until it settles, then
+delegates to `fetchCardSource`.
+
+#### 4. Overlay view state
 
 **File**: `tui/src/screens/SittingOverlay.tsx`
 
-**Intent**: The source view is a nested view inside the overlay, following the
-`isRejectConfirmPending` precedent rather than global store state.
+**Intent**: The open source view is nested overlay state (offset and expansion), while
+availability comes from the sitting store.
 
 **Contract**: Local state
 `sourceView: { source: CardSource; isExpanded: boolean; offset: number } | null`
-and `isSourceAvailable: boolean`, plus the constants for the new hints. Handlers
+plus the constants for the new hints. Derive
+`isSourceAvailable` as `isCardSourceProbeComplete && cardSource !== null`. Handlers
 declared, bodies unimplemented.
 
-#### 3. Viewport component
+#### 5. Viewport component
 
 **File**: `tui/src/components/SourceViewport.tsx`
 
@@ -609,10 +634,11 @@ inside surrounding note text, and make Esc close the source before the sitting.
 **Intent**: A read-only excursion with exactly one way out, offered only when it
 leads somewhere.
 
-**Contract**: After a successful reveal the overlay calls `fetchCardSource` once and
-sets `isSourceAvailable` from whether it returned a source. `s` opens the source view
-only when `isBackVisible && isSourceAvailable`; nothing is rendered or said when it
-is unavailable. While `sourceView !== null`: Esc closes it and returns to the card,
+**Contract**: After reveal, the sitting store's probe (Phase 8) fills
+`cardSource` / `isCardSourceProbeComplete`; the overlay reads those fields and treats
+source as available when the probe is complete and `cardSource` is non-null. `s` opens
+the source view only when `isBackVisible && isSourceAvailable`; nothing is rendered or
+said when it is unavailable. While `sourceView !== null`: Esc closes it and returns to the card,
 leaving the sitting open; grade digits, arrows, `t`, `x` and Enter are all inert.
 The Esc chain in `useInput` becomes source view → reject confirm → close sitting.
 The fragment is marked by slicing `block.text` at `span.start`/`span.end` and
