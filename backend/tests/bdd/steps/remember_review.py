@@ -817,3 +817,54 @@ def opened_sitting_excludes_named_card(
     )
     assert sitting is not None
     assert card.id not in sitting.card_ids
+
+
+@given(parsers.parse('a card "{label}" was discarded by the system as ungrounded'))
+def card_was_discarded_by_system_as_ungrounded(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    _ = _card(remember_flow_context, label)
+    card = remember_flow_context.distill_cards_by_label[label]
+    discarded = card.model_copy(
+        update={
+            "discard": Discard(
+                reason=DiscardReason.UNGROUNDED,
+                detail=None,
+                discarded_at=remember_flow_context.clock.now(),
+            )
+        }
+    )
+    asyncio.run(remember_flow_context.composition.cards.save(discarded))
+    remember_flow_context.distill_cards_by_label[label] = discarded
+
+
+@when("the user rejects the current card")
+def user_rejects_the_current_card(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    assert remember_flow_context.sitting_id is not None
+    assert remember_flow_context.current_card_id is not None
+    asyncio.run(
+        remember_flow_context.composition.reject_card().handle(
+            remember_flow_context.sitting_id,
+            remember_flow_context.current_card_id,
+        )
+    )
+
+
+@when("the remember worker drains the outbox once")
+def remember_worker_drains_the_outbox_once(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    _ = asyncio.run(remember_flow_context.composition.worker().run_once())
+
+
+@then(parsers.parse('the card "{label}" has a discard whose reason is "{reason}"'))
+def card_has_discard_whose_reason_is(
+    remember_flow_context: RememberFlowContext, label: str, reason: str
+) -> None:
+    card = remember_flow_context.distill_cards_by_label[label]
+    persisted = asyncio.run(remember_flow_context.composition.cards.get(card.id))
+    assert persisted is not None
+    assert persisted.discard is not None
+    assert persisted.discard.reason == DiscardReason(reason)
