@@ -14,19 +14,30 @@ type DueActions = {
 };
 
 let pollIntervalId: ReturnType<typeof setInterval> | null = null;
+let partitionGeneration = 0;
 
 export const useDueStore = create<DueState & DueActions>((set, get) => ({
   partition: null,
   isStale: false,
   fetchDue: async () => {
+    const generationAtStart = partitionGeneration;
     try {
       const partition = await fetchDueCount();
+      if (generationAtStart !== partitionGeneration) {
+        return;
+      }
       set({ partition, isStale: false });
     } catch {
+      if (generationAtStart !== partitionGeneration) {
+        return;
+      }
       set({ isStale: true });
     }
   },
-  applyPartition: (partition) => set({ partition, isStale: false }),
+  applyPartition: (partition) => {
+    partitionGeneration += 1;
+    set({ partition, isStale: false });
+  },
   startPolling: (intervalMs: number) => {
     get().stopPolling();
     void get().fetchDue();
