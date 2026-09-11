@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  currentCard,
   type Grade,
   gradeCard,
   openSitting,
@@ -291,7 +292,41 @@ export const useSittingStore = create<SittingState & SittingActions>(
       });
       try {
         await rejectCard(sittingId, cardId);
-        set({ isSubmitting: false });
+        const result = await currentCard(sittingId);
+        if (result.due != null) {
+          useDueStore.getState().applyPartition(result.due);
+        }
+        if (result.sittingComplete || result.cardId === null) {
+          set({
+            phase: "complete",
+            sittingId: result.sittingId,
+            cardId: null,
+            front: null,
+            back: null,
+            isBackVisible: false,
+            selectedGradeIndex: 0,
+            error: null,
+            isSubmitting: false,
+            isResumed: false,
+            outstandingCount: result.outstandingCount,
+            notice: null,
+          });
+          return;
+        }
+        set({
+          phase: "presented",
+          sittingId: result.sittingId,
+          cardId: result.cardId,
+          front: result.front,
+          back: null,
+          isBackVisible: false,
+          selectedGradeIndex: 0,
+          error: null,
+          isSubmitting: false,
+          isResumed: false,
+          outstandingCount: result.outstandingCount,
+          notice: null,
+        });
       } catch (error) {
         if (error instanceof SittingHttpError) {
           if (error.code === SITTING_EXPIRED) {
