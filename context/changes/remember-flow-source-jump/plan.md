@@ -630,6 +630,15 @@ source hint, shown under the same condition that enables the key.
 #### Manual Verification:
 - `cd tui && pnpm start`, open a review, press `t` then `s`: the fragment appears highlighted with text above and below it; Esc returns to the card with the sitting intact; a second Esc leaves the sitting
 
+### Review r3
+
+Artifact: `reviews/2026-09-11-r3-impl-review.md`
+
+- `R3-F2` — Card source probe state lives in the sitting store, not overlay-local state
+  Fix: Align the plan's Phase 8/9 Contracts with the store-owned probe fields, or move availability and cached `CardSource` back into `SittingOverlay` local state as originally specified.
+- `R3-F3` — `cardSourceProbe.ts` is outside every phase's Changes Required
+  Fix: Name `cardSourceProbe.ts` explicitly in the phase Contract that introduces in-flight deduplication, or fold the helper into a file already listed in Changes Required.
+
 ---
 
 ## Phase 10: Expansion and the viewport
@@ -707,6 +716,13 @@ and registered per the existing `pytest_plugins` convention.
 - `cd backend && uv run pytest tests/features -q` passes
 - `cd backend && uv run pytest tests/bdd/test_remember_step_coverage.py -q` passes
 - `cd backend && uv run pytest -q` passes
+
+### Review r3
+
+Artifact: `reviews/2026-09-11-r3-impl-review.md`
+
+- `R3-F1` — Phase 11 Automated Verification command collects no tests
+  Fix: Either make `tests/features` a collectable pytest entrypoint (as the plan documents) or change Phase 11's Automated Verification bullet to the bdd loader path so CI and humans can run the documented command without a silent no-op.
 
 ---
 
