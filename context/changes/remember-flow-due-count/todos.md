@@ -38,7 +38,7 @@ updated: 2026-09-11
 
 #### Triage
 
-- [x] 3.6 R4-F2 Three phases verify with a checker this project does not install
+- [x] 3.6 R4-F2 Three phases verify with a checker this project does not install — 7fe7cab
 
 ### Phase 4: Acceptance layer for AC-14 and AC-15
 
