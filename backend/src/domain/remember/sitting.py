@@ -13,7 +13,7 @@ from domain.remember.exceptions import (
     SittingExpiredError,
 )
 from domain.remember.review_event import ReviewEvent
-from domain.remember.review_payload import is_finishing
+from domain.remember.review_payload import is_accounting, is_finishing
 from domain.remember.value_objects import (
     MIN_RESUME_HORIZON,
     CardId,
@@ -150,7 +150,11 @@ class Sitting(BaseModel, frozen=True):
         return tuple(event for event in events if event.sitting_id == self.id)
 
     def _showing_count(self, card_id: CardId, events: Sequence[ReviewEvent]) -> int:
-        return sum(1 for event in events if event.card_id == card_id)
+        return sum(
+            1
+            for event in events
+            if event.card_id == card_id and is_accounting(event.payload)
+        )
 
     def _card_is_finished(self, card_id: CardId, events: Sequence[ReviewEvent]) -> bool:
         if any(

@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test remember-flow-source-jump phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement remember-flow-source-jump phase 4
 updated: 2026-09-11
 ---
 
@@ -27,13 +27,13 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — bb8fb78
 
 #### Automated
 
-- [ ] 3.1 test_sitting.py passes with existing tests unmodified
-- [ ] 3.2 Remember property suite passes
-- [ ] 3.3 Remember unit and integration suites pass
+- [x] 3.1 test_sitting.py passes with existing tests unmodified
+- [x] 3.2 Remember property suite passes
+- [x] 3.3 Remember unit and integration suites pass
 
 ### Phase 4: Source port, DTO, route and wiring
 
