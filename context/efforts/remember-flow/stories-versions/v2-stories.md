@@ -1,6 +1,6 @@
 ---
 status: draft
-version: 3
+version: 2
 created: 2026-09-09
 effort_id: remember-flow
 ---
@@ -8,8 +8,6 @@ effort_id: remember-flow
 # Remember flow — User Stories
 
 > Revision 2 (2026-09-09): adds US-12 over the PRD's new FR-017 and FR-018, covering entry into a review from an in-flight capture session and the guarantee that free text cannot trigger one. Purely additive — US-01 through US-11 and AC-01 through AC-20 are unchanged. Prior version: stories-versions/v1-stories.md
-
-> Revision 3 (2026-09-11): brings FR-014 under US-09 as AC-23, so the user/generation-time distinction on a rejection has an acceptance authority instead of sitting uncovered. Purely additive — US-01 through US-12 and AC-01 through AC-22 are unchanged. Prior version: stories-versions/v2-stories.md
 
 ## Stories
 
@@ -87,12 +85,11 @@ Realizes: FR-012
 
 ### US-09 — Turn down a bad card where you meet it
 
-I want to reject a card during a review, so that a bad card leaves circulation instead of coming back to be graded lowest over and over, and so that my turning it down is not confused with the system having thrown it out on its own.
+I want to reject a card during a review, so that a bad card leaves circulation instead of coming back to be graded lowest over and over.
 
-Realizes: FR-013, FR-014
+Realizes: FR-013
 
 - AC-17: A card the user rejects during a review is not offered in any later review.
-- AC-23: A card the user rejects is recorded as the user's own judgement, distinguishable from a card the system rejected when it was generated.
 
 ### US-10 — Get to where the card came from
 
@@ -122,4 +119,4 @@ Realizes: FR-017, FR-018
 
 ## Uncovered Requirements
 
-*(none — every FR in `prd.md` is realized by a story.)*
+- **FR-014** — The distinction between a user's rejection and a generation-time one is recorded for a reader this effort does not build: the PRD's Non-Goals bar statistics and reporting, and distill's PRD makes the rejection-inspection surface a non-goal. A generation-quality signal, not a user payoff.

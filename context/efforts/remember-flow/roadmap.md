@@ -58,7 +58,7 @@ flowchart LR
 ### S-04: Users can reject a bad card during review so it stops coming back
 
 - **Outcome:** Users can reject a bad card during review so it stops coming back
-- **Acceptance criteria:** AC-17
+- **Acceptance criteria:** AC-17, AC-23
 - **Change ID:** remember-flow-card-rejection
 - **Status:** in_progress
 - **Prerequisites:** S-01
