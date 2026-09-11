@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 7
-next_step: 7.1
-next_command: /implement remember-flow-source-jump phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /implement remember-flow-source-jump phase 8
 updated: 2026-09-11
 ---
 
@@ -88,13 +88,13 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 7.1 test_card_source_query.py passes
-- [ ] 7.2 test_remember_routes.py passes
-- [ ] 7.3 Full backend suite passes
+- [x] 7.1 test_card_source_query.py passes — 88314d5
+- [x] 7.2 test_remember_routes.py passes — 88314d5
+- [x] 7.3 Full backend suite passes — 88314d5
 
 #### Manual
 
-- [ ] 7.4 Source route returns 404 before the back is revealed and 200 after
+- [x] 7.4 Source route returns 404 before the back is revealed and 200 after — 88314d5
 
 ### Phase 8: TUI client, view state and viewport component
 
