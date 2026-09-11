@@ -10,12 +10,12 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 1.1 Add Rejected, the ReviewOutcome alias and FINISHING_OUTCOMES in domain/remember/value_objects.py
-- [x] 1.2 Rename ReviewEvent.grade to outcome and widen it to ReviewOutcome
-- [x] 1.3 Add Sitting.guard_outcome and route GradeCardCommand's guard through it
-- [x] 1.4 Filter non-Grade outcomes out of SchedulingReplay.replay
-- [x] 1.5 Add domain/remember/outbox.py with CARD_REJECTED and CardRejectedPayload
-- [x] 1.6 Migrate the 21 ReviewEvent construction sites across src, unit, property and bdd suites
+- [x] 1.1 Add Rejected, the ReviewOutcome alias and FINISHING_OUTCOMES in domain/remember/value_objects.py — c63f414
+- [x] 1.2 Rename ReviewEvent.grade to outcome and widen it to ReviewOutcome — c63f414
+- [x] 1.3 Add Sitting.guard_outcome and route GradeCardCommand's guard through it — c63f414
+- [x] 1.4 Filter non-Grade outcomes out of SchedulingReplay.replay — c63f414
+- [x] 1.5 Add domain/remember/outbox.py with CARD_REJECTED and CardRejectedPayload — c63f414
+- [x] 1.6 Migrate the 21 ReviewEvent construction sites across src, unit, property and bdd suites — c63f414
 
 #### Manual
 
