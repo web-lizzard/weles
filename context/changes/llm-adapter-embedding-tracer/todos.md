@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-embedding-tracer
-current_phase: 4
-next_step: 4.4
-next_command: /implement llm-adapter-embedding-tracer phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /implement llm-adapter-embedding-tracer phase 5
 updated: 2026-09-12
 ---
 
@@ -57,7 +57,7 @@ updated: 2026-09-12
 
 #### Manual
 
-- [ ] 4.4 Start the backend with tracing off, then with real Langfuse keys, and confirm no exporter errors
+- [x] 4.4 Start the backend with tracing off, then with real Langfuse keys, and confirm no exporter errors — a53c8a2
 
 ### Phase 5: Smoke script
 
