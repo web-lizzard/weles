@@ -17,6 +17,22 @@ from domain.remember.value_objects import (
 )
 
 
+class SourceSpan(BaseModel, frozen=True):
+    block_index: int
+    start: int
+    end: int
+
+
+class SourceBlock(BaseModel, frozen=True):
+    index: int
+    text: str
+
+
+class CardSource(BaseModel, frozen=True):
+    blocks: Sequence[SourceBlock]
+    span: SourceSpan
+
+
 class ReviewableCard(BaseModel, frozen=True):
     id: CardId
     front: str
@@ -27,6 +43,10 @@ class ReviewCatalog(Protocol):
     async def list_reviewable(self) -> Sequence[ReviewableCard]: ...
 
     async def get_reviewable(self, card_id: CardId) -> ReviewableCard | None: ...
+
+
+class CardSourceLocator(Protocol):
+    async def locate(self, card_id: CardId) -> CardSource | None: ...
 
 
 class SittingRepository(Protocol):

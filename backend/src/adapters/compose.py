@@ -49,6 +49,9 @@ from adapters.out.in_memory.distill.note_repository import (
 from adapters.out.in_memory.distill.unit_of_work import (
     InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
 )
+from adapters.out.in_memory.remember.card_source_locator import (
+    InMemoryCardSourceLocator,
+)
 from adapters.out.in_memory.remember.clock import SystemClock
 from adapters.out.in_memory.remember.review_catalog import InMemoryReviewCatalog
 from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
@@ -86,10 +89,10 @@ from application.distill.queries.list_notes import ListNotesQueryPort
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.commands.reject_card import RejectCardCommand
+from application.remember.commands.reveal_back import RevealBackCommand
 from application.remember.ports import UnitOfWork as RememberUnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
-from application.remember.queries.reveal_back import RevealBackQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import Settings
 from domain.capture.ports import CaptureSessionRepository
@@ -97,6 +100,7 @@ from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 from domain.distill.card_factory import CardFactory
 from domain.distill.value_objects import CardLengthPolicy
+from domain.remember.ports import CardSourceLocator
 from domain.remember.value_objects import ResumeHorizon, ShowingLimit
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
@@ -142,6 +146,9 @@ _remember_review_events = InMemoryReviewEventStore()
 _remember_scheduling_states = InMemorySchedulingStateRepository()
 _remember_lock = asyncio.Lock()
 _remember_catalog = InMemoryReviewCatalog(
+    _distill_note_repository, _distill_card_repository
+)
+_remember_card_source_locator = InMemoryCardSourceLocator(
     _distill_note_repository, _distill_card_repository
 )
 _remember_scheduler = FsrsScheduler()
@@ -317,5 +324,13 @@ def get_due_count_query() -> DueCountQuery:
     )
 
 
-def get_reveal_back_query() -> RevealBackQuery:
-    return RevealBackQuery(_remember_sittings, _remember_catalog, _remember_clock)
+def get_card_source_locator() -> CardSourceLocator:
+    return _remember_card_source_locator
+
+
+def get_reveal_back_command() -> RevealBackCommand:
+    return RevealBackCommand(
+        uow_factory=_remember_unit_of_work,
+        catalog=_remember_catalog,
+        clock=_remember_clock,
+    )

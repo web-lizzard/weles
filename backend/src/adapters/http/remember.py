@@ -5,17 +5,20 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 
 from adapters.compose import (
+    get_card_source_locator,
     get_current_card_query,
     get_due_count_query,
     get_grade_card_command,
     get_open_sitting_command,
     get_reject_card_command,
-    get_reveal_back_query,
+    get_reveal_back_command,
 )
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.commands.reject_card import RejectCardCommand
+from application.remember.commands.reveal_back import RevealBackCommand
 from application.remember.dto import (
+    CardSourceDTO,
     DueCountDTO,
     GradeAppliedDTO,
     GradeRequestDTO,
@@ -27,7 +30,7 @@ from application.remember.dto import (
 )
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
-from application.remember.queries.reveal_back import RevealBackQuery
+from domain.remember.ports import CardSourceLocator
 from domain.remember.value_objects import CardId, SittingId
 
 router = APIRouter()
@@ -55,13 +58,24 @@ async def current_card(
     return await query.handle(SittingId(value=sitting_id))
 
 
-@router.get("/review-sittings/{sitting_id}/cards/{card_id}/back")
+@router.post("/review-sittings/{sitting_id}/cards/{card_id}/back")
 async def reveal_back(
     sitting_id: UUID,
     card_id: UUID,
-    query: Annotated[RevealBackQuery, Depends(get_reveal_back_query)],
+    command: Annotated[RevealBackCommand, Depends(get_reveal_back_command)],
 ) -> RevealedCardDTO:
-    return await query.handle(SittingId(value=sitting_id), CardId(value=card_id))
+    return await command.handle(SittingId(value=sitting_id), CardId(value=card_id))
+
+
+@router.get("/review-sittings/{sitting_id}/cards/{card_id}/source")
+async def card_source(
+    sitting_id: UUID,
+    card_id: UUID,
+    locator: Annotated[CardSourceLocator, Depends(get_card_source_locator)],
+) -> CardSourceDTO:
+    _ = sitting_id
+    _ = await locator.locate(CardId(value=card_id))
+    raise NotImplementedError
 
 
 @router.post("/review-sittings/{sitting_id}/cards/{card_id}/grade")
