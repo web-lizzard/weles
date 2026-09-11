@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 9
-next_step: 9.4
-next_command: /implement remember-flow-source-jump phase 9
+current_phase: 10
+next_step: 10.4
+next_command: /implement remember-flow-source-jump phase 10
 updated: 2026-09-11
 ---
 
@@ -119,7 +119,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 9.4 Press t then s in a live review: fragment highlighted in context, Esc returns to the card, second Esc leaves the sitting
+- [x] 9.4 Press t then s in a live review: fragment highlighted in context, Esc returns to the card, second Esc leaves the sitting — 4c9e59d
 
 #### Triage
 
