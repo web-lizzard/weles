@@ -11,12 +11,13 @@ updated: 2026-09-11
 #### Automated
 
 - [ ] 1.1 Pin pydantic-ai-slim[openai]==2.39.0 and the three OpenTelemetry packages at ==1.44.0
-- [ ] 1.2 Declare EmbeddingProvider enum and provider, model, and Langfuse settings fields
-- [ ] 1.3 Record the new environment keys in .env.example
+- [ ] 1.2 Add an RFC 3339 exclude-newer cutoff to [tool.uv] and prove it is enforced
+- [ ] 1.3 Declare EmbeddingProvider enum and provider, model, and Langfuse settings fields
+- [ ] 1.4 Record the new environment keys in .env.example
 
 #### Manual
 
-- [ ] 1.4 Confirm Settings() defaults to the openrouter provider with no .env override
+- [ ] 1.5 Confirm Settings() defaults to the openrouter provider with no .env override
 
 ### Phase 2: `adapters/out/llm/` stubs and interfaces
 

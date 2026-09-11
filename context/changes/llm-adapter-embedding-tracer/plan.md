@@ -167,9 +167,10 @@ three OpenTelemetry packages at one shared version:
 cd backend && uv add "pydantic-ai-slim[openai]==2.39.0" "opentelemetry-api==1.44.0" "opentelemetry-sdk==1.44.0" "opentelemetry-exporter-otlp-proto-http==1.44.0"
 ```
 
-**Versions are chosen with a one-week soak rule**: no release younger than seven days, so a
-freshly published artifact has had time to surface a compromise or a regression before it
-enters the lock. As of 2026-09-11 that resolves to `pydantic-ai-slim` **2.39.0**
+**Versions are chosen with a one-week soak rule**, enforced by `exclude-newer` in the next
+change entry: no release younger than seven days, so a freshly published artifact has had
+time to surface a compromise or a regression before it enters the lock. The pins and the
+resolver setting agree by construction — every pin below predates the cutoff. As of 2026-09-11 that resolves to `pydantic-ai-slim` **2.39.0**
 (2026-09-04) — 2.40.0 through 2.42.0 are newer than the cutoff, and what they add
 (`GitHubCopilotProvider`, `openai-codex`, `ImageGenerator`, Bedrock and Gemini fixes) is
 irrelevant here. The OpenTelemetry trio at **1.44.0** dates to 2026-07-16 and clears the rule
@@ -185,7 +186,51 @@ at import rather than at export. Pinning all three to `1.44.0` makes that invari
 in the manifest instead of leaving it to the resolver, and makes the next upgrade a
 deliberate three-line edit.
 
-#### 2. Settings
+#### 2. Resolution policy
+
+**File**: `backend/pyproject.toml`
+
+**Intent**: Make the one-week soak a rule uv enforces rather than a habit the author has to
+remember. Exact pins protect the four dependencies named above; this protects everything
+else, including transitive packages and every future `uv add`.
+
+**Contract**: the existing `[tool.uv]` table gains one key, an RFC 3339 timestamp seven days
+back from the day the phase runs:
+
+```toml
+[tool.uv]
+package = false
+exclude-newer = "2026-09-04T00:00:00Z"
+```
+
+The constraint compares against each artifact's upload time, applies to all packages rather
+than just the new ones, and takes effect on `uv lock`, `uv sync`, and `uv add` alike.
+
+**It must be a full timestamp.** uv's current documentation advertises relative durations
+(`"1 week"`, `"P7D"`) and bare dates, but the pinned toolchain here is **uv 0.9.6**, which
+accepts none of them — verified in this session:
+
+| Value | uv 0.9.6 |
+| --- | --- |
+| `"1 week"` | rejected — `failed to parse year in date` |
+| `"P7D"` | rejected — `expected four digit year` |
+| `"2026-09-04"` | rejected — `failed to find time component` |
+| `"2026-09-04T00:00:00Z"` | accepted, constrains resolution |
+
+The failure mode is what makes this load-bearing: a malformed value is **not an error**. uv
+prints `warning: Failed to parse pyproject.toml during settings discovery`, ignores the
+setting, and resolves to the newest release anyway — the manifest looks protected while the
+policy is off. That is why the success criteria below prove the setting is *active*, not
+merely present.
+
+The cost is that a fixed timestamp is a freeze rather than a sliding window: it stops
+admitting anything at all until deliberately moved forward. That is the acceptable half of
+the trade — a stale cutoff withholds updates, whereas a stale *sliding* window would keep
+admitting them unattended. Bump the timestamp as a deliberate act whenever dependencies are
+refreshed, and use `--exclude-newer-package <name>=<later date>` to let a single security fix
+through without moving the global cutoff.
+
+#### 3. Settings
 
 **File**: `backend/src/config/settings.py`
 
@@ -210,7 +255,7 @@ langfuse_otlp_endpoint: str = "https://cloud.langfuse.com/api/public/otel/v1/tra
 `embedding_dimensions` at `None` means "send no `dimensions` parameter" — the model's own
 default, 1536 for `text-embedding-3-small`.
 
-#### 3. Environment template
+#### 4. Environment template
 
 **File**: `.env.example`
 
@@ -227,6 +272,9 @@ whitelisting `.env.example`.
 #### Automated Verification:
 - `cd backend && uv sync` resolves with `openai` and `tiktoken` present in `uv.lock`
 - `cd backend && grep -c '==' pyproject.toml` confirms the four new dependencies are exact pins
+- `cd backend && uv lock 2>&1 | grep -i "failed to parse"` returns nothing — the cutoff parsed
+- `cd backend && uv add "pydantic-ai-slim==2.42.0"` fails with `no version of pydantic-ai-slim==2.42.0`, proving the cutoff is enforced and not silently ignored (revert the manifest afterwards)
+- `cd backend && uv lock --check` passes
 - `cd backend && uv run python -c "import opentelemetry.sdk, opentelemetry.exporter.otlp.proto.http.trace_exporter"` exits 0, proving the three OTel versions agree
 - `cd backend && uv run python -c "from pydantic_ai.embeddings.openai import OpenAIEmbeddingModel"` exits 0
 - `cd backend && uv run pytest` stays green
