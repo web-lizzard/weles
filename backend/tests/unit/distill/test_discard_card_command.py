@@ -55,6 +55,27 @@ async def test_discard_stamps_user_audit_carrying_the_envelope_discarded_at() ->
     assert persisted.discard.discarded_at == discarded_at
 
 
+async def test_discard_stamps_a_non_none_detail_onto_the_card() -> None:
+    "Discard.detail must equal the handle() detail argument, including a non-None string."  # noqa: E501
+    stack = _make_stack()
+    note_id = NoteId(value=uuid4())
+    card = _sample_card(note_id)
+    await stack.cards_repo.save(card)
+    discarded_at = datetime(2026, 5, 1, 14, 30, tzinfo=UTC)
+
+    await stack.command.handle(
+        card.id,
+        DiscardReason.USER_AUDIT,
+        "rejected during review",
+        discarded_at,
+    )
+
+    persisted = await stack.cards_repo.get(card.id)
+    assert persisted is not None
+    assert persisted.discard is not None
+    assert persisted.discard.detail == "rejected during review"
+
+
 async def test_discard_leaves_a_card_that_already_carries_any_discard_unchanged(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
