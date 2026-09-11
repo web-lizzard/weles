@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-card-rejection
 current_phase: 8
-next_step: 8.1
+next_step: 8.7
 next_command: /implement remember-flow-card-rejection phase 8
 updated: 2026-09-11
 ---
@@ -114,12 +114,12 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 8.1 Regenerate src/api/generated/schema.d.ts against the running backend
-- [ ] 8.2 Add rejectCard with a 204 branch ahead of the data guard in src/api/sittings.ts
-- [ ] 8.3 Add currentCard mapping PresentedCardDTO in src/api/sittings.ts
-- [ ] 8.4 Add rejectCurrentCard to the sitting store and extend LastAction for retry
-- [ ] 8.5 Bind the reject key in SittingOverlay behind isBackVisible and add its hint constant
-- [ ] 8.6 Add rejectCard and currentCard to the six vi.mock factories over src/api/sittings
+- [x] 8.1 Regenerate src/api/generated/schema.d.ts against the running backend
+- [x] 8.2 Add rejectCard with a 204 branch ahead of the data guard in src/api/sittings.ts
+- [x] 8.3 Add currentCard mapping PresentedCardDTO in src/api/sittings.ts
+- [x] 8.4 Add rejectCurrentCard to the sitting store and extend LastAction for retry
+- [x] 8.5 Bind the reject key in SittingOverlay behind isBackVisible and add its hint constant
+- [x] 8.6 Add rejectCard and currentCard to the six vi.mock factories over src/api/sittings
 
 #### Manual
 

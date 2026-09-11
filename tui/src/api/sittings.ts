@@ -40,6 +40,15 @@ export type GradeApplied = {
   due?: DuePartition;
 };
 
+export type PresentedCard = {
+  sittingId: string;
+  cardId: string | null;
+  front: string | null;
+  sittingComplete: boolean;
+  outstandingCount: number;
+  due?: DuePartition;
+};
+
 export class SittingHttpError extends Error {
   constructor(
     public code: string,
@@ -130,6 +139,43 @@ export async function gradeCard(
     outstandingCount: data.outstanding_count,
     nextCardId: data.next_card_id,
     nextFront: data.next_front,
+    ...(data.due != null ? { due: toDuePartition(data.due) } : {}),
+  };
+}
+
+export async function rejectCard(
+  sittingId: string,
+  cardId: string,
+): Promise<void> {
+  const { data, error, response } = await client.POST(
+    "/review-sittings/{sitting_id}/cards/{card_id}/rejection",
+    {
+      params: { path: { sitting_id: sittingId, card_id: cardId } },
+    },
+  );
+  if (response.status === 204) {
+    return;
+  }
+  if (error || !data) {
+    throwOnClientError(error, response, "rejectCard failed");
+  }
+}
+
+export async function currentCard(sittingId: string): Promise<PresentedCard> {
+  const { data, error, response } = await client.GET(
+    "/review-sittings/{sitting_id}/current-card",
+    { params: { path: { sitting_id: sittingId } } },
+  );
+  if (error || !data) {
+    throwOnClientError(error, response, "currentCard failed");
+  }
+
+  return {
+    sittingId: data.sitting_id,
+    cardId: data.card_id,
+    front: data.front,
+    sittingComplete: data.sitting_complete,
+    outstandingCount: data.outstanding_count,
     ...(data.due != null ? { due: toDuePartition(data.due) } : {}),
   };
 }

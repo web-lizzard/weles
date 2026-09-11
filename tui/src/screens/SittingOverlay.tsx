@@ -11,6 +11,7 @@ const GRADES: Grade[] = ["forgot", "hard", "good", "easy"];
 const GRADE_LABELS = ["1 Forgot", "2 Hard", "3 Good", "4 Easy"];
 const ESC_HINT = "← ESC to go back";
 const TOGGLE_CARD_HINT = "Press t to toggle card";
+const REJECT_HINT = "Press x to reject card";
 const RESUMED_BANNER = "Resumed — picking up where you left off";
 
 export default function SittingOverlay(): JSX.Element {
@@ -22,6 +23,7 @@ export default function SittingOverlay(): JSX.Element {
   const toggleBack = useSittingStore((s) => s.toggleBack);
   const moveSelection = useSittingStore((s) => s.moveSelection);
   const submitGrade = useSittingStore((s) => s.submitGrade);
+  const rejectCurrentCard = useSittingStore((s) => s.rejectCurrentCard);
   const error = useSittingStore((s) => s.error);
   const retry = useSittingStore((s) => s.retry);
   const sittingId = useSittingStore((s) => s.sittingId);
@@ -55,6 +57,11 @@ export default function SittingOverlay(): JSX.Element {
 
     if (input === "t") {
       void toggleBack();
+      return;
+    }
+
+    if (input === "x" && isBackVisible) {
+      void rejectCurrentCard();
       return;
     }
 
@@ -111,6 +118,8 @@ export default function SittingOverlay(): JSX.Element {
         isStale={dueIsStale}
         showToggleHint={phase === "presented"}
         toggleHint={TOGGLE_CARD_HINT}
+        showRejectHint={phase === "presented" && isBackVisible}
+        rejectHint={REJECT_HINT}
       />
     ) : null;
 

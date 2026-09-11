@@ -3,6 +3,7 @@ import {
   type Grade,
   gradeCard,
   openSitting,
+  rejectCard,
   revealBack,
   SITTING_EXPIRED,
   SittingHttpError,
@@ -19,7 +20,8 @@ type SittingPhase =
 type LastAction =
   | { type: "open" }
   | { type: "reveal" }
-  | { type: "grade"; grade: Grade };
+  | { type: "grade"; grade: Grade }
+  | { type: "reject" };
 
 type SittingState = {
   phase: SittingPhase;
@@ -42,6 +44,7 @@ type SittingActions = {
   toggleBack: () => Promise<void>;
   moveSelection: (delta: 1 | -1) => void;
   submitGrade: (grade: Grade) => Promise<void>;
+  rejectCurrentCard: () => Promise<void>;
   retry: () => Promise<void>;
   reset: () => void;
 };
@@ -271,6 +274,36 @@ export const useSittingStore = create<SittingState & SittingActions>(
         }
       }
     },
+    rejectCurrentCard: async () => {
+      const state = get();
+      if (state.sittingId === null || state.cardId === null) {
+        return;
+      }
+      if (state.isSubmitting) {
+        return;
+      }
+
+      const { sittingId, cardId } = state;
+      set({
+        lastAction: { type: "reject" },
+        error: null,
+        isSubmitting: true,
+      });
+      try {
+        await rejectCard(sittingId, cardId);
+        set({ isSubmitting: false });
+      } catch (error) {
+        if (error instanceof SittingHttpError) {
+          if (error.code === SITTING_EXPIRED) {
+            await recoverFromSittingExpired(set, get);
+          } else {
+            set(sittingHttpErrorState(error));
+          }
+        } else {
+          throw error;
+        }
+      }
+    },
     retry: async () => {
       const { lastAction } = get();
       if (lastAction === null) {
@@ -280,6 +313,8 @@ export const useSittingStore = create<SittingState & SittingActions>(
         await get().open();
       } else if (lastAction.type === "reveal") {
         await get().toggleBack();
+      } else if (lastAction.type === "reject") {
+        await get().rejectCurrentCard();
       } else {
         await get().submitGrade(lastAction.grade);
       }

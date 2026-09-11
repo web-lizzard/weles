@@ -25,6 +25,8 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
     openSitting: vi.fn(),
     revealBack: vi.fn(),
     gradeCard: vi.fn(),
+    rejectCard: vi.fn(),
+    currentCard: vi.fn(),
   };
 });
 

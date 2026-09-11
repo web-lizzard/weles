@@ -14,6 +14,8 @@ type DueOverlayFooterProps = {
   isStale: boolean;
   showToggleHint: boolean;
   toggleHint: string;
+  showRejectHint?: boolean;
+  rejectHint?: string;
 };
 
 export default function DueOverlayFooter({
@@ -22,6 +24,8 @@ export default function DueOverlayFooter({
   isStale,
   showToggleHint,
   toggleHint,
+  showRejectHint = false,
+  rejectHint,
 }: DueOverlayFooterProps): JSX.Element {
   const showBreakdown =
     partition !== null && duePartitionShowsBreakdown(partition);
@@ -54,6 +58,11 @@ export default function DueOverlayFooter({
       {showToggleHint && (
         <Box marginTop={1}>
           <Text color="yellow">{toggleHint}</Text>
+        </Box>
+      )}
+      {showRejectHint && rejectHint !== undefined && (
+        <Box marginTop={showToggleHint ? 0 : 1}>
+          <Text color="yellow">{rejectHint}</Text>
         </Box>
       )}
     </Box>
