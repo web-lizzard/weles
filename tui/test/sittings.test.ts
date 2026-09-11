@@ -120,16 +120,29 @@ describe("sittings API", () => {
     });
   });
 
-  it("maps revealBack fields from snake_case to camelCase", async () => {
-    mockFetchJson({
-      sitting_id: sittingId,
-      card_id: cardId,
-      front: "Front text",
-      back: "Back text",
-    });
+  it("posts revealBack to the back route and maps snake_case fields", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          sitting_id: sittingId,
+          card_id: cardId,
+          front: "Front text",
+          back: "Back text",
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
 
     const result = await revealBack(sittingId, cardId);
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      `http://localhost:8000/review-sittings/${sittingId}/cards/${cardId}/back`,
+      expect.objectContaining({ method: "POST" }),
+    );
     expect(result).toEqual({
       sittingId,
       cardId,
