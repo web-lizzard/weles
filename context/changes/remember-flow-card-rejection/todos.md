@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
 current_phase: 4
-next_step: 4.1
-next_command: /unit-test remember-flow-card-rejection phase 4
+next_step: 4.4
+next_command: /implement remember-flow-card-rejection phase 4
 updated: 2026-09-11
 ---
 
@@ -59,13 +59,13 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — cedfe29
 
 #### Automated
 
-- [ ] 4.1 Refuse a rejection under each of the four conditions grading already refuses
-- [ ] 4.2 Write the review event and the card_rejected envelope inside one unit of work
-- [ ] 4.3 Leave the scheduling state repository untouched on a rejection
+- [x] 4.1 Refuse a rejection under each of the four conditions grading already refuses
+- [x] 4.2 Write the review event and the card_rejected envelope inside one unit of work
+- [x] 4.3 Leave the scheduling state repository untouched on a rejection
 
 #### Manual
 

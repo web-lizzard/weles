@@ -1,8 +1,12 @@
 from collections.abc import Callable
 
 from application.remember.ports import Clock, UnitOfWork
-from domain.remember.ports import ReviewCatalog
-from domain.remember.value_objects import CardId, SittingId
+from domain.remember.exceptions import SittingNotFoundError
+from domain.remember.outbox import CardRejectedPayload
+from domain.remember.ports import ReviewableCard, ReviewCatalog
+from domain.remember.review_event import ReviewEvent
+from domain.remember.sitting import Sitting
+from domain.remember.value_objects import CardId, Rejected, SittingId
 
 
 class RejectCardCommand:
@@ -17,4 +21,32 @@ class RejectCardCommand:
         self._clock: Clock = clock
 
     async def handle(self, sitting_id: SittingId, card_id: CardId) -> None:
-        del sitting_id, card_id
+        async with self._uow_factory() as uow:
+            sitting = await self._require_sitting(uow, sitting_id)
+            sitting_events = await uow.review_events.list_by_sitting(sitting_id)
+            by_id = await self._reviewable_by_id()
+            present = sitting.visible(frozenset(by_id))
+            reviewed_at = self._clock.now()
+            sitting.guard_outcome(card_id, present, sitting_events, reviewed_at)
+            event = ReviewEvent(
+                card_id=card_id,
+                reviewed_at=reviewed_at,
+                outcome=Rejected.REJECTED,
+                sitting_id=sitting_id,
+            )
+            envelope = CardRejectedPayload(
+                card_id=card_id.value, rejected_at=reviewed_at
+            ).to_envelope()
+            await uow.review_events.save(event)
+            await uow.outbox.append(envelope)
+            await uow.commit()
+
+    async def _require_sitting(self, uow: UnitOfWork, sitting_id: SittingId) -> Sitting:
+        sitting = await uow.sittings.get(sitting_id)
+        if sitting is None:
+            raise SittingNotFoundError
+        return sitting
+
+    async def _reviewable_by_id(self) -> dict[CardId, ReviewableCard]:
+        reviewable = await self._catalog.list_reviewable()
+        return {card.id: card for card in reviewable}
