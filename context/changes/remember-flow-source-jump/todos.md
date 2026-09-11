@@ -18,10 +18,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 2.1 test_sitting.py passes with the pinned draw-seed values unchanged
-- [x] 2.2 Remember property suite passes
-- [x] 2.3 Full backend suite passes
-- [x] 2.4 basedpyright reports no new errors across src
+- [x] 2.1 test_sitting.py passes with the pinned draw-seed values unchanged — 35861b3
+- [x] 2.2 Remember property suite passes — 35861b3
+- [x] 2.3 Full backend suite passes — 35861b3
+- [x] 2.4 basedpyright reports no new errors across src — 35861b3
 
 ### Phase 3: Non-accounting payloads stop counting
 
