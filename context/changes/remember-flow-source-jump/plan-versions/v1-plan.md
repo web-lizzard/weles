@@ -1,7 +1,5 @@
 # Source Jump During Review Implementation Plan
 
-> Revision 2 (2026-09-11): the review log carries a discriminated payload union instead of a widened `outcome` enum; phases 1-2 become three phases and later phases shift by one. Everything downstream of the log — the source port, the route, and the whole TUI slice — survives unchanged. Prior version: plan-versions/v1-plan.md
-
 ## Overview
 
 A card under review can be ambiguous. This change gives the reviewer a route from
@@ -10,13 +8,10 @@ route when the fragment can no longer be found. The route opens only after the
 back has been revealed, presents the fragment marked inside surrounding note text,
 expands to the whole note without leaving, and returns to the card by a single Esc.
 
-The change also reshapes the review log, and carries one correction the domain
-needs regardless. The log's `outcome` field answers "what happened to this card";
-revealing a back answers "what did the user do along the way", so the record becomes
-a discriminated union of payloads rather than a widened enum. And `Sitting` counts
-*every* review event toward a card's showing limit and draw seed, which is only
-correct while every event is a grading — it stops being correct the moment a
-non-accounting payload exists, which this change introduces.
+The change also carries one correction the domain needs regardless: `Sitting`
+currently counts *every* review event toward a card's showing limit and draw seed.
+That is only correct while every event is a grading. It stops being correct the
+moment a non-grading event exists — which this change introduces.
 
 ## Current State Analysis
 
@@ -73,19 +68,13 @@ a card whose note no longer contains its quote.
   `_showing_count`/`_draw_seed` to grading outcomes changes no existing test result
   — including the pinned draw-seed tests (`backend/tests/unit/remember/test_sitting.py:310-318`,
   `352-361`, `375-392`) and the showing-limit test (`test_sitting.py:159-168`).
-- `SchedulingReplay.replay` already discriminates with `isinstance(outcome, Grade)`
-  (`backend/src/domain/remember/ports.py:99`) — the one such site today, and the
-  shape the payload union generalises.
+- `SchedulingReplay.replay` already filters with `isinstance(outcome, Grade)`
+  (`backend/src/domain/remember/ports.py:99`), so a third `ReviewOutcome` member
+  is skipped by the scheduler without any change there.
 - `ReviewOutcome = Grade | Rejected` is a plain union of `StrEnum`s validated by
   pydantic smart-union (`backend/src/domain/remember/value_objects.py:24`,
-  `backend/src/domain/remember/review_event.py:11`), so it discriminates only by
-  string values happening not to collide.
-- `outcome` never leaves the domain: 13 references across five `src` files, none in
-  any DTO and none in any HTTP route. Reshaping the record breaks no contract and
-  touches no client.
-- `_draw_seed` hashes the outcome as a raw string (`sitting.py:167-188`). Mapping
-  `Graded` back to its grade value and `Rejection` to `"rejected"` reproduces those
-  strings byte for byte, so the migration keeps every pinned draw value.
+  `backend/src/domain/remember/review_event.py:11`). A third member is safe only
+  because its string value collides with nothing.
 - `RejectCardCommand` is the structural template for a new writing command:
   `uow_factory`/`catalog`/`clock` injection, one `clock.now()` per handler,
   `sitting.guard_outcome(...)`, port writes, then `uow.commit()` inside the
@@ -114,175 +103,94 @@ a card whose note no longer contains its quote.
   the source cannot be reached.
 - Not recording that the user visited the source. A visit leaves no trace on the
   sitting, the schedule, or the review log.
-- Not building general TUI scrolling. Phase 10 builds a viewport for the source view
+- Not building general TUI scrolling. Phase 9 builds a viewport for the source view
   only; the browse path keeps its current overflow behaviour.
 
 ## Implementation Approach
 
 Four movements, in order.
 
-**The log's shape first (Phases 1-3).** Give the review log a payload union so each
-kind of fact has its own type, migrate every reader and writer onto it without
-changing a single decision, then teach `Sitting` that only an accounting payload
-consumes a showing or perturbs the draw. All three land before anything emits a
-`Reveal`, so this is a self-contained correction with its own pins.
+**The domain rule first (Phases 1-2).** Give `ReviewOutcome` a third member and
+teach `Sitting` that "how many times was this card shown" means "how many times was
+it accounted for", not "how many events mention it". This lands before anything
+emits the new outcome, so it is a self-contained correction with its own pins.
 
-**The source as a second boundary crossing (Phases 4, 6).** `CardSourceLocator` is
+**The source as a second boundary crossing (Phases 3, 5).** `CardSourceLocator` is
 a new port in the remember domain, implemented by an adapter that sits beside
 `InMemoryReviewCatalog` and, like it, is allowed to read distill. Resolution happens
 there — the remember domain never imports `NoteDocument`.
 
-**Reveal becomes a write (Phase 5), and the route reads that fact (Phase 7).**
+**Reveal becomes a write (Phase 4), and the route reads that fact (Phase 6).**
 Because the aggregate stays frozen and write-once, the fact lands in the existing
-`ReviewEventStore` as a `Reveal` payload. The source route refuses a card with no
+`ReviewEventStore` as a `Revealed` outcome. The source route refuses a card with no
 reveal event, which is what enforces AC-18 without inventing reveal state on `Sitting`.
 
-**The client last (Phases 8-10).** One new API call, a nested view inside
+**The client last (Phases 7-9).** One new API call, a nested view inside
 `SittingOverlay` that extends the existing Esc ladder, and a viewport so the
 expanded state genuinely reaches the whole note.
 
-Phase 11 closes the loop with acceptance scenarios for US-10 and US-11.
+Phase 10 closes the loop with acceptance scenarios for US-10 and US-11.
 
 ## Critical Implementation Details
 
-Phase 3 must narrow **both** `_showing_count` and `_draw_seed`. Narrowing only the
+Phase 2 must narrow **both** `_showing_count` and `_draw_seed`. Narrowing only the
 first leaves a reveal event shifting the hash that picks the next card, which would
 let the current card change under the user between two `current-card` calls — the
 opposite of the "stable next draw" that query promises.
 
-Phase 2 is the one phase that rewrites code it does not otherwise change: every
-reader and writer of `ReviewEvent` moves in one commit, because the field cannot
-exist in both shapes at once. Its safety rests entirely on `seed_token` reproducing
-today's hashed strings — if a pinned draw-seed test changes value, the mapping is
-wrong, not the test.
-
-Phase 5 changes `GET .../back` to `POST .../back`. The response shape does not
+Phase 4 changes `GET .../back` to `POST .../back`. The response shape does not
 change, but `tui/src/api/generated/schema.d.ts` is generated from the live OpenAPI
 document and must be regenerated against a running backend, or the client will not
 typecheck.
 
 ---
 
-## Phase 1: Event payload union
+## Phase 1: Outcome vocabulary
 
 ### Overview
 
-Introduce the payload types the review log will carry, the discriminated union over
-them, and the predicates that classify them. Nothing reads or writes them yet.
+Introduce the third review outcome and the vocabulary that separates accounting
+outcomes from the rest. Nothing emits or reads it yet.
 
 ### Changes Required:
 
-#### 1. Review event payloads
+#### 1. Review outcome value objects
 
 **File**: `backend/src/domain/remember/value_objects.py`
 
-**Intent**: `Grade` and `Rejected` both answer "what happened to this card in this
-review". Revealing a back answers a different question — "what did the user do along
-the way" — and a field named `outcome` cannot honestly hold both. A tagged union
-gives each kind of fact its own type, and gives a future fact somewhere to put its
-own data instead of forcing an optional field onto every event.
+**Intent**: Give the review log a way to say "the user saw this back" without that
+statement being mistaken for a grading.
 
-**Contract**: New frozen models, each carrying a literal tag: `Graded`
-(`kind: Literal["graded"]`, `grade: Grade`), `Rejection` (`kind: Literal["rejected"]`)
-and `Reveal` (`kind: Literal["revealed"]`). `ReviewEventPayload` is the pydantic
-discriminated union over them on `kind`. Two module-level predicates replace the
-`FINISHING_OUTCOMES` frozenset's job: `is_accounting(payload)` — true for `Graded`
-and `Rejection`, the kinds that mean the card was dealt with — and
-`is_finishing(payload)` — true for `Graded` with `GOOD` or `EASY`, and for
-`Rejection`. `Grade` keeps its members and its meaning; `Rejected`, `ReviewOutcome`
-and `FINISHING_OUTCOMES` stay in place untouched for now and are removed in Phase 2.
+**Contract**: New `Revealed(StrEnum)` with a single member `REVEALED = "revealed"`.
+`ReviewOutcome` widens to `Grade | Rejected | Revealed`. New module-level
+`GRADING_OUTCOMES: frozenset[ReviewOutcome]` holding every `Grade` member plus
+`Rejected.REJECTED` — the outcomes that count as a card having been accounted for.
+`FINISHING_OUTCOMES` is unchanged and does not gain `Revealed.REVEALED`.
 
 ```python
-ReviewEventPayload = Annotated[
-    Graded | Rejection | Reveal, Field(discriminator="kind")
-]
+class Revealed(StrEnum):
+    REVEALED = "revealed"
+
+ReviewOutcome = Grade | Rejected | Revealed
+
+GRADING_OUTCOMES: frozenset[ReviewOutcome] = frozenset({*Grade, Rejected.REJECTED})
 ```
-
-#### 2. Draw-seed token
-
-**File**: `backend/src/domain/remember/value_objects.py`
-
-**Intent**: The seed that picks the next card must keep producing the values it
-produces today, or every pinned draw test becomes a re-pinning exercise that proves
-nothing.
-
-**Contract**: `seed_token(payload) -> str` returns `payload.grade` for `Graded` and
-`"rejected"` for `Rejection` — byte-identical to the strings `_draw_seed` hashes
-today. `Reveal` never reaches it, because Phase 3 filters non-accounting payloads
-out before hashing.
 
 ### Success Criteria:
 
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/remember -q` passes unchanged
 - `cd backend && uv run basedpyright src/domain/remember` reports no new errors
-- `cd backend && uv run ruff check src` passes
 
 ---
 
-## Phase 2: Migrate the review log to payloads
+## Phase 2: Narrow showing count and draw seed to accounting outcomes
 
 ### Overview
 
-Replace `ReviewEvent.outcome` with `ReviewEvent.payload` and move every reader and
-writer onto it. Every rule keeps its current meaning, and — because `seed_token`
-reproduces today's hashed strings exactly — every pinned draw-seed value stays as it is.
-
-### Changes Required:
-
-#### 1. The event record
-
-**File**: `backend/src/domain/remember/review_event.py`
-
-**Intent**: One field, one honest name, one place a new kind of fact can land.
-
-**Contract**: `outcome: ReviewOutcome` becomes `payload: ReviewEventPayload`. The
-other three fields are untouched. `ReviewOutcome`, `Rejected` and
-`FINISHING_OUTCOMES` are deleted from `value_objects.py` in this phase, once nothing
-reads them.
-
-#### 2. Domain readers
-
-**File**: `backend/src/domain/remember/sitting.py`, `backend/src/domain/remember/ports.py`, `backend/src/domain/remember/due_partition.py`
-
-**Intent**: Move the readers without changing what any of them decide.
-
-**Contract**: `_card_is_finished` calls `is_finishing(event.payload)` where it tested
-`event.outcome in FINISHING_OUTCOMES`. `_draw_seed` hashes `seed_token(event.payload)`
-in both the sort key and the joined parts, in place of `event.outcome`.
-`SchedulingReplay.replay` matches `isinstance(event.payload, Graded)` and reads
-`payload.grade`, in place of `isinstance(outcome, Grade)`. `due_partition` follows
-the same substitution. No signature changes anywhere.
-
-#### 3. Command writers
-
-**File**: `backend/src/application/remember/commands/grade_card.py`, `backend/src/application/remember/commands/reject_card.py`
-
-**Intent**: The two existing writers construct payloads instead of enum members.
-
-**Contract**: `GradeCardCommand` builds `ReviewEvent(..., payload=Graded(grade=grade))`;
-`RejectCardCommand` builds `ReviewEvent(..., payload=Rejection())`. Nothing else in
-either handler changes — the guards, the clock call, the outbox envelope and the
-commit all stay as they are.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run pytest tests/unit/remember/test_sitting.py -q` passes with the pinned draw-seed values unchanged
-- `cd backend && uv run pytest tests/property/remember -q` passes
-- `cd backend && uv run pytest -q` passes
-- `cd backend && uv run basedpyright src` reports no new errors
-
----
-
-## Phase 3: Non-accounting payloads stop counting
-
-### Overview
-
-Teach `Sitting` that only an accounting payload consumes a showing or perturbs the
-draw. This is what makes a `Reveal` inert, and it is a correction the aggregate needs
-regardless — counting every event that mentions a card was only ever correct while
-every event was a grading.
+Teach `Sitting` that a non-grading event neither consumes a showing nor perturbs
+the draw. Today's behaviour is unchanged because today every event is a grading;
+the pins added here are what keep it that way.
 
 ### Changes Required:
 
@@ -291,13 +199,14 @@ every event was a grading.
 **File**: `backend/src/domain/remember/sitting.py`
 
 **Intent**: "How many times was this card shown" must mean "how many times was it
-accounted for", not "how many events mention it".
+accounted for". Counting every event that mentions a card was only ever correct by
+accident of there being one kind of event.
 
-**Contract**: `_showing_count` counts only events where `is_accounting(event.payload)`.
-`_draw_seed` filters its sorted event list to the same predicate before hashing, so
-the seed is a function of accounting payloads alone. `_card_is_finished`, `next_card`,
-`is_finished`, `outstanding`, `_eligible_pool` and `guard_outcome` keep their current
-signatures and read the narrowed helpers.
+**Contract**: `_showing_count` counts only events whose `outcome in GRADING_OUTCOMES`.
+`_draw_seed` filters its sorted event list to the same set before hashing, so the
+seed is a function of gradings alone. `_card_is_finished`, `next_card`,
+`is_finished`, `outstanding`, `_eligible_pool` and `guard_outcome` keep their
+current signatures and read the narrowed helpers.
 
 ### Success Criteria:
 
@@ -308,11 +217,11 @@ signatures and read the narrowed helpers.
 
 ---
 
-## Phase 4: Source port, DTO, route and wiring
+## Phase 3: Source port, DTO, route and wiring
 
 ### Overview
 
-Materialize every backend symbol Phases 5-7 will implement and test against: the
+Materialize every backend symbol Phases 4-6 will implement and test against: the
 source value objects, the port, the adapter skeleton, the DTO, the route, and the
 composition wiring.
 
@@ -365,7 +274,7 @@ current read-only implementation. The old query module is deleted.
 
 **File**: `backend/src/application/remember/dto.py`, `backend/src/adapters/http/remember.py`, `backend/src/adapters/compose.py`, `backend/src/adapters/http/errors.py`, `backend/src/domain/remember/exceptions.py`
 
-**Intent**: Put the HTTP surface in place so Phase 7 implements behaviour rather
+**Intent**: Put the HTTP surface in place so Phase 6 implements behaviour rather
 than plumbing.
 
 **Contract**: New `CardSourceDTO` (`blocks: list[SourceBlockDTO]`, `span: SourceSpanDTO`).
@@ -387,12 +296,12 @@ as `"source_not_available": 404`.
 
 ---
 
-## Phase 5: Revealing the back records the fact
+## Phase 4: Revealing the back records the fact
 
 ### Overview
 
 Turn reveal into a write. The aggregate stays frozen and write-once; the fact lands
-in the existing review log as a `Reveal` payload, idempotent per card per sitting.
+in the existing review log as a `Revealed` outcome, idempotent per card per sitting.
 
 ### Changes Required:
 
@@ -401,15 +310,15 @@ in the existing review log as a `Reveal` payload, idempotent per card per sittin
 **File**: `backend/src/application/remember/commands/reveal_back.py`
 
 **Intent**: AC-18 needs a domain fact saying the back was seen. The review log
-already exists and, after Phase 3, ignores non-accounting payloads everywhere it matters.
+already exists and, after Phase 2, ignores non-grading outcomes everywhere it matters.
 
 **Contract**: `handle` opens `self._uow_factory()` as an async context manager,
 resolves the sitting (`SittingNotFoundError` when absent), refuses an unoffered
 sitting (`SittingExpiredError`) and a non-member card (`CardNotInSittingError`),
 resolves the card through the catalog (`CardNotReviewableError` when absent), then
-appends a `ReviewEvent(card_id=…, reviewed_at=clock.now(), payload=Reveal(),
+appends a `ReviewEvent(card_id=…, reviewed_at=clock.now(), outcome=Revealed.REVEALED,
 sitting_id=…)` and commits. Idempotent: when the sitting's events already carry a
-`Reveal` payload for this card, no second event is written and the same
+`Revealed` outcome for this card, no second event is written and the same
 `RevealedCardDTO` is returned. `guard_outcome` is deliberately **not** called —
 revealing is not an outcome and must not be refused for a finished sitting.
 
@@ -435,7 +344,7 @@ revealing is not an outcome and must not be refused for a finished sitting.
 
 ---
 
-## Phase 6: The locator resolves the fragment
+## Phase 5: The locator resolves the fragment
 
 ### Overview
 
@@ -478,7 +387,7 @@ the card's quote back into the in-memory note repository after the card was mint
 
 ---
 
-## Phase 7: The source route and the AC-18 gate
+## Phase 6: The source route and the AC-18 gate
 
 ### Overview
 
@@ -497,14 +406,14 @@ resolution, no source. Both answer identically from the client's side.
 `async def handle(self, sitting_id, card_id) -> CardSourceDTO`. Raises
 `SittingNotFoundError`, `SittingExpiredError` and `CardNotInSittingError` as the
 other read paths do. Raises `SourceNotAvailableError` when the sitting's events
-carry no `Reveal` payload for this card, and equally when `locator.locate`
+carry no `Revealed` outcome for this card, and equally when `locator.locate`
 returns `None` — the two conditions are indistinguishable in the response, by design.
 
 #### 2. Route
 
 **File**: `backend/src/adapters/http/remember.py`, `backend/src/adapters/compose.py`
 
-**Intent**: Expose the query behind the path Phase 4 reserved.
+**Intent**: Expose the query behind the path Phase 3 reserved.
 
 **Contract**: The `/source` route delegates to `CardSourceQuery` via
 `Depends(get_card_source_query)`. `compose.py` gains that provider, built from
@@ -523,11 +432,11 @@ and `_remember_clock`.
 
 ---
 
-## Phase 8: TUI client, view state and viewport component
+## Phase 7: TUI client, view state and viewport component
 
 ### Overview
 
-Materialize every client symbol Phases 9-10 implement against.
+Materialize every client symbol Phases 8-9 implement against.
 
 ### Changes Required:
 
@@ -576,7 +485,7 @@ rendering a window plus "more above"/"more below" markers. Unimplemented body.
 
 ---
 
-## Phase 9: The source view and the Esc ladder
+## Phase 8: The source view and the Esc ladder
 
 ### Overview
 
@@ -615,7 +524,7 @@ source hint, shown under the same condition that enables the key.
 
 ---
 
-## Phase 10: Expansion and the viewport
+## Phase 9: Expansion and the viewport
 
 ### Overview
 
@@ -661,7 +570,7 @@ from the same `stdout.rows` the overlay already sizes itself with (`App.tsx:29-3
 
 ---
 
-## Phase 11: Acceptance scenarios for US-10 and US-11
+## Phase 10: Acceptance scenarios for US-10 and US-11
 
 ### Overview
 
@@ -696,9 +605,8 @@ and registered per the existing `pytest_plugins` convention.
 ## Testing Strategy
 
 ### Unit Tests:
-`Sitting` gains pins that a `Reveal` payload consumes no showing, finishes no card
-and shifts no draw, and keeps its existing pinned draw values across the migration.
-`RevealBackCommand` gains event-write and idempotency tests.
+`Sitting` gains pins that a reveal event consumes no showing, finishes no card and
+shifts no draw. `RevealBackCommand` gains event-write and idempotency tests.
 `CardSourceQuery` gains gate tests for unrevealed and unresolvable. TUI store and
 component tests cover the view state, the Esc ladder and the viewport reducer.
 
@@ -709,7 +617,7 @@ gets the standard parametrized contract suite, with the unresolvable case built 
 rewriting the note behind the card.
 
 ### Manual Testing Steps:
-Per phase above; the load-bearing one is Phase 10 with a note longer than the terminal.
+Per phase above; the load-bearing one is Phase 9 with a note longer than the terminal.
 
 ## Performance Considerations
 
@@ -721,9 +629,8 @@ per keystroke, and the expanded state costs no further call.
 
 No data migration. `GET .../back` becomes `POST .../back` — a breaking change to a
 route with exactly one consumer, updated in the same phase. Existing review event
-logs stay valid: they hold only accounting facts, which is precisely what Phase 3
-narrows to. The in-memory stores do not survive a restart, so the record reshape in
-Phase 2 needs no data migration either.
+logs stay valid: they contain only grading outcomes, which is precisely what
+Phase 2 narrows to.
 
 ## References
 
