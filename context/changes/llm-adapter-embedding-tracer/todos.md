@@ -1,19 +1,19 @@
 ---
 change_id: llm-adapter-embedding-tracer
 current_phase: 1
-next_step: 1.1
+next_step: 1.5
 next_command: /implement llm-adapter-embedding-tracer phase 1
-updated: 2026-09-11
+updated: 2026-09-12
 ---
 
 ### Phase 1: Provider and telemetry dependencies, settings, environment
 
 #### Automated
 
-- [ ] 1.1 Pin pydantic-ai-slim[openai]==2.39.0 and the three OpenTelemetry packages at ==1.44.0
-- [ ] 1.2 Add an RFC 3339 exclude-newer cutoff to [tool.uv] and prove it is enforced
-- [ ] 1.3 Declare EmbeddingProvider enum and provider, model, and Langfuse settings fields
-- [ ] 1.4 Record the new environment keys in .env.example
+- [x] 1.1 Pin pydantic-ai-slim[openai]==2.39.0 and the three OpenTelemetry packages at ==1.44.0
+- [x] 1.2 Add an RFC 3339 exclude-newer cutoff to [tool.uv] and prove it is enforced
+- [x] 1.3 Declare EmbeddingProvider enum and provider, model, and Langfuse settings fields
+- [x] 1.4 Record the new environment keys in backend/.env.example
 
 #### Manual
 
@@ -23,12 +23,12 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 2.1 Create the adapters/out/llm package with the tracing helper signatures and attribute constants
-- [ ] 2.2 Add the OpenRouterEmbeddingAdapter stub with its constructor and embed signature
+- [x] 2.1 Create the adapters/out/llm package with the tracing helper signatures and attribute constants
+- [x] 2.2 Add the OpenRouterEmbeddingAdapter stub with its constructor and embed signature
 
 #### Manual
 
-- [ ] 2.3 Run the existing suite and confirm the stubs changed nothing
+- [x] 2.3 Run the existing suite and confirm the stubs changed nothing
 
 ### Phase 3: Adapter behaviour and span emission
 
