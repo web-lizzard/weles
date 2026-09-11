@@ -15,6 +15,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.remember.outbox import CARD_REJECTED
 
 from .conftest import RememberTestContext
 
@@ -161,3 +162,29 @@ async def test_grade_card_returns_409_for_a_card_that_is_not_the_one_in_front(
 
     assert response.status_code == 409
     assert response.json()["code"] == "card_not_presentable"
+
+
+async def test_reject_card_returns_204_and_queues_card_rejected_on_the_remember_outbox(
+    remember_client: RememberTestContext,
+) -> None:
+    note = _note()
+    card = _card(note.id)
+    await remember_client.notes.save(note)
+    await remember_client.cards.save(card)
+
+    opened = remember_client.client.post("/review-sittings")
+    opened_body = cast(dict[str, object], opened.json())
+    sitting_id = cast(str, opened_body["sitting_id"])
+    card_id = cast(str, opened_body["card_id"])
+
+    response = remember_client.client.post(
+        f"/review-sittings/{sitting_id}/cards/{card_id}/rejection"
+    )
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+    envelopes = remember_client.outbox_store.all()
+    assert len(envelopes) == 1
+    assert envelopes[0].type == CARD_REJECTED
+    assert envelopes[0].payload["card_id"] == card_id
