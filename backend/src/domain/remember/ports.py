@@ -93,6 +93,8 @@ class SchedulingReplay:
         """
         graded: list[tuple[Grade, datetime]] = []
         for event in events:
+            if event.card_id != card_id:
+                continue
             outcome = event.outcome
             if isinstance(outcome, Grade):
                 graded.append((outcome, event.reviewed_at))
