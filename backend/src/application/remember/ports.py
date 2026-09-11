@@ -6,6 +6,7 @@ from domain.remember.ports import (
     SchedulingStateRepository,
     SittingRepository,
 )
+from domain.shared.outbox.ports import OutboxAppender
 
 
 class Clock(Protocol):
@@ -18,6 +19,7 @@ class UnitOfWork(Protocol):
     sittings: SittingRepository
     review_events: ReviewEventStore
     scheduling_states: SchedulingStateRepository
+    outbox: OutboxAppender
 
     async def __aenter__(self) -> "UnitOfWork": ...
 

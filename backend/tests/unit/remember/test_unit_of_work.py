@@ -8,6 +8,8 @@ from adapters.out.in_memory.remember.scheduling_state_repository import (
 )
 from adapters.out.in_memory.remember.sitting_repository import InMemorySittingRepository
 from adapters.out.in_memory.remember.unit_of_work import InMemoryUnitOfWork
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
@@ -30,7 +32,15 @@ def _make_unit_of_work() -> tuple[
     sittings = InMemorySittingRepository()
     review_events = InMemoryReviewEventStore()
     scheduling_states = InMemorySchedulingStateRepository()
-    uow = InMemoryUnitOfWork(sittings, review_events, scheduling_states, asyncio.Lock())
+    outbox_store = InMemoryOutboxStore()
+    uow = InMemoryUnitOfWork(
+        sittings,
+        review_events,
+        scheduling_states,
+        outbox_store,
+        InMemoryOutboxAppender(outbox_store),
+        asyncio.Lock(),
+    )
     return uow, sittings, review_events, scheduling_states
 
 
@@ -106,8 +116,24 @@ async def test_a_second_unit_of_work_enters_only_after_the_first_window_closes()
     sittings = InMemorySittingRepository()
     review_events = InMemoryReviewEventStore()
     scheduling_states = InMemorySchedulingStateRepository()
-    first = InMemoryUnitOfWork(sittings, review_events, scheduling_states, lock)
-    second = InMemoryUnitOfWork(sittings, review_events, scheduling_states, lock)
+    outbox_store = InMemoryOutboxStore()
+    outbox = InMemoryOutboxAppender(outbox_store)
+    first = InMemoryUnitOfWork(
+        sittings,
+        review_events,
+        scheduling_states,
+        outbox_store,
+        outbox,
+        lock,
+    )
+    second = InMemoryUnitOfWork(
+        sittings,
+        review_events,
+        scheduling_states,
+        outbox_store,
+        outbox,
+        lock,
+    )
     order: list[str] = []
 
     async def first_window() -> None:
