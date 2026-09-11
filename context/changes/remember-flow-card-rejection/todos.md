@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test remember-flow-card-rejection phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement remember-flow-card-rejection phase 3
 updated: 2026-09-11
 ---
 
@@ -25,14 +25,14 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — b2be10f
 
 #### Automated
 
-- [ ] 2.1 Treat a rejection as finishing its card in is_finished and outstanding
-- [ ] 2.2 Keep a rejected card out of next_card for the rest of the sitting
-- [ ] 2.3 Return None from SchedulingReplay.replay for a log holding only rejections
-- [ ] 2.4 Fold only the graded events when a card's log mixes grades and a rejection
+- [x] 2.1 Treat a rejection as finishing its card in is_finished and outstanding
+- [x] 2.2 Keep a rejected card out of next_card for the rest of the sitting
+- [x] 2.3 Return None from SchedulingReplay.replay for a log holding only rejections
+- [x] 2.4 Fold only the graded events when a card's log mixes grades and a rejection
 
 ### Phase 3: Rejection write-path stubs
 
