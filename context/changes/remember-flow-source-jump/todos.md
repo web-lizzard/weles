@@ -13,10 +13,6 @@ updated: 2026-09-11
 - [ ] 1.1 Remember unit suite passes unchanged
 - [ ] 1.2 basedpyright reports no new errors in domain/remember
 
-#### Manual
-
-- [ ] 1.3 Print GRADING_OUTCOMES and Revealed.REVEALED from a python one-liner
-
 ### Phase 2: Narrow showing count and draw seed to accounting outcomes
 
 #### Tests
@@ -29,10 +25,6 @@ updated: 2026-09-11
 - [ ] 2.2 Remember property suite passes
 - [ ] 2.3 Remember unit and integration suites pass
 
-#### Manual
-
-- [ ] 2.4 Pinned draw-seed cases report the same values as before the change
-
 ### Phase 3: Source port, DTO, route and wiring
 
 #### Automated
@@ -40,10 +32,6 @@ updated: 2026-09-11
 - [ ] 3.1 basedpyright reports no new errors across src
 - [ ] 3.2 ruff check passes on src
 - [ ] 3.3 test_remember_routes.py passes with reveal calls switched to POST
-
-#### Manual
-
-- [ ] 3.4 openapi.json lists the /source path and shows post on the /back path
 
 ### Phase 4: Revealing the back records the fact
 
@@ -74,10 +62,6 @@ updated: 2026-09-11
 - [ ] 5.2 Remember unit suite passes
 - [ ] 5.3 basedpyright reports no new errors in the remember in-memory adapters
 
-#### Manual
-
-- [ ] 5.4 Both the resolving and the rewritten-note cases are named and green
-
 ### Phase 6: The source route and the AC-18 gate
 
 #### Tests
@@ -101,9 +85,6 @@ updated: 2026-09-11
 - [ ] 7.1 TUI typecheck passes
 - [ ] 7.2 TUI lint passes
 - [ ] 7.3 TUI test suite passes unchanged
-
-#### Manual
-
 - [ ] 7.4 TUI build completes, confirming the new modules resolve
 
 ### Phase 8: The source view and the Esc ladder
@@ -150,6 +131,3 @@ updated: 2026-09-11
 - [ ] 10.2 Remember step coverage check passes
 - [ ] 10.3 Full backend suite passes
 
-#### Manual
-
-- [ ] 10.4 Marker selection lists a scenario for AC-18, AC-19 and AC-20
