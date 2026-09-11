@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 9
-next_step: 9.5
-next_command: /implement remember-flow-card-rejection phase 9
+current_phase: 10
+next_step:
+next_command: /archive remember-flow-card-rejection
 updated: 2026-09-11
 ---
 
@@ -123,7 +123,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 8.7 Run the TUI against a running backend and confirm reveal and the four grades behave as before
+- [x] 8.7 Run the TUI against a running backend and confirm reveal and the four grades behave as before — 2e8425a
 
 ### Phase 9: Reject client and store behaviour
 
@@ -140,7 +140,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 9.5 Reject a card in the running TUI and confirm the next card appears with no further keystroke
+- [x] 9.5 Reject a card in the running TUI and confirm the next card appears with no further keystroke — 2e8425a
 
 #### Triage
 
@@ -159,4 +159,4 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 10.3 Walk a sitting rejecting one card, open a new sitting, and confirm the card is not offered
+- [x] 10.3 Walk a sitting rejecting one card, open a new sitting, and confirm the card is not offered — 2e8425a
