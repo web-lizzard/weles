@@ -13,6 +13,4 @@ class CardRejectedPayload(BaseModel, frozen=True):
     rejected_at: datetime
 
     def to_envelope(self) -> OutboxEnvelope:
-        payload = self.model_dump(mode="json")
-        payload["rejected_at"] = self.rejected_at.isoformat()
-        return OutboxEnvelope.pending(CARD_REJECTED, payload)
+        return OutboxEnvelope.pending(CARD_REJECTED, self.model_dump(mode="json"))
