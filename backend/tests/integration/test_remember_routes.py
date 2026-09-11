@@ -188,3 +188,58 @@ async def test_reject_card_returns_204_and_queues_card_rejected_on_the_remember_
     assert len(envelopes) == 1
     assert envelopes[0].type == CARD_REJECTED
     assert envelopes[0].payload["card_id"] == card_id
+
+
+async def test_source_route_returns_404_before_the_back_is_revealed(
+    remember_client: RememberTestContext,
+) -> None:
+    note = _note()
+    card = _card(note.id)
+    await remember_client.notes.save(note)
+    await remember_client.cards.save(card)
+
+    opened = remember_client.client.post("/review-sittings")
+    opened_body = cast(dict[str, object], opened.json())
+    sitting_id = cast(str, opened_body["sitting_id"])
+    card_id = cast(str, opened_body["card_id"])
+
+    response = remember_client.client.get(
+        f"/review-sittings/{sitting_id}/cards/{card_id}/source"
+    )
+
+    assert response.status_code == 404
+    assert response.json()["code"] == "source_not_available"
+
+
+async def test_source_route_returns_blocks_and_span_after_the_back_is_revealed(
+    remember_client: RememberTestContext,
+) -> None:
+    note = _note()
+    card = _card(note.id)
+    await remember_client.notes.save(note)
+    await remember_client.cards.save(card)
+
+    opened = remember_client.client.post("/review-sittings")
+    opened_body = cast(dict[str, object], opened.json())
+    sitting_id = cast(str, opened_body["sitting_id"])
+    card_id = cast(str, opened_body["card_id"])
+
+    reveal = remember_client.client.post(
+        f"/review-sittings/{sitting_id}/cards/{card_id}/back"
+    )
+    assert reveal.status_code == 200
+
+    response = remember_client.client.get(
+        f"/review-sittings/{sitting_id}/cards/{card_id}/source"
+    )
+
+    assert response.status_code == 200
+    body = cast(dict[str, object], response.json())
+    blocks = cast(list[object], body["blocks"])
+    span = cast(dict[str, object], body["span"])
+    assert len(blocks) >= 1
+    assert isinstance(blocks[0], dict)
+    assert "text" in cast(dict[str, object], blocks[0])
+    assert "block_index" in span
+    assert "start" in span
+    assert "end" in span
