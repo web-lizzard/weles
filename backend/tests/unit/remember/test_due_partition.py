@@ -8,6 +8,7 @@ from domain.remember.sitting import Sitting
 from domain.remember.value_objects import (
     CardId,
     Grade,
+    Graded,
     OpaqueSchedulerState,
     SchedulerAlgorithm,
     SchedulerStamp,
@@ -50,7 +51,7 @@ def _event(card_id: CardId, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=datetime.now(UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 

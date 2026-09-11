@@ -8,7 +8,13 @@ from pydantic import BaseModel
 from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
-from domain.remember.value_objects import CardId, Grade, SchedulerStamp, SittingId
+from domain.remember.value_objects import (
+    CardId,
+    Grade,
+    Graded,
+    SchedulerStamp,
+    SittingId,
+)
 
 
 class ReviewableCard(BaseModel, frozen=True):
@@ -95,9 +101,9 @@ class SchedulingReplay:
         for event in events:
             if event.card_id != card_id:
                 continue
-            outcome = event.outcome
-            if isinstance(outcome, Grade):
-                graded.append((outcome, event.reviewed_at))
+            payload = event.payload
+            if isinstance(payload, Graded):
+                graded.append((payload.grade, event.reviewed_at))
         if not graded:
             return None
 

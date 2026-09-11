@@ -16,6 +16,7 @@ from domain.remember.sitting import Sitting
 from domain.remember.value_objects import (
     CardId,
     Grade,
+    Graded,
     OpaqueSchedulerState,
     SchedulerAlgorithm,
     SchedulerStamp,
@@ -56,7 +57,7 @@ def _event(card_id: CardId) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,
         sitting_id=_sitting().id,
-        outcome=Grade.GOOD,
+        payload=Graded(grade=Grade.GOOD),
         reviewed_at=datetime.now(UTC),
     )
 

@@ -14,7 +14,7 @@ from domain.remember.ports import (
 from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
-from domain.remember.value_objects import CardId, Grade, SittingId
+from domain.remember.value_objects import CardId, Grade, Graded, SittingId
 
 
 class GradeCardCommand:
@@ -52,7 +52,7 @@ class GradeCardCommand:
             event = ReviewEvent(
                 card_id=card_id,
                 reviewed_at=reviewed_at,
-                outcome=grade,
+                payload=Graded(grade=grade),
                 sitting_id=sitting_id,
             )
             previous = await self._previous_state(uow, card_id)

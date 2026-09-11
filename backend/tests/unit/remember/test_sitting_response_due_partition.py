@@ -12,7 +12,7 @@ from application.remember.dto import (
     SittingResumedDTO,
 )
 from domain.remember.review_event import ReviewEvent
-from domain.remember.value_objects import CardId, Grade, SittingId
+from domain.remember.value_objects import CardId, Grade, Graded, SittingId
 
 from .conftest import open_sitting, reviewable
 
@@ -21,7 +21,7 @@ def _event(card_id: object, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,  # pyright: ignore[reportArgumentType]
         reviewed_at=datetime.now(UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 

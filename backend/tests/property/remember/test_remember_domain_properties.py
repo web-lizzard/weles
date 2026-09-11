@@ -15,6 +15,7 @@ from domain.remember.sitting import Sitting
 from domain.remember.value_objects import (
     CardId,
     Grade,
+    Graded,
     OpaqueSchedulerState,
     SchedulerAlgorithm,
     SchedulerStamp,
@@ -56,7 +57,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=reviewed_at or datetime(2026, 1, 1, tzinfo=UTC),
-        outcome=grade,
+        payload=Graded(grade=grade),
         sitting_id=sitting_id,
     )
 
@@ -95,9 +96,9 @@ def _sequential_replay(
     ordered = sorted(events, key=lambda event: event.reviewed_at)
     previous: SchedulingState | None = None
     for event in ordered:
-        outcome = event.outcome
-        assert isinstance(outcome, Grade)
-        previous = scheduler.review(previous, card_id, outcome, event.reviewed_at)
+        payload = event.payload
+        assert isinstance(payload, Graded)
+        previous = scheduler.review(previous, card_id, payload.grade, event.reviewed_at)
     return previous
 
 
@@ -220,7 +221,7 @@ def test_replay_matches_sequential_live_review(
         ReviewEvent(
             card_id=card_id,
             reviewed_at=base + timedelta(hours=index),
-            outcome=grade,
+            payload=Graded(grade=grade),
             sitting_id=SittingId.new(),
         )
         for index, grade in enumerate(grades)
@@ -247,7 +248,7 @@ def test_replay_is_invariant_under_event_order_permutation(
         ReviewEvent(
             card_id=card_id,
             reviewed_at=base + timedelta(hours=index),
-            outcome=grade,
+            payload=Graded(grade=grade),
             sitting_id=SittingId.new(),
         )
         for index, grade in enumerate(grades)
@@ -289,7 +290,9 @@ def test_next_card_never_returns_a_finished_card(
             )
             finished = (
                 any(
-                    event.card_id == pick and event.outcome in {Grade.GOOD, Grade.EASY}
+                    event.card_id == pick
+                    and isinstance(event.payload, Graded)
+                    and event.payload.grade in {Grade.GOOD, Grade.EASY}
                     for event in sitting_events
                 )
                 or sum(1 for event in sitting_events if event.card_id == pick) >= limit
@@ -323,13 +326,13 @@ def test_replay_ignores_grades_belonging_to_other_cards(
         ReviewEvent(
             card_id=card_a,
             reviewed_at=base,
-            outcome=grade_a,
+            payload=Graded(grade=grade_a),
             sitting_id=SittingId.new(),
         ),
         ReviewEvent(
             card_id=card_b,
             reviewed_at=base + timedelta(hours=1),
-            outcome=grade_b,
+            payload=Graded(grade=grade_b),
             sitting_id=SittingId.new(),
         ),
     )

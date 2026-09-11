@@ -18,17 +18,6 @@ class Grade(StrEnum):
     EASY = "easy"
 
 
-class Rejected(StrEnum):
-    REJECTED = "rejected"
-
-
-ReviewOutcome = Grade | Rejected
-
-FINISHING_OUTCOMES: frozenset[ReviewOutcome] = frozenset(
-    {Grade.GOOD, Grade.EASY, Rejected.REJECTED}
-)
-
-
 class Graded(BaseModel, frozen=True):
     kind: Literal["graded"] = "graded"
     grade: Grade

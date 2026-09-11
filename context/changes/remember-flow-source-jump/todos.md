@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 2
-next_step: 2.1
-next_command: /implement remember-flow-source-jump phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test remember-flow-source-jump phase 3
 updated: 2026-09-11
 ---
 
@@ -18,10 +18,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 2.1 test_sitting.py passes with the pinned draw-seed values unchanged
-- [ ] 2.2 Remember property suite passes
-- [ ] 2.3 Full backend suite passes
-- [ ] 2.4 basedpyright reports no new errors across src
+- [x] 2.1 test_sitting.py passes with the pinned draw-seed values unchanged
+- [x] 2.2 Remember property suite passes
+- [x] 2.3 Full backend suite passes
+- [x] 2.4 basedpyright reports no new errors across src
 
 ### Phase 3: Non-accounting payloads stop counting
 

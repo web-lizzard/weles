@@ -8,7 +8,7 @@ import pytest
 from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
 from domain.remember.ports import ReviewEventStore
 from domain.remember.review_event import ReviewEvent
-from domain.remember.value_objects import CardId, Grade, SittingId
+from domain.remember.value_objects import CardId, Grade, Graded, SittingId
 
 _IMPLEMENTATIONS: list[Callable[[], ReviewEventStore]] = [
     cast(Callable[[], ReviewEventStore], InMemoryReviewEventStore),
@@ -33,7 +33,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         sitting_id=sitting_id,
-        outcome=grade,
+        payload=Graded(grade=grade),
         reviewed_at=reviewed_at,
     )
 
