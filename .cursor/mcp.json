@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "langfuse": {
+      "type": "stdio",
+      "command": "bash",
+      "args": ["${workspaceFolder}/scripts/langfuse-mcp-cursor.sh"]
+    }
+  }
+}
