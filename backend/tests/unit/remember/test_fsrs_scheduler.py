@@ -27,7 +27,7 @@ def _event(card_id: CardId, *, reviewed_at: datetime, grade: Grade) -> ReviewEve
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=reviewed_at,
-        grade=grade,
+        outcome=grade,
         sitting_id=SittingId.new(),
     )
 
@@ -50,10 +50,12 @@ def _review_sequentially(
 ) -> SchedulingState:
     previous: SchedulingState | None = None
     for event in events:
+        outcome = event.outcome
+        assert isinstance(outcome, Grade)
         previous = scheduler.review(
             previous,
             card_id,
-            event.grade,
+            outcome,
             event.reviewed_at,
         )
     assert previous is not None
@@ -78,7 +80,7 @@ events = tuple(
     ReviewEvent(
         card_id=card_id,
         reviewed_at=datetime.fromisoformat(event["reviewed_at"]),
-        grade=Grade(event["grade"]),
+        outcome=Grade(event["grade"]),
         sitting_id=SittingId(value=event["sitting_id"]),
     )
     for event in log["events"]
@@ -103,7 +105,7 @@ def _replayed_due_at_in_a_fresh_interpreter(
             "events": [
                 {
                     "reviewed_at": event.reviewed_at.isoformat(),
-                    "grade": event.grade.value,
+                    "grade": event.outcome.value,
                     "sitting_id": str(event.sitting_id.value),
                 }
                 for event in events

@@ -46,7 +46,7 @@ def _event(card_id: CardId) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,
         sitting_id=_sitting().id,
-        grade=Grade.GOOD,
+        outcome=Grade.GOOD,
         reviewed_at=datetime.now(UTC),
     )
 

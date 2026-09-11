@@ -5,10 +5,16 @@ from datetime import datetime
 
 from pydantic import BaseModel, model_validator
 
-from domain.remember.exceptions import EmptySittingError
+from domain.remember.exceptions import (
+    CardNotInSittingError,
+    CardNotPresentableError,
+    EmptySittingError,
+    SittingAlreadyCompleteError,
+    SittingExpiredError,
+)
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import (
-    FINISHING_GRADES,
+    FINISHING_OUTCOMES,
     MIN_RESUME_HORIZON,
     CardId,
     ResumeHorizon,
@@ -99,6 +105,22 @@ class Sitting(BaseModel, frozen=True):
         """True iff as_of < opened_at + resume_horizon.value. Finish is not this."""
         return as_of < self.opened_at + self.resume_horizon.value
 
+    def guard_outcome(
+        self,
+        card_id: CardId,
+        present: frozenset[CardId],
+        events: Sequence[ReviewEvent],
+        as_of: datetime,
+    ) -> None:
+        if not self.is_offered(as_of):
+            raise SittingExpiredError
+        if not self.contains(card_id):
+            raise CardNotInSittingError
+        if self.is_finished(present, events):
+            raise SittingAlreadyCompleteError
+        if card_id != self.next_card(present, events):
+            raise CardNotPresentableError
+
     def _eligible_pool(
         self,
         present: frozenset[CardId],
@@ -130,7 +152,7 @@ class Sitting(BaseModel, frozen=True):
 
     def _card_is_finished(self, card_id: CardId, events: Sequence[ReviewEvent]) -> bool:
         if any(
-            event.card_id == card_id and event.grade in FINISHING_GRADES
+            event.card_id == card_id and event.outcome in FINISHING_OUTCOMES
             for event in events
         ):
             return True
@@ -149,7 +171,7 @@ class Sitting(BaseModel, frozen=True):
             key=lambda event: (
                 event.reviewed_at,
                 event.card_id.value,
-                event.grade,
+                event.outcome,
                 event.sitting_id.value,
             ),
         )
@@ -158,7 +180,7 @@ class Sitting(BaseModel, frozen=True):
                 (
                     str(event.card_id.value),
                     event.reviewed_at.isoformat(),
-                    event.grade,
+                    event.outcome,
                     str(event.sitting_id.value),
                 )
             )

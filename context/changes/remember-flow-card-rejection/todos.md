@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-card-rejection
 current_phase: 1
-next_step: 1.1
+next_step: 1.7
 next_command: /implement remember-flow-card-rejection phase 1
 updated: 2026-09-11
 ---
@@ -10,12 +10,12 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 1.1 Add Rejected, the ReviewOutcome alias and FINISHING_OUTCOMES in domain/remember/value_objects.py
-- [ ] 1.2 Rename ReviewEvent.grade to outcome and widen it to ReviewOutcome
-- [ ] 1.3 Add Sitting.guard_outcome and route GradeCardCommand's guard through it
-- [ ] 1.4 Filter non-Grade outcomes out of SchedulingReplay.replay
-- [ ] 1.5 Add domain/remember/outbox.py with CARD_REJECTED and CardRejectedPayload
-- [ ] 1.6 Migrate the 21 ReviewEvent construction sites across src, unit, property and bdd suites
+- [x] 1.1 Add Rejected, the ReviewOutcome alias and FINISHING_OUTCOMES in domain/remember/value_objects.py
+- [x] 1.2 Rename ReviewEvent.grade to outcome and widen it to ReviewOutcome
+- [x] 1.3 Add Sitting.guard_outcome and route GradeCardCommand's guard through it
+- [x] 1.4 Filter non-Grade outcomes out of SchedulingReplay.replay
+- [x] 1.5 Add domain/remember/outbox.py with CARD_REJECTED and CardRejectedPayload
+- [x] 1.6 Migrate the 21 ReviewEvent construction sites across src, unit, property and bdd suites
 
 #### Manual
 

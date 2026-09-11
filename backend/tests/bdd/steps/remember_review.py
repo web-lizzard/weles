@@ -268,7 +268,7 @@ def card_has_two_prior_good_grades(remember_flow_context: RememberFlowContext) -
         event = ReviewEvent(
             card_id=card.id,
             reviewed_at=reviewed_at,
-            grade=Grade.GOOD,
+            outcome=Grade.GOOD,
             sitting_id=sitting_id,
         )
         asyncio.run(remember_flow_context.composition.review_events.save(event))
