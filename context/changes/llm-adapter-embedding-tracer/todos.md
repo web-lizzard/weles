@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-embedding-tracer
-current_phase: 1
-next_step: 1.5
-next_command: /implement llm-adapter-embedding-tracer phase 1
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test llm-adapter-embedding-tracer phase 3
 updated: 2026-09-12
 ---
 
@@ -17,7 +17,7 @@ updated: 2026-09-12
 
 #### Manual
 
-- [ ] 1.5 Confirm Settings() defaults to the openrouter provider with no .env override
+- [x] 1.5 Confirm Settings() defaults to the openrouter provider with no .env override
 
 ### Phase 2: `adapters/out/llm/` stubs and interfaces
 
