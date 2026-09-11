@@ -31,3 +31,35 @@ On **Rebuild Container**, `postCreateCommand` also runs:
 - **`15-install-claude-code.sh`** — installs Claude Code CLI (credentials bind-mounted from host `~/.claude-personal`).
 
 Add new in-container setup steps as numbered scripts in `.devcontainer/post-create.d/`.
+
+## Langfuse MCP (Claude Code and Cursor)
+
+Embedding traces from the backend land in [Langfuse Cloud](https://cloud.langfuse.com). Both editors can query the same project through Langfuse’s hosted MCP server at `https://cloud.langfuse.com/api/public/mcp` (streamable HTTP, Basic auth).
+
+| File | Editor |
+| --- | --- |
+| `.mcp.json` | Claude Code (`/mcp`) |
+| `.cursor/mcp.json` | Cursor MCP panel |
+
+Neither file commits secrets. Langfuse keys live in `backend/.env` (same as OTLP smoke traces).
+
+**Claude Code** — `.mcp.json` uses `headersHelper` (`scripts/langfuse-mcp-auth-headers.sh`) to build Basic auth from `backend/.env` on each connect. Restart Claude Code or reconnect MCP after changing keys.
+
+**Cursor** — `.cursor/mcp.json` declares `"type": "stdio"` and runs `scripts/langfuse-mcp-cursor.sh` (stdio → `mcp-remote` → Langfuse HTTP). Keys come from `backend/.env` via `scripts/langfuse-mcp-refresh-headers.sh` (gitignored `.cursor/langfuse-mcp.headers`).
+
+Troubleshooting Cursor:
+
+1. Workspace root must be the repo (`/workspaces/weles`), not `backend/` — otherwise `.cursor/mcp.json` is ignored.
+2. **Project MCP is not under Settings → Tools.** Use the sidebar **Customize → MCPs** (or `Cmd/Ctrl+Shift+P` → **Open Customize** → **MCPs**). At the top, open the **scope** dropdown and pick this repo folder (not only **User**). Marketplace plugins (Exa, GitLens) are separate from your `langfuse` server.
+3. On Cursor **3.15–3.16** and in **devcontainers**, project servers often **do not render** in Customize even when configured — update to **3.17+** if you can. Workaround: run `bash scripts/register-langfuse-mcp-user.sh` (writes `langfuse` into `~/.cursor/mcp.json` on the machine that runs MCP — inside the container that is `/home/vscode/.cursor/mcp.json`), then **Developer: Reload Window**.
+4. If the server appears but fails to start, open its network/sandbox setting and choose **Allow all** (stdio `mcp-remote` needs outbound HTTPS).
+5. **Editor Agent (Ctrl+I)** / chat in the editor window — the separate **Agents** window may not load project MCP on remote/devcontainer setups.
+6. **Output → MCP Logs** while toggling `langfuse` on; test manually: `bash scripts/langfuse-mcp-cursor.sh` (should log “Proxy established successfully”).
+
+Derive manually from project API keys (`public_key:secret_key`, colon, no newline):
+
+```bash
+echo -n "pk-lf-xxx:sk-lf-xxx" | base64 -w 0
+```
+
+Use the **EU** endpoint above if your project is on `cloud.langfuse.com`; US projects need `https://us.cloud.langfuse.com/api/public/mcp` in both MCP configs.
