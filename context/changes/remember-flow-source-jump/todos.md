@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 11
-next_step: tests
-next_command: /unit-test remember-flow-source-jump phase 11
+current_phase: 9
+next_step: 9.4
+next_command: /implement remember-flow-source-jump phase 9
 updated: 2026-09-11
 ---
 
@@ -141,10 +141,10 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 09cefa7
 
 #### Automated
 
-- [ ] 11.1 Feature suite passes
-- [ ] 11.2 Remember step coverage check passes
-- [ ] 11.3 Full backend suite passes
+- [x] 11.1 Feature suite passes
+- [x] 11.2 Remember step coverage check passes
+- [x] 11.3 Full backend suite passes
