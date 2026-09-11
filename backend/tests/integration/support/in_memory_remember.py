@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import cast
 
 from adapters.compose import (
+    get_card_source_query,
     get_current_card_query,
     get_due_count_query,
     get_grade_card_command,
@@ -18,6 +19,9 @@ from adapters.out.in_memory.distill.note_repository import (
 )
 from adapters.out.in_memory.distill.unit_of_work import (
     InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
+)
+from adapters.out.in_memory.remember.card_source_locator import (
+    InMemoryCardSourceLocator,
 )
 from adapters.out.in_memory.remember.clock import SystemClock
 from adapters.out.in_memory.remember.review_catalog import InMemoryReviewCatalog
@@ -41,6 +45,7 @@ from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.commands.reject_card import RejectCardCommand
 from application.remember.commands.reveal_back import RevealBackCommand
 from application.remember.ports import Clock, UnitOfWork
+from application.remember.queries.card_source import CardSourceQuery
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
 from domain.remember.value_objects import (
@@ -188,6 +193,15 @@ class InMemoryRememberComposition:
             clock=self.clock,
         )
 
+    def card_source(self) -> CardSourceQuery:
+        locator = InMemoryCardSourceLocator(self.notes, self.cards)
+        return CardSourceQuery(
+            self.sittings,
+            self.review_events,
+            locator,
+            self.clock,
+        )
+
     def dependency_overrides(
         self,
     ) -> dict[Callable[..., object], Callable[..., object]]:
@@ -198,4 +212,5 @@ class InMemoryRememberComposition:
             get_current_card_query: self.current_card,
             get_due_count_query: self.due_count,
             get_reveal_back_command: self.reveal_back,
+            get_card_source_query: self.card_source,
         }

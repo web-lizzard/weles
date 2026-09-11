@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 
 from adapters.compose import (
-    get_card_source_locator,
+    get_card_source_query,
     get_current_card_query,
     get_due_count_query,
     get_grade_card_command,
@@ -28,9 +28,9 @@ from application.remember.dto import (
     SittingOpenedDTO,
     SittingResumedDTO,
 )
+from application.remember.queries.card_source import CardSourceQuery
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
-from domain.remember.ports import CardSourceLocator
 from domain.remember.value_objects import CardId, SittingId
 
 router = APIRouter()
@@ -71,11 +71,9 @@ async def reveal_back(
 async def card_source(
     sitting_id: UUID,
     card_id: UUID,
-    locator: Annotated[CardSourceLocator, Depends(get_card_source_locator)],
+    query: Annotated[CardSourceQuery, Depends(get_card_source_query)],
 ) -> CardSourceDTO:
-    _ = sitting_id
-    _ = await locator.locate(CardId(value=card_id))
-    raise NotImplementedError
+    return await query.handle(SittingId(value=sitting_id), CardId(value=card_id))
 
 
 @router.post("/review-sittings/{sitting_id}/cards/{card_id}/grade")

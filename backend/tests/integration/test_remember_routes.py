@@ -26,7 +26,9 @@ def _note() -> Note:
         id=NoteId(value=uuid4()),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
-        content=NoteContent(value="We discussed how connections are established."),
+        content=NoteContent(
+            value="Connections are established via a three-way handshake."
+        ),
         tags=[TagSnapshot(id=uuid4(), label="networking")],
         distillation_status=DistillationStatus.READY,
         approved_at=now,
