@@ -83,6 +83,7 @@ from application.distill.queries.list_cards_for_note import ListCardsForNoteQuer
 from application.distill.queries.list_notes import ListNotesQueryPort
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
+from application.remember.commands.reject_card import RejectCardCommand
 from application.remember.ports import UnitOfWork as RememberUnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
@@ -254,6 +255,8 @@ def _remember_unit_of_work() -> RememberUnitOfWork:
                 _remember_sittings,
                 _remember_review_events,
                 _remember_scheduling_states,
+                _outbox_store,
+                _outbox_appender,
                 _remember_lock,
             ),
         ),
@@ -276,6 +279,14 @@ def get_grade_card_command() -> GradeCardCommand:
         uow_factory=_remember_unit_of_work,
         catalog=_remember_catalog,
         scheduler=_remember_scheduler,
+        clock=_remember_clock,
+    )
+
+
+def get_reject_card_command() -> RejectCardCommand:
+    return RejectCardCommand(
+        uow_factory=_remember_unit_of_work,
+        catalog=_remember_catalog,
         clock=_remember_clock,
     )
 

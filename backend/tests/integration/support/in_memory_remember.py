@@ -8,6 +8,7 @@ from adapters.compose import (
     get_due_count_query,
     get_grade_card_command,
     get_open_sitting_command,
+    get_reject_card_command,
     get_reveal_back_query,
 )
 from adapters.out.fsrs.scheduler import FsrsScheduler
@@ -25,8 +26,11 @@ from adapters.out.in_memory.remember.sitting_repository import InMemorySittingRe
 from adapters.out.in_memory.remember.unit_of_work import (
     InMemoryUnitOfWork,
 )
+from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
+from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
+from application.remember.commands.reject_card import RejectCardCommand
 from application.remember.ports import Clock, UnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
@@ -52,6 +56,8 @@ class InMemoryRememberComposition:
     resume_horizon: ResumeHorizon
     notes: InMemoryDistillNoteRepository
     cards: InMemoryCardRepository
+    outbox_store: InMemoryOutboxStore
+    outbox: InMemoryOutboxAppender
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
 
     @classmethod
@@ -63,6 +69,7 @@ class InMemoryRememberComposition:
     ) -> "InMemoryRememberComposition":
         notes = InMemoryDistillNoteRepository()
         cards = InMemoryCardRepository()
+        outbox_store = InMemoryOutboxStore()
         return cls(
             sittings=InMemorySittingRepository(),
             review_events=InMemoryReviewEventStore(),
@@ -74,6 +81,8 @@ class InMemoryRememberComposition:
             resume_horizon=resume_horizon or ResumeHorizon(value=MIN_RESUME_HORIZON),
             notes=notes,
             cards=cards,
+            outbox_store=outbox_store,
+            outbox=InMemoryOutboxAppender(outbox_store),
         )
 
     def unit_of_work(self) -> UnitOfWork:
@@ -85,6 +94,8 @@ class InMemoryRememberComposition:
                     self.sittings,
                     self.review_events,
                     self.scheduling_states,
+                    self.outbox_store,
+                    self.outbox,
                     self.lock,
                 ),
             ),
@@ -105,6 +116,13 @@ class InMemoryRememberComposition:
             uow_factory=self.unit_of_work,
             catalog=self.catalog,
             scheduler=self.scheduler,
+            clock=self.clock,
+        )
+
+    def reject_card(self) -> RejectCardCommand:
+        return RejectCardCommand(
+            uow_factory=self.unit_of_work,
+            catalog=self.catalog,
             clock=self.clock,
         )
 
@@ -137,6 +155,7 @@ class InMemoryRememberComposition:
         return {
             get_open_sitting_command: self.open_sitting,
             get_grade_card_command: self.grade_card,
+            get_reject_card_command: self.reject_card,
             get_current_card_query: self.current_card,
             get_due_count_query: self.due_count,
             get_reveal_back_query: self.reveal_back,

@@ -9,10 +9,12 @@ from adapters.compose import (
     get_due_count_query,
     get_grade_card_command,
     get_open_sitting_command,
+    get_reject_card_command,
     get_reveal_back_query,
 )
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
+from application.remember.commands.reject_card import RejectCardCommand
 from application.remember.dto import (
     DueCountDTO,
     GradeAppliedDTO,
@@ -72,3 +74,12 @@ async def grade_card(
     return await command.handle(
         SittingId(value=sitting_id), CardId(value=card_id), body.grade
     )
+
+
+@router.post("/review-sittings/{sitting_id}/cards/{card_id}/rejection", status_code=204)
+async def reject_card(
+    sitting_id: UUID,
+    card_id: UUID,
+    command: Annotated[RejectCardCommand, Depends(get_reject_card_command)],
+) -> None:
+    await command.handle(SittingId(value=sitting_id), CardId(value=card_id))
