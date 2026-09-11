@@ -1,10 +1,10 @@
 ---
 change_id: remember-flow-capture-review
 title: Users can open a review from within a capture session and return to the conversation with nothing lost
-status: new
+status: archived
 created: 2026-09-11
 updated: 2026-09-11
-archived_at: null
+archived_at: 2026-09-11T16:09:42Z
 origin: remember-pillar
 effort_id: remember-flow
 slice_ref: S-06
