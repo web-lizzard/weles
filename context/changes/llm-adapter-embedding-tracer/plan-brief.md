@@ -31,7 +31,8 @@ over MCP.
 | Provider | OpenRouter for embeddings and later chat | One key and one billing surface across the whole effort. | Plan |
 | Library | pydantic-ai `Embedder` + `OpenAIEmbeddingModel` + `OpenRouterProvider` | Already a dependency and already ADR-committed for LLM adapters. | Research |
 | Extra | `pydantic-ai-slim[openai]`, not `[openrouter]` | The OpenAI embeddings module imports `tiktoken` at import time, which `[openrouter]` does not pull. | Research |
-| Version discipline | Exact pins, nothing younger than a week: `pydantic-ai-slim[openai]==2.39.0`, all three OTel packages `==1.44.0` | A seven-day soak gives a compromised or regressed release time to surface; exact pins match the existing `fsrs==6.3.2` and keep the OTel trio in lockstep. | Plan |
+| Version discipline | Exact pins: `pydantic-ai-slim[openai]==2.39.0`, all three OTel packages `==1.44.0` | A seven-day soak gives a compromised or regressed release time to surface; exact pins match the existing `fsrs==6.3.2` and keep the OTel trio in lockstep. | Plan |
+| Soak enforcement | `[tool.uv] exclude-newer` at a fixed RFC 3339 timestamp | Makes the soak a resolver rule covering transitive packages and future `uv add`; uv 0.9.6 rejects relative durations, and a malformed value degrades to a silent no-op. | Plan |
 | Tracing dependency | OpenTelemetry API in adapters; Langfuse only at composition | Adapters stay vendor-neutral, and a future domain-side span port reuses the same vocabulary. | Plan |
 | Langfuse hosting | Cloud Hobby, tracing only | Zero infra, and one observation per embed stays far under the 50k unit cap. | Research |
 | Granularity | One observation per `embed()` | Nests naturally under a conversation trace in S-05 without doubling billable units. | Plan |
@@ -73,7 +74,7 @@ Adapters know OpenTelemetry; only `adapters/telemetry.py` knows Langfuse.
 
 | Phase | What it delivers | Key risk |
 | --- | --- | --- |
-| 1. Dependencies, settings, environment | `[openai]` extra, OTel packages at one pinned version, every new config field | Exact pins move upgrade duty to the author; the OTel trio must stay in lockstep |
+| 1. Dependencies, settings, environment | `[openai]` extra, OTel packages at one pinned version, the uv soak cutoff, every new config field | Exact pins and a frozen cutoff move upgrade duty to the author; a mistyped cutoff disables itself with only a warning |
 | 2. `adapters/out/llm/` stubs | Tracing helper and adapter signatures Phase 3 imports | Attribute vocabulary chosen here is inherited by four later seams |
 | 3. Adapter behaviour and span emission | Vector mapping, dimension setting, one Langfuse-shaped span per call | Span attribute names must match Langfuse's mapping exactly or the observation renders blank |
 | 4. Telemetry bootstrap and wiring | OTLP exporter to Langfuse, provider switch honoured | A default-on provider reaching the test suite or CI |
