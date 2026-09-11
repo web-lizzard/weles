@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-embedding-tracer
-current_phase: 5
-next_step: 5.1
-next_command: /implement llm-adapter-embedding-tracer phase 5
+current_phase: 6
+next_step:
+next_command: /archive llm-adapter-embedding-tracer
 updated: 2026-09-12
 ---
 
@@ -63,23 +63,23 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 5.1 Add scripts/smoke_embedding.py with an explicit force_flush before exit
+- [x] 5.1 Add scripts/smoke_embedding.py with an explicit force_flush before exit — 61b6958
 
 #### Manual
 
-- [ ] 5.2 Run the smoke script against real OpenRouter and record the printed dimension
-- [ ] 5.3 Re-run with EMBEDDING_DIMENSIONS=256 and record whether OpenRouter honoured it
-- [ ] 5.4 Confirm the observation appears in the Langfuse project with input and model visible
+- [x] 5.2 Run the smoke script against real OpenRouter and record the printed dimension
+- [x] 5.3 Re-run with EMBEDDING_DIMENSIONS=256 and record whether OpenRouter honoured it
+- [x] 5.4 Confirm the observation appears in the Langfuse project with input and model visible
 
 ### Phase 6: Langfuse MCP for Claude Code and Cursor
 
 #### Automated
 
-- [ ] 6.1 Add .mcp.json pointing at the hosted Langfuse MCP endpoint
-- [ ] 6.2 Add .cursor/mcp.json with the same server
-- [ ] 6.3 Document LANGFUSE_MCP_AUTH derivation in .env.example and README
+- [x] 6.1 Add .mcp.json pointing at the hosted Langfuse MCP endpoint
+- [x] 6.2 Add .cursor/mcp.json with the same server
+- [x] 6.3 Document LANGFUSE_MCP_AUTH derivation in .env.example and README
 
 #### Manual
 
-- [ ] 6.4 Confirm /mcp in Claude Code lists langfuse connected and returns recent observations
-- [ ] 6.5 Confirm Cursor connects and record whether it expanded the header variable
+- [x] 6.4 Confirm /mcp in Claude Code lists langfuse connected and returns recent observations
+- [x] 6.5 Confirm Cursor connects and record whether it expanded the header variable
