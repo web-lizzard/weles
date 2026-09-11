@@ -1,11 +1,13 @@
 ---
 feature: "Remember flow"
 effort_id: remember-flow
-version: 1
+version: 2
 status: draft
 created: 2026-09-09
 context_type: greenfield
 ---
+
+> Revision 2 (2026-09-11): drops FR-012 (post-capture review prompt) as a non-goal. Resolves Open Question 4. Subtractive only — FR-001 through FR-011 and FR-013 through FR-018 are unchanged.
 
 ## Problem & Outcome
 
@@ -55,7 +57,6 @@ The single Weles user — one person working through technical material (books, 
 
 - FR-010: User can see how many cards are due without starting a session. Priority: must-have
 - FR-011: That count refreshes while Weles is open, without the user re-entering the view. Priority: must-have
-- FR-012: After a capture session closes, user is told if cards are waiting to be reviewed. Priority: nice-to-have
 
 ### Judging a card
 
@@ -76,6 +77,7 @@ The single Weles user — one person working through technical material (books, 
 - **Statistics, streaks, charts.** Review history exists, but reporting on it is a separate product, not part of making cards come back.
 - **FSRS parameter optimization.** There is no body of review history to fit against until the pillar has been used; it is purely additive later.
 - **Editing a card during a review.** Fixing a card's wording belongs to distill; from a review the only judgement available is rejection.
+- **A review prompt at the moment a capture session closes.** Argued through and dropped (former FR-012): to carry any value beyond the always-visible due count, such a prompt would have to hold the user synchronously at the close of capture and wait for an answer. Anything short of that is the same information the due count already shows, in the same place, one line lower — so the prompt is either an interruption the guardrails forbid or a duplicate. FR-010 and FR-011 cover the need.
 - **Notifications outside a running Weles.** Telling the user something is due while the app is closed requires a background process this pillar deliberately does not have.
 - **Multiple devices or synchronization.** One person, one machine.
 
@@ -84,4 +86,4 @@ The single Weles user — one person working through technical material (books, 
 1. **Exact UI labels for the four grades.** — Owner: user. Block: no (four steps are settled; the wording can land during stories).
 2. **How often the due count refreshes while Weles is open.** — Owner: user. Block: no (any sane cadence ships).
 3. **The session expiry horizon value.** — Owner: user. Block: no (a configured setting; the number can be tuned after first use).
-4. **Whether the post-capture prompt (FR-012) earns its place at all**, now that FR-018 makes a review reachable during capture and the due count (FR-010, FR-011) is already visible while the conversation runs — being told again at close may be duplicative. — Owner: user. Block: no (nice-to-have; may be dropped rather than built).
+4. ~~**Whether the post-capture prompt (FR-012) earns its place at all.**~~ Resolved 2026-09-11: dropped. A prompt only carries value if it waits synchronously for the user at the close of capture; without that wait it is indistinguishable from the due count already on screen. See Non-Goals.
