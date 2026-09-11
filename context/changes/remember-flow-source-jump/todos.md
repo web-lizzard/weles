@@ -10,9 +10,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 1.1 Remember unit suite passes unchanged
-- [x] 1.2 basedpyright reports no new errors in domain/remember
-- [x] 1.3 ruff check passes on src
+- [x] 1.1 Remember unit suite passes unchanged — 323a8e4
+- [x] 1.2 basedpyright reports no new errors in domain/remember — 323a8e4
+- [x] 1.3 ruff check passes on src — 323a8e4
 
 ### Phase 2: Migrate the review log to payloads
 
