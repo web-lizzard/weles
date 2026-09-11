@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 1
-next_step: 1.7
-next_command: /implement remember-flow-card-rejection phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test remember-flow-card-rejection phase 2
 updated: 2026-09-11
 ---
 
@@ -19,7 +19,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 1.7 Grep domain/remember and application/remember for a surviving .grade and confirm only Scheduler's parameter remains
+- [x] 1.7 Grep domain/remember and application/remember for a surviving .grade and confirm only Scheduler's parameter remains — c63f414
 
 ### Phase 2: Rejection settles a card and never reaches the scheduler
 
