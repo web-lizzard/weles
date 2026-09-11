@@ -114,12 +114,12 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 8.1 Regenerate src/api/generated/schema.d.ts against the running backend
-- [x] 8.2 Add rejectCard with a 204 branch ahead of the data guard in src/api/sittings.ts
-- [x] 8.3 Add currentCard mapping PresentedCardDTO in src/api/sittings.ts
-- [x] 8.4 Add rejectCurrentCard to the sitting store and extend LastAction for retry
-- [x] 8.5 Bind the reject key in SittingOverlay behind isBackVisible and add its hint constant
-- [x] 8.6 Add rejectCard and currentCard to the six vi.mock factories over src/api/sittings
+- [x] 8.1 Regenerate src/api/generated/schema.d.ts against the running backend — 3c55912
+- [x] 8.2 Add rejectCard with a 204 branch ahead of the data guard in src/api/sittings.ts — 3c55912
+- [x] 8.3 Add currentCard mapping PresentedCardDTO in src/api/sittings.ts — 3c55912
+- [x] 8.4 Add rejectCurrentCard to the sitting store and extend LastAction for retry — 3c55912
+- [x] 8.5 Bind the reject key in SittingOverlay behind isBackVisible and add its hint constant — 3c55912
+- [x] 8.6 Add rejectCard and currentCard to the six vi.mock factories over src/api/sittings — 3c55912
 
 #### Manual
 
