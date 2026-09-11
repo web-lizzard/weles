@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-source-jump
 title: Users can jump from a card under review to its source passage
-status: planned
+status: implementing
 created: 2026-09-11
 updated: 2026-09-11
 archived_at: null

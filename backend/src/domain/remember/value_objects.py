@@ -1,8 +1,9 @@
 from datetime import timedelta
 from enum import StrEnum
+from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from domain.remember.exceptions import (
     InvalidResumeHorizonError,
@@ -26,6 +27,22 @@ ReviewOutcome = Grade | Rejected
 FINISHING_OUTCOMES: frozenset[ReviewOutcome] = frozenset(
     {Grade.GOOD, Grade.EASY, Rejected.REJECTED}
 )
+
+
+class Graded(BaseModel, frozen=True):
+    kind: Literal["graded"] = "graded"
+    grade: Grade
+
+
+class Rejection(BaseModel, frozen=True):
+    kind: Literal["rejected"] = "rejected"
+
+
+class Reveal(BaseModel, frozen=True):
+    kind: Literal["revealed"] = "revealed"
+
+
+ReviewEventPayload = Annotated[Graded | Rejection | Reveal, Field(discriminator="kind")]
 
 
 class SittingId(BaseModel, frozen=True):
