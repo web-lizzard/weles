@@ -129,9 +129,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 10.1 sourceViewport.test.tsx and sittingOverlay.test.tsx pass
-- [x] 10.2 TUI test suite passes
-- [x] 10.3 TUI lint passes
+- [x] 10.1 sourceViewport.test.tsx and sittingOverlay.test.tsx pass — 9bf59a6
+- [x] 10.2 TUI test suite passes — 9bf59a6
+- [x] 10.3 TUI lint passes — 9bf59a6
 
 #### Manual
 
