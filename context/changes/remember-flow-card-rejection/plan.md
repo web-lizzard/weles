@@ -264,6 +264,13 @@ mixed log returns exactly what the same grades alone would have produced.
 - `cd backend && uv run pytest tests/unit/remember/test_scheduling_replay.py -v`
 - `cd backend && uv run pytest tests/property/remember -v`
 
+### Review r1
+
+Artifact: `reviews/2026-09-11-r1-property-test-phase-2.md`
+
+- SchedulingReplay folds grades belonging to other cards
+  Fix: The shrunk two-card log must make `SchedulingReplay.replay(card_a, events)` equal `replay(card_a, events)` with only `card_a` events until the bug is fixed; `test_replay_for_one_card_ignores_another_cards_grades_in_the_sequence` (unit pin) and `test_replay_ignores_grades_belonging_to_other_cards` (property) stay as regression.
+
 ---
 
 ## Phase 3: Rejection write-path stubs
