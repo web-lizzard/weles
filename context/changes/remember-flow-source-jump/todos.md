@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 8
-next_step: 8.1
-next_command: /implement remember-flow-source-jump phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /unit-test remember-flow-source-jump phase 9
 updated: 2026-09-11
 ---
 
@@ -100,10 +100,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 8.1 TUI typecheck passes
-- [ ] 8.2 TUI lint passes
-- [ ] 8.3 TUI test suite passes unchanged
-- [ ] 8.4 TUI build completes, confirming the new modules resolve
+- [x] 8.1 TUI typecheck passes
+- [x] 8.2 TUI lint passes
+- [x] 8.3 TUI test suite passes unchanged
+- [x] 8.4 TUI build completes, confirming the new modules resolve
 
 ### Phase 9: The source view and the Esc ladder
 
