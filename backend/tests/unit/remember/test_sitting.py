@@ -1,4 +1,6 @@
-from datetime import UTC, datetime
+import hashlib
+import random
+from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
@@ -10,6 +12,7 @@ from domain.remember.value_objects import (
     CardId,
     Grade,
     Rejected,
+    ResumeHorizon,
     ShowingLimit,
     SittingId,
 )
@@ -315,3 +318,92 @@ def test_the_seeded_draw_matches_a_pinned_outcome_for_an_empty_log() -> None:
     assert sitting.next_card(sitting.card_ids, ()) == CardId(
         value=UUID("6513270e-269e-0d37-f2a7-4de452e6b438")
     )
+
+
+def _expected_draw_seed(sitting: Sitting, events: tuple[ReviewEvent, ...]) -> int:
+    parts = [str(sitting.id.value)]
+    ordered = sorted(
+        (event for event in events if event.sitting_id == sitting.id),
+        key=lambda event: (
+            event.reviewed_at,
+            event.card_id.value,
+            event.outcome,
+            event.sitting_id.value,
+        ),
+    )
+    for event in ordered:
+        parts.extend(
+            (
+                str(event.card_id.value),
+                event.reviewed_at.isoformat(),
+                event.outcome,
+                str(event.sitting_id.value),
+            )
+        )
+    digest = hashlib.sha256("|".join(parts).encode()).digest()
+    return int.from_bytes(digest[:8], "big")
+
+
+def _card_from_seed(pool: frozenset[CardId], seed: int) -> CardId:
+    ordered = sorted(pool, key=lambda card_id: card_id.value)
+    return ordered[random.Random(seed).randrange(len(ordered))]
+
+
+def test_draw_seed_includes_event_sitting_id_in_hash_input() -> None:
+    sitting_id = "00000000-1111-1111-1111-111111111111"
+    card = "6513270e-269e-0d37-f2a7-4de452e6b438"
+    sitting = _pinned_sitting(sitting_id, (card,))
+    event = _pinned_event(card, sitting_id, datetime(2026, 2, 1, tzinfo=UTC))
+    events = (event,)
+    present = sitting.card_ids
+    expected_seed = _expected_draw_seed(sitting, events)
+
+    assert sitting.next_card(present, events) == _card_from_seed(present, expected_seed)
+
+    parts_without_sitting_id = [
+        str(sitting.id.value),
+        str(event.card_id.value),
+        event.reviewed_at.isoformat(),
+        event.outcome,
+        "None",
+    ]
+    wrong_digest = hashlib.sha256("|".join(parts_without_sitting_id).encode()).digest()
+    wrong_seed = int.from_bytes(wrong_digest[:8], "big")
+    assert expected_seed != wrong_seed
+
+
+def test_draw_seed_uses_exactly_eight_digest_bytes_big_endian() -> None:
+    sitting_id = "5ab7c383-a883-4fdf-ab28-0d827faaea53"
+    card_ids = (
+        "6513270e-269e-0d37-f2a7-4de452e6b438",
+        "d23f0824-128b-2f33-0c5c-7fd0a6a3a450",
+    )
+    sitting = _pinned_sitting(sitting_id, card_ids)
+    events: tuple[ReviewEvent, ...] = ()
+    present = sitting.card_ids
+
+    parts = [str(sitting.id.value)]
+    digest = hashlib.sha256("|".join(parts).encode()).digest()
+    eight_byte_seed = int.from_bytes(digest[:8], "big")
+    nine_byte_seed = int.from_bytes(digest[:9], "big")
+
+    assert _expected_draw_seed(sitting, events) == eight_byte_seed
+    assert eight_byte_seed != nine_byte_seed
+    assert sitting.next_card(present, events) == _card_from_seed(
+        present, eight_byte_seed
+    )
+
+
+def test_is_offered_is_false_at_opened_at_plus_resume_horizon() -> None:
+    opened_at = datetime(2026, 3, 1, 12, 0, tzinfo=UTC)
+    horizon = ResumeHorizon(value=timedelta(hours=3))
+    sitting = Sitting.open(
+        frozenset({_card_id()}),
+        opened_at,
+        ShowingLimit(value=2),
+        resume_horizon=horizon,
+    )
+    boundary = opened_at + horizon.value
+
+    assert sitting.is_offered(boundary - timedelta(microseconds=1)) is True
+    assert sitting.is_offered(boundary) is False
