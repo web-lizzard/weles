@@ -12,5 +12,9 @@ describe("generated OpenAPI schema (R1-F1)", () => {
     expect(schema).toContain(
       '"/review-sittings/{sitting_id}/cards/{card_id}/grade"',
     );
+    expect(schema).toContain(
+      '"/review-sittings/{sitting_id}/cards/{card_id}/rejection"',
+    );
+    expect(schema).toContain('"/review-sittings/{sitting_id}/current-card"');
   });
 });
