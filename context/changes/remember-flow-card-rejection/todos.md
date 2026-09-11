@@ -89,10 +89,10 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 6.1 Stamp a user_audit Discard carrying the envelope's rejected_at
-- [x] 6.2 No-op on a card that already carries any Discard
-- [x] 6.3 No-op on a card id that names no card
-- [x] 6.4 Log and ack a malformed card_rejected payload without calling the command
+- [x] 6.1 Stamp a user_audit Discard carrying the envelope's rejected_at — 064dc4f
+- [x] 6.2 No-op on a card that already carries any Discard — 064dc4f
+- [x] 6.3 No-op on a card id that names no card — 064dc4f
+- [x] 6.4 Log and ack a malformed card_rejected payload without calling the command — 064dc4f
 
 ### Phase 7: Acceptance layer for AC-17 and AC-23
 
