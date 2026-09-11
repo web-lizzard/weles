@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 5
-next_step: 5.1
-next_command: /implement remember-flow-card-rejection phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test remember-flow-card-rejection phase 6
 updated: 2026-09-11
 ---
 
@@ -75,11 +75,11 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 5.1 Add CardRepository.get and implement it on the in-memory adapter
-- [ ] 5.2 Add DiscardCardCommand taking card id, reason, detail and discarded_at
-- [ ] 5.3 Add CardDiscardHandler bound to CARD_REJECTED
-- [ ] 5.4 Register the discard command and handler in compose and in the worker's handler list
-- [ ] 5.5 Add a worker seam to InMemoryRememberComposition over its own notes and cards repositories
+- [x] 5.1 Add CardRepository.get and implement it on the in-memory adapter
+- [x] 5.2 Add DiscardCardCommand taking card id, reason, detail and discarded_at
+- [x] 5.3 Add CardDiscardHandler bound to CARD_REJECTED
+- [x] 5.4 Register the discard command and handler in compose and in the worker's handler list
+- [x] 5.5 Add a worker seam to InMemoryRememberComposition over its own notes and cards repositories
 
 ### Phase 6: Distill discard behaviour
 

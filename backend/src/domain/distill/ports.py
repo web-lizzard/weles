@@ -2,7 +2,7 @@ from typing import Protocol
 
 from domain.distill.card import Card
 from domain.distill.note import Note
-from domain.distill.value_objects import NoteId
+from domain.distill.value_objects import CardId, NoteId
 
 
 class NoteRepository(Protocol):
@@ -15,5 +15,7 @@ class NoteRepository(Protocol):
 
 class CardRepository(Protocol):
     async def save(self, card: Card) -> None: ...
+
+    async def get(self, card_id: CardId) -> Card | None: ...
 
     async def list_by_note(self, note_id: NoteId) -> list[Card]: ...

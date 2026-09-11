@@ -65,6 +65,7 @@ from adapters.out.in_memory.shared.outbox.envelope_query import (
     InMemoryOutboxEnvelopeQueryAdapter,
 )
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from adapters.out.worker.handlers.card_discard import CardDiscardHandler
 from adapters.out.worker.handlers.flashcard_gen import FlashcardGenHandler
 from adapters.out.worker.handlers.note_save import SaveNoteHandler
 from adapters.out.worker.outbox_worker import OutboxWorker
@@ -75,6 +76,7 @@ from application.capture.commands.start_capture_session import (
 )
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
+from application.distill.commands.discard_card import DiscardCardCommand
 from application.distill.commands.generate_cards import GenerateCardsCommand
 from application.distill.commands.save_note import SaveNoteCommand
 from application.distill.ports import UnitOfWork as DistillUnitOfWork
@@ -193,9 +195,11 @@ _generate_cards_command = GenerateCardsCommand(
     card_factory=_card_factory,
 )
 _flashcard_gen_handler = FlashcardGenHandler(_generate_cards_command)
+_discard_card_command = DiscardCardCommand(uow_factory=_distill_unit_of_work)
+_card_discard_handler = CardDiscardHandler(_discard_card_command)
 _outbox_worker = OutboxWorker(
     _outbox_claimer,
-    [_save_note_handler, _flashcard_gen_handler],
+    [_save_note_handler, _flashcard_gen_handler, _card_discard_handler],
     worker_id=_settings.outbox_worker_id,
     batch_size=_settings.outbox_batch_size,
     max_attempts=_settings.outbox_max_attempts,

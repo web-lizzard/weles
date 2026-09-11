@@ -2,7 +2,7 @@ import copy
 from uuid import UUID
 
 from domain.distill.card import Card
-from domain.distill.value_objects import NoteId
+from domain.distill.value_objects import CardId, NoteId
 
 
 class InMemoryCardRepository:
@@ -11,6 +11,9 @@ class InMemoryCardRepository:
 
     async def save(self, card: Card) -> None:
         self._cards[card.id.value] = card
+
+    async def get(self, card_id: CardId) -> Card | None:
+        return self._cards.get(card_id.value)
 
     async def list_by_note(self, note_id: NoteId) -> list[Card]:
         return [card for card in self._cards.values() if card.note_id == note_id]
