@@ -27,7 +27,7 @@ const SOURCE_WITH_NEIGHBOURING_BLOCKS: CardSource = {
     { index: 1, text: "Lead quoted span tail" },
     { index: 2, text: "Paragraph below the quote." },
   ],
-  span: { blockIndex: 1, start: 5, end: 12 },
+  span: { blockIndex: 1, start: 5, end: 11 },
 };
 
 async function pressKey(
@@ -70,6 +70,8 @@ function resetStore() {
     isResumed: false,
     outstandingCount: 0,
     notice: null,
+    cardSource: null,
+    isCardSourceProbeComplete: false,
   });
 }
 

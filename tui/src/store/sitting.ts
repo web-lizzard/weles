@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  type CardSource,
   currentCard,
   type Grade,
   gradeCard,
@@ -9,6 +10,7 @@ import {
   SITTING_EXPIRED,
   SittingHttpError,
 } from "../api/sittings.js";
+import { probeCardSource } from "../lib/cardSourceProbe.js";
 import { useDueStore } from "./due.js";
 
 type SittingPhase =
@@ -39,6 +41,8 @@ type SittingState = {
   isResumed: boolean;
   outstandingCount: number;
   notice: string | null;
+  cardSource: CardSource | null;
+  isCardSourceProbeComplete: boolean;
 };
 
 type SittingActions = {
@@ -98,7 +102,25 @@ const initialState: SittingState = {
   isResumed: false,
   outstandingCount: 0,
   notice: null,
+  cardSource: null,
+  isCardSourceProbeComplete: false,
 };
+
+function clearCardSourceState(): Pick<
+  SittingState,
+  "cardSource" | "isCardSourceProbeComplete"
+> {
+  return { cardSource: null, isCardSourceProbeComplete: false };
+}
+
+async function probeCurrentCardSource(
+  set: SittingStoreSet,
+  sittingId: string,
+  cardId: string,
+): Promise<void> {
+  const source = await probeCardSource(sittingId, cardId);
+  set({ cardSource: source, isCardSourceProbeComplete: true });
+}
 
 function sittingHttpErrorState(error: SittingHttpError): Partial<SittingState> {
   return {
@@ -150,6 +172,7 @@ async function applyCurrentCardAfterReject(
       outstandingCount: result.outstandingCount,
       notice: null,
       lastAction: null,
+      ...clearCardSourceState(),
     });
   } catch (error) {
     if (error instanceof SittingHttpError) {
@@ -211,6 +234,7 @@ export const useSittingStore = create<SittingState & SittingActions>(
           error: null,
           isResumed: result.kind === "resumed",
           outstandingCount: result.outstandingCount,
+          ...clearCardSourceState(),
         });
       } catch (error) {
         if (error instanceof SittingHttpError) {
@@ -237,6 +261,9 @@ export const useSittingStore = create<SittingState & SittingActions>(
 
       if (state.back !== null) {
         set({ isBackVisible: true });
+        if (!state.isCardSourceProbeComplete) {
+          void probeCurrentCardSource(set, state.sittingId, state.cardId);
+        }
         return;
       }
 
@@ -249,6 +276,7 @@ export const useSittingStore = create<SittingState & SittingActions>(
       try {
         const revealed = await revealBack(state.sittingId, state.cardId);
         set({ isBackVisible: true, back: revealed.back });
+        void probeCurrentCardSource(set, state.sittingId, state.cardId);
       } catch (error) {
         if (error instanceof SittingHttpError) {
           if (error.code === SITTING_EXPIRED) {
@@ -319,6 +347,7 @@ export const useSittingStore = create<SittingState & SittingActions>(
           isResumed: false,
           outstandingCount: result.outstandingCount,
           notice: null,
+          ...clearCardSourceState(),
         });
       } catch (error) {
         if (error instanceof SittingHttpError) {
