@@ -10,6 +10,7 @@ from integration.support.in_memory_remember import InMemoryRememberComposition
 from pytest_bdd import given, parsers, then, when
 
 from application.remember.dto import (
+    CardSourceDTO,
     DueCountDTO,
     GradeAppliedDTO,
     NothingDueDTO,
@@ -34,6 +35,7 @@ from domain.distill.value_objects import (
 from domain.distill.value_objects import (
     CardId as DistillCardId,
 )
+from domain.remember.exceptions import SourceNotAvailableError
 from domain.remember.ports import ReviewableCard
 from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState, card_is_due
@@ -80,6 +82,8 @@ class RememberFlowContext:
     live_membership: frozenset[CardId] | None = None
     prior_sitting_id: SittingId | None = None
     last_due_count: DueCountDTO | None = None
+    last_card_source: CardSourceDTO | None = None
+    last_source_error: BaseException | None = None
 
 
 @pytest.fixture
@@ -125,6 +129,49 @@ def _card(
     context.distill_cards_by_label[label] = card
     reviewable = ReviewableCard(
         id=CardId(value=card.id.value), front=front_text, back=back_text
+    )
+    context.cards_by_label[label] = reviewable
+    return reviewable
+
+
+_RESOLVABLE_SOURCE_NOTE = (
+    "Lead paragraph.\n\nConnections are established via a three-way handshake.\n\nTail."
+)
+_RESOLVABLE_SOURCE_QUOTE = "Connections are established via a three-way handshake."
+
+
+def _card_with_resolvable_source(
+    context: RememberFlowContext, label: str
+) -> ReviewableCard:
+    slug = label.replace(" ", "-")
+    now = datetime.now(UTC)
+    note = Note(
+        id=NoteId(value=uuid4()),
+        session_id=SessionId(value=uuid4()),
+        topic=TopicSnapshot(id=uuid4(), label=slug),
+        content=NoteContent(value=_RESOLVABLE_SOURCE_NOTE),
+        tags=[],
+        distillation_status=DistillationStatus.READY,
+        approved_at=now,
+        created_at=now,
+        updated_at=now,
+    )
+    card = Card(
+        id=DistillCardId(value=uuid4()),
+        note_id=note.id,
+        front=CardSide(value=f"Front for {slug}"),
+        back=CardSide(value=f"Back for {slug}"),
+        anchor=Anchor(quote=_RESOLVABLE_SOURCE_QUOTE),
+        discard=None,
+        created_at=now,
+    )
+    asyncio.run(context.composition.notes.save(note))
+    asyncio.run(context.composition.cards.save(card))
+    context.distill_cards_by_label[label] = card
+    reviewable = ReviewableCard(
+        id=CardId(value=card.id.value),
+        front=card.front.value,
+        back=card.back.value,
     )
     context.cards_by_label[label] = reviewable
     return reviewable
@@ -189,6 +236,41 @@ def catalog_has_due_card(
 ) -> None:
     card = _card(remember_flow_context, label)
     _mark_due(remember_flow_context, card.id)
+
+
+@given(
+    parsers.parse(
+        'the catalog has a due card "{label}" with a resolvable source fragment'
+    )
+)
+def catalog_has_due_card_with_resolvable_source(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = _card_with_resolvable_source(remember_flow_context, label)
+    _mark_due(remember_flow_context, card.id)
+
+
+@given(
+    parsers.parse(
+        'the catalog has a due card "{label}" with its note rewritten after minting'
+    )
+)
+def catalog_has_due_card_with_rewritten_note(
+    remember_flow_context: RememberFlowContext, label: str
+) -> None:
+    card = _card_with_resolvable_source(remember_flow_context, label)
+    _mark_due(remember_flow_context, card.id)
+    distill_card = remember_flow_context.distill_cards_by_label[label]
+    note = asyncio.run(
+        remember_flow_context.composition.notes.get(distill_card.note_id)
+    )
+    assert note is not None
+    rewritten = note.model_copy(
+        update={
+            "content": NoteContent(value="The note was rewritten without the quote.")
+        }
+    )
+    asyncio.run(remember_flow_context.composition.notes.save(rewritten))
 
 
 @given(parsers.parse('the catalog has due cards "{first}" and "{second}"'))
@@ -349,6 +431,29 @@ def clock_advances_by_hours(
     remember_flow_context: RememberFlowContext, hours: int
 ) -> None:
     remember_flow_context.clock.advance(timedelta(hours=hours))
+
+
+def _read_current_card_source(remember_flow_context: RememberFlowContext) -> None:
+    assert remember_flow_context.sitting_id is not None
+    assert remember_flow_context.current_card_id is not None
+    remember_flow_context.last_card_source = None
+    remember_flow_context.last_source_error = None
+    try:
+        result = asyncio.run(
+            remember_flow_context.composition.card_source().handle(
+                remember_flow_context.sitting_id,
+                remember_flow_context.current_card_id,
+            )
+        )
+        remember_flow_context.last_card_source = result
+    except BaseException as exc:
+        remember_flow_context.last_source_error = exc
+
+
+@when("the user reads the current card's source")
+@when("the user tries to read the current card's source")
+def user_reads_current_card_source(remember_flow_context: RememberFlowContext) -> None:
+    _read_current_card_source(remember_flow_context)
 
 
 @when("the user reveals the current card's back")
@@ -869,3 +974,30 @@ def card_has_discard_whose_reason_is(
     assert persisted is not None
     assert persisted.discard is not None
     assert persisted.discard.reason == DiscardReason(reason)
+
+
+@then("the source is not available")
+def source_is_not_available(remember_flow_context: RememberFlowContext) -> None:
+    assert isinstance(remember_flow_context.last_source_error, SourceNotAvailableError)
+    assert remember_flow_context.last_card_source is None
+
+
+@then("the source shows the fragment marked in the note")
+def source_shows_fragment_marked_in_note(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    source = remember_flow_context.last_card_source
+    assert isinstance(source, CardSourceDTO)
+    assert len(source.blocks) >= 1
+    block = source.blocks[source.span.block_index]
+    marked = block.text[source.span.start : source.span.end]
+    assert marked == _RESOLVABLE_SOURCE_QUOTE
+
+
+@then("no source-unavailability message is offered")
+def no_source_unavailability_message_is_offered(
+    remember_flow_context: RememberFlowContext,
+) -> None:
+    error = remember_flow_context.last_source_error
+    assert isinstance(error, SourceNotAvailableError)
+    assert error.args == ()
