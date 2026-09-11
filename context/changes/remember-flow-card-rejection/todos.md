@@ -37,9 +37,9 @@ updated: 2026-09-11
 #### Triage
 
 - [x] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 882047a) — 5251732
-- [x] 2.6 R2-F2 Draw seed must include each event sitting_id in the hash input
-- [x] 2.7 R2-F3 Draw seed uses exactly eight digest bytes big-endian
-- [x] 2.8 R2-F4 is_offered is false at exactly opened_at plus resume_horizon
+- [x] 2.6 R2-F2 Draw seed must include each event sitting_id in the hash input — fbb3fc2
+- [x] 2.7 R2-F3 Draw seed uses exactly eight digest bytes big-endian — fbb3fc2
+- [x] 2.8 R2-F4 is_offered is false at exactly opened_at plus resume_horizon — fbb3fc2
 
 ### Phase 3: Rejection write-path stubs
 
