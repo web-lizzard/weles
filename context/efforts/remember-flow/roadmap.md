@@ -12,7 +12,7 @@ updated: 2026-09-11
 | S-02 | Users can leave a review mid-way and pick up where they left off | remember-flow-session-resume | done |
 | S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | done |
 | S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | in_progress |
-| S-05 | Users can jump from a card under review to its source passage | remember-flow-source-jump | pending |
+| S-05 | Users can jump from a card under review to its source passage | remember-flow-source-jump | in_progress |
 | S-06 | Users can open a review from inside capture and return without losing the conversation | remember-flow-capture-entry | pending |
 | S-07 | Users learn about waiting cards when a capture session closes | remember-flow-capture-prompt | pending |
 
@@ -69,7 +69,7 @@ flowchart LR
 - **Outcome:** Users can jump from a card under review to its source passage
 - **Acceptance criteria:** AC-18, AC-19, AC-20
 - **Change ID:** remember-flow-source-jump
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-03, S-04, S-06
 
