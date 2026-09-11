@@ -13,8 +13,7 @@ updated: 2026-09-11
 | S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | done |
 | S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | done |
 | S-05 | Users can jump from a card under review to its source passage | remember-flow-source-jump | in_progress |
-| S-06 | Users can open a review from inside capture and return without losing the conversation | remember-flow-capture-entry | pending |
-| S-07 | Users learn about waiting cards when a capture session closes | remember-flow-capture-prompt | pending |
+| S-06 | Users can open a review from capture, return without losing the conversation, and learn about waiting cards when a capture session closes | remember-flow-capture-review | in_progress |
 
 ## Dependencies
 
@@ -24,8 +23,8 @@ flowchart LR
   S-01 --> S-03["S-03 · due count"]
   S-01 --> S-04["S-04 · card rejection"]
   S-01 --> S-05["S-05 · source jump"]
-  S-01 --> S-06["S-06 · capture entry"]
-  S-03 --> S-07["S-07 · capture prompt"]
+  S-01 --> S-06["S-06 · capture review loop"]
+  S-03 --> S-06
 ```
 
 ## Slices
@@ -73,22 +72,14 @@ flowchart LR
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-03, S-04, S-06
 
-### S-06: Users can open a review from inside capture and return without losing the conversation
+### S-06: Users can open a review from capture, return without losing the conversation, and learn about waiting cards when a capture session closes
 
-- **Outcome:** Users can open a review from inside capture and return without losing the conversation
-- **Acceptance criteria:** AC-21, AC-22
-- **Change ID:** remember-flow-capture-entry
-- **Status:** pending
-- **Prerequisites:** S-01
-- **Parallel with:** S-02, S-03, S-04, S-05
-
-### S-07: Users learn about waiting cards when a capture session closes
-
-- **Outcome:** Users learn about waiting cards when a capture session closes
-- **Acceptance criteria:** AC-16
-- **Change ID:** remember-flow-capture-prompt
-- **Status:** pending
-- **Prerequisites:** S-03
+- **Outcome:** Users can open a review from capture, return without losing the conversation, and learn about waiting cards when a capture session closes
+- **Acceptance criteria:** AC-16, AC-21, AC-22
+- **Change ID:** remember-flow-capture-review
+- **Status:** in_progress
+- **Prerequisites:** S-01, S-03
+- **Parallel with:** S-02, S-04, S-05
 
 ## Done
 
