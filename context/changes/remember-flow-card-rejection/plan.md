@@ -684,6 +684,17 @@ false, `back` cleared. The response's `due` goes through
 - Reject a card in the running TUI and confirm the next card appears without any further
   keystroke, and that the due count in the header does not go stale
 
+### Review r6
+
+Artifact: `reviews/2026-09-11-r6-impl-review.md`
+
+- `R6-F1` — Retry re-issues a rejection the backend already recorded
+  Fix: A retry must not replay a step whose server write already committed. Once
+  `rejectCard` has resolved, the outstanding work is the re-read alone — `retry()` (or the
+  action it dispatches) must resume from `currentCard`, not from the rejection. Encode
+  which leg is still owed in `lastAction`, or recover the presented card without going
+  through `rejectCurrentCard`; do not widen the error branch's key set instead.
+
 ---
 
 ## Phase 10: Overlay gesture behind the reveal gate
