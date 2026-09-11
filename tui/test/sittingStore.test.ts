@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DuePartition } from "../src/api/due";
 import {
+  currentCard,
   gradeCard,
   openSitting,
+  rejectCard,
   revealBack,
   SITTING_EXPIRED,
   SittingHttpError,
@@ -63,6 +65,8 @@ describe("useSittingStore", () => {
     vi.mocked(openSitting).mockReset();
     vi.mocked(revealBack).mockReset();
     vi.mocked(gradeCard).mockReset();
+    vi.mocked(rejectCard).mockReset();
+    vi.mocked(currentCard).mockReset();
   });
 
   afterEach(() => {
@@ -356,5 +360,126 @@ describe("useSittingStore", () => {
     expect(useSittingStore.getState().phase).toBe("error");
     expect(useSittingStore.getState().notice).toBeNull();
     expect(openSitting).not.toHaveBeenCalled();
+  });
+
+  it("re-reads currentCard after rejectCard and presents the next front with the back hidden", async () => {
+    vi.mocked(rejectCard).mockResolvedValue(undefined);
+    vi.mocked(currentCard).mockResolvedValue({
+      sittingId,
+      cardId: nextCardId,
+      front: "Next after reject",
+      sittingComplete: false,
+      outstandingCount: 1,
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "First front",
+      back: "Back text",
+      isBackVisible: true,
+      selectedGradeIndex: 2,
+    });
+
+    await useSittingStore.getState().rejectCurrentCard();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(rejectCard).toHaveBeenCalledWith(sittingId, cardId);
+    expect(currentCard).toHaveBeenCalledWith(sittingId);
+    const state = useSittingStore.getState();
+    expect(state.phase).toBe("presented");
+    expect(state.cardId).toBe(nextCardId);
+    expect(state.front).toBe("Next after reject");
+    expect(state.isBackVisible).toBe(false);
+    expect(state.back).toBeNull();
+    expect(state.selectedGradeIndex).toBe(0);
+    expect(state.outstandingCount).toBe(1);
+  });
+
+  it("pushes due from currentCard into dueStore after a successful rejection", async () => {
+    const updatedDue: DuePartition = {
+      total: 3,
+      notYetSeen: 0,
+      seenStillOwed: 2,
+      ripeOutsideSitting: 1,
+    };
+    vi.mocked(rejectCard).mockResolvedValue(undefined);
+    vi.mocked(currentCard).mockResolvedValue({
+      sittingId,
+      cardId: nextCardId,
+      front: "Next",
+      sittingComplete: false,
+      outstandingCount: 2,
+      due: updatedDue,
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Front",
+    });
+    useDueStore.setState({ partition: DUE_PARTITION, isStale: true });
+
+    await useSittingStore.getState().rejectCurrentCard();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(useDueStore.getState().partition).toEqual(updatedDue);
+    expect(useDueStore.getState().isStale).toBe(false);
+  });
+
+  it("completes the sitting when currentCard reports sittingComplete after a rejection", async () => {
+    vi.mocked(rejectCard).mockResolvedValue(undefined);
+    vi.mocked(currentCard).mockResolvedValue({
+      sittingId,
+      cardId: null,
+      front: null,
+      sittingComplete: true,
+      outstandingCount: 0,
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Last card",
+    });
+
+    await useSittingStore.getState().rejectCurrentCard();
+    await vi.advanceTimersByTimeAsync(0);
+
+    const state = useSittingStore.getState();
+    expect(state.phase).toBe("complete");
+    expect(state.cardId).toBeNull();
+    expect(state.front).toBeNull();
+  });
+
+  it("re-opens once with a notice when rejectCard returns sitting_expired instead of entering error", async () => {
+    vi.mocked(rejectCard).mockRejectedValue(
+      new SittingHttpError(SITTING_EXPIRED, "Sitting no longer offered", 409),
+    );
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId: "00000000-0000-4000-8000-000000000002",
+      cardId,
+      front: "Fresh front",
+      sittingComplete: false,
+      outstandingCount: 1,
+    });
+    useSittingStore.setState({
+      phase: "presented",
+      sittingId,
+      cardId,
+      front: "Stale front",
+    });
+
+    await useSittingStore.getState().rejectCurrentCard();
+    await vi.advanceTimersByTimeAsync(0);
+
+    const state = useSittingStore.getState();
+    expect(state.phase).not.toBe("error");
+    expect(state.error).toBeNull();
+    expect(state.notice).toMatch(/expired/i);
+    expect(openSitting).toHaveBeenCalledTimes(1);
+    expect(state.front).toBe("Fresh front");
+    expect(currentCard).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  currentCard,
   gradeCard,
   openSitting,
+  rejectCard,
   revealBack,
   SITTING_EXPIRED,
   SittingHttpError,
@@ -236,6 +238,60 @@ describe("sittings API", () => {
       expect(httpError.status).toBe(404);
       expect(httpError.message).toBe("Sitting not found");
       return true;
+    });
+  });
+
+  it("resolves rejectCard without a body when the server returns 204", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(rejectCard(sittingId, cardId)).resolves.toBeUndefined();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `http://localhost:8000/review-sittings/${sittingId}/cards/${cardId}/rejection`,
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("throws SittingHttpError from rejectCard when the server returns a client error body", async () => {
+    mockFetchJson(
+      { code: "card_not_presentable", detail: "Card is not presentable" },
+      409,
+    );
+
+    await expect(rejectCard(sittingId, cardId)).rejects.toSatisfy(
+      (error: unknown) => {
+        expect(error).toBeInstanceOf(SittingHttpError);
+        const httpError = error as SittingHttpError;
+        expect(httpError.code).toBe("card_not_presentable");
+        expect(httpError.detail).toBe("Card is not presentable");
+        expect(httpError.status).toBe(409);
+        return true;
+      },
+    );
+  });
+
+  it("maps currentCard from snake_case to camelCase including due", async () => {
+    mockFetchJson({
+      sitting_id: sittingId,
+      card_id: cardId,
+      front: "Current front",
+      sitting_complete: false,
+      outstanding_count: 2,
+      due: duePartitionRaw,
+    });
+
+    const result = await currentCard(sittingId);
+
+    expect(result).toEqual({
+      sittingId,
+      cardId,
+      front: "Current front",
+      sittingComplete: false,
+      outstandingCount: 2,
+      due: duePartition,
     });
   });
 });
