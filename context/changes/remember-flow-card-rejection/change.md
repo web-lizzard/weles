@@ -1,7 +1,7 @@
 ---
 change_id: remember-flow-card-rejection
 title: Users can reject a bad card during review so it stops coming back
-status: implementing
+status: implemented
 created: 2026-09-11
 updated: 2026-09-11
 archived_at: null
