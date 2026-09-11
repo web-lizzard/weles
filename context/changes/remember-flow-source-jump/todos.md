@@ -156,4 +156,4 @@ updated: 2026-09-11
 
 #### Triage
 
-- [ ] 11.4 R3-F1 Phase 11 Automated Verification command collects no tests
+- [x] 11.4 R3-F1 Phase 11 Automated Verification command collects no tests — 2d973ef
