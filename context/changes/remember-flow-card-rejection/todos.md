@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 2
-next_step: 2.5
-next_command: /implement remember-flow-card-rejection phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement remember-flow-card-rejection phase 3
 updated: 2026-09-11
 ---
 
@@ -36,7 +36,7 @@ updated: 2026-09-11
 
 #### Triage
 
-- [ ] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 882047a)
+- [x] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 882047a) — 5251732
 
 ### Phase 3: Rejection write-path stubs
 
