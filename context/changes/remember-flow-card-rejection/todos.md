@@ -98,13 +98,13 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 7.1 Register markers AC-16 through AC-23 in pyproject.toml
+- [x] 7.1 Register markers AC-16 through AC-23 in pyproject.toml — efc4339
 
 #### Manual
 
-- [x] 7.2 Author the AC-17 and AC-23 scenarios via /bdd
-- [x] 7.3 Confirm the new scenarios fail on assertions, not on undefined steps or collection
-- [x] 7.4 Confirm no existing remember-flow scenario regressed
+- [x] 7.2 Author the AC-17 and AC-23 scenarios via /bdd — efc4339
+- [x] 7.3 Confirm the new scenarios fail on assertions, not on undefined steps or collection — efc4339
+- [x] 7.4 Confirm no existing remember-flow scenario regressed — efc4339
 
 ### Phase 8: TUI client, store and binding stubs
 
