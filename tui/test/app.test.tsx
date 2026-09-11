@@ -2,7 +2,7 @@ import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NoteDetail } from "../src/api/notes";
 import { getNote } from "../src/api/notes";
-import { openSitting } from "../src/api/sittings";
+import { fetchCardSource, openSitting, revealBack } from "../src/api/sittings";
 import {
   approveNote,
   sendMessage,
@@ -74,6 +74,8 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
   return {
     ...actual,
     openSitting: vi.fn(),
+    revealBack: vi.fn(),
+    fetchCardSource: vi.fn(),
   };
 });
 
@@ -443,6 +445,54 @@ describe("App", () => {
       expect(sitting.sittingId).toBeNull();
       expect(sitting.cardId).toBeNull();
       expect(sitting.front).toBeNull();
+    });
+
+    it("closes the source view on ESC before leaving the sitting overlay", async () => {
+      vi.mocked(openSitting).mockResolvedValue({
+        kind: "opened",
+        sittingId,
+        cardId,
+        front: "What is a SYN?",
+        sittingComplete: false,
+        outstandingCount: 0,
+      });
+      vi.mocked(revealBack).mockResolvedValue({
+        sittingId,
+        cardId,
+        front: "What is a SYN?",
+        back: "Synchronize sequence numbers.",
+      });
+      vi.mocked(fetchCardSource).mockResolvedValue({
+        blocks: [
+          { index: 0, text: "Context above." },
+          { index: 1, text: "Quoted span text" },
+        ],
+        span: { blockIndex: 1, start: 0, end: 6 },
+      });
+
+      const { stdin, lastFrame } = render(<App />);
+
+      await submitMessage(stdin, "/remember");
+      await waitFor(() => (lastFrame() ?? "").includes("What is a SYN?"));
+
+      stdin.write("t");
+      await waitFor(() =>
+        (lastFrame() ?? "").includes("Synchronize sequence numbers."),
+      );
+
+      stdin.write("s");
+      await waitFor(() => (lastFrame() ?? "").includes("Context above."));
+
+      expect(useAppStore.getState().isSittingOverlayOpen).toBe(true);
+
+      stdin.write("\x1B");
+      await waitFor(() => !(lastFrame() ?? "").includes("Context above."));
+      expect(lastFrame()).toContain("Synchronize sequence numbers.");
+      expect(useAppStore.getState().isSittingOverlayOpen).toBe(true);
+
+      stdin.write("\x1B");
+      await waitFor(() => !(lastFrame() ?? "").includes("What is a SYN?"));
+      expect(useAppStore.getState().isSittingOverlayOpen).toBe(false);
     });
 
     it("blocks capture input while the sitting overlay is open", async () => {
