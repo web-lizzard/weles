@@ -123,8 +123,8 @@ updated: 2026-09-11
 
 #### Triage
 
-- [ ] 9.5 R3-F2 Card source probe state lives in the sitting store, not overlay-local state
-- [ ] 9.6 R3-F3 cardSourceProbe.ts is outside every phase's Changes Required
+- [x] 9.5 R3-F2 Card source probe state lives in the sitting store, not overlay-local state — cddb1a7
+- [x] 9.6 R3-F3 cardSourceProbe.ts is outside every phase's Changes Required — cddb1a7
 
 ### Phase 10: Expansion and the viewport
 
