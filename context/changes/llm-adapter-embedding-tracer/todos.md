@@ -23,12 +23,12 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 2.1 Create the adapters/out/llm package with the tracing helper signatures and attribute constants
-- [x] 2.2 Add the OpenRouterEmbeddingAdapter stub with its constructor and embed signature
+- [x] 2.1 Create the adapters/out/llm package with the tracing helper signatures and attribute constants — 3231051
+- [x] 2.2 Add the OpenRouterEmbeddingAdapter stub with its constructor and embed signature — 3231051
 
 #### Manual
 
-- [x] 2.3 Run the existing suite and confirm the stubs changed nothing
+- [x] 2.3 Run the existing suite and confirm the stubs changed nothing — 3231051
 
 ### Phase 3: Adapter behaviour and span emission
 
