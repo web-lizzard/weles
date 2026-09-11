@@ -113,9 +113,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 9.1 sittingOverlay.test.tsx passes
-- [x] 9.2 TUI test suite passes
-- [x] 9.3 TUI typecheck passes
+- [x] 9.1 sittingOverlay.test.tsx passes — c06218d
+- [x] 9.2 TUI test suite passes — c06218d
+- [x] 9.3 TUI typecheck passes — c06218d
 
 #### Manual
 
