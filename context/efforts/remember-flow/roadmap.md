@@ -11,7 +11,7 @@ updated: 2026-09-11
 | S-01 | Users can work through every due card in one review sitting — graded cards reschedule themselves | remember-flow-review-session | done |
 | S-02 | Users can leave a review mid-way and pick up where they left off | remember-flow-session-resume | done |
 | S-03 | Users can see how many cards are due without opening a review | remember-flow-due-count | done |
-| S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | in_progress |
+| S-04 | Users can reject a bad card during review so it stops coming back | remember-flow-card-rejection | done |
 | S-05 | Users can jump from a card under review to its source passage | remember-flow-source-jump | in_progress |
 | S-06 | Users can open a review from inside capture and return without losing the conversation | remember-flow-capture-entry | pending |
 | S-07 | Users learn about waiting cards when a capture session closes | remember-flow-capture-prompt | pending |
@@ -60,7 +60,7 @@ flowchart LR
 - **Outcome:** Users can reject a bad card during review so it stops coming back
 - **Acceptance criteria:** AC-17, AC-23
 - **Change ID:** remember-flow-card-rejection
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-03, S-05, S-06
 
@@ -95,3 +95,4 @@ flowchart LR
 - **S-01: Users can work through every due card in one review sitting — graded cards reschedule themselves** — Archived 2026-09-10 → `context/archive/changes/2026-09-09-remember-flow-review-session/`. Lesson: —.
 - **S-02: Users can leave a review mid-way and pick up where they left off** — Archived 2026-09-10 → `context/archive/changes/2026-09-10-remember-flow-session-resume/`. Lesson: —.
 - **S-03: Users can see how many cards are due without opening a review** — Archived 2026-09-11 → `context/archive/changes/2026-09-10-remember-flow-due-count/`. Lesson: —.
+- **S-04: Users can reject a bad card during review so it stops coming back** — Archived 2026-09-11 → `context/archive/changes/2026-09-11-remember-flow-card-rejection/`. Lesson: —.
