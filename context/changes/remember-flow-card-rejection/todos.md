@@ -63,9 +63,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 4.1 Refuse a rejection under each of the four conditions grading already refuses
-- [x] 4.2 Write the review event and the card_rejected envelope inside one unit of work
-- [x] 4.3 Leave the scheduling state repository untouched on a rejection
+- [x] 4.1 Refuse a rejection under each of the four conditions grading already refuses — 3413efb
+- [x] 4.2 Write the review event and the card_rejected envelope inside one unit of work — 3413efb
+- [x] 4.3 Leave the scheduling state repository untouched on a rejection — 3413efb
 
 #### Manual
 
