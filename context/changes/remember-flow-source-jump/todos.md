@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 4
-next_step: 4.1
-next_command: /implement remember-flow-source-jump phase 4
+current_phase: 5
+next_step: Tests
+next_command: /unit-test remember-flow-source-jump phase 5
 updated: 2026-09-11
 ---
 
@@ -47,9 +47,9 @@ updated: 2026-09-11
 
 #### Automated
 
-- [ ] 4.1 basedpyright reports no new errors across src
-- [ ] 4.2 ruff check passes on src
-- [ ] 4.3 test_remember_routes.py passes with reveal calls switched to POST
+- [x] 4.1 basedpyright reports no new errors across src — 32f600b
+- [x] 4.2 ruff check passes on src — 32f600b
+- [x] 4.3 test_remember_routes.py passes with reveal calls switched to POST — 32f600b
 
 ### Phase 5: Revealing the back records the fact
 
