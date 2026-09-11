@@ -1,8 +1,9 @@
-import { Box, Text, useInput } from "ink";
+import { Box, Text, useInput, useStdout } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { CardSource, Grade } from "../api/sittings.js";
 import DueOverlayFooter from "../components/DueOverlayFooter.js";
+import SourceViewport from "../components/SourceViewport.js";
 import { useDueStore } from "../store/due.js";
 import { useAppStore } from "../store/index.js";
 import { useSittingStore } from "../store/sitting.js";
@@ -18,6 +19,9 @@ const RESUMED_BANNER = "Resumed — picking up where you left off";
 
 const INVERSE_ON = "\u001b[7m";
 const INVERSE_OFF = "\u001b[27m";
+const DEFAULT_TERMINAL_ROWS = 24;
+/** Rows reserved for overlay chrome outside the source viewport window. */
+const SOURCE_VIEWPORT_CHROME_ROWS = 19;
 
 type SourceViewState = {
   source: CardSource;
@@ -26,6 +30,8 @@ type SourceViewState = {
 };
 
 export default function SittingOverlay(): JSX.Element {
+  const { stdout } = useStdout();
+  const sourceViewportHeight = sourceViewportLineCount(stdout.rows);
   const phase = useSittingStore((s) => s.phase);
   const front = useSittingStore((s) => s.front);
   const back = useSittingStore((s) => s.back);
@@ -92,7 +98,81 @@ export default function SittingOverlay(): JSX.Element {
     if (sourceView !== null) {
       if (key.escape) {
         setSourceView(null);
+        return;
       }
+
+      if (input === "e") {
+        setSourceView((current) => {
+          if (current === null) {
+            return current;
+          }
+          const nextExpanded = !current.isExpanded;
+          const lines = buildSourceLines(current.source, nextExpanded);
+          return {
+            ...current,
+            isExpanded: nextExpanded,
+            offset: offsetToKeepSpanInView(
+              current.source,
+              lines,
+              sourceViewportHeight,
+              nextExpanded,
+            ),
+          };
+        });
+        return;
+      }
+
+      const lines = buildSourceLines(sourceView.source, sourceView.isExpanded);
+      const maxOffset = Math.max(0, lines.length - sourceViewportHeight);
+
+      if (key.upArrow) {
+        setSourceView((current) =>
+          current === null
+            ? current
+            : { ...current, offset: Math.max(0, current.offset - 1) },
+        );
+        return;
+      }
+
+      if (key.downArrow) {
+        setSourceView((current) =>
+          current === null
+            ? current
+            : {
+                ...current,
+                offset: Math.min(maxOffset, current.offset + 1),
+              },
+        );
+        return;
+      }
+
+      if (key.pageUp) {
+        setSourceView((current) =>
+          current === null
+            ? current
+            : {
+                ...current,
+                offset: Math.max(0, current.offset - sourceViewportHeight),
+              },
+        );
+        return;
+      }
+
+      if (key.pageDown) {
+        setSourceView((current) =>
+          current === null
+            ? current
+            : {
+                ...current,
+                offset: Math.min(
+                  maxOffset,
+                  current.offset + sourceViewportHeight,
+                ),
+              },
+        );
+        return;
+      }
+
       return;
     }
 
@@ -185,7 +265,7 @@ export default function SittingOverlay(): JSX.Element {
     case "presented":
       body =
         sourceView !== null
-          ? renderSourceView(sourceView.source)
+          ? renderSourceView(sourceView, sourceViewportHeight)
           : renderPresented(front, back, isBackVisible, selectedGradeIndex);
       break;
     case "complete":
@@ -253,34 +333,79 @@ export default function SittingOverlay(): JSX.Element {
   );
 }
 
-function renderSourceBlock(
-  block: { index: number; text: string },
-  span: CardSource["span"],
-): JSX.Element {
-  if (block.index !== span.blockIndex) {
-    return <Text wrap="wrap">{block.text}</Text>;
-  }
-  return (
-    <Text wrap="wrap">
-      {block.text.slice(0, span.start)}
-      {INVERSE_ON}
-      {block.text.slice(span.start, span.end)}
-      {INVERSE_OFF}
-      {block.text.slice(span.end)}
-    </Text>
-  );
+function sourceViewportLineCount(stdoutRows: number): number {
+  const rows = stdoutRows > 0 ? stdoutRows : DEFAULT_TERMINAL_ROWS;
+  return Math.max(1, rows - SOURCE_VIEWPORT_CHROME_ROWS);
 }
 
-function renderSourceView(source: CardSource): JSX.Element {
-  return (
-    <Box flexDirection="column" gap={1}>
-      {source.blocks.map((block) => (
-        <Box key={block.index} flexDirection="column">
-          {renderSourceBlock(block, source.span)}
-        </Box>
-      ))}
-    </Box>
-  );
+function visibleSourceBlocks(
+  source: CardSource,
+  isExpanded: boolean,
+): CardSource["blocks"] {
+  if (isExpanded) {
+    return [...source.blocks].sort((a, b) => a.index - b.index);
+  }
+  const spanIndex = source.span.blockIndex;
+  return source.blocks
+    .filter(
+      (block) => block.index >= spanIndex - 1 && block.index <= spanIndex + 1,
+    )
+    .sort((a, b) => a.index - b.index);
+}
+
+function blockToHighlightedLines(
+  block: { index: number; text: string },
+  span: CardSource["span"],
+): string[] {
+  let text = block.text;
+  if (block.index === span.blockIndex) {
+    text =
+      text.slice(0, span.start) +
+      INVERSE_ON +
+      text.slice(span.start, span.end) +
+      INVERSE_OFF +
+      text.slice(span.end);
+  }
+  return text.split("\n");
+}
+
+function buildSourceLines(source: CardSource, isExpanded: boolean): string[] {
+  const blocks = visibleSourceBlocks(source, isExpanded);
+  return blocks.flatMap((block) => blockToHighlightedLines(block, source.span));
+}
+
+function spanLineIndexInLines(source: CardSource, isExpanded: boolean): number {
+  const blocks = visibleSourceBlocks(source, isExpanded);
+  let lineIndex = 0;
+
+  for (const block of blocks) {
+    if (block.index === source.span.blockIndex) {
+      const beforeSpan = block.text.slice(0, source.span.start);
+      return lineIndex + beforeSpan.split("\n").length - 1;
+    }
+    lineIndex += blockToHighlightedLines(block, source.span).length;
+  }
+
+  return 0;
+}
+
+function offsetToKeepSpanInView(
+  source: CardSource,
+  lines: string[],
+  height: number,
+  isExpanded: boolean,
+): number {
+  const spanLineIndex = spanLineIndexInLines(source, isExpanded);
+  const maxOffset = Math.max(0, lines.length - height);
+  if (spanLineIndex >= maxOffset) {
+    return maxOffset;
+  }
+  return Math.min(spanLineIndex, maxOffset);
+}
+
+function renderSourceView(state: SourceViewState, height: number): JSX.Element {
+  const lines = buildSourceLines(state.source, state.isExpanded);
+  return <SourceViewport lines={lines} offset={state.offset} height={height} />;
 }
 
 function renderOpening(): JSX.Element {

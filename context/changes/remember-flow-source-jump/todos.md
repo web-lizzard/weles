@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 9
-next_step: 9.4
-next_command: /implement remember-flow-source-jump phase 9
+current_phase: 11
+next_step: tests
+next_command: /unit-test remember-flow-source-jump phase 11
 updated: 2026-09-11
 ---
 
@@ -125,13 +125,13 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — b4799a7
 
 #### Automated
 
-- [ ] 10.1 sourceViewport.test.tsx and sittingOverlay.test.tsx pass
-- [ ] 10.2 TUI test suite passes
-- [ ] 10.3 TUI lint passes
+- [x] 10.1 sourceViewport.test.tsx and sittingOverlay.test.tsx pass
+- [x] 10.2 TUI test suite passes
+- [x] 10.3 TUI lint passes
 
 #### Manual
 
