@@ -8,7 +8,6 @@ import NoteDetailScreen from "./screens/NoteDetailScreen.js";
 import NoteListOverlay from "./screens/NoteListOverlay.js";
 import SittingOverlay from "./screens/SittingOverlay.js";
 import { useAppStore } from "./store/index.js";
-import { useSittingStore } from "./store/sitting.js";
 
 const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
@@ -24,7 +23,6 @@ export default function App() {
   const activeNoteTab = useAppStore((state) => state.activeNoteTab);
   const selectedCardId = useAppStore((state) => state.selectedCardId);
   const closeNotes = useAppStore((state) => state.closeNotes);
-  const closeSittingOverlay = useAppStore((state) => state.closeSittingOverlay);
   const closeDetail = useAppStore((state) => state.closeDetail);
   const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
   const columns =
@@ -47,10 +45,9 @@ export default function App() {
       return;
     }
 
-    if (isSittingOverlayOpen) {
-      closeSittingOverlay();
-      useSittingStore.getState().reset();
-    }
+    // Sitting Esc ladder (source view → reject confirm → leave sitting) lives in
+    // SittingOverlay only; handling it here would close the overlay on the first
+    // Esc while the source view is open.
   });
 
   return (
