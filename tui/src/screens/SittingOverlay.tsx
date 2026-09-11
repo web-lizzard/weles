@@ -14,8 +14,10 @@ const TOGGLE_CARD_HINT = "Press t to toggle card";
 const REJECT_HINT = "Press x to turn down this card";
 const REJECT_CONFIRM_HINT = "Turn down this card? y confirm · n cancel";
 const SOURCE_HINT = "Press s to view source";
-const EXPAND_SOURCE_HINT = "Press e to expand to the whole note";
 const RESUMED_BANNER = "Resumed — picking up where you left off";
+
+const INVERSE_ON = "\u001b[7m";
+const INVERSE_OFF = "\u001b[27m";
 
 type SourceViewState = {
   source: CardSource;
@@ -36,51 +38,64 @@ export default function SittingOverlay(): JSX.Element {
   const error = useSittingStore((s) => s.error);
   const retry = useSittingStore((s) => s.retry);
   const sittingId = useSittingStore((s) => s.sittingId);
+  const cardId = useSittingStore((s) => s.cardId);
   const isResumed = useSittingStore((s) => s.isResumed);
   const outstandingCount = useSittingStore((s) => s.outstandingCount);
   const notice = useSittingStore((s) => s.notice);
+  const cardSource = useSittingStore((s) => s.cardSource);
+  const isCardSourceProbeComplete = useSittingStore(
+    (s) => s.isCardSourceProbeComplete,
+  );
   const partition = useDueStore((s) => s.partition);
   const dueIsStale = useDueStore((s) => s.isStale);
   const [isRejectConfirmPending, setRejectConfirmPending] = useState(false);
   const [sourceView, setSourceView] = useState<SourceViewState | null>(null);
-  const [isSourceAvailable, setIsSourceAvailable] = useState(false);
+  const [sourceOpenRequested, setSourceOpenRequested] = useState(false);
 
-  const closeSourceView = (): void => {};
-
-  const openSourceView = (): void => {};
-
-  const probeSourceAvailability = async (): Promise<void> => {};
-
-  const toggleSourceExpanded = (): void => {};
-
-  const moveSourceOffset = (_delta: number): void => {};
-
-  const phase8SourceScaffold = {
-    sourceView,
-    isSourceAvailable,
-    hints: { source: SOURCE_HINT, expand: EXPAND_SOURCE_HINT },
-    handlers: {
-      closeSourceView,
-      openSourceView,
-      probeSourceAvailability,
-      toggleSourceExpanded,
-      moveSourceOffset,
-    },
-    setters: { setSourceView, setIsSourceAvailable },
-  };
-  void phase8SourceScaffold;
+  const isSourceAvailable = isCardSourceProbeComplete && cardSource !== null;
 
   useEffect(() => {
     void useSittingStore.getState().open();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clear source UI when the card changes
+  useEffect(() => {
+    setSourceOpenRequested(false);
+    setSourceView(null);
+  }, [cardId]);
+
   useEffect(() => {
     if (!isBackVisible) {
       setRejectConfirmPending(false);
+      setSourceView(null);
     }
   }, [isBackVisible]);
 
+  useEffect(() => {
+    if (
+      !sourceOpenRequested ||
+      !isSourceAvailable ||
+      cardSource === null ||
+      sourceView !== null
+    ) {
+      return;
+    }
+    setSourceView({
+      source: cardSource,
+      isExpanded: false,
+      offset: 0,
+    });
+    setSourceOpenRequested(false);
+  }, [sourceOpenRequested, isSourceAvailable, cardSource, sourceView]);
+
   useInput((input, key) => {
+    if (sourceView !== null) {
+      if (key.escape) {
+        setSourceView(null);
+      }
+      return;
+    }
+
     if (key.escape) {
       if (isRejectConfirmPending) {
         setRejectConfirmPending(false);
@@ -111,6 +126,19 @@ export default function SittingOverlay(): JSX.Element {
       if (input === "n") {
         setRejectConfirmPending(false);
         return;
+      }
+      return;
+    }
+
+    if (input === "s" && isBackVisible) {
+      if (isSourceAvailable && cardSource !== null) {
+        setSourceView({
+          source: cardSource,
+          isExpanded: false,
+          offset: 0,
+        });
+      } else if (!isCardSourceProbeComplete) {
+        setSourceOpenRequested(true);
       }
       return;
     }
@@ -155,7 +183,10 @@ export default function SittingOverlay(): JSX.Element {
       body = renderNothingDue();
       break;
     case "presented":
-      body = renderPresented(front, back, isBackVisible, selectedGradeIndex);
+      body =
+        sourceView !== null
+          ? renderSourceView(sourceView.source)
+          : renderPresented(front, back, isBackVisible, selectedGradeIndex);
       break;
     case "complete":
       body = renderComplete();
@@ -176,14 +207,23 @@ export default function SittingOverlay(): JSX.Element {
         partition={partition}
         outstandingCount={outstandingCount}
         isStale={dueIsStale}
-        showToggleHint={phase === "presented"}
+        showToggleHint={phase === "presented" && sourceView === null}
         toggleHint={TOGGLE_CARD_HINT}
-        showRejectHint={phase === "presented" && isBackVisible}
+        showRejectHint={
+          phase === "presented" && isBackVisible && sourceView === null
+        }
         rejectHint={REJECT_HINT}
         showRejectConfirm={
           phase === "presented" && isBackVisible && isRejectConfirmPending
         }
         rejectConfirmHint={REJECT_CONFIRM_HINT}
+        showSourceHint={
+          phase === "presented" &&
+          isBackVisible &&
+          isSourceAvailable &&
+          sourceView === null
+        }
+        sourceHint={SOURCE_HINT}
       />
     ) : null;
 
@@ -192,7 +232,7 @@ export default function SittingOverlay(): JSX.Element {
   return (
     <Box flexDirection="column" flexGrow={1}>
       <Text dimColor>{ESC_HINT}</Text>
-      {phase === "presented" && isResumed && (
+      {phase === "presented" && isResumed && sourceView === null && (
         <Box marginTop={1}>
           <Text color="cyan">{RESUMED_BANNER}</Text>
         </Box>
@@ -203,10 +243,42 @@ export default function SittingOverlay(): JSX.Element {
         marginTop={presentedTopMargin}
         gap={notice !== null ? 1 : 0}
       >
-        {notice !== null && <Text dimColor>{notice}</Text>}
+        {notice !== null && sourceView === null && (
+          <Text dimColor>{notice}</Text>
+        )}
         {body}
       </Box>
       {footer}
+    </Box>
+  );
+}
+
+function renderSourceBlock(
+  block: { index: number; text: string },
+  span: CardSource["span"],
+): JSX.Element {
+  if (block.index !== span.blockIndex) {
+    return <Text wrap="wrap">{block.text}</Text>;
+  }
+  return (
+    <Text wrap="wrap">
+      {block.text.slice(0, span.start)}
+      {INVERSE_ON}
+      {block.text.slice(span.start, span.end)}
+      {INVERSE_OFF}
+      {block.text.slice(span.end)}
+    </Text>
+  );
+}
+
+function renderSourceView(source: CardSource): JSX.Element {
+  return (
+    <Box flexDirection="column" gap={1}>
+      {source.blocks.map((block) => (
+        <Box key={block.index} flexDirection="column">
+          {renderSourceBlock(block, source.span)}
+        </Box>
+      ))}
     </Box>
   );
 }

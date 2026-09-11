@@ -18,6 +18,8 @@ type DueOverlayFooterProps = {
   rejectHint?: string;
   showRejectConfirm?: boolean;
   rejectConfirmHint?: string;
+  showSourceHint?: boolean;
+  sourceHint?: string;
 };
 
 export default function DueOverlayFooter({
@@ -30,6 +32,8 @@ export default function DueOverlayFooter({
   rejectHint,
   showRejectConfirm = false,
   rejectConfirmHint,
+  showSourceHint = false,
+  sourceHint,
 }: DueOverlayFooterProps): JSX.Element {
   const showBreakdown =
     partition !== null && duePartitionShowsBreakdown(partition);
@@ -72,6 +76,11 @@ export default function DueOverlayFooter({
       {showRejectHint && !showRejectConfirm && rejectHint !== undefined && (
         <Box marginTop={showToggleHint ? 0 : 1}>
           <Text color="red">{rejectHint}</Text>
+        </Box>
+      )}
+      {showSourceHint && sourceHint !== undefined && (
+        <Box marginTop={1}>
+          <Text color="yellow">{sourceHint}</Text>
         </Box>
       )}
     </Box>
