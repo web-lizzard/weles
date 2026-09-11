@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-card-rejection
-current_phase: 8
-next_step: 8.7
-next_command: /implement remember-flow-card-rejection phase 8
+current_phase: 9
+next_step: 9.5
+next_command: /implement remember-flow-card-rejection phase 9
 updated: 2026-09-11
 ---
 
@@ -144,7 +144,7 @@ updated: 2026-09-11
 
 #### Triage
 
-- [ ] 9.6 R6-F1 Retry re-issues a rejection the backend already recorded (proof: 2e4a84e)
+- [x] 9.6 R6-F1 Retry re-issues a rejection the backend already recorded (proof: 2e4a84e) — 6a88772
 
 ### Phase 10: Overlay gesture behind the reveal gate
 
