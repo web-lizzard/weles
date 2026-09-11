@@ -36,7 +36,7 @@ updated: 2026-09-11
 
 #### Triage
 
-- [ ] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 3f99e12)
+- [ ] 2.5 SchedulingReplay folds grades belonging to other cards (proof: 882047a)
 
 ### Phase 3: Rejection write-path stubs
 
