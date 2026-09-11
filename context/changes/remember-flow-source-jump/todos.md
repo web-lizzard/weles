@@ -145,6 +145,6 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 11.1 Feature suite passes
-- [x] 11.2 Remember step coverage check passes
-- [x] 11.3 Full backend suite passes
+- [x] 11.1 Feature suite passes — e37f3fa
+- [x] 11.2 Remember step coverage check passes — e37f3fa
+- [x] 11.3 Full backend suite passes — e37f3fa
