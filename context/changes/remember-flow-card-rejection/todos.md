@@ -75,11 +75,11 @@ updated: 2026-09-11
 
 #### Automated
 
-- [x] 5.1 Add CardRepository.get and implement it on the in-memory adapter
-- [x] 5.2 Add DiscardCardCommand taking card id, reason, detail and discarded_at
-- [x] 5.3 Add CardDiscardHandler bound to CARD_REJECTED
-- [x] 5.4 Register the discard command and handler in compose and in the worker's handler list
-- [x] 5.5 Add a worker seam to InMemoryRememberComposition over its own notes and cards repositories
+- [x] 5.1 Add CardRepository.get and implement it on the in-memory adapter — cc9621e
+- [x] 5.2 Add DiscardCardCommand taking card id, reason, detail and discarded_at — cc9621e
+- [x] 5.3 Add CardDiscardHandler bound to CARD_REJECTED — cc9621e
+- [x] 5.4 Register the discard command and handler in compose and in the worker's handler list — cc9621e
+- [x] 5.5 Add a worker seam to InMemoryRememberComposition over its own notes and cards repositories — cc9621e
 
 ### Phase 6: Distill discard behaviour
 
