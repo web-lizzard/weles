@@ -146,12 +146,12 @@ updated: 2026-09-11
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — d142e47
 
 #### Automated
 
-- [ ] 10.1 Fire the reject gesture only while the back is visible
-- [ ] 10.2 Render the reject hint only alongside the back
+- [x] 10.1 Fire the reject gesture only while the back is visible — d142e47
+- [x] 10.2 Render the reject hint only alongside the back — d142e47
 
 #### Manual
 
