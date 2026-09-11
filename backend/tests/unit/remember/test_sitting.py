@@ -29,7 +29,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=datetime.now(UTC),
-        grade=grade,
+        outcome=grade,
         sitting_id=sitting_id,
     )
 
@@ -79,13 +79,13 @@ def test_grades_from_another_sitting_do_not_finish_this_one_or_hide_its_next_car
         ReviewEvent(
             card_id=first,
             reviewed_at=datetime.now(UTC),
-            grade=Grade.GOOD,
+            outcome=Grade.GOOD,
             sitting_id=SittingId.new(),
         ),
         ReviewEvent(
             card_id=second,
             reviewed_at=datetime.now(UTC),
-            grade=Grade.GOOD,
+            outcome=Grade.GOOD,
             sitting_id=SittingId.new(),
         ),
     )
@@ -196,7 +196,7 @@ def _pinned_event(
     return ReviewEvent(
         card_id=CardId(value=UUID(card_id)),
         reviewed_at=reviewed_at,
-        grade=grade,
+        outcome=grade,
         sitting_id=SittingId(value=UUID(sitting_id)),
     )
 

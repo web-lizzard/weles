@@ -33,7 +33,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         sitting_id=sitting_id,
-        grade=grade,
+        outcome=grade,
         reviewed_at=reviewed_at,
     )
 

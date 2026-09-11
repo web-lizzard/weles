@@ -20,7 +20,7 @@ def _event(card_id: object, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,  # pyright: ignore[reportArgumentType]
         reviewed_at=datetime.now(UTC),
-        grade=grade,
+        outcome=grade,
         sitting_id=sitting_id,
     )
 

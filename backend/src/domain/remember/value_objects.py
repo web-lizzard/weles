@@ -17,7 +17,15 @@ class Grade(StrEnum):
     EASY = "easy"
 
 
-FINISHING_GRADES: frozenset[Grade] = frozenset({Grade.GOOD, Grade.EASY})
+class Rejected(StrEnum):
+    REJECTED = "rejected"
+
+
+ReviewOutcome = Grade | Rejected
+
+FINISHING_OUTCOMES: frozenset[ReviewOutcome] = frozenset(
+    {Grade.GOOD, Grade.EASY, Rejected.REJECTED}
+)
 
 
 class SittingId(BaseModel, frozen=True):

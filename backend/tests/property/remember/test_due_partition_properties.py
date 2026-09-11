@@ -71,7 +71,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=_AS_OF,
-        grade=grade,
+        outcome=grade,
         sitting_id=sitting_id,
     )
 

@@ -85,22 +85,27 @@ class SchedulingReplay:
     def replay(
         self, card_id: CardId, events: Sequence[ReviewEvent]
     ) -> SchedulingState | None:
-        """Fold events in reviewed_at order; return None when the log is empty.
+        """Fold graded events in reviewed_at order; return None when none remain.
 
         Each scheduler result becomes the next previous state. Only
-        card_id, reviewed_at, and grade are read — sitting_id never
-        reaches the scheduler.
+        card_id, reviewed_at, and a Grade outcome are read — sitting_id
+        never reaches the scheduler.
         """
-        if not events:
+        graded: list[tuple[Grade, datetime]] = []
+        for event in events:
+            outcome = event.outcome
+            if isinstance(outcome, Grade):
+                graded.append((outcome, event.reviewed_at))
+        if not graded:
             return None
 
-        ordered = sorted(events, key=lambda event: event.reviewed_at)
+        ordered = sorted(graded, key=lambda item: item[1])
         previous: SchedulingState | None = None
-        for event in ordered:
+        for grade, reviewed_at in ordered:
             previous = self._scheduler.review(
                 previous,
                 card_id,
-                event.grade,
-                event.reviewed_at,
+                grade,
+                reviewed_at,
             )
         return previous

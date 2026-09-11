@@ -35,7 +35,7 @@ def _event(
     return ReviewEvent(
         card_id=card_id,
         reviewed_at=reviewed_at,
-        grade=grade,
+        outcome=grade,
         sitting_id=sitting_id or SittingId.new(),
     )
 
@@ -76,10 +76,12 @@ def _replay_sequential(
     ordered = sorted(events, key=lambda event: event.reviewed_at)
     previous: SchedulingState | None = None
     for event in ordered:
+        outcome = event.outcome
+        assert isinstance(outcome, Grade)
         previous = scheduler.review(
             previous,
             card_id,
-            event.grade,
+            outcome,
             event.reviewed_at,
         )
     return previous
