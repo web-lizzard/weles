@@ -75,7 +75,7 @@ async def test_full_review_loop_returns_a_front_reveals_it_and_completes_on_grad
     assert current_body["card_id"] == str(card.id.value)
     assert current_body["front"] == card.front.value
 
-    back = remember_client.client.get(
+    back = remember_client.client.post(
         f"/review-sittings/{sitting_id}/cards/{card.id.value}/back"
     )
 

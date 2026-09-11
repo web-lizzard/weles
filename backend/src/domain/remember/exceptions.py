@@ -35,3 +35,7 @@ class SittingExpiredError(CoreException):
 
 class CardNotReviewableError(NotFoundError):
     pass
+
+
+class SourceNotAvailableError(NotFoundError):
+    pass

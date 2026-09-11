@@ -55,6 +55,22 @@ class RevealedCardDTO(BaseModel):
     back: str
 
 
+class SourceSpanDTO(BaseModel):
+    block_index: int
+    start: int
+    end: int
+
+
+class SourceBlockDTO(BaseModel):
+    index: int
+    text: str
+
+
+class CardSourceDTO(BaseModel):
+    blocks: list[SourceBlockDTO]
+    span: SourceSpanDTO
+
+
 class GradeRequestDTO(BaseModel):
     grade: Grade
 

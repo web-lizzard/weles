@@ -9,7 +9,7 @@ from adapters.compose import (
     get_grade_card_command,
     get_open_sitting_command,
     get_reject_card_command,
-    get_reveal_back_query,
+    get_reveal_back_command,
 )
 from adapters.out.fsrs.scheduler import FsrsScheduler
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
@@ -39,10 +39,10 @@ from application.distill.ports import UnitOfWork as DistillUnitOfWork
 from application.remember.commands.grade_card import GradeCardCommand
 from application.remember.commands.open_sitting import OpenSittingCommand
 from application.remember.commands.reject_card import RejectCardCommand
+from application.remember.commands.reveal_back import RevealBackCommand
 from application.remember.ports import Clock, UnitOfWork
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
-from application.remember.queries.reveal_back import RevealBackQuery
 from domain.remember.value_objects import (
     MIN_RESUME_HORIZON,
     ResumeHorizon,
@@ -181,8 +181,12 @@ class InMemoryRememberComposition:
             self.scheduler,
         )
 
-    def reveal_back(self) -> RevealBackQuery:
-        return RevealBackQuery(self.sittings, self.catalog, self.clock)
+    def reveal_back(self) -> RevealBackCommand:
+        return RevealBackCommand(
+            uow_factory=self.unit_of_work,
+            catalog=self.catalog,
+            clock=self.clock,
+        )
 
     def dependency_overrides(
         self,
@@ -193,5 +197,5 @@ class InMemoryRememberComposition:
             get_reject_card_command: self.reject_card,
             get_current_card_query: self.current_card,
             get_due_count_query: self.due_count,
-            get_reveal_back_query: self.reveal_back,
+            get_reveal_back_command: self.reveal_back,
         }
