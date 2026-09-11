@@ -145,7 +145,34 @@ describe("SittingOverlay", () => {
     expect(rejectCard).not.toHaveBeenCalled();
   });
 
-  it("calls rejectCard when x is pressed while the back is showing", async () => {
+  it("does not call rejectCard after x alone when the back is showing", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "x");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(rejectCard).not.toHaveBeenCalled();
+  });
+
+  it("calls rejectCard when y confirms after x with the back showing", async () => {
     vi.mocked(openSitting).mockResolvedValue({
       kind: "opened",
       sittingId,
@@ -177,8 +204,39 @@ describe("SittingOverlay", () => {
     await vi.advanceTimersByTimeAsync(0);
     await pressKey(stdin, "x");
     await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "y");
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(rejectCard).toHaveBeenCalledWith(sittingId, cardId);
+  });
+
+  it("does not call rejectCard when n cancels the turn-down prompt", async () => {
+    vi.mocked(openSitting).mockResolvedValue({
+      kind: "opened",
+      sittingId,
+      cardId,
+      front: "Front line",
+      sittingComplete: false,
+      outstandingCount: 0,
+    });
+    vi.mocked(revealBack).mockResolvedValue({
+      sittingId,
+      cardId,
+      front: "Front line",
+      back: "Back line",
+    });
+
+    const { stdin } = render(<SittingOverlay />);
+    await vi.advanceTimersByTimeAsync(0);
+
+    await pressKey(stdin, "t");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "x");
+    await vi.advanceTimersByTimeAsync(0);
+    await pressKey(stdin, "n");
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(rejectCard).not.toHaveBeenCalled();
   });
 
   it("omits the reject hint while only the front is showing", async () => {
@@ -194,7 +252,7 @@ describe("SittingOverlay", () => {
     const { lastFrame } = render(<SittingOverlay />);
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(lastFrame()).not.toMatch(/press x to reject/i);
+    expect(lastFrame()).not.toMatch(/press x to turn down/i);
   });
 
   it("shows the reject hint alongside the back after t reveals it", async () => {
@@ -219,7 +277,7 @@ describe("SittingOverlay", () => {
     await pressKey(stdin, "t");
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(lastFrame()).toMatch(/press x to reject/i);
+    expect(lastFrame()).toMatch(/press x to turn down/i);
   });
 
   it("shows the card back after t is pressed and hides it when t is pressed again", async () => {

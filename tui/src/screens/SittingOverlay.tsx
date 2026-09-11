@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Grade } from "../api/sittings.js";
 import DueOverlayFooter from "../components/DueOverlayFooter.js";
 import { useDueStore } from "../store/due.js";
@@ -11,7 +11,8 @@ const GRADES: Grade[] = ["forgot", "hard", "good", "easy"];
 const GRADE_LABELS = ["1 Forgot", "2 Hard", "3 Good", "4 Easy"];
 const ESC_HINT = "← ESC to go back";
 const TOGGLE_CARD_HINT = "Press t to toggle card";
-const REJECT_HINT = "Press x to reject card";
+const REJECT_HINT = "Press x to turn down this card";
+const REJECT_CONFIRM_HINT = "Turn down this card? y confirm · n cancel";
 const RESUMED_BANNER = "Resumed — picking up where you left off";
 
 export default function SittingOverlay(): JSX.Element {
@@ -32,13 +33,24 @@ export default function SittingOverlay(): JSX.Element {
   const notice = useSittingStore((s) => s.notice);
   const partition = useDueStore((s) => s.partition);
   const dueIsStale = useDueStore((s) => s.isStale);
+  const [isRejectConfirmPending, setRejectConfirmPending] = useState(false);
 
   useEffect(() => {
     void useSittingStore.getState().open();
   }, []);
 
+  useEffect(() => {
+    if (!isBackVisible) {
+      setRejectConfirmPending(false);
+    }
+  }, [isBackVisible]);
+
   useInput((input, key) => {
     if (key.escape) {
+      if (isRejectConfirmPending) {
+        setRejectConfirmPending(false);
+        return;
+      }
       useAppStore.getState().closeSittingOverlay();
       useSittingStore.getState().reset();
       return;
@@ -55,13 +67,26 @@ export default function SittingOverlay(): JSX.Element {
       return;
     }
 
+    if (isRejectConfirmPending) {
+      if (input === "y") {
+        setRejectConfirmPending(false);
+        void rejectCurrentCard();
+        return;
+      }
+      if (input === "n") {
+        setRejectConfirmPending(false);
+        return;
+      }
+      return;
+    }
+
     if (input === "t") {
       void toggleBack();
       return;
     }
 
     if (input === "x" && isBackVisible) {
-      void rejectCurrentCard();
+      setRejectConfirmPending(true);
       return;
     }
 
@@ -120,6 +145,10 @@ export default function SittingOverlay(): JSX.Element {
         toggleHint={TOGGLE_CARD_HINT}
         showRejectHint={phase === "presented" && isBackVisible}
         rejectHint={REJECT_HINT}
+        showRejectConfirm={
+          phase === "presented" && isBackVisible && isRejectConfirmPending
+        }
+        rejectConfirmHint={REJECT_CONFIRM_HINT}
       />
     ) : null;
 
