@@ -25,10 +25,12 @@ def _graded(
     card_id: object,
     sitting_id: object,
     grade: Grade,
+    *,
+    reviewed_at: datetime | None = None,
 ) -> ReviewEvent:
     return ReviewEvent(
         card_id=card_id,  # pyright: ignore[reportArgumentType]
-        reviewed_at=datetime.now(UTC),
+        reviewed_at=reviewed_at or datetime.now(UTC),
         payload=Graded(grade=grade),
         sitting_id=sitting_id,  # pyright: ignore[reportArgumentType]
     )
@@ -76,7 +78,12 @@ async def test_a_finished_sitting_still_accepts_reveal_without_guard_outcome(
 ) -> None:
     card = await reviewable(composition, front="Done front", back="Done back")
     sitting = open_sitting(card)
-    prior = _graded(card.id, sitting.id, Grade.GOOD)
+    prior = _graded(
+        card.id,
+        sitting.id,
+        Grade.GOOD,
+        reviewed_at=composition.clock.now(),
+    )
     await composition.sittings.save(sitting)
     await composition.review_events.save(prior)
 
