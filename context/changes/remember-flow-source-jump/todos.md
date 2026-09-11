@@ -1,8 +1,8 @@
 ---
 change_id: remember-flow-source-jump
-current_phase: 10
-next_step: 10.4
-next_command: /implement remember-flow-source-jump phase 10
+current_phase: 11
+next_step: epilogue
+next_command: /archive remember-flow-source-jump
 updated: 2026-09-11
 ---
 
@@ -140,7 +140,7 @@ updated: 2026-09-11
 
 #### Manual
 
-- [ ] 10.4 With a note longer than the terminal, scroll to the last line and confirm the marker clears and Esc lands on the card
+- [x] 10.4 With a note longer than the terminal, scroll to the last line and confirm the marker clears and Esc lands on the card — b9e9d75
 
 ### Phase 11: Acceptance scenarios for US-10 and US-11
 
