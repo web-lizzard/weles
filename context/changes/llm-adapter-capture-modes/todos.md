@@ -127,9 +127,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 12.1 Send-message command suite passes, covering both segments and rollback
-- [x] 12.2 No turn opens a third segment
-- [x] 12.3 Basedpyright reports zero errors over the application layer
+- [x] 12.1 Send-message command suite passes, covering both segments and rollback — a152dbd
+- [x] 12.2 No turn opens a third segment — a152dbd
+- [x] 12.3 Basedpyright reports zero errors over the application layer — a152dbd
 
 #### Manual
 
