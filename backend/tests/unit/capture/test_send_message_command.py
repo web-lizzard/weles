@@ -64,6 +64,7 @@ from domain.capture.value_objects import (
 from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.exceptions import CoreException
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 
 _CONFIRMATION_PHRASE = "that's all"
 
@@ -829,8 +830,9 @@ class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        async with super().converse(turn, tools) as events:
+        async with super().converse(turn, tools, instruction) as events:
 
             async def with_full_coverage() -> AsyncGenerator[AgentEvent, None]:
                 async for event in events:
@@ -945,8 +947,9 @@ class _ScriptedCaptureAgent:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        events = self._events(turn, tools)
+        events = self._events(turn, tools, instruction)
         try:
             yield events
         finally:
@@ -956,8 +959,9 @@ class _ScriptedCaptureAgent:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AgentEvent, None]:
-        _ = turn, tools
+        _ = turn, tools, instruction
         self.converse_calls += 1
         script = self._scripts.pop(0)
         for item in script:
@@ -981,8 +985,9 @@ class _OscillatingCaptureAgent:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        events = self._events(turn, tools)
+        events = self._events(turn, tools, instruction)
         try:
             yield events
         finally:
@@ -992,8 +997,9 @@ class _OscillatingCaptureAgent:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AgentEvent, None]:
-        _ = turn
+        _ = turn, instruction
         self.converse_calls += 1
         if self.converse_calls > 2:
             raise RuntimeError("opened a third segment")

@@ -11,6 +11,7 @@ from domain.capture.topic import Topic
 from domain.capture.turn import AgentEvent, CaptureTurn
 from domain.capture.value_objects import Embedding, NoteId, SessionId, TagId, TopicId
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 
 
 class EmbeddingPort(Protocol):
@@ -43,6 +44,7 @@ class CaptureAgentPort(Protocol):
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AbstractAsyncContextManager[AsyncIterator[AgentEvent]]: ...
 
 

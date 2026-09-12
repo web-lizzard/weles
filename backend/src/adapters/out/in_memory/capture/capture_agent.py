@@ -21,6 +21,7 @@ from domain.capture.turn import (
 )
 from domain.capture.value_objects import Label, MessageRole, NoteContent, SessionTopic
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 
 _CHUNK_SIZE = 12
 _CHUNK_DELAY_SECONDS = 0.01
@@ -57,7 +58,9 @@ class DeterministicCaptureAgentAdapter:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        _ = instruction
         events = self._events(turn, tools)
         try:
             yield events

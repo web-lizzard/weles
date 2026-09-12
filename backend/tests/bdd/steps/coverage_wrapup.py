@@ -15,6 +15,7 @@ from adapters.out.in_memory.capture.capture_agent import (
 )
 from domain.capture.turn import AgentEvent, CaptureTurn
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 
 
 class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
@@ -23,8 +24,9 @@ class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        async with super().converse(turn, tools) as events:
+        async with super().converse(turn, tools, instruction) as events:
 
             async def with_full_coverage() -> AsyncGenerator[AgentEvent, None]:
                 async for event in events:

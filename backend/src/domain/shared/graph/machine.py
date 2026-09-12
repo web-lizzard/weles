@@ -3,6 +3,7 @@ from collections.abc import Mapping, Sequence
 from enum import StrEnum
 
 from domain.shared.graph.model import Graph, State, Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 
 
 class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
@@ -50,6 +51,14 @@ class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
         never be called.
         """
         return self.current_state.get_tools(self._context)
+
+    def build_instruction(self) -> Instruction:
+        """What the current state would tell a model this turn — the machine
+        asks the state and hands the answer on unchanged.
+
+        Unimplemented on the base class until a concrete machine wires the hook.
+        """
+        raise NotImplementedError
 
     async def apply(self, event: EventT) -> None:
         """Feed one event of a turn to the machine.

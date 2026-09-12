@@ -44,6 +44,7 @@ from domain.capture.turn import (
 )
 from domain.capture.value_objects import CapturePhase, MessageRole, NoteContent
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 
 _CONVERSING_INSTRUCTIONS = (
     "Continue this capture conversation with the user. "
@@ -69,7 +70,9 @@ class PydanticAiCaptureAgentAdapter:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        _ = instruction
         user_prompt, message_history = _prompt_and_history(turn)
         toolset = FunctionToolset[object](
             tools=[_pydantic_tool(tool, turn) for tool in tools]

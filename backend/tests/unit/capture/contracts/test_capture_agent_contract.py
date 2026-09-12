@@ -10,6 +10,7 @@ from adapters.out.in_memory.capture.capture_agent import (
 )
 from adapters.out.llm.capture.agent import PydanticAiCaptureAgentAdapter
 from domain.capture.capture_session import CaptureSession
+from domain.capture.instructions import ConversingInstructionBuilder
 from domain.capture.message import Message
 from domain.capture.ports import CaptureAgentPort
 from domain.capture.turn import (
@@ -61,7 +62,8 @@ async def _collect(
     turn: CaptureTurn,
     tools: Sequence[Tool[CaptureTurn, ToolResult]],
 ) -> list[object]:
-    async with adapter.converse(turn, tools) as events:
+    instruction = ConversingInstructionBuilder().build(turn)
+    async with adapter.converse(turn, tools, instruction) as events:
         return [event async for event in events]
 
 

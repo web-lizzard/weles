@@ -13,6 +13,9 @@ from domain.shared.graph.model import (
     ToolResult,
     Transition,
 )
+from domain.shared.instruction.model import InstructionBuilder
+
+from .graph_instruction_builder import GRAPH_TEST_INSTRUCTION_BUILDER
 
 
 class _Phase(StrEnum):
@@ -64,6 +67,11 @@ class _Open(State[_Context, _Deps, str]):
 
     @property
     @override
+    def instruction_builder(self) -> InstructionBuilder[_Context]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
+
+    @property
+    @override
     def description(self) -> str:
         return "Open intake phase."
 
@@ -81,6 +89,11 @@ class _Waiting(State[_Context, _Deps, str]):
 
     @property
     @override
+    def instruction_builder(self) -> InstructionBuilder[_Context]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
+
+    @property
+    @override
     def description(self) -> str:
         return "Waiting before closure."
 
@@ -95,6 +108,11 @@ class _Closed(State[_Context, _Deps, str]):
     @override
     def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
         return ()
+
+    @property
+    @override
+    def instruction_builder(self) -> InstructionBuilder[_Context]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
 
     @property
     @override
@@ -202,6 +220,11 @@ async def test_apply_runs_matching_state_actions_without_leaving_the_phase() -> 
         @override
         def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
             return (stamp,)
+
+        @property
+        @override
+        def instruction_builder(self) -> InstructionBuilder[_Context]:
+            return GRAPH_TEST_INSTRUCTION_BUILDER
 
         @property
         @override
@@ -335,6 +358,11 @@ async def test_apply_passes_construction_deps_to_state_actions() -> None:
         @override
         def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
             return (cast(Action[_Context, _Deps, str], record_deps),)
+
+        @property
+        @override
+        def instruction_builder(self) -> InstructionBuilder[_Context]:
+            return GRAPH_TEST_INSTRUCTION_BUILDER
 
         @property
         @override

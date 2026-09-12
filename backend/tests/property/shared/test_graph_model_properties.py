@@ -7,6 +7,7 @@ from typing import override
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from unit.shared.graph_instruction_builder import GRAPH_TEST_INSTRUCTION_BUILDER
 
 from domain.shared.graph.model import (
     Action,
@@ -16,6 +17,7 @@ from domain.shared.graph.model import (
     ToolResult,
     Transition,
 )
+from domain.shared.instruction.model import InstructionBuilder
 
 
 class _Node(StrEnum):
@@ -38,6 +40,11 @@ class _Bare(State[object, object, str]):
     @override
     def actions(self) -> tuple[Action[object, object, str], ...]:
         return ()
+
+    @property
+    @override
+    def instruction_builder(self) -> InstructionBuilder[object]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
 
     @property
     @override

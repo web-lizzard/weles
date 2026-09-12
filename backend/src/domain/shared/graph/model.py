@@ -5,6 +5,8 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
+from domain.shared.instruction.model import InstructionBuilder
+
 type Condition[ContextT, EventT] = Callable[[ContextT, EventT], bool]
 """Whether an edge may be taken. Reads the context and the event that is being
 applied."""
@@ -107,6 +109,14 @@ class State[ContextT, DepsT, EventT](ABC):
     @abstractmethod
     def actions(self) -> Sequence[Action[ContextT, DepsT, EventT]]:
         """Every action this state can ever run, unfiltered."""
+        ...
+
+    @property
+    @abstractmethod
+    def instruction_builder(self) -> InstructionBuilder[ContextT]:
+        """How this state builds the instruction it would hand a model this turn.
+        The inventory, so what a phase tells the model stays inspectable without
+        a context — the mirror of `tools`."""
         ...
 
     @property

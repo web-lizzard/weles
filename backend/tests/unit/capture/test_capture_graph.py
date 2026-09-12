@@ -22,7 +22,7 @@ from domain.capture.graph import (
     CaptureMachine,
     ConversationRequestSignal,
     Conversing,
-    CoverageAssessed,
+    CoverageAssessment,
     Drafting,
     DraftingConsentSignal,
     NoteContentProposal,
@@ -52,6 +52,7 @@ from domain.capture.turn import (
 from domain.capture.value_objects import (
     CapturePhase,
     ConversationRequest,
+    Coverage,
     DraftingConsent,
     Embedding,
     Label,
@@ -314,7 +315,7 @@ async def test_proposal_tools_return_results_built_from_the_model_arguments() ->
     session_topic = await conversing_tools["propose_session_topic"].handler(
         conversing.context, {"topic": "TCP handshakes"}
     )
-    assert coverage == CoverageAssessed(coverage=0.4)
+    assert coverage == CoverageAssessment(coverage=Coverage(value=0.4))
     assert session_topic == SessionTopicProposal(
         topic=SessionTopic(value="TCP handshakes")
     )
@@ -339,7 +340,7 @@ async def test_proposal_tools_return_results_built_from_the_model_arguments() ->
     assert Conversing().get_actions(conversing.context, topic_proposed) != ()
     await conversing.apply(topic_proposed)
 
-    assert coverage == CoverageAssessed(coverage=0.4)
+    assert coverage == CoverageAssessment(coverage=Coverage(value=0.4))
     assert session_topic == SessionTopicProposal(
         topic=SessionTopic(value="TCP handshakes")
     )
