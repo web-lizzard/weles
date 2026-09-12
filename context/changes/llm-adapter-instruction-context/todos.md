@@ -24,8 +24,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 2.1 Implement trend_of over the window and the flat band
-- [x] 2.2 Implement reading_of against COVERAGE_HIGH and the trend
+- [x] 2.1 Implement trend_of over the window and the flat band — 2bac54f
+- [x] 2.2 Implement reading_of against COVERAGE_HIGH and the trend — 2bac54f
 
 ### Phase 3: Capture's phase builders build
 
