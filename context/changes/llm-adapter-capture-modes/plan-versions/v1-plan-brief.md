@@ -1,6 +1,6 @@
 # Capture Capture-Mode Graph and the Pydantic AI Agent Adapter — Plan Brief
 
-> Full plan: `plan.md` · Revision 2 (2026-09-12); prior version in `plan-versions/v1-*`
+> Full plan: `plan.md`
 
 ## What & Why
 
@@ -29,11 +29,8 @@ symmetric. `GenerateReplyCommand` holds one port and loops while a move is avail
 | Pydantic AI reach | `TestModel` / `FunctionModel` only | Proves FR-09 and the whole seam while leaving keys, cost and live cadence to S-05. | Plan |
 | Superseded ports | Removed in this change | One route to a model instead of two; the shaping log names this reach explicitly. | Plan |
 | Consent carrier | Tool result → `apply` → value object on the session | Consent is the model's reading, so it cannot exist before the model runs; the session is the only carrier that survives a turn. | Plan |
-| Who chooses the move | Machine reports available transitions, command decides | Keeps the choice where the use case lives, and leaves room for the model to choose from the same list later. | Plan |
-| Transition timing | At the start of each segment, at most two segments | Drafts land in the turn consent was given, and an intent carried from a previous turn is spent before the model sees the wrong tools. | Plan |
-| Return edge | Guarded on a recognised request | Without it every drafting turn burns a segment returning to a conversation nobody asked for. | Plan |
-| Loop termination | Each edge consumes the intent that permitted it | An intent is single-use, so nothing permits a further move until the model produces a new one. | Plan |
-| Transition weights | Not modelled | Disjoint guards already express precedence, and a weight would need a legend that a description gives for free. | Plan |
+| Transition timing | `while` on a machine predicate, one stream segment per phase | Notes are drafted in the same turn consent was given, and a third phase would need no command change. | Plan |
+| Return edge | Guarded on a recognised request | An unguarded return oscillates forever inside the loop; a satisfiable guard still honours FR-02. | Plan |
 | Mid-turn failure | Roll the whole turn back | `UnitOfWork` already gives it, and a retry stays clean. | Plan |
 | Deterministic stand-in | Keeps `"that's all"`, emits a tool result | Acceptance scenarios in capture-flow *and* distill-flow depend on the phrase; the adapter still decides no phase. | Plan |
 | Tool-name invariant | `model_validator` on `Tool` | A misnamed tool fails at import rather than mid-conversation. | Plan |
@@ -59,7 +56,7 @@ and 7 introduce new classes; the rest add methods to classes that already exist.
 | Phase | What it delivers | Key risk |
 | --- | --- | --- |
 | 1. Graph mechanics bodies | Executable mechanics plus the tool-name validator | Validator needs pydantic introspection in the domain |
-| 2. Edge vocabulary and available transitions | Edge aliases, `State.description`, `available_transitions` | Supersedes the shaping session's `guard-concept` decision |
+| 2. State machine bodies | `apply`, `transition`, and the `can_advance`/`advance` pair | A leaky predicate would put phase names in the command |
 | 3. Consent symbols (stubs) | Value object, tools, results, events | `TurnOpened` removal touches the event union |
 | 4. Capture graph behaviour | Guards, actions, per-turn tool filtering | Consent guard must read persisted state, not the event |
 | 5. Pydantic AI adapter (stubs) | Adapter skeleton, session id on tracing | Tracing change is shared with the embedding adapter |
@@ -74,10 +71,8 @@ and 7 introduce new classes; the rest add methods to classes that already exist.
 
 ## Open Risks & Assumptions
 
-- The loop terminates because each edge consumes its intent; the two-segment cap states what this use
-  case needs rather than guarding against a runaway.
-- Guards are assumed disjoint. Two transitions available at once is a defect in the graph, and only
-  the mechanics suite catches it.
+- The loop terminates because the return edge is guarded; the iteration cap is a safety net, not the
+  mechanism. Relaxing that guard regresses it to oscillation.
 - Pydantic AI's event surface is assumed stable at 2.35.3 — `run_stream_events` with per-call
   `toolsets` was verified against the installed package, not just the docs.
 - Phase 10's blast radius reaches distill-flow, whose scenarios depend on capture's stand-in.

@@ -18,7 +18,7 @@ updated: 2026-09-12
 - [x] 1.2 Ruff reports no B027 suppression left in the graph package — a8793ee
 - [x] 1.3 Basedpyright reports zero errors over the graph package — a8793ee
 
-### Phase 2: Edge vocabulary, state descriptions, and available transitions
+### Phase 2: State machine bodies and the transition predicate
 
 #### Tests
 
@@ -26,9 +26,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 2.1 State machine suite passes, including available_transitions and refused targets
-- [ ] 2.2 Graph model suite still passes after the edge alias split
-- [ ] 2.3 Basedpyright reports zero errors over the graph package
+- [ ] 2.1 State machine suite passes, including can_advance and advance
+- [ ] 2.2 Basedpyright reports zero errors over the graph package
 
 ### Phase 3: Consent and return-to-conversation symbols (stubs)
 
@@ -45,7 +44,7 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 4.1 Capture graph suite passes, pinning empty terminal states, both edges reachable, and at most one transition available
+- [ ] 4.1 Capture graph suite passes, pinning empty terminal states and both edges reachable
 - [ ] 4.2 Capture domain model suite passes
 - [ ] 4.3 Basedpyright reports zero errors over the domain layer
 
@@ -99,12 +98,11 @@ updated: 2026-09-12
 #### Automated
 
 - [ ] 9.1 Send-message command suite passes, covering both segments and rollback
-- [ ] 9.2 No turn opens a third segment
-- [ ] 9.3 Basedpyright reports zero errors over the application layer
+- [ ] 9.2 Basedpyright reports zero errors over the application layer
 
 #### Manual
 
-- [ ] 9.4 Stream two turns over HTTP and confirm draft events arrive in the consent turn
+- [ ] 9.3 Stream two turns over HTTP and confirm draft events arrive in the consent turn
 
 ### Phase 10: Remove the superseded ports and rewire composition
 
