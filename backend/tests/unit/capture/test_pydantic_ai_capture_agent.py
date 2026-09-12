@@ -22,12 +22,14 @@ from domain.capture.capture_session import CaptureSession
 from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.graph import CaptureMachine
 from domain.capture.message import Message
+from domain.capture.topic import Topic
 from domain.capture.turn import (
     CaptureTurn,
     ConversationRequested,
     CoverageAssessed,
     DraftingConsentSignalled,
     NoteContentProduced,
+    NoteDraft,
     NoteTagProposed,
     NoteTopicProposed,
     ReplyProduced,
@@ -35,6 +37,7 @@ from domain.capture.turn import (
 )
 from domain.capture.value_objects import (
     CapturePhase,
+    Embedding,
     Label,
     MessageContent,
     MessageRole,
@@ -72,6 +75,15 @@ def _turn(
     return CaptureTurn(session=session, messages=messages)
 
 
+def _drafting_turn_with_topic() -> CaptureTurn:
+    turn = _turn(phase=CapturePhase.DRAFTING)
+    turn.draft = NoteDraft(
+        topic=Topic.mint(Label(value="TCP"), Embedding(values=(1.0,))),
+        topic_reused=False,
+    )
+    return turn
+
+
 def _adapter(
     model: TestModel | FunctionModel, *, model_name: str = "test"
 ) -> PydanticAiCaptureAgentAdapter:
@@ -97,16 +109,17 @@ def _tool_named(turn: CaptureTurn, name: str) -> Tool[CaptureTurn, ToolResult]:
     raise AssertionError(f"tool {name!r} not offered for this turn")
 
 
-async def test_drafting_text_deltas_map_to_note_content_produced() -> None:
+async def test_drafting_text_deltas_map_to_reply_until_note_topic_exists() -> None:
     _ = _install_in_memory_tracer()
     adapter = _adapter(TestModel())
     turn = _turn(phase=CapturePhase.DRAFTING)
 
     events = await _collect(adapter, turn, [])
 
-    note_chunks = [event for event in events if isinstance(event, NoteContentProduced)]
-    assert note_chunks
-    assert "".join(chunk.content.value for chunk in note_chunks).strip() != ""
+    assert not any(isinstance(event, NoteContentProduced) for event in events)
+    reply_chunks = [event for event in events if isinstance(event, ReplyProduced)]
+    assert reply_chunks
+    assert "".join(chunk.text for chunk in reply_chunks).strip() != ""
 
 
 async def test_propose_session_topic_tool_maps_to_session_topic_proposed() -> None:
@@ -160,7 +173,7 @@ async def test_propose_note_topic_tool_maps_to_note_topic_proposed() -> None:
 async def test_propose_note_tag_tool_maps_to_note_tag_proposed() -> None:
     _ = _install_in_memory_tracer()
     adapter = _adapter(TestModel())
-    turn = _turn(phase=CapturePhase.DRAFTING)
+    turn = _drafting_turn_with_topic()
 
     events = await _collect(adapter, turn, [_tool_named(turn, "propose_note_tag")])
 
@@ -172,7 +185,7 @@ async def test_propose_note_tag_tool_maps_to_note_tag_proposed() -> None:
 async def test_propose_note_content_tool_maps_to_note_content_produced() -> None:
     _ = _install_in_memory_tracer()
     adapter = _adapter(TestModel())
-    turn = _turn(phase=CapturePhase.DRAFTING)
+    turn = _drafting_turn_with_topic()
 
     events = await _collect(adapter, turn, [_tool_named(turn, "propose_note_content")])
 

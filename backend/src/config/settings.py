@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     sitting_max_showings: int = 2
     sitting_resume_horizon_hours: float = 24.0
     embedding_provider: EmbeddingProvider = EmbeddingProvider.OPENROUTER
-    capture_agent_provider: CaptureAgentProvider = CaptureAgentProvider.DETERMINISTIC
+    capture_agent_provider: CaptureAgentProvider = CaptureAgentProvider.PYDANTIC_AI
     openrouter_api_key: str | None = None
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimensions: int | None = None
