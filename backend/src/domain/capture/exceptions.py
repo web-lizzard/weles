@@ -81,6 +81,10 @@ class SimilarityScoreOutOfRangeError(CoreException):
     pass
 
 
+class CoverageOutOfRangeError(CoreException):
+    pass
+
+
 class EmbeddingDimensionMismatchError(CoreException):
     pass
 
