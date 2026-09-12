@@ -1,7 +1,7 @@
 ---
 change_id: capture-redraft-draft-context
 title: Restore in-memory draft context on redraft passes through the capture machine
-status: new
+status: planned
 created: 2026-09-13
 updated: 2026-09-13
 archived_at: null
