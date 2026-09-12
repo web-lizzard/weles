@@ -1,0 +1,200 @@
+import asyncio
+from collections.abc import AsyncIterator, Sequence
+
+from application.capture.value_objects import (
+    ConfidenceAssessment,
+    ConfidencePointKind,
+    Transcript,
+    TranscriptEntry,
+)
+from domain.capture.turn import (
+    AgentEvent,
+    CaptureTurn,
+    DraftingConsentSignalled,
+    NoteContentProduced,
+    NoteTagProposed,
+    NoteTopicProposed,
+    ReplyProduced,
+)
+from domain.capture.value_objects import Label, MessageRole, NoteContent
+from domain.shared.graph.model import Tool, ToolResult
+
+_CHUNK_SIZE = 12
+_CHUNK_DELAY_SECONDS = 0.01
+_DEFAULT_SOLID = "what you've said so far"
+_DEFAULT_SHAKY = "the parts you haven't unpacked yet"
+
+_CONFIRMATION_PHRASES = frozenset(
+    {
+        "that's all",
+        "that's everything",
+        "we're done",
+        "i'm done",
+        "nothing more",
+        "that covers it",
+    }
+)
+
+_NOTE_TOOL_NAMES = frozenset(
+    {
+        "propose_note_topic",
+        "propose_note_tag",
+        "propose_note_content",
+    }
+)
+
+
+class DeterministicCaptureAgentAdapter:
+    async def converse(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncIterator[AgentEvent]:
+        tools_by_name = {tool.name: tool for tool in tools}
+        last_user = _last_user_message(turn)
+
+        if (
+            last_user is not None
+            and _is_confirmation(last_user.content.value)
+            and "signal_drafting_consent" in tools_by_name
+        ):
+            yield DraftingConsentSignalled()
+            return
+
+        if _NOTE_TOOL_NAMES.issubset(tools_by_name):
+            transcript = _transcript(turn)
+            assessment = _assess(transcript)
+            topic_label = _derive_topic_label(transcript, assessment)
+            yield NoteTopicProposed(label=topic_label)
+            for tag_label in _derive_tag_labels(assessment):
+                yield NoteTagProposed(label=tag_label)
+            note_body = _derive_note_body(transcript)
+            async for chunk in _yield_note_content(note_body):
+                yield chunk
+            return
+
+        transcript = _transcript(turn)
+        assessment = _assess(transcript)
+        reply = _conversational_reply(assessment)
+        async for chunk in _yield_reply(reply):
+            yield chunk
+
+
+def _transcript(turn: CaptureTurn) -> Transcript:
+    return [
+        TranscriptEntry(role=message.role, content=message.content)
+        for message in turn.messages
+    ]
+
+
+def _normalize_phrase(text: str) -> str:
+    return text.strip().lower()
+
+
+def _is_confirmation(content: str) -> bool:
+    return _normalize_phrase(content) in _CONFIRMATION_PHRASES
+
+
+def _last_user_message(turn: CaptureTurn):
+    for message in reversed(turn.messages):
+        if message.role is MessageRole.USER:
+            return message
+    return None
+
+
+def _assess(transcript: Transcript) -> ConfidenceAssessment:
+    from application.capture.value_objects import ConfidencePoint
+
+    user_entries = [entry for entry in transcript if entry.role is MessageRole.USER]
+    if not user_entries:
+        return ConfidenceAssessment(points=[], coverage_confidence=0.0)
+
+    latest = user_entries[-1]
+    return ConfidenceAssessment(
+        points=[
+            ConfidencePoint(
+                kind=ConfidencePointKind.SOLID,
+                note=f"You've articulated: {latest.content.value.strip()}",
+            ),
+            ConfidencePoint(
+                kind=ConfidencePointKind.SHAKY,
+                note=f"The details behind: {latest.content.value.strip()}",
+            ),
+        ],
+        coverage_confidence=0.0,
+    )
+
+
+def _user_messages_excluding_confirmation(transcript: Transcript) -> list[str]:
+    return [
+        entry.content.value.strip()
+        for entry in transcript
+        if entry.role is MessageRole.USER and not _is_confirmation(entry.content.value)
+    ]
+
+
+def _derive_topic_label(
+    transcript: Transcript, assessment: ConfidenceAssessment
+) -> Label:
+    user_messages = _user_messages_excluding_confirmation(transcript)
+    base = user_messages[0] if user_messages else "Untitled capture session"
+
+    shaky = next(
+        (
+            point.note
+            for point in assessment.points
+            if point.kind is ConfidencePointKind.SHAKY
+        ),
+        None,
+    )
+    if shaky:
+        return Label(value=f"{shaky} in {base}")
+    return Label(value=base)
+
+
+def _derive_tag_labels(assessment: ConfidenceAssessment) -> list[Label]:
+    return [Label(value=point.note) for point in assessment.points]
+
+
+def _derive_note_body(transcript: Transcript) -> str:
+    lines: list[str] = []
+    for entry in transcript:
+        if entry.role is MessageRole.USER and _is_confirmation(entry.content.value):
+            continue
+        speaker = "User" if entry.role is MessageRole.USER else "Agent"
+        lines.append(f"{speaker}: {entry.content.value.strip()}")
+    return "\n\n".join(lines)
+
+
+def _conversational_reply(assessment: ConfidenceAssessment) -> str:
+    solid = next(
+        (
+            point.note
+            for point in assessment.points
+            if point.kind is ConfidencePointKind.SOLID
+        ),
+        _DEFAULT_SOLID,
+    )
+    shaky = next(
+        (
+            point.note
+            for point in assessment.points
+            if point.kind is ConfidencePointKind.SHAKY
+        ),
+        _DEFAULT_SHAKY,
+    )
+    return f"You've got a handle on: {solid}. Let's dig into: {shaky}."
+
+
+async def _yield_reply(text: str) -> AsyncIterator[ReplyProduced]:
+    for start in range(0, len(text), _CHUNK_SIZE):
+        yield ReplyProduced(text=text[start : start + _CHUNK_SIZE])
+        await asyncio.sleep(_CHUNK_DELAY_SECONDS)
+
+
+async def _yield_note_content(text: str) -> AsyncIterator[NoteContentProduced]:
+    for start in range(0, len(text), _CHUNK_SIZE):
+        yield NoteContentProduced(
+            content=NoteContent(value=text[start : start + _CHUNK_SIZE])
+        )
+        await asyncio.sleep(_CHUNK_DELAY_SECONDS)

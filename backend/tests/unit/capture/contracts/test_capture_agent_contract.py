@@ -5,6 +5,9 @@ import pytest
 from pydantic_ai import Agent, models
 from pydantic_ai.models.test import TestModel
 
+from adapters.out.in_memory.capture.capture_agent import (
+    DeterministicCaptureAgentAdapter,
+)
 from adapters.out.llm.capture.agent import PydanticAiCaptureAgentAdapter
 from domain.capture.capture_session import CaptureSession
 from domain.capture.message import Message
@@ -29,8 +32,16 @@ def _make_pydantic_capture_agent() -> CaptureAgentPort:
     )
 
 
+def _make_deterministic_capture_agent() -> CaptureAgentPort:
+    return cast(
+        CaptureAgentPort,
+        cast(object, DeterministicCaptureAgentAdapter()),
+    )
+
+
 _IMPLEMENTATIONS: list[Callable[[], CaptureAgentPort]] = [
     _make_pydantic_capture_agent,
+    _make_deterministic_capture_agent,
 ]
 
 
@@ -53,7 +64,9 @@ async def _collect(
     return [event async for event in adapter.converse(turn, tools)]
 
 
-@pytest.mark.parametrize("make_adapter", _IMPLEMENTATIONS, ids=["pydantic_ai"])
+@pytest.mark.parametrize(
+    "make_adapter", _IMPLEMENTATIONS, ids=["pydantic_ai", "deterministic"]
+)
 async def test_converse_yields_only_agent_events_not_command_recording_events(
     make_adapter: Callable[[], CaptureAgentPort],
 ) -> None:
@@ -65,7 +78,9 @@ async def test_converse_yields_only_agent_events_not_command_recording_events(
     assert not any(isinstance(event, AssistantMessageRecorded) for event in events)
 
 
-@pytest.mark.parametrize("make_adapter", _IMPLEMENTATIONS, ids=["pydantic_ai"])
+@pytest.mark.parametrize(
+    "make_adapter", _IMPLEMENTATIONS, ids=["pydantic_ai", "deterministic"]
+)
 async def test_converse_yields_joinable_reply_produced_while_conversing(
     make_adapter: Callable[[], CaptureAgentPort],
 ) -> None:
