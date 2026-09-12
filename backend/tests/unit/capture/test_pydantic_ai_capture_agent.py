@@ -24,15 +24,21 @@ from domain.capture.graph import CaptureMachine
 from domain.capture.message import Message
 from domain.capture.turn import (
     CaptureTurn,
+    ConversationRequested,
+    CoverageAssessed,
     DraftingConsentSignalled,
     NoteContentProduced,
+    NoteTagProposed,
+    NoteTopicProposed,
     ReplyProduced,
     SessionTopicProposed,
 )
 from domain.capture.value_objects import (
     CapturePhase,
+    Label,
     MessageContent,
     MessageRole,
+    NoteContent,
     SessionTopic,
 )
 from domain.shared.graph.model import Tool, ToolResult
@@ -127,6 +133,66 @@ async def test_signal_drafting_consent_tool_maps_to_drafting_consent_signalled()
     )
 
     assert any(isinstance(event, DraftingConsentSignalled) for event in events)
+
+
+async def test_assess_coverage_tool_maps_to_coverage_assessed() -> None:
+    _ = _install_in_memory_tracer()
+    adapter = _adapter(TestModel())
+    turn = _turn()
+
+    events = await _collect(adapter, turn, [_tool_named(turn, "assess_coverage")])
+
+    assert any(isinstance(event, CoverageAssessed) for event in events)
+
+
+async def test_propose_note_topic_tool_maps_to_note_topic_proposed() -> None:
+    _ = _install_in_memory_tracer()
+    adapter = _adapter(TestModel())
+    turn = _turn(phase=CapturePhase.DRAFTING)
+
+    events = await _collect(adapter, turn, [_tool_named(turn, "propose_note_topic")])
+
+    proposed = [event for event in events if isinstance(event, NoteTopicProposed)]
+    assert len(proposed) == 1
+    assert proposed[0].label == Label(value="a")
+
+
+async def test_propose_note_tag_tool_maps_to_note_tag_proposed() -> None:
+    _ = _install_in_memory_tracer()
+    adapter = _adapter(TestModel())
+    turn = _turn(phase=CapturePhase.DRAFTING)
+
+    events = await _collect(adapter, turn, [_tool_named(turn, "propose_note_tag")])
+
+    proposed = [event for event in events if isinstance(event, NoteTagProposed)]
+    assert len(proposed) == 1
+    assert proposed[0].label == Label(value="a")
+
+
+async def test_propose_note_content_tool_maps_to_note_content_produced() -> None:
+    _ = _install_in_memory_tracer()
+    adapter = _adapter(TestModel())
+    turn = _turn(phase=CapturePhase.DRAFTING)
+
+    events = await _collect(adapter, turn, [_tool_named(turn, "propose_note_content")])
+
+    produced = [
+        event
+        for event in events
+        if isinstance(event, NoteContentProduced)
+        and event.content == NoteContent(value="a")
+    ]
+    assert len(produced) == 1
+
+
+async def test_request_conversation_tool_maps_to_conversation_requested() -> None:
+    _ = _install_in_memory_tracer()
+    adapter = _adapter(TestModel())
+    turn = _turn(phase=CapturePhase.DRAFTING)
+
+    events = await _collect(adapter, turn, [_tool_named(turn, "request_conversation")])
+
+    assert any(isinstance(event, ConversationRequested) for event in events)
 
 
 async def _function_model_stream(
