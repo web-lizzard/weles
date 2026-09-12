@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 14
-next_step: 14.0
-next_command: /unit-test llm-adapter-capture-modes phase 14
+current_phase: 15
+next_step: 15.1
+next_command: /implement llm-adapter-capture-modes phase 15
 updated: 2026-09-12
 ---
 
@@ -152,13 +152,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f296721
 
 #### Automated
 
-- [ ] 14.1 Graph mechanics suite passes, asserting deps reach both actions and edge actions
-- [ ] 14.2 Capture suites pass unchanged after the widening
-- [ ] 14.3 Basedpyright reports zero errors over src and tests
+- [x] 14.1 Graph mechanics suite passes, asserting deps reach both actions and edge actions — 1d9f574
+- [x] 14.2 Capture suites pass unchanged after the widening — 1d9f574
+- [x] 14.3 Basedpyright reports zero errors over src and tests — 1d9f574
 
 ### Phase 15: Vocabulary resolution and the dependency set move into the domain (stubs)
 
