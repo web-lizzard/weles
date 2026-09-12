@@ -1,7 +1,6 @@
 # Capture Capture-Mode Graph and the Pydantic AI Agent Adapter — Implementation Plan
 
 > Revision 2 (2026-09-12): the machine reports available transitions and the command decides; guards read disjoint intents off the aggregate instead of the event, and each edge consumes the intent that let it through. Phase 1 is executed and untouched; phase 2 is split into a stubs and a behaviour phase, shifting later phases by one. Prior version: plan-versions/v1-plan.md
-> Revision 3 (2026-09-12): a turn's own messages reach the machine as command-raised events, and the event union splits so an adapter cannot raise them. Phases 1-5 are executed and untouched; new phases 6 and 7 are inserted before the adapter work, shifting later phases by two. Prior version: plan-versions/v2-plan.md
 
 ## Overview
 
@@ -13,7 +12,7 @@ in the shape the planning session settled, rewrites `GenerateReplyCommand` onto 
 `CaptureAgentPort`, and builds two adapters behind that port — the Pydantic AI one first.
 
 The working tree is knowingly red at the start: `InMemoryMessageRepository` no longer satisfies
-`MessageRepository`, and its contract suite is skipped. Phase 11 closes that.
+`MessageRepository`, and its contract suite is skipped. Phase 9 closes that.
 
 ## Current State Analysis
 
@@ -108,11 +107,10 @@ then the capture composition's consent and return model (3–4), then the adapte
 declared port (5–8) with Pydantic AI ahead of the in-memory one at the user's direction, then the
 command that consumes all of it (9), then removal of what the new seam replaces (10).
 
-Stubs phases appear only where a test would otherwise fail to collect. Phases 1, 3, 5, 7, 11 and 12
-add methods or behaviour to classes and modules that already exist — a test importing them collects
-and fails on behaviour, which is the red half doing its job. Phases 2, 4, 6, 8 and 10 introduce
-symbols the suites import by name — new aliases, new classes, new modules — so each is a stubs phase
-of its own.
+Stubs phases appear only where a test would otherwise fail to collect. Phases 1, 3, 9 and 10 add
+methods to classes and modules that already exist — a test importing them collects and fails on
+behaviour, which is the red half doing its job. Phases 2, 4, 6 and 8 introduce symbols the suites
+import by name — new aliases, new classes, new modules — so each is a stubs phase of its own.
 
 ## Critical Implementation Details
 
@@ -345,84 +343,11 @@ drafting turn burns a segment returning to a conversation nobody asked for. Both
 
 ---
 
-## Phase 6: Message-recording events and the agent/command event split (stubs)
+## Phase 6: Pydantic AI capture agent adapter (stubs)
 
 ### Overview
 
-Materialize the symbols phase 7's tests import. Two events the *command* raises — not the adapter —
-plus the union split that stops an adapter from raising them.
-
-### Changes Required:
-
-#### 1. Event split and the two message events
-
-**File**: `backend/src/domain/capture/turn.py`
-
-**Intent**: A turn's own messages never reach the machine today, so the context a tool reads is the
-conversation minus its latest exchange. These two events are how they get there; splitting the union
-is how the type system keeps them out of the adapter's hands.
-
-**Contract**: `UserMessageRecorded` and `AssistantMessageRecorded`, each `frozen=True` with a pinned
-`kind` literal and a `message: Message` field. `AgentEvent` becomes the union of everything the model
-produces — `ReplyProduced`, `SessionTopicProposed`, `NoteTopicProposed`, `NoteTagProposed`,
-`NoteContentProduced`, `DraftingConsentSignalled`, `ConversationRequested` — and
-`CaptureEvent = AgentEvent | UserMessageRecorded | AssistantMessageRecorded` is what the command
-applies. `CaptureTurn` gains `record_message(self, message: Message) -> None`, empty body, so
-appending stays the context's own operation rather than the caller reassigning a field.
-
-#### 2. Port narrowing and action declarations
-
-**File**: `backend/src/domain/capture/ports.py`, `backend/src/domain/capture/graph.py`
-
-**Intent**: Make "the adapter cannot raise a command event" a type error rather than a convention.
-
-**Contract**: `CaptureAgentPort.converse` returns `AsyncIterator[AgentEvent]`. In `graph.py`, actions
-`_record_user_message` and `_record_assistant_message` with empty bodies.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run python -c "from domain.capture.turn import AgentEvent, UserMessageRecorded, AssistantMessageRecorded"` succeeds
-- `cd backend && uv run basedpyright src/domain/capture` reports zero errors
-
----
-
-## Phase 7: A turn's own messages reach the machine
-
-### Overview
-
-Make the two events do their work, so the context a tool reads includes the exchange in progress.
-
-### Changes Required:
-
-#### 1. Recording actions, offered by both phases
-
-**File**: `backend/src/domain/capture/graph.py`, `backend/src/domain/capture/turn.py`
-
-**Intent**: A message is part of the conversation whatever phase the session is in, so both states
-run these actions; and the consent invariant finally has the message it tests for.
-
-**Contract**: `CaptureTurn.record_message` appends to `messages` in memory. `_record_user_message` and
-`_record_assistant_message` call it with the event's message. Both `Conversing.get_actions` and
-`Drafting.get_actions` return the matching recorder for a `UserMessageRecorded` or an
-`AssistantMessageRecorded`, alongside the actions each already returns; both inventories grow to
-match. This closes two defects: `_record_drafting_consent` currently sees an empty `context.messages`
-when the user's first message is the consent, and `propose_note_content` currently drafts from a
-conversation missing its latest exchange.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run pytest tests/unit/capture/test_capture_graph.py -v` passes, including consent recorded when the turn's own message is the only one
-- `cd backend && uv run basedpyright src/domain` reports zero errors
-
----
-
-## Phase 8: Pydantic AI capture agent adapter (stubs)
-
-### Overview
-
-Materialize the adapter module and class phase 9's tests import.
+Materialize the adapter module and class phase 7's tests import.
 
 ### Changes Required:
 
@@ -456,7 +381,7 @@ defaults to `None` and `OpenRouterEmbeddingAdapter` is not required to pass it.
 
 ---
 
-## Phase 9: Pydantic AI adapter — stream mapping and tracing
+## Phase 7: Pydantic AI adapter — stream mapping and tracing
 
 ### Overview
 
@@ -496,7 +421,7 @@ and usage. Tool handlers are invoked with the same `turn` the adapter received.
 
 ---
 
-## Phase 10: Deterministic in-memory capture agent adapter (stubs)
+## Phase 8: Deterministic in-memory capture agent adapter (stubs)
 
 ### Overview
 
@@ -520,7 +445,7 @@ Materialize the in-memory implementation of the same port.
 
 ---
 
-## Phase 11: Deterministic adapter behaviour and message history
+## Phase 9: Deterministic adapter behaviour and message history
 
 ### Overview
 
@@ -563,7 +488,7 @@ messages for that session, empty list when none. The module-level `pytestmark` s
 
 ---
 
-## Phase 12: Command rewrite — one port and the turn loop
+## Phase 10: Command rewrite — one port and the turn loop
 
 ### Overview
 
@@ -598,11 +523,8 @@ for _ in range(_MAX_SEGMENTS):
         yield ...                       # text passes through in the same pass
 ```
 
-Before the first segment the command records the user's message and applies a `UserMessageRecorded`;
-after a segment whose reply buffer is non-empty it records the assistant's message and applies an
-`AssistantMessageRecorded`, so the drafting segment reads a complete conversation. The transition is
-attempted at the *start* of a segment, not the end, so an intent recorded in a previous turn is
-consumed before the model is handed the wrong phase's tools. The command names the
+The transition is attempted at the *start* of a segment, not the end, so an intent recorded in a
+previous turn is consumed before the model is handed the wrong phase's tools. The command names the
 phase it wants and matches on it declaratively — that is its use case, not the graph's topology, so
 adding a phase this command does not serve changes nothing here. The session, its messages and any
 note the turn touched are read off `machine.context` and persisted once, then `uow.commit()`. Any
@@ -624,7 +546,7 @@ on that exception path, not as a mid-stream break mechanism.
 
 ---
 
-## Phase 13: Remove the superseded ports and rewire composition
+## Phase 11: Remove the superseded ports and rewire composition
 
 ### Overview
 
@@ -679,18 +601,18 @@ updated only where the removed symbols or the changed constructor made them fail
 
 ### Unit Tests:
 Mechanics (phases 1–3) are proven against a throwaway two-phase graph that is not capture's, so
-reusability is tested rather than asserted. Capture's own graph (phases 5 and 7) is tested for its guards,
+reusability is tested rather than asserted. Capture's own graph (phase 5) is tested for its guards,
 its per-turn tool filtering, and two invariants `frame.md` demands: `graph.terminal_states` is empty,
-and both edges stay reachable. Adapter tests (9, 11) use `TestModel`/`FunctionModel` and the real
-in-memory store respectively. Command tests (12) cover the single-segment turn, the transition turn
+and both edges stay reachable. Adapter tests (7, 9) use `TestModel`/`FunctionModel` and the real
+in-memory store respectively. Command tests (10) cover the single-segment turn, the transition turn
 with two segments, and rollback on a mid-stream failure.
 
 ### Integration Tests:
-`tests/integration/test_capture_http.py` exercises the SSE contract unchanged; phase 13 updates it
+`tests/integration/test_capture_http.py` exercises the SSE contract unchanged; phase 11 updates it
 only where removed symbols force it.
 
 ### Manual Testing Steps:
-Per-phase Manual bullets above. The Langfuse session-grouping check in phase 9 is the one step that
+Per-phase Manual bullets above. The Langfuse session-grouping check in phase 7 is the one step that
 cannot be automated here, since it requires a real provider call and the Langfuse UI.
 
 ## Performance Considerations

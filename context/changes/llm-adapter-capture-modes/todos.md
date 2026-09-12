@@ -56,14 +56,14 @@ updated: 2026-09-12
 - [x] 5.2 Capture domain model suite passes — e0cfce9
 - [x] 5.3 Basedpyright reports zero errors over the domain layer — e0cfce9
 
-### Phase 6: Pydantic AI capture agent adapter (stubs)
+### Phase 6: Message-recording events and the agent/command event split (stubs)
 
 #### Automated
 
-- [ ] 6.1 Pydantic AI capture agent module imports cleanly
-- [ ] 6.2 Embedding adapter suite still passes after the tracing signature change
+- [ ] 6.1 AgentEvent and the two message events import by name
+- [ ] 6.2 Basedpyright reports zero errors over the capture domain
 
-### Phase 7: Pydantic AI adapter — stream mapping and tracing
+### Phase 7: A turn's own messages reach the machine
 
 #### Tests
 
@@ -71,21 +71,39 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 7.1 Pydantic AI capture agent suite passes on TestModel and FunctionModel
-- [ ] 7.2 Capture agent contract suite passes for the Pydantic AI implementation
-- [ ] 7.3 Basedpyright reports zero errors over the adapters layer
+- [ ] 7.1 Capture graph suite passes, including consent recorded from the turn's own first message
+- [ ] 7.2 Basedpyright reports zero errors over the domain layer
+
+### Phase 8: Pydantic AI capture agent adapter (stubs)
+
+#### Automated
+
+- [ ] 8.1 Pydantic AI capture agent module imports cleanly
+- [ ] 8.2 Embedding adapter suite still passes after the tracing signature change
+
+### Phase 9: Pydantic AI adapter — stream mapping and tracing
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 9.1 Pydantic AI capture agent suite passes on TestModel and FunctionModel
+- [ ] 9.2 Capture agent contract suite passes for the Pydantic AI implementation
+- [ ] 9.3 Basedpyright reports zero errors over the adapters layer
 
 #### Manual
 
-- [ ] 7.4 Confirm one real capture turn groups its observations under the session id in Langfuse
+- [ ] 9.4 Confirm one real capture turn groups its observations under the session id in Langfuse
 
-### Phase 8: Deterministic in-memory capture agent adapter (stubs)
+### Phase 10: Deterministic in-memory capture agent adapter (stubs)
 
 #### Automated
 
-- [ ] 8.1 Deterministic capture agent module imports cleanly
+- [ ] 10.1 Deterministic capture agent module imports cleanly
 
-### Phase 9: Deterministic adapter behaviour and message history
+### Phase 11: Deterministic adapter behaviour and message history
 
 #### Tests
 
@@ -93,35 +111,35 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 9.1 Message repository contract suite passes with nothing skipped
-- [ ] 9.2 Capture agent contract suite passes for both implementations
-- [ ] 9.3 Basedpyright reports zero errors over src and tests
-
-### Phase 10: Command rewrite — one port and the turn loop
-
-#### Tests
-
-- [ ] tests generated
-
-#### Automated
-
-- [ ] 10.1 Send-message command suite passes, covering both segments and rollback
-- [ ] 10.2 No turn opens a third segment
-- [ ] 10.3 Basedpyright reports zero errors over the application layer
-
-#### Manual
-
-- [ ] 10.4 Stream two turns over HTTP and confirm draft events arrive in the consent turn
-
-### Phase 11: Remove the superseded ports and rewire composition
-
-#### Automated
-
-- [ ] 11.1 Full pytest run passes, including the distill-flow features
-- [ ] 11.2 Ruff is clean over src and tests
+- [ ] 11.1 Message repository contract suite passes with nothing skipped
+- [ ] 11.2 Capture agent contract suite passes for both implementations
 - [ ] 11.3 Basedpyright reports zero errors over src and tests
-- [ ] 11.4 Grep finds no superseded port or ReplyChunk reference
+
+### Phase 12: Command rewrite — one port and the turn loop
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 12.1 Send-message command suite passes, covering both segments and rollback
+- [ ] 12.2 No turn opens a third segment
+- [ ] 12.3 Basedpyright reports zero errors over the application layer
 
 #### Manual
 
-- [ ] 11.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged
+- [ ] 12.4 Stream two turns over HTTP and confirm draft events arrive in the consent turn
+
+### Phase 13: Remove the superseded ports and rewire composition
+
+#### Automated
+
+- [ ] 13.1 Full pytest run passes, including the distill-flow features
+- [ ] 13.2 Ruff is clean over src and tests
+- [ ] 13.3 Basedpyright reports zero errors over src and tests
+- [ ] 13.4 Grep finds no superseded port or ReplyChunk reference
+
+#### Manual
+
+- [ ] 13.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged

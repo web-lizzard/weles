@@ -1,6 +1,6 @@
 # Capture Capture-Mode Graph and the Pydantic AI Agent Adapter — Plan Brief
 
-> Full plan: `plan.md` · Revision 3 (2026-09-12); prior versions in `plan-versions/v1-*`, `v2-*`
+> Full plan: `plan.md` · Revision 2 (2026-09-12); prior version in `plan-versions/v1-*`
 
 ## What & Why
 
@@ -38,7 +38,6 @@ symmetric. `GenerateReplyCommand` holds one port and loops while a move is avail
 | Deterministic stand-in | Keeps `"that's all"`, emits a tool result | Acceptance scenarios in capture-flow *and* distill-flow depend on the phrase; the adapter still decides no phase. | Plan |
 | Tool-name invariant | `model_validator` on `Tool` | A misnamed tool fails at import rather than mid-conversation. | Plan |
 | Tracing | `langfuse.session.id` per turn | One capture session reads as one bucket rather than scattered spans. | Plan |
-| Message recording | Command-raised events through `apply` | Keeps `apply` the only way the context changes, and the split union stops an adapter raising them. | Plan |
 
 ## Scope
 
@@ -64,17 +63,15 @@ and 7 introduce new classes; the rest add methods to classes that already exist.
 | 3. State machine behaviour | `available_transitions`, `transition`, `current_state_name` | The machine must report, never choose |
 | 4. Consent symbols (stubs) | Value object, tools, results, events | `TurnOpened` removal touches the event union |
 | 5. Capture graph behaviour | Guards, actions, per-turn tool filtering | Consent guard must read persisted state, not the event |
-| 6. Message events (stubs) | `AgentEvent` split, two command-raised events | Narrows the port signature set in discover-contracts |
-| 7. Messages reach the machine | A turn's own exchange enters the context | Fixes consent on a first-message turn and drafting from a stale transcript |
-| 8. Pydantic AI adapter (stubs) | Adapter skeleton, session id on tracing | Tracing change is shared with the embedding adapter |
-| 9. Pydantic AI stream mapping | `run_stream_events` → `CaptureEvent`, traced | Library event surface is the least familiar ground here |
-| 10. In-memory adapter (stubs) | Stand-in skeleton | — |
-| 11. Stand-in behaviour + history | Acceptance scenarios keep running; port satisfied again | Losing `"that's all"` would break distill-flow too |
-| 12. Command rewrite | One port, the turn loop, rollback posture | The loop must terminate; 827 lines of tests rewritten |
-| 13. Remove superseded ports | One route to a model; composition rewired | Widest blast radius — compose, integration, BDD |
+| 6. Pydantic AI adapter (stubs) | Adapter skeleton, session id on tracing | Tracing change is shared with the embedding adapter |
+| 7. Pydantic AI stream mapping | `run_stream_events` → `CaptureEvent`, traced | Library event surface is the least familiar ground here |
+| 8. In-memory adapter (stubs) | Stand-in skeleton | — |
+| 9. Stand-in behaviour + history | Acceptance scenarios keep running; port satisfied again | Losing `"that's all"` would break distill-flow too |
+| 10. Command rewrite | One port, the turn loop, rollback posture | The loop must terminate; 827 lines of tests rewritten |
+| 11. Remove superseded ports | One route to a model; composition rewired | Widest blast radius — compose, integration, BDD |
 
 **Prerequisites:** none beyond the closed `frame.md` and `discover-contracts.md`; S-01 landed the
-`adapters/out/llm/` package and tracing. **Estimated effort:** large — thirteen phases, seven test-driven.
+`adapters/out/llm/` package and tracing. **Estimated effort:** large — eleven phases, six test-driven.
 
 ## Open Risks & Assumptions
 
