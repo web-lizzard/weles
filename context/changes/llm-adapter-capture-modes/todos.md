@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 5
-next_step: 5.4
-next_command: /implement llm-adapter-capture-modes phase 5
+current_phase: 8
+next_step: 8.1
+next_command: /implement llm-adapter-capture-modes phase 8
 updated: 2026-09-12
 ---
 
@@ -58,7 +58,7 @@ updated: 2026-09-12
 
 #### Triage
 
-- [ ] 5.4 R5-F2 Capture graph tests must assert CaptureSession.start() stamps UTC-aware created_at
+- [x] 5.4 R5-F2 Capture graph tests must assert CaptureSession.start() stamps UTC-aware created_at
 
 ### Phase 6: Message-recording events and the agent/command event split (stubs)
 
