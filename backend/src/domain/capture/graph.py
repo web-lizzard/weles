@@ -1,7 +1,7 @@
 # Blocking comment. Present only while the handler, guard and action bodies
 # below are absent — each reads its parameters nowhere in a `...` body. Remove
 # it once the bodies land.
-# pyright: reportUnusedParameter=false
+# pyright: reportUnusedParameter=false, reportUnusedFunction=false
 from collections.abc import Sequence
 from typing import Literal, override
 
@@ -126,6 +126,14 @@ class NoteContentProposal(ToolResult, frozen=True):
     content: NoteContent
 
 
+class DraftingConsentSignal(ToolResult, frozen=True):
+    tool: Literal["signal_drafting_consent"] = "signal_drafting_consent"
+
+
+class ConversationRequestSignal(ToolResult, frozen=True):
+    tool: Literal["request_conversation"] = "request_conversation"
+
+
 def consent_given(context: CaptureTurn) -> bool:
     """The guard into drafting: the session already holds messages, and the
     user's latest message was read as consent (FR-01).
@@ -136,6 +144,11 @@ def consent_given(context: CaptureTurn) -> bool:
     entry; the consent half replaces that function's phrase list, which is not
     ported — no fixed phrase stands in for the user's word.
     """
+    ...
+
+
+def conversation_requested(context: CaptureTurn) -> bool:
+    """Whether the session holds a return-to-conversation intent (FR-02)."""
     ...
 
 
@@ -164,11 +177,37 @@ async def _propose_note_content(
 ) -> NoteContentProposal: ...
 
 
+async def _signal_drafting_consent(
+    context: CaptureTurn, arguments: ToolArguments
+) -> DraftingConsentSignal: ...
+
+
+async def _request_conversation(
+    context: CaptureTurn, arguments: ToolArguments
+) -> ConversationRequestSignal: ...
+
+
 async def _assign_session_topic(context: CaptureTurn, event: CaptureEvent) -> None:
     """Put the proposed topic on the session, in memory. `assign_topic` refuses
     a second assignment, which is why `Conversing` withdraws the tool once the
     session has one."""
     ...
+
+
+async def _record_drafting_consent(
+    context: CaptureTurn, event: CaptureEvent
+) -> None: ...
+
+
+async def _record_conversation_request(
+    context: CaptureTurn, event: CaptureEvent
+) -> None: ...
+
+
+async def _consume_drafting_consent(context: CaptureTurn) -> None: ...
+
+
+async def _consume_conversation_request(context: CaptureTurn) -> None: ...
 
 
 _ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessed](
@@ -204,6 +243,22 @@ _PROPOSE_NOTE_CONTENT = Tool[CaptureTurn, NoteContentProposal](
     description="Write the body of the note being drafted.",
     result=NoteContentProposal,
     handler=_propose_note_content,
+)
+
+_SIGNAL_DRAFTING_CONSENT = Tool[CaptureTurn, DraftingConsentSignal](
+    name="signal_drafting_consent",
+    description="Read the user's latest message as consent to start drafting.",
+    result=DraftingConsentSignal,
+    handler=_signal_drafting_consent,
+)
+
+_REQUEST_CONVERSATION = Tool[CaptureTurn, ConversationRequestSignal](
+    name="request_conversation",
+    description=(
+        "Read the user's latest message as a request to return to conversation."
+    ),
+    result=ConversationRequestSignal,
+    handler=_request_conversation,
 )
 
 _CAPTURE_GRAPH = Graph[CaptureTurn, CaptureEvent, CapturePhase](
