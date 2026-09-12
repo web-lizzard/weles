@@ -14,9 +14,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 1.1 Graph mechanics suite passes against a non-capture graph
-- [x] 1.2 Ruff reports no B027 suppression left in the graph package
-- [x] 1.3 Basedpyright reports zero errors over the graph package
+- [x] 1.1 Graph mechanics suite passes against a non-capture graph — a8793ee
+- [x] 1.2 Ruff reports no B027 suppression left in the graph package — a8793ee
+- [x] 1.3 Basedpyright reports zero errors over the graph package — a8793ee
 
 ### Phase 2: State machine bodies and the transition predicate
 
