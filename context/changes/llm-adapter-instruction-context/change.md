@@ -3,7 +3,7 @@ change_id: llm-adapter-instruction-context
 title: Capture's instructions are domain artifacts that cannot dispatch without their context
 status: implementing
 created: 2026-09-12
-updated: 2026-09-12
+updated: 2026-09-13
 archived_at: null
 effort_id: llm-adapter
 slice_ref: S-03
