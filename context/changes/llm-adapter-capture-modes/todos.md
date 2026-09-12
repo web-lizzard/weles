@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 8
-next_step: 8.1
-next_command: /implement llm-adapter-capture-modes phase 8
+current_phase: 5
+next_step: 5.4
+next_command: /implement llm-adapter-capture-modes phase 5
 updated: 2026-09-12
 ---
 
@@ -55,6 +55,10 @@ updated: 2026-09-12
 - [x] 5.1 Capture graph suite passes, pinning empty terminal states, both edges reachable, and at most one transition available — e0cfce9
 - [x] 5.2 Capture domain model suite passes — e0cfce9
 - [x] 5.3 Basedpyright reports zero errors over the domain layer — e0cfce9
+
+#### Triage
+
+- [ ] 5.4 R5-F2 Capture graph tests must assert CaptureSession.start() stamps UTC-aware created_at
 
 ### Phase 6: Message-recording events and the agent/command event split (stubs)
 
