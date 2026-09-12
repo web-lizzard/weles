@@ -10,6 +10,7 @@ OBSERVATION_INPUT = "langfuse.observation.input"
 OBSERVATION_OUTPUT = "langfuse.observation.output"
 OBSERVATION_MODEL_NAME = "langfuse.observation.model.name"
 OBSERVATION_USAGE_DETAILS = "langfuse.observation.usage_details"
+SESSION_ID = "langfuse.session.id"
 
 
 class ObservationRecorder:
@@ -30,11 +31,17 @@ class ObservationRecorder:
 
 @contextmanager
 def observation(
-    name: str, *, observation_type: str, input_value: object
+    name: str,
+    *,
+    observation_type: str,
+    input_value: object,
+    session_id: str | None = None,
 ) -> Generator[ObservationRecorder, None, None]:
     with trace.get_tracer(__name__).start_as_current_span(name) as span:
         span.set_attribute(OBSERVATION_TYPE, observation_type)
         span.set_attribute(OBSERVATION_INPUT, json.dumps(input_value))
+        if session_id is not None:
+            span.set_attribute(SESSION_ID, session_id)
         recorder = ObservationRecorder(span)
         try:
             yield recorder
