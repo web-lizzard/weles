@@ -17,12 +17,14 @@ from domain.capture.graph import (
 )
 from domain.capture.message import Message
 from domain.capture.turn import (
+    AssistantMessageRecorded,
     CaptureTurn,
     ConversationRequested,
     DraftingConsentSignalled,
     NoteContentProduced,
     ReplyProduced,
     SessionTopicProposed,
+    UserMessageRecorded,
 )
 from domain.capture.value_objects import (
     CapturePhase,
@@ -42,6 +44,14 @@ def _user_message(session: CaptureSession) -> Message:
         session_id=session.id,
         role=MessageRole.USER,
         content=MessageContent(value="Let's talk about TCP handshakes"),
+    )
+
+
+def _assistant_message(session: CaptureSession) -> Message:
+    return Message.record(
+        session_id=session.id,
+        role=MessageRole.AGENT,
+        content=MessageContent(value="We can write this up as a note."),
     )
 
 
@@ -271,3 +281,49 @@ async def test_proposal_tools_return_results_built_from_the_model_arguments() ->
         "assess_coverage",
         "signal_drafting_consent",
     }
+
+
+def test_recording_a_message_on_the_turn_appends_it_to_the_conversation() -> None:
+    session = CaptureSession.start()
+    turn = CaptureTurn(session=session, messages=())
+    incoming = _user_message(session)
+
+    turn.record_message(incoming)
+
+    assert list(turn.messages) == [incoming]
+
+
+async def test_applying_the_turns_own_first_message_then_consent_opens_drafting() -> (
+    None
+):
+    machine = CaptureMachine(_turn(messages=()))
+    incoming = _user_message(machine.context.session)
+    recorded = UserMessageRecorded(message=incoming)
+    consent = DraftingConsentSignalled()
+
+    assert Conversing().get_actions(machine.context, recorded) != ()
+    await machine.apply(recorded)
+
+    assert incoming in machine.context.messages
+
+    await machine.apply(consent)
+
+    assert machine.context.session.drafting_consent == DraftingConsent()
+    assert machine.available_transitions() == {
+        CapturePhase.DRAFTING: Drafting().description,
+    }
+
+
+async def test_applying_an_assistant_message_while_drafting_appends_it() -> None:
+    machine = CaptureMachine(_turn(phase=CapturePhase.DRAFTING, messages=()))
+    incoming = _assistant_message(machine.context.session)
+    recorded = AssistantMessageRecorded(message=incoming)
+    user_recorded = UserMessageRecorded(message=_user_message(machine.context.session))
+
+    assert Drafting().get_actions(machine.context, recorded) != ()
+    assert Drafting().get_actions(machine.context, user_recorded) != ()
+    assert Conversing().get_actions(machine.context, recorded) != ()
+
+    await machine.apply(recorded)
+
+    assert incoming in machine.context.messages
