@@ -105,19 +105,19 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 10.1 Deterministic capture agent module imports cleanly
+- [x] 10.1 Deterministic capture agent module imports cleanly — 034d08d
 
 ### Phase 11: Deterministic adapter behaviour and message history
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 034d08d
 
 #### Automated
 
-- [ ] 11.1 Message repository contract suite passes with nothing skipped
-- [ ] 11.2 Capture agent contract suite passes for both implementations
-- [ ] 11.3 Basedpyright reports zero errors over src and tests
+- [x] 11.1 Message repository contract suite passes with nothing skipped — 034d08d
+- [x] 11.2 Capture agent contract suite passes for both implementations — 034d08d
+- [x] 11.3 Basedpyright reports zero errors over src and tests — 034d08d
 
 ### Phase 12: Command rewrite — one port and the turn loop
 
