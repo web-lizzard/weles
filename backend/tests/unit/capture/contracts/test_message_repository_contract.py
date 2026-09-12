@@ -9,14 +9,6 @@ from domain.capture.message import Message
 from domain.capture.ports import MessageRepository
 from domain.capture.value_objects import MessageContent, MessageRole, SessionId
 
-pytestmark = pytest.mark.skip(
-    reason=(
-        "MessageRepository.history is on the port but InMemoryMessageRepository "
-        "does not implement it yet; re-enable in /implement "
-        "llm-adapter-capture-modes."
-    ),
-)
-
 
 def _make_in_memory() -> tuple[MessageRepository, InMemoryMessageStore]:
     store = InMemoryMessageStore()
@@ -43,3 +35,43 @@ async def test_add_persists_message_visible_via_the_shared_store(
     await repository.add(message)
 
     assert store.list_by_session(message.session_id) == [message]
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_history_returns_messages_for_session_in_order(
+    make_repository: Callable[[], tuple[MessageRepository, InMemoryMessageStore]],
+) -> None:
+    repository, _store = make_repository()
+    session_id = SessionId.new()
+    first = Message.record(
+        session_id=session_id,
+        role=MessageRole.USER,
+        content=MessageContent(value="First"),
+    )
+    second = Message.record(
+        session_id=session_id,
+        role=MessageRole.AGENT,
+        content=MessageContent(value="Second"),
+    )
+    other_session = Message.record(
+        session_id=SessionId.new(),
+        role=MessageRole.USER,
+        content=MessageContent(value="Other"),
+    )
+
+    await repository.add(first)
+    await repository.add(second)
+    await repository.add(other_session)
+
+    history = await repository.history(session_id)
+
+    assert history == [first, second]
+
+
+@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
+async def test_history_returns_empty_list_when_session_has_no_messages(
+    make_repository: Callable[[], tuple[MessageRepository, InMemoryMessageStore]],
+) -> None:
+    repository, _store = make_repository()
+
+    assert await repository.history(SessionId.new()) == []
