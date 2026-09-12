@@ -44,6 +44,7 @@ from domain.capture.turn import (
     AgentEvent,
     CaptureTurn,
     ConversationRequested,
+    CoverageAssessed,
     DraftingConsentSignalled,
     NoteContentProduced,
     NoteTagProposed,
@@ -52,6 +53,7 @@ from domain.capture.turn import (
 )
 from domain.capture.value_objects import (
     CapturePhase,
+    Coverage,
     Label,
     MessageContent,
     NoteContent,
@@ -220,6 +222,37 @@ async def test_done_event_reports_zero_coverage_with_deterministic_assessment() 
 
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
     assert done.coverage_confidence == 0.0
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.assessments == ()
+
+
+async def test_done_coverage_confidence_reflects_last_session_assessment() -> None:
+    stack = _make_agent_command_stack(
+        _ScriptedCaptureAgent(
+            [
+                [
+                    ReplyProduced(text="Still exploring the topic."),
+                    CoverageAssessed(coverage=Coverage(value=0.45)),
+                    CoverageAssessed(coverage=Coverage(value=0.82)),
+                ],
+            ]
+        )
+    )
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    content = MessageContent(value="How does congestion control relate?")
+
+    events = [event async for event in stack.command.handle(session.id, content)]
+
+    done = next(event for event in events if isinstance(event, ReplyDoneEvent))
+    assert done.coverage_confidence == 0.82
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.assessments == (
+        Coverage(value=0.45),
+        Coverage(value=0.82),
+    )
 
 
 async def test_drafting_turn_emits_draft_events_before_done() -> None:
