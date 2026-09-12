@@ -1,9 +1,3 @@
-# Blocking comments. Both exist only while the method bodies are absent —
-# every parameter reads as unused in a `...` body, and B027 fires because
-# these are concrete methods on an ABC, deliberately unimplemented here.
-# Remove both once the bodies land.
-# ruff: noqa: B027
-# pyright: reportUnusedParameter=false
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from enum import StrEnum
@@ -23,23 +17,24 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
     evaluated. It never persists and never commits.
     """
 
-    def __init__(self, context: ContextT) -> None: ...
+    def __init__(self, context: ContextT) -> None:
+        self._context: ContextT = context
 
     @property
     def context(self) -> ContextT:
         """The aggregate the machine carries. The caller reads what a turn
         touched from here — no separate record of changes is returned."""
-        ...
+        return self._context
 
     @property
     def current_state(self) -> State[ContextT, EventT]:
         """The declared state the context's state name resolves to."""
-        ...
+        return self.graph.states[self.current_state_name]
 
     @property
     def current_state_name(self) -> NameT:
         """The state name currently held on the aggregate."""
-        ...
+        return self.state_name_of(self._context)
 
     def get_tools(self) -> Sequence[Tool[ContextT, ToolResult]]:
         """What the current state offers the context this turn — the machine
@@ -48,7 +43,7 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         What this does not return is never rendered to the model and so can
         never be called.
         """
-        ...
+        return self.current_state.get_tools(self._context)
 
     async def apply(self, event: EventT) -> None:
         """Feed one event of a turn to the machine.
@@ -56,12 +51,21 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         Runs the actions the current state says this event warrants. Crosses no
         edge — a move is a separate, explicitly requested act.
         """
-        ...
+        for action in self.current_state.get_actions(self._context, event):
+            await action(self._context, event)
 
     def available_transitions(self) -> Mapping[NameT, str]:
         """Every target reachable from the current state whose guard passes,
         mapped to that state's description."""
-        ...
+        context = self._context
+        source = self.current_state_name
+        available: dict[NameT, str] = {}
+        for target, edge in self.graph.outgoing(source).items():
+            guard = edge.guard
+            if guard is not None and not guard(context):
+                continue
+            available[target] = self.graph.states[target].description
+        return available
 
     async def transition(self, target: NameT) -> bool:
         """Take the edge to target: run its actions, then write the new state
@@ -76,7 +80,14 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         an exception — the machine owns the edges, so "there is no such move"
         is something it knows rather than something it discovers.
         """
-        ...
+        if target not in self.available_transitions():
+            return False
+        source = self.current_state_name
+        edge = self.graph.outgoing(source)[target]
+        for action in edge.actions:
+            await action(self._context)
+        self.enter_state(self._context, target)
+        return True
 
     @property
     @abstractmethod
