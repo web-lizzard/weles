@@ -1,7 +1,5 @@
 # Capture Capture-Mode Graph and the Pydantic AI Agent Adapter — Implementation Plan
 
-> Revision 2 (2026-09-12): the machine reports available transitions and the command decides; guards read disjoint intents off the aggregate instead of the event, and each edge consumes the intent that let it through. Phase 1 is executed and untouched; phases 2, 3, 4 and 9 are rewritten. Prior version: plan-versions/v1-plan.md
-
 ## Overview
 
 Slice S-02 of the `llm-adapter` effort makes the effort's thesis falsifiable: the phases of a
@@ -114,20 +112,14 @@ so each is preceded by its own stubs phase.
 
 ## Critical Implementation Details
 
-Guards read state, never the event. An intent — consent to draft, or a request to return to
-conversation — is persisted on the session by an action during `apply`, and the edge that it permits
-**consumes** it. That consumption is what terminates the loop: once an intent is spent, nothing
-permits a further move until the model produces a new one. Guarding the return edge is still
-required, but for a narrower reason than an earlier draft of this plan claimed — without it, every
-drafting turn would burn one extra segment returning to a conversation nobody asked for.
+The `while` loop and the unguarded return edge are incompatible: once in `DRAFTING`, the move back is
+permanently available, so a loop conditioned on "a move is possible" never terminates. Guarding the
+return edge on a recognised request is what makes the loop finite, and it is also what FR-02 asks for
+— the condition is satisfiable in any turn, so drafting never becomes terminal. A bounded iteration
+count backs this up as a safety net, not as the primary mechanism.
 
-Because guards are disjoint by construction, at most one transition is ever available. Two available
-at once means the intents stopped being disjoint, which is a defect in the graph declaration — caught
-by the mechanics suite, not raised at runtime, per the `graph-exceptions` decision.
-
-The command asks the machine what is available and decides for itself; it never asks the machine to
-pick. That is what keeps a future in which the *model* chooses the next phase from requiring a
-different shape — it reads the same list, by description.
+Breaking out of `async for` mid-stream leaves Pydantic AI's run context open; every segment is wrapped
+in `contextlib.aclosing` so an early exit at a transition disposes the run properly.
 
 ## Phase 1: Graph mechanics bodies and the tool-name invariant
 
@@ -163,55 +155,35 @@ blocking comments at the top of the file once bodies land.
 
 ---
 
-## Phase 2: Edge vocabulary, state descriptions, and available transitions
+## Phase 2: State machine bodies and the transition predicate
 
 ### Overview
 
-Split the edge vocabulary from the phase vocabulary, give a state a description the model will one
-day read, and fill `StateMachine` so it *reports* what is available without deciding anything.
+Fill `StateMachine`'s bodies and add the target-free predicate and mover the command's loop needs, so
+the graph's inventory never leaks into the application layer.
 
 ### Changes Required:
 
-#### 1. Edge aliases and state description
-
-**File**: `backend/src/domain/shared/graph/model.py`
-
-**Intent**: A guard runs after a whole stream segment, when no event "requests" the move, so the
-event parameter has nothing to bind to; and a state needs a description because choosing the next
-phase is a decision a model will eventually make from a list.
-
-**Contract**: Two new aliases for edge-side callables — `EdgeCondition[ContextT]` taking only the
-context, and `EdgeAction[ContextT]` returning an awaitable and taking only the context.
-`Transition.guard` becomes `EdgeCondition[ContextT] | None` and `Transition.actions` becomes
-`Sequence[EdgeAction[ContextT]]`. `Condition` and `Action` keep their event parameter and stay in use
-for `State.get_actions`, which still runs per event. `State` gains an abstract
-`description: str` property, the state-level counterpart of `Tool.description`. This supersedes the
-`guard-concept` entry in `discover-contracts-log.md`, whose premise — that a guard is evaluated
-against the event requesting the move — no longer holds.
-
-#### 2. State machine
+#### 1. State machine
 
 **File**: `backend/src/domain/shared/graph/machine.py`
 
-**Intent**: Let the machine answer "where can this context go from here, and what are those places"
-while leaving the choice to the caller.
+**Intent**: Give the mechanics a way to answer "is any move available for this event?" and "take it",
+without the caller naming a phase.
 
-**Contract**: `__init__(context)` stores the context; `context`, `current_state` and a new
-`current_state_name` expose it, the resolved `State`, and its name. `get_tools()` delegates to the
-current state. `apply(event)` runs the actions the current state warrants for that event and crosses
-no edge. `available_transitions() -> Mapping[NameT, str]` returns every target whose edge guard
-passes, mapped to that target state's `description` — the keys are what a command matches on, the
-values are what a model would read. `transition(target) -> bool` runs the edge's actions, writes the
-new name via `enter_state`, and reports whether the move happened; it refuses a target that is not
-currently available. There is no `can_transition`, no `can_advance` and no `advance`: membership in
-`available_transitions()` already answers the question, and two ways to learn one fact drift apart.
-Remove both blocking comments.
+**Contract**: `__init__(context)` stores the context. `context` and `current_state` expose it and the
+resolved `State`. `get_tools()` delegates to the current state. `apply(event)` runs the actions the
+current state warrants for that event and crosses no edge. `can_transition(target, event)` reports
+whether that edge exists and its guard passes. `transition(target, event)` runs the edge's actions
+then writes the new name via `enter_state`, returning whether the move happened. Two new methods:
+`can_advance(event) -> bool`, true when any outgoing edge's guard passes for this event, and
+`async advance(event) -> bool`, which takes the first such edge and reports whether it moved. Remove
+both blocking comments.
 
 ### Success Criteria:
 
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/shared/test_graph_machine.py -v` passes
-- `cd backend && uv run pytest tests/unit/shared/test_graph_model.py -v` still passes after the alias split
 - `cd backend && uv run basedpyright src/domain/shared/graph` reports zero errors
 
 ---
@@ -231,13 +203,9 @@ Materialize the symbols phase 4's tests import. No behaviour — declarations an
 **Intent**: Give the session a durable carrier for the user's expressed wish to draft, so it survives
 between turns the way the phase itself does.
 
-**Contract**: `DraftingConsent(BaseModel, frozen=True)` and `ConversationRequest(BaseModel, frozen=True)`
-in `value_objects.py` — two disjoint intents, so at most one guard can ever pass.
-`CaptureSession.drafting_consent: DraftingConsent | None = None` and
-`CaptureSession.conversation_request: ConversationRequest | None = None`, plus
-`record_drafting_consent`, `record_conversation_request`, and `clear_drafting_consent` /
-`clear_conversation_request` — all with empty bodies. The clearers exist because an intent is spent
-when the edge it permits is taken.
+**Contract**: `DraftingConsent(BaseModel, frozen=True)` in `value_objects.py`.
+`CaptureSession.drafting_consent: DraftingConsent | None = None`, plus
+`record_drafting_consent(self, consent: DraftingConsent) -> None` with an empty body.
 
 #### 2. Tools, results and events
 
@@ -247,12 +215,10 @@ when the edge it permits is taken.
 conversation — as tools with results and matching domain events.
 
 **Contract**: In `graph.py`: `DraftingConsentSignal(ToolResult, frozen=True)` pinning
-`tool: Literal["signal_drafting_consent"]`; `ConversationRequestSignal(ToolResult, frozen=True)`
-pinning `tool: Literal["request_conversation"]`; handlers `_signal_drafting_consent` and
+`tool: Literal["signal_drafting_consent"]`; `ConversationRequest(ToolResult, frozen=True)` pinning
+`tool: Literal["request_conversation"]`; handlers `_signal_drafting_consent` and
 `_request_conversation`; module-level `_SIGNAL_DRAFTING_CONSENT` and `_REQUEST_CONVERSATION` tools;
-phase actions `_record_drafting_consent` and `_record_conversation_request`; edge actions
-`_consume_drafting_consent` and `_consume_conversation_request`; guard `conversation_requested`;
-`description` on `Conversing` and `Drafting`. In `turn.py`:
+action `_record_drafting_consent`; guard `conversation_requested`. In `turn.py`:
 `DraftingConsentSignalled` and `ConversationRequested` event models, both added to the `CaptureEvent`
 union; `TurnOpened` is removed along with its `consent_signalled` field.
 
@@ -280,15 +246,12 @@ tools a phase offers this turn, and what an event makes happen.
 **Intent**: Move the drafting decision out of the adapter's phrase list and the topic decision off the
 command, into the graph where `frame.md` puts them.
 
-**Contract**: `consent_given(context)` returns true when `context.session.drafting_consent` is set —
-an `EdgeCondition`, so it reads persisted state and takes no event. `conversation_requested(context)`
-returns true when `context.session.conversation_request` is set. The two are disjoint by
-construction, because each edge clears its own intent on the way through.
-`_record_drafting_consent(context, event)` persists the consent only when `context.messages` is
-non-empty — the invariant that keeps a consent without a conversation from being recorded — and
-`_record_conversation_request` persists the return intent. The edge actions
-`_consume_drafting_consent` and `_consume_conversation_request` clear them, and are what makes an
-intent single-use and the command's loop finite.
+**Contract**: `consent_given(context, event)` returns true when `context.session.drafting_consent` is
+set and `context.messages` is non-empty — it reads persisted state, not the event's payload.
+`_record_drafting_consent(context, event)` persists the consent in memory only when
+`context.messages` is non-empty, which is the invariant that keeps a consent without a conversation
+from being recorded. `conversation_requested(context, event)` returns true when the event is a
+`ConversationRequested`. `CaptureSession.record_drafting_consent` assigns the value object.
 
 #### 2. Phase inventories and filtering
 
@@ -300,19 +263,15 @@ intent single-use and the command's loop finite.
 `_PROPOSE_SESSION_TOPIC` once `context.session.topic` is set — the filter `send_message.py:83`
 performs today. `Conversing.get_actions` returns `_assign_session_topic` only for a
 `SessionTopicProposed` and `_record_drafting_consent` only for a `DraftingConsentSignalled`.
-`Drafting.tools` gains `_REQUEST_CONVERSATION`, and `Drafting.get_actions` returns
-`_record_conversation_request` only for a `ConversationRequested`. `_assign_session_topic` puts the
-proposed topic on the session. The `CONVERSING -> DRAFTING` transition carries
-`actions=(_consume_drafting_consent,)` and the `DRAFTING -> CONVERSING` transition gains
-`guard=conversation_requested` with `actions=(_consume_conversation_request,)`; the in-file comment
-justifying the missing guard is replaced with one explaining why it is required — without it every
-drafting turn burns a segment returning to a conversation nobody asked for. Both states get a
-`description`. The five proposal handlers return their results from the arguments the model sent.
+`Drafting.tools` gains `_REQUEST_CONVERSATION`. `_assign_session_topic` puts the proposed topic on the
+session. The `DRAFTING -> CONVERSING` transition gains `guard=conversation_requested`, and the
+in-file comment justifying its absence is replaced with one explaining why the guard is required.
+The five proposal handlers return their results from the arguments the model sent.
 
 ### Success Criteria:
 
 #### Automated Verification:
-- `cd backend && uv run pytest tests/unit/capture/test_capture_graph.py -v` passes, including that at most one transition is ever available
+- `cd backend && uv run pytest tests/unit/capture/test_capture_graph.py -v` passes
 - `cd backend && uv run pytest tests/unit/capture/test_model.py -v` passes
 - `cd backend && uv run basedpyright src/domain` reports zero errors
 
@@ -483,35 +442,19 @@ it used to make itself.
 **Contract**: The constructor takes `capture_sessions`, `uow`, `capture_agent: CaptureAgentPort` and
 `vocabulary`, dropping `transcript_query`, `topic_extraction`, `confidence_assessment` and
 `reply_generation`. `handle` rehydrates the session, builds a `CaptureTurn` from it plus
-`uow.messages.history(...)`, constructs a `CaptureMachine` over it, and runs at most
-`_MAX_SEGMENTS = 2` segments — the number this use case needs, conversing then drafting, declared as
-a constant in the command rather than as a tuned setting. Each segment first attempts the transition
-this use case cares about, then streams:
-
-```python
-for _ in range(_MAX_SEGMENTS):
-    available = machine.available_transitions()
-    if CapturePhase.DRAFTING in available:
-        await machine.transition(CapturePhase.DRAFTING)
-    async for event in agent.converse(turn, machine.get_tools()):
-        await machine.apply(event)
-        yield ...                       # text passes through in the same pass
-```
-
-The transition is attempted at the *start* of a segment, not the end, so an intent recorded in a
-previous turn is consumed before the model is handed the wrong phase's tools. The command names the
-phase it wants and matches on it declaratively — that is its use case, not the graph's topology, so
-adding a phase this command does not serve changes nothing here. The session, its messages and any
-note the turn touched are read off `machine.context` and persisted once, then `uow.commit()`. Any
-exception propagates out of the `async with uow` block uncommitted, so an interrupted turn leaves no
-trace — the rollback posture chosen in planning. `contextlib.aclosing` wraps each segment as hygiene
-on that exception path, not as a mid-stream break mechanism.
+`uow.messages.history(...)`, constructs a `CaptureMachine` over it, and loops: get the current phase's
+tools, open a stream inside `contextlib.aclosing`, apply each arriving event to the machine while
+translating it to the client's `ReplyStreamEvent` shape, and break the segment when
+`machine.can_advance(event)`. Outside the segment, `await machine.advance(event)` and loop again;
+terminate when no move is available or a bounded iteration count is reached. The session, its
+messages and any note the turn touched are read off `machine.context` and persisted once, then
+`uow.commit()`. Any exception propagates out of the `async with uow` block uncommitted, so an
+interrupted turn leaves no trace — the rollback posture chosen in planning.
 
 ### Success Criteria:
 
 #### Automated Verification:
 - `cd backend && uv run pytest tests/unit/capture/test_send_message_command.py -v` passes
-- `cd backend && uv run pytest tests/unit/capture/test_send_message_command.py -k segments -v` confirms no turn opens a third segment
 - `cd backend && uv run basedpyright src/application` reports zero errors
 
 #### Manual Verification:
