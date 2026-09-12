@@ -71,8 +71,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 7.1 Capture graph suite passes, including consent recorded from the turn's own first message
-- [x] 7.2 Basedpyright reports zero errors over the domain layer
+- [x] 7.1 Capture graph suite passes, including consent recorded from the turn's own first message — 72b0247
+- [x] 7.2 Basedpyright reports zero errors over the domain layer — 72b0247
 
 ### Phase 8: Pydantic AI capture agent adapter (stubs)
 
