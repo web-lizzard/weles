@@ -82,8 +82,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 8.1 Pydantic AI capture agent module imports cleanly
-- [x] 8.2 Embedding adapter suite still passes after the tracing signature change
+- [x] 8.1 Pydantic AI capture agent module imports cleanly — f64b708
+- [x] 8.2 Embedding adapter suite still passes after the tracing signature change — f64b708
 
 ### Phase 9: Pydantic AI adapter — stream mapping and tracing
 
