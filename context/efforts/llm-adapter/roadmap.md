@@ -1,7 +1,7 @@
 ---
 effort_id: llm-adapter
 created: 2026-09-11
-updated: 2026-09-12
+updated: 2026-09-13
 ---
 
 ## At a glance
@@ -10,7 +10,7 @@ updated: 2026-09-12
 |----|---------|-----------|--------|
 | S-01 | Vocabulary reuse runs on a real embedding model, traced in Langfuse | llm-adapter-embedding-tracer | done |
 | S-02 | A capture session moves between conversing and note drafting on the user's word | llm-adapter-capture-modes | done |
-| S-03 | Capture's instructions are domain artifacts that cannot dispatch without their context | llm-adapter-instruction-context | in_progress |
+| S-03 | Capture's instructions are domain artifacts that cannot dispatch without their context | llm-adapter-instruction-context | done |
 | S-04 | The model reaches the domain only through tools that never mutate an aggregate | llm-adapter-domain-tools | done |
 | S-05 | Capture converses end to end against a real provider | llm-adapter-capture-live | pending |
 | S-06 | Distill generates cards end to end against a real provider | llm-adapter-distill-live | in_progress |
@@ -71,7 +71,7 @@ alone is what keeps a later handoff design possible.
 - **Outcome:** Capture's instructions are domain artifacts that cannot dispatch without their context
 - **Acceptance criteria:** FR-05
 - **Change ID:** llm-adapter-instruction-context
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-02
 - **Parallel with:** S-04
 - **Research:** current-context
@@ -141,3 +141,4 @@ Langfuse.
 - **S-01: Vocabulary reuse runs on a real embedding model, traced in Langfuse** — Archived 2026-09-12 → `context/archive/changes/2026-09-11-llm-adapter-embedding-tracer/`. Lesson: —.
 - **S-02: A capture session moves between conversing and note drafting on the user's word** — Archived 2026-09-12 → `context/archive/changes/2026-09-12-llm-adapter-capture-modes/`. Lesson: —.
 - **S-04: The model reaches the domain only through tools that never mutate an aggregate** — Archived 2026-09-12 → `context/archive/changes/2026-09-12-llm-adapter-domain-tools/`. Lesson: —.
+- **S-03: Capture's instructions are domain artifacts that cannot dispatch without their context** — Archived 2026-09-13 → `context/archive/changes/2026-09-12-llm-adapter-instruction-context/`. Lesson: —.
