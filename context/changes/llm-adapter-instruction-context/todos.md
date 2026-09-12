@@ -3,7 +3,7 @@ change_id: llm-adapter-instruction-context
 current_phase: 5
 next_step: 5.7
 next_command: /implement llm-adapter-instruction-context phase 5
-updated: 2026-09-12
+updated: 2026-09-13
 ---
 
 ### Phase 1: Pin the shared instruction model
@@ -56,12 +56,12 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 5.1 Implement the recording action and route it from Conversing.get_actions
-- [x] 5.2 Guard the model's float in the assess_coverage handler
-- [x] 5.3 Map CoverageAssessment to CoverageAssessed in the provider adapter
-- [x] 5.4 Yield CoverageAssessed from the deterministic double
-- [x] 5.5 Remove CaptureTurn.coverage_confidence and read the figure from the session
-- [x] 5.6 Move the coverage wrap-up BDD step onto the event
+- [x] 5.1 Implement the recording action and route it from Conversing.get_actions — 532db6b
+- [x] 5.2 Guard the model's float in the assess_coverage handler — 532db6b
+- [x] 5.3 Map CoverageAssessment to CoverageAssessed in the provider adapter — 532db6b
+- [x] 5.4 Yield CoverageAssessed from the deterministic double — 532db6b
+- [x] 5.5 Remove CaptureTurn.coverage_confidence and read the figure from the session — 532db6b
+- [x] 5.6 Move the coverage wrap-up BDD step onto the event — 532db6b
 
 #### Manual
 
