@@ -1,5 +1,5 @@
 from collections.abc import AsyncIterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from application.capture.dto import (
     DraftDeltaEvent,
@@ -23,12 +23,11 @@ from domain.capture.graph import CaptureMachine
 from domain.capture.message import Message
 from domain.capture.note import Note
 from domain.capture.ports import CaptureAgentPort, CaptureSessionRepository
-from domain.capture.tag import Tag
-from domain.capture.topic import Topic
 from domain.capture.turn import (
     AgentEvent,
     AssistantMessageRecorded,
     CaptureTurn,
+    DraftCompleted,
     NoteContentProduced,
     NoteTagProposed,
     NoteTopicProposed,
@@ -39,11 +38,8 @@ from domain.capture.value_objects import (
     CapturePhase,
     MessageContent,
     MessageRole,
-    NoteContent,
     SessionId,
     SessionStatus,
-    TagId,
-    TopicId,
 )
 from domain.capture.vocabulary import VocabularyResolver
 
@@ -51,10 +47,7 @@ from domain.capture.vocabulary import VocabularyResolver
 @dataclass
 class _TurnBuffers:
     full_text: str = ""
-    draft_text: str = ""
     agent_message: Message | None = None
-    resolved_topic: Topic | None = None
-    resolved_tags: list[Tag] = field(default_factory=list)
 
 
 class GenerateReplyCommand:
@@ -106,42 +99,25 @@ class GenerateReplyCommand:
             await machine.apply(UserMessageRecorded(message=user_message))
 
             buffers = _TurnBuffers()
-            async for event in self._dispatch(uow, machine, turn, buffers):
+            async for event in self._dispatch(machine, turn, buffers):
                 yield event
 
             context = machine.context
             session = context.session
-            note_to_save: Note | None = None
-            if buffers.resolved_topic is not None:
-                note_content = NoteContent(value=buffers.draft_text)
-                if session.note_id is not None:
-                    persisted_note = await uow.notes.get(session.note_id)
-                    if persisted_note is None:
-                        raise NoteNotFoundError
-                    await self._apply_redraft(
-                        uow,
-                        persisted_note,
-                        buffers.resolved_topic,
-                        buffers.resolved_tags,
-                        note_content,
-                    )
-                    note_to_save = persisted_note
-                else:
-                    note_to_save = session.draft_note(
-                        buffers.resolved_topic,
-                        note_content,
-                        buffers.resolved_tags,
-                    )
+            draft_done_event: DraftDoneEvent | None = None
+            persisted_note = context.note
+            draft = context.draft
+            if (
+                persisted_note is not None
+                and draft is not None
+                and draft.topic is not None
+            ):
                 draft_done_event = DraftDoneEvent(
-                    note_id=note_to_save.id.value,
-                    topic=buffers.resolved_topic.label.value,
-                    content=note_to_save.content.value,
-                    tags=[tag.label.value for tag in buffers.resolved_tags],
+                    note_id=persisted_note.id.value,
+                    topic=draft.topic.label.value,
+                    content=persisted_note.content.value,
+                    tags=[tag.label.value for tag in draft.tags],
                 )
-            elif buffers.draft_text or buffers.resolved_tags:
-                raise DraftTopicMissingError
-            else:
-                draft_done_event = None
 
             if buffers.agent_message is None:
                 done_message_id = user_message.id.value
@@ -157,12 +133,6 @@ class GenerateReplyCommand:
                 coverage_confidence=context.coverage_confidence,
             )
 
-            prior_ids = {message.id.value for message in prior}
-            for message in context.messages:
-                if message.id.value not in prior_ids:
-                    await uow.messages.add(message)
-            if note_to_save is not None:
-                await uow.notes.add(note_to_save)
             await uow.capture_sessions.save(session)
             await uow.commit()
 
@@ -172,7 +142,6 @@ class GenerateReplyCommand:
 
     async def _dispatch(
         self,
-        uow: UnitOfWork,
         machine: CaptureMachine,
         turn: CaptureTurn,
         buffers: _TurnBuffers,
@@ -181,65 +150,54 @@ class GenerateReplyCommand:
             _ = await machine.transition(CapturePhase.DRAFTING)
 
         if machine.current_state_name is CapturePhase.CONVERSING:
-            async for event in self._conversing_stream(uow, machine, turn, buffers):
+            async for event in self._conversing_stream(machine, turn, buffers):
                 yield event
             if CapturePhase.DRAFTING in machine.available_transitions():
                 _ = await machine.transition(CapturePhase.DRAFTING)
 
         if machine.current_state_name is CapturePhase.DRAFTING:
-            async for event in self._drafting_stream(uow, machine, turn, buffers):
+            async for event in self._drafting_stream(machine, turn, buffers):
                 yield event
 
     async def _conversing_stream(
         self,
-        uow: UnitOfWork,
         machine: CaptureMachine,
         turn: CaptureTurn,
         buffers: _TurnBuffers,
     ) -> AsyncIterator[ReplyStreamEvent]:
-        async for event in self._open_stream(uow, machine, turn, buffers):
+        async for event in self._open_stream(machine, turn, buffers):
             yield event
 
     async def _drafting_stream(
         self,
-        uow: UnitOfWork,
         machine: CaptureMachine,
         turn: CaptureTurn,
         buffers: _TurnBuffers,
     ) -> AsyncIterator[ReplyStreamEvent]:
-        async for event in self._open_stream(uow, machine, turn, buffers):
+        async for event in self._open_stream(machine, turn, buffers):
             yield event
 
     async def _open_stream(
         self,
-        uow: UnitOfWork,
         machine: CaptureMachine,
         turn: CaptureTurn,
         buffers: _TurnBuffers,
     ) -> AsyncIterator[ReplyStreamEvent]:
         reply_buffer = ""
+        drafting = machine.current_state_name is CapturePhase.DRAFTING
         async with self._capture_agent.converse(turn, machine.get_tools()) as events:
             async for event in events:
-                topic_ids_before = {topic.id for topic in await uow.topics.candidates()}
-                tag_ids_before = {tag.id for tag in await uow.tags.candidates()}
                 await machine.apply(event)
-                mapped = await self._map_agent_event(
-                    machine,
-                    event,
-                    buffers,
-                    topic_ids_before,
-                    tag_ids_before,
-                )
+                mapped = self._to_reply_stream_event(machine, event)
                 if mapped is None:
                     continue
-                stream_event, buffers.resolved_topic, extra_text = mapped
+                stream_event, extra_text = mapped
                 if extra_text is not None:
-                    if isinstance(stream_event, ReplyDeltaEvent):
-                        reply_buffer += extra_text
-                        buffers.full_text += extra_text
-                    else:
-                        buffers.draft_text += extra_text
+                    reply_buffer += extra_text
+                    buffers.full_text += extra_text
                 yield stream_event
+        if drafting:
+            await machine.apply(DraftCompleted())
         if reply_buffer:
             assistant = Message.record(
                 turn.session.id,
@@ -249,75 +207,40 @@ class GenerateReplyCommand:
             await machine.apply(AssistantMessageRecorded(message=assistant))
             buffers.agent_message = assistant
 
-    async def _map_agent_event(
+    def _to_reply_stream_event(
         self,
         machine: CaptureMachine,
         event: AgentEvent,
-        buffers: _TurnBuffers,
-        topic_ids_before: set[TopicId],
-        tag_ids_before: set[TagId],
-    ) -> tuple[ReplyStreamEvent, Topic | None, str | None] | None:
+    ) -> tuple[ReplyStreamEvent, str | None] | None:
         if isinstance(event, ReplyProduced):
-            return ReplyDeltaEvent(text=event.text), buffers.resolved_topic, event.text
+            return ReplyDeltaEvent(text=event.text), event.text
         draft = machine.context.draft
         if isinstance(event, NoteTopicProposed):
             if draft is None or draft.topic is None:
                 raise DraftTopicMissingError
-            buffers.resolved_topic = draft.topic
             return (
                 DraftTopicEvent(
                     label=draft.topic.label.value,
-                    reused=draft.topic.id in topic_ids_before,
+                    reused=draft.topic_reused,
                 ),
-                draft.topic,
                 None,
             )
         if isinstance(event, NoteTagProposed):
             if draft is None or draft.topic is None or not draft.tags:
                 raise DraftTopicMissingError
             tag = draft.tags[-1]
-            buffers.resolved_tags.append(tag)
             return (
                 DraftTagEvent(
                     label=tag.label.value,
-                    reused=tag.id in tag_ids_before,
+                    reused=draft.tag_reused[-1],
                 ),
-                draft.topic,
                 None,
             )
         if isinstance(event, NoteContentProduced):
             if draft is None or draft.topic is None:
                 raise DraftTopicMissingError
-            return (
-                DraftDeltaEvent(text=event.content.value),
-                draft.topic,
-                event.content.value,
-            )
+            return DraftDeltaEvent(text=event.content.value), None
         return None
-
-    async def _apply_redraft(
-        self,
-        uow: UnitOfWork,
-        note: Note,
-        topic: Topic,
-        tags: list[Tag],
-        content: NoteContent,
-    ) -> None:
-        current = await uow.note_vocabulary.resolve(note)
-
-        note.change_topic(topic)
-
-        resolved_ids = {tag.id for tag in tags}
-        current_ids = {tag.id for tag in current.tags}
-        for tag in current.tags:
-            if tag.id not in resolved_ids:
-                note.remove_tag(tag)
-
-        for tag in tags:
-            if tag.id not in current_ids:
-                note.add_tag(tag)
-
-        note.update_content(content)
 
     async def _get_open_session(
         self,

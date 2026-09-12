@@ -715,6 +715,7 @@ async def test_drafting_consent_turn_adds_each_message_to_the_repository_once() 
                     DraftingConsentSignalled(),
                 ],
                 [
+                    ReplyProduced(text="handoff"),
                     NoteTopicProposed(label=Label(value="TCP handshakes")),
                     NoteTagProposed(label=Label(value="networking")),
                     NoteContentProduced(content=NoteContent(value="SYN then ACK.")),
@@ -738,7 +739,10 @@ async def test_redraft_turn_still_updates_note_while_staging_each_message_once()
     stack, message_repo = _make_agent_command_stack_with_message_add_counter(
         _ScriptedCaptureAgent(
             [
-                [DraftingConsentSignalled()],
+                [
+                    ReplyProduced(text="handoff"),
+                    DraftingConsentSignalled(),
+                ],
                 _draft_events(
                     topic=Label(value="TCP handshakes"),
                     tags=[Label(value="networking")],
