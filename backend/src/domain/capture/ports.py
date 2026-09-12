@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator, Sequence
 from typing import Protocol
 
 from domain.capture.capture_session import CaptureSession
@@ -6,7 +7,37 @@ from domain.capture.note import Note
 from domain.capture.note_vocabulary import NoteVocabulary
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
+from domain.capture.turn import CaptureEvent, CaptureTurn
 from domain.capture.value_objects import NoteId, SessionId, TagId, TopicId
+from domain.shared.graph.model import Tool, ToolResult
+
+
+class CaptureAgentPort(Protocol):
+    """One turn of conversation with a model, expressed entirely in capture's
+    own vocabulary.
+
+    It is a domain port, not an application one, and it earns that by owing
+    nothing to any transport: it takes the turn and the tools the current phase
+    offers, and yields `CaptureEvent`s. No chunk type, no provider type, no
+    streaming protocol crosses it — `AsyncIterator` is the only borrowed
+    concept and it is stdlib. Replacing the adapter library changes nothing
+    here, which is FR-09.
+
+    The tools arrive already filtered by the phase, and the adapter invokes
+    their handlers with the same `turn` it was given. A tool reads and computes
+    and never mutates, so nothing about state escapes into the adapter.
+
+    This port is held by the application command, never by the state machine —
+    `frame.md` is explicit that the machine is handed no model-facing port and
+    consumes no stream, and that stays true: declaring the port beside the
+    domain does not hand it to the machine.
+    """
+
+    def converse(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncIterator[CaptureEvent]: ...
 
 
 class CaptureSessionRepository(Protocol):
@@ -17,6 +48,8 @@ class CaptureSessionRepository(Protocol):
 
 class MessageRepository(Protocol):
     async def add(self, message: Message) -> None: ...
+
+    async def history(self, session_id: SessionId) -> list[Message]: ...
 
 
 class NoteRepository(Protocol):
