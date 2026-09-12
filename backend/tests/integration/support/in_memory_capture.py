@@ -38,11 +38,10 @@ from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from application.capture.ports import UnitOfWork
-from application.capture.services.vocabulary import VocabularyResolver
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from domain.capture.ports import CaptureAgentPort
 from domain.capture.value_objects import SimilarityScore
-from domain.capture.vocabulary import MatchCriteria
+from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 
 
 @dataclass

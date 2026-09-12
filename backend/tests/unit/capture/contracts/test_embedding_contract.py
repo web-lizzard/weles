@@ -5,7 +5,7 @@ from typing import cast
 import pytest
 
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
-from application.capture.ports import EmbeddingPort
+from domain.capture.ports import EmbeddingPort
 
 _IMPLEMENTATIONS: list[Callable[[], EmbeddingPort]] = [
     cast(Callable[[], EmbeddingPort], DeterministicEmbeddingAdapter),

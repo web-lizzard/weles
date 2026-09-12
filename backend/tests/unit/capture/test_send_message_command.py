@@ -33,7 +33,6 @@ from application.capture.dto import (
     ReplyDoneEvent,
     ReplyStreamEvent,
 )
-from application.capture.services.vocabulary import VocabularyResolver
 from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
@@ -61,7 +60,7 @@ from domain.capture.value_objects import (
     SessionTopic,
     SimilarityScore,
 )
-from domain.capture.vocabulary import MatchCriteria
+from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.exceptions import CoreException
 from domain.shared.graph.model import Tool, ToolResult
 

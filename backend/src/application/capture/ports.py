@@ -8,12 +8,7 @@ from domain.capture.ports import (
     TagRepository,
     TopicRepository,
 )
-from domain.capture.value_objects import Embedding
 from domain.shared.outbox.ports import OutboxAppender
-
-
-class EmbeddingPort(Protocol):
-    async def embed(self, text: str) -> Embedding: ...
 
 
 class UnitOfWork(Protocol):

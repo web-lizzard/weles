@@ -10,14 +10,13 @@ from application.capture.dto import (
     ReplyDoneEvent,
     ReplyStreamEvent,
 )
-from application.capture.exceptions import DraftTopicMissingError
 from application.capture.ports import UnitOfWork
-from application.capture.services.vocabulary import VocabularyResolver
 from domain.capture.capture_session import CaptureSession
 from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
+    DraftTopicMissingError,
     NoteNotFoundError,
 )
 from domain.capture.graph import CaptureMachine
@@ -44,6 +43,7 @@ from domain.capture.value_objects import (
     SessionId,
     SessionStatus,
 )
+from domain.capture.vocabulary import VocabularyResolver
 
 
 @dataclass
