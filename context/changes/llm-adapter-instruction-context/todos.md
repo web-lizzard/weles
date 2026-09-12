@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-instruction-context
-current_phase: 5
-next_step: 5.7
-next_command: /implement llm-adapter-instruction-context phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /implement llm-adapter-instruction-context phase 6
 updated: 2026-09-13
 ---
 
@@ -65,7 +65,7 @@ updated: 2026-09-13
 
 #### Manual
 
-- [ ] 5.7 Run the full backend suite after the rename
+- [x] 5.7 Run the full backend suite after the rename
 
 ### Phase 6: The machine hands the instruction across the port
 
