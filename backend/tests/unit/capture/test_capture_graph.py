@@ -4,6 +4,7 @@ from datetime import UTC
 import pytest
 
 from domain.capture.capture_session import CaptureSession
+from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.graph import (
     CaptureMachine,
     ConversationRequestSignal,
@@ -77,6 +78,10 @@ def _turn(
     return CaptureTurn(session=session, messages=messages)
 
 
+def _machine(turn: CaptureTurn) -> CaptureMachine:
+    return CaptureMachine(turn, NULL_CAPTURE_DEPS)
+
+
 def _tool_names(tools: Sequence[Tool[CaptureTurn, ToolResult]]) -> set[str]:
     return {tool.name for tool in tools}
 
@@ -90,7 +95,7 @@ def test_turn_bootstrap_stamps_session_created_at_in_utc() -> None:
 async def test_at_most_one_available_transition_and_each_intent_opens_its_edge() -> (
     None
 ):
-    graph = CaptureMachine(_turn()).graph
+    graph = _machine(_turn()).graph
     idle = _turn()
     consented = _turn(drafting_consent=DraftingConsent())
     drafting = _turn(phase=CapturePhase.DRAFTING)
@@ -114,17 +119,17 @@ async def test_at_most_one_available_transition_and_each_intent_opens_its_edge()
     assert conversation_requested(drafting) is False
     assert consent_given(consented) is True
     assert conversation_requested(returning) is True
-    assert CaptureMachine(idle).available_transitions() == {}
-    assert await CaptureMachine(idle).transition(CapturePhase.DRAFTING) is False
-    assert CaptureMachine(consented).available_transitions() == {
+    assert _machine(idle).available_transitions() == {}
+    assert await _machine(idle).transition(CapturePhase.DRAFTING) is False
+    assert _machine(consented).available_transitions() == {
         CapturePhase.DRAFTING: Drafting().description,
     }
-    assert CaptureMachine(drafting).available_transitions() == {}
-    assert await CaptureMachine(drafting).transition(CapturePhase.CONVERSING) is False
-    assert CaptureMachine(returning).available_transitions() == {
+    assert _machine(drafting).available_transitions() == {}
+    assert await _machine(drafting).transition(CapturePhase.CONVERSING) is False
+    assert _machine(returning).available_transitions() == {
         CapturePhase.CONVERSING: Conversing().description,
     }
-    assert CaptureMachine(both_intents_while_conversing).available_transitions() == {
+    assert _machine(both_intents_while_conversing).available_transitions() == {
         CapturePhase.DRAFTING: Drafting().description,
     }
     for turn in (
@@ -134,13 +139,13 @@ async def test_at_most_one_available_transition_and_each_intent_opens_its_edge()
         returning,
         both_intents_while_conversing,
     ):
-        assert len(CaptureMachine(turn).available_transitions()) <= 1
+        assert len(_machine(turn).available_transitions()) <= 1
 
 
 def test_conversing_withholds_the_session_topic_tool_once_the_session_has_one() -> None:
-    unnamed = CaptureMachine(_turn())
-    named = CaptureMachine(_turn(topic=SessionTopic(value="TCP handshakes")))
-    drafting = CaptureMachine(_turn(phase=CapturePhase.DRAFTING))
+    unnamed = _machine(_turn())
+    named = _machine(_turn(topic=SessionTopic(value="TCP handshakes")))
+    drafting = _machine(_turn(phase=CapturePhase.DRAFTING))
 
     assert _tool_names(Conversing().tools) == {
         "assess_coverage",
@@ -173,7 +178,7 @@ def test_conversing_withholds_the_session_topic_tool_once_the_session_has_one() 
 async def test_drafting_consent_with_messages_opens_drafting_and_spends_intent() -> (
     None
 ):
-    machine = CaptureMachine(_turn())
+    machine = _machine(_turn())
     reply = ReplyProduced(text="Shall we write this up?")
     consent = DraftingConsentSignalled()
     topic_proposed = SessionTopicProposed(topic=SessionTopic(value="TCP handshakes"))
@@ -226,7 +231,7 @@ async def test_drafting_consent_with_messages_opens_drafting_and_spends_intent()
 async def test_applying_drafting_consent_without_messages_does_not_open_drafting() -> (
     None
 ):
-    machine = CaptureMachine(_turn(messages=()))
+    machine = _machine(_turn(messages=()))
     consent = DraftingConsentSignalled()
 
     assert Conversing().get_actions(machine.context, consent)
@@ -240,7 +245,7 @@ async def test_applying_drafting_consent_without_messages_does_not_open_drafting
 
 async def test_assess_coverage_rejects_bool_coverage() -> None:
     """Bool must not coerce to a coverage score."""
-    conversing = CaptureMachine(_turn())
+    conversing = _machine(_turn())
     assess = next(tool for tool in Conversing().tools if tool.name == "assess_coverage")
 
     with pytest.raises(TypeError):
@@ -248,7 +253,7 @@ async def test_assess_coverage_rejects_bool_coverage() -> None:
 
 
 async def test_proposal_tools_return_results_built_from_the_model_arguments() -> None:
-    conversing = CaptureMachine(_turn())
+    conversing = _machine(_turn())
     conversing_tools = {tool.name: tool for tool in Conversing().tools}
     drafting_tools = {tool.name: tool for tool in Drafting().tools}
 
@@ -314,7 +319,7 @@ def test_recording_a_message_on_the_turn_appends_it_to_the_conversation() -> Non
 async def test_applying_the_turns_own_first_message_then_consent_opens_drafting() -> (
     None
 ):
-    machine = CaptureMachine(_turn(messages=()))
+    machine = _machine(_turn(messages=()))
     incoming = _user_message(machine.context.session)
     recorded = UserMessageRecorded(message=incoming)
     consent = DraftingConsentSignalled()
@@ -333,7 +338,7 @@ async def test_applying_the_turns_own_first_message_then_consent_opens_drafting(
 
 
 async def test_applying_an_assistant_message_while_drafting_appends_it() -> None:
-    machine = CaptureMachine(_turn(phase=CapturePhase.DRAFTING, messages=()))
+    machine = _machine(_turn(phase=CapturePhase.DRAFTING, messages=()))
     incoming = _assistant_message(machine.context.session)
     recorded = AssistantMessageRecorded(message=incoming)
     user_recorded = UserMessageRecorded(message=_user_message(machine.context.session))

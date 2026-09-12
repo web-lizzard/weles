@@ -43,7 +43,7 @@ def _flag_guard(context: _Context) -> bool:
     return context.flag
 
 
-class _Described(State[_Context, str]):
+class _Described(State[_Context, object, str]):
     def __init__(self, label: str) -> None:
         self._label: str = label
 
@@ -54,7 +54,7 @@ class _Described(State[_Context, str]):
 
     @property
     @override
-    def actions(self) -> tuple[Action[_Context, str], ...]:
+    def actions(self) -> tuple[Action[_Context, object, str], ...]:
         return ()
 
     @property
@@ -63,14 +63,16 @@ class _Described(State[_Context, str]):
         return self._label
 
 
-class _ProbeMachine(StateMachine[_Context, str, _Node]):
-    def __init__(self, context: _Context, graph: Graph[_Context, str, _Node]) -> None:
-        super().__init__(context)
-        self._graph: Graph[_Context, str, _Node] = graph
+class _ProbeMachine(StateMachine[_Context, object, str, _Node]):
+    def __init__(
+        self, context: _Context, graph: Graph[_Context, object, str, _Node]
+    ) -> None:
+        super().__init__(context, object())
+        self._graph: Graph[_Context, object, str, _Node] = graph
 
     @property
     @override
-    def graph(self) -> Graph[_Context, str, _Node]:
+    def graph(self) -> Graph[_Context, object, str, _Node]:
         return self._graph
 
     @override
@@ -83,7 +85,7 @@ class _ProbeMachine(StateMachine[_Context, str, _Node]):
 
 
 def _reference_available(
-    graph: Graph[_Context, str, _Node], context: _Context, source: _Node
+    graph: Graph[_Context, object, str, _Node], context: _Context, source: _Node
 ) -> dict[_Node, str]:
     available: dict[_Node, str] = {}
     for target, edge in graph.outgoing(source).items():
@@ -96,15 +98,15 @@ def _reference_available(
 
 def _graph_from_edge_specs(
     specs: Mapping[tuple[_Node, _Node], tuple[bool, str]],
-) -> Graph[_Context, str, _Node]:
+) -> Graph[_Context, object, str, _Node]:
     states = {node: _Described(f"State {node.value}.") for node in _ALL_NODES}
-    transitions: dict[_Node, dict[_Node, Transition[_Context, str]]] = {}
+    transitions: dict[_Node, dict[_Node, Transition[_Context, object, str]]] = {}
     for (source, target), (needs_flag, _label) in specs.items():
         guard: EdgeCondition[_Context] | None
         guard = _flag_guard if needs_flag else None
-        edge = Transition[_Context, str](guard=guard)
+        edge = Transition[_Context, object, str](guard=guard)
         transitions.setdefault(source, {})[target] = edge
-    return Graph[_Context, str, _Node](states=states, transitions=transitions)
+    return Graph[_Context, object, str, _Node](states=states, transitions=transitions)
 
 
 _edge_key_strategy = st.tuples(

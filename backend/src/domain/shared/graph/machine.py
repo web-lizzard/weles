@@ -5,7 +5,7 @@ from enum import StrEnum
 from domain.shared.graph.model import Graph, State, Tool, ToolResult
 
 
-class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
+class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
     """The mechanics of a phase graph, generic over the aggregate it carries,
     the event type a turn feeds it, and the enum naming its states.
 
@@ -17,8 +17,9 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
     evaluated. It never persists and never commits.
     """
 
-    def __init__(self, context: ContextT) -> None:
+    def __init__(self, context: ContextT, deps: DepsT) -> None:
         self._context: ContextT = context
+        self._deps: DepsT = deps
 
     @property
     def context(self) -> ContextT:
@@ -27,7 +28,12 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         return self._context
 
     @property
-    def current_state(self) -> State[ContextT, EventT]:
+    def deps(self) -> DepsT:
+        """Collaborators forwarded to state and edge actions for this turn."""
+        return self._deps
+
+    @property
+    def current_state(self) -> State[ContextT, DepsT, EventT]:
         """The declared state the context's state name resolves to."""
         return self.graph.states[self.current_state_name]
 
@@ -52,7 +58,7 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         edge — a move is a separate, explicitly requested act.
         """
         for action in self.current_state.get_actions(self._context, event):
-            await action(self._context, event)
+            await action(self._context, self._deps, event)
 
     def available_transitions(self) -> Mapping[NameT, str]:
         """Every target reachable from the current state whose guard passes,
@@ -85,13 +91,13 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         source = self.current_state_name
         edge = self.graph.outgoing(source)[target]
         for action in edge.actions:
-            await action(self._context)
+            await action(self._context, self._deps)
         self.enter_state(self._context, target)
         return True
 
     @property
     @abstractmethod
-    def graph(self) -> Graph[ContextT, EventT, NameT]:
+    def graph(self) -> Graph[ContextT, DepsT, EventT, NameT]:
         """This machine's graph, declared whole.
 
         State names are unique, a source/target pair appears at most once, and

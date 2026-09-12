@@ -28,7 +28,7 @@ class _Node(StrEnum):
 _ALL_NODES = list(_Node)
 
 
-class _Bare(State[object, str]):
+class _Bare(State[object, object, str]):
     @property
     @override
     def tools(self) -> tuple[Tool[object, ToolResult], ...]:
@@ -36,7 +36,7 @@ class _Bare(State[object, str]):
 
     @property
     @override
-    def actions(self) -> tuple[Action[object, str], ...]:
+    def actions(self) -> tuple[Action[object, object, str], ...]:
         return ()
 
     @property
@@ -63,14 +63,16 @@ def _reference_reachable(
 
 def _graph_from_adjacency(
     adjacency: Mapping[_Node, frozenset[_Node]],
-) -> Graph[object, str, _Node]:
+) -> Graph[object, object, str, _Node]:
     states = {node: _Bare() for node in _ALL_NODES}
-    transitions: dict[_Node, dict[_Node, Transition[object, str]]] = {}
+    transitions: dict[_Node, dict[_Node, Transition[object, object, str]]] = {}
     for source, targets in adjacency.items():
         if not targets:
             continue
-        transitions[source] = {target: Transition[object, str]() for target in targets}
-    return Graph[object, str, _Node](states=states, transitions=transitions)
+        transitions[source] = {
+            target: Transition[object, object, str]() for target in targets
+        }
+    return Graph[object, object, str, _Node](states=states, transitions=transitions)
 
 
 _adjacency_strategy = st.fixed_dictionaries(
