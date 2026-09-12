@@ -3,7 +3,7 @@ change_id: llm-adapter-instruction-context
 current_phase: 4
 next_step: 4.1
 next_command: /implement llm-adapter-instruction-context phase 4
-updated: 2026-09-12
+updated: 2026-09-12T22:46:00
 ---
 
 ### Phase 1: Pin the shared instruction model
@@ -35,9 +35,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 3.1 Implement CaptureInstructionBuilder.build as the final composition
-- [x] 3.2 Implement ConversingInstructionBuilder.phase_blocks with its two optional blocks
-- [x] 3.3 Implement DraftingInstructionBuilder.phase_blocks with the three draft states and the handoff
+- [x] 3.1 Implement CaptureInstructionBuilder.build as the final composition — 247b4e9
+- [x] 3.2 Implement ConversingInstructionBuilder.phase_blocks with its two optional blocks — 247b4e9
+- [x] 3.3 Implement DraftingInstructionBuilder.phase_blocks with the three draft states and the handoff — 247b4e9
 
 ### Phase 4: Declare the wiring symbols
 
