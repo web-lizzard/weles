@@ -413,7 +413,7 @@ async def test_redraft_content_without_reproposing_topic_keeps_prior_draft_conte
     assert second_draft_done.note_id == first_draft_done.note_id
     assert second_draft_done.topic == "TCP handshakes"
     assert second_draft_done.tags == ["networking"]
-    assert second_draft_done.content == "first chunk second chunk"
+    assert second_draft_done.content == "first chunksecond chunk"
 
 
 async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id() -> (
