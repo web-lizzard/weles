@@ -187,7 +187,7 @@ class GenerateReplyCommand:
     ) -> AsyncIterator[ReplyStreamEvent]:
         reply_buffer = ""
         drafting = machine.current_state_name is CapturePhase.DRAFTING
-        instruction = machine.current_state.instruction_builder.build(turn)
+        instruction = machine.build_instruction()
         async with self._capture_agent.converse(
             turn, machine.get_tools(), instruction
         ) as events:

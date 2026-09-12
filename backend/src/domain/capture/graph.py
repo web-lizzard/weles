@@ -46,6 +46,7 @@ from domain.shared.graph.model import (
     ToolResult,
     Transition,
 )
+from domain.shared.instruction.model import Instruction
 
 
 class CaptureMachine(
@@ -70,6 +71,10 @@ class CaptureMachine(
     @override
     def enter_state(self, context: CaptureTurn, name: CapturePhase) -> None:
         context.session.enter_phase(name)
+
+    @override
+    def build_instruction(self) -> Instruction:
+        return self.current_state.instruction_builder.build(self._context)
 
 
 _CONVERSING_INSTRUCTION_BUILDER = ConversingInstructionBuilder()

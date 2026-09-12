@@ -82,8 +82,9 @@ class _InstructionCapturingModel(FunctionModel):
         return ModelResponse(parts=[TextPart("ok")])
 
     async def _stream(
-        self, _messages: list[ModelMessage], _info: AgentInfo
+        self, _messages: list[ModelMessage], info: AgentInfo
     ) -> AsyncIterator[str]:
+        self.captured_instructions.append(info.instructions)
         yield "ok"
 
 
