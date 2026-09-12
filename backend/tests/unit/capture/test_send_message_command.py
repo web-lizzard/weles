@@ -34,11 +34,13 @@ from application.capture.dto import (
     ReplyStreamEvent,
 )
 from domain.capture.capture_session import CaptureSession
+from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
     EmptyMessageContentError,
 )
+from domain.capture.graph import CaptureMachine
 from domain.capture.message import Message
 from domain.capture.turn import (
     AgentEvent,
@@ -224,7 +226,7 @@ async def test_done_event_reports_zero_coverage_with_deterministic_assessment() 
     assert done.coverage_confidence == 0.0
     persisted = await stack.session_repo.get(session.id)
     assert persisted is not None
-    assert persisted.assessments == ()
+    assert persisted.assessments == (Coverage(value=0.0),)
 
 
 async def test_done_coverage_confidence_reflects_last_session_assessment() -> None:
@@ -640,6 +642,25 @@ async def test_draft_tag_without_prior_topic_raises_core_exception() -> None:
             pass
 
 
+async def test_ordinary_turn_passes_machine_built_instruction() -> None:
+    agent = _InstructionMatchingCaptureAgent(
+        [[ReplyProduced(text="Let's unpack the handshake.")]]
+    )
+    stack = _make_agent_command_stack(agent)
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+
+    _ = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Explain TCP handshakes"),
+        )
+    ]
+
+    assert agent.instruction_matches_machine is True
+
+
 async def test_ordinary_turn_opens_one_converse_segment_and_stays_conversing() -> None:
     agent = _ScriptedCaptureAgent(
         [
@@ -870,7 +891,7 @@ class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
             async def with_full_coverage() -> AsyncGenerator[AgentEvent, None]:
                 async for event in events:
                     yield event
-                turn.coverage_confidence = 1.0
+                yield CoverageAssessed(coverage=Coverage(value=1.0))
 
             yield with_full_coverage()
 
@@ -1001,6 +1022,27 @@ class _ScriptedCaptureAgent:
             if item is _RAISE:
                 raise RuntimeError("simulated mid-stream failure")
             yield cast(AgentEvent, item)
+
+
+class _InstructionMatchingCaptureAgent(_ScriptedCaptureAgent):
+    instruction_matches_machine: bool
+
+    def __init__(self, scripts: list[list[object]]) -> None:
+        super().__init__(scripts)
+        self.instruction_matches_machine = False
+
+    @override
+    async def _events(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
+    ) -> AsyncGenerator[AgentEvent, None]:
+        machine = CaptureMachine(turn, NULL_CAPTURE_DEPS)
+        expected = machine.build_instruction()
+        self.instruction_matches_machine = instruction.blocks == expected.blocks
+        async for event in super()._events(turn, tools, instruction):
+            yield event
 
 
 def _consent_then_draft_agent(draft_script: list[object]) -> "_ScriptedCaptureAgent":
