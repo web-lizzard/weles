@@ -2,12 +2,23 @@ from collections.abc import Sequence
 from typing import Literal, override
 
 from domain.capture.deps import CaptureDeps
+from domain.capture.exceptions import DraftTopicMissingError
+from domain.capture.message import Message
+from domain.capture.note import Note
+from domain.capture.ports import NoteVocabularyRepository
+from domain.capture.tag import Tag
+from domain.capture.topic import Topic
 from domain.capture.turn import (
     AssistantMessageRecorded,
     CaptureEvent,
     CaptureTurn,
     ConversationRequested,
+    DraftCompleted,
     DraftingConsentSignalled,
+    NoteContentProduced,
+    NoteDraft,
+    NoteTagProposed,
+    NoteTopicProposed,
     SessionTopicProposed,
     UserMessageRecorded,
 )
@@ -108,8 +119,8 @@ class Conversing(State[CaptureTurn, CaptureDeps, CaptureEvent]):
 
 
 class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
-    """Writing the note. Every tool here proposes a part of it; assembling and
-    persisting the note stays with the command."""
+    """Writing the note. Every tool here proposes a part of it; actions on
+    those events build `context.draft`, and `DraftCompleted` materialises it."""
 
     @property
     @override
@@ -130,6 +141,10 @@ class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
     @override
     def actions(self) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         return (
+            _resolve_note_topic,
+            _resolve_note_tag,
+            _append_note_content,
+            _materialise_note,
             _record_conversation_request,
             _record_user_message,
             _record_assistant_message,
@@ -141,6 +156,14 @@ class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
     ) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         _ = context
         selected: list[Action[CaptureTurn, CaptureDeps, CaptureEvent]] = []
+        if isinstance(event, NoteTopicProposed):
+            selected.append(_resolve_note_topic)
+        if isinstance(event, NoteTagProposed):
+            selected.append(_resolve_note_tag)
+        if isinstance(event, NoteContentProduced):
+            selected.append(_append_note_content)
+        if isinstance(event, DraftCompleted):
+            selected.append(_materialise_note)
         if isinstance(event, ConversationRequested):
             selected.append(_record_conversation_request)
         selected.extend(_message_recording_actions(event))
@@ -308,18 +331,101 @@ def _message_recording_actions(
     return ()
 
 
+async def _stage_message(deps: CaptureDeps, message: Message) -> None:
+    await deps.messages.add(message)
+
+
 async def _record_user_message(
-    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
 ) -> None:
     if isinstance(event, UserMessageRecorded):
         context.record_message(event.message)
+        await _stage_message(deps, event.message)
 
 
 async def _record_assistant_message(
-    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
 ) -> None:
     if isinstance(event, AssistantMessageRecorded):
         context.record_message(event.message)
+        await _stage_message(deps, event.message)
+
+
+async def _resolve_note_topic(
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
+) -> None:
+    if not isinstance(event, NoteTopicProposed):
+        return
+    resolution = await deps.vocabulary.resolve_topic(event.label, deps.topics)
+    context.draft = NoteDraft(topic=resolution.topic, tags=[], content="")
+
+
+async def _resolve_note_tag(
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
+) -> None:
+    if not isinstance(event, NoteTagProposed):
+        return
+    if context.draft is None:
+        raise DraftTopicMissingError
+    resolution = await deps.vocabulary.resolve_tag(event.label, deps.tags)
+    context.draft.tags.append(resolution.tag)
+
+
+async def _append_note_content(
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
+) -> None:
+    _ = deps
+    if not isinstance(event, NoteContentProduced):
+        return
+    if context.draft is None:
+        raise DraftTopicMissingError
+    context.draft.content += event.content.value
+
+
+async def _reconcile_note_tags(
+    note: Note,
+    topic: Topic,
+    tags: list[Tag],
+    content: NoteContent,
+    note_vocabulary: NoteVocabularyRepository,
+) -> None:
+    current = await note_vocabulary.resolve(note)
+    note.change_topic(topic)
+    resolved_ids = {tag.id for tag in tags}
+    current_ids = {tag.id for tag in current.tags}
+    for tag in current.tags:
+        if tag.id not in resolved_ids:
+            note.remove_tag(tag)
+    for tag in tags:
+        if tag.id not in current_ids:
+            note.add_tag(tag)
+    note.update_content(content)
+
+
+async def _materialise_note(
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
+) -> None:
+    if not isinstance(event, DraftCompleted):
+        return
+    draft = context.draft
+    if draft is None or draft.topic is None:
+        return
+    note_content = NoteContent(value=draft.content)
+    topic = draft.topic
+    tags = draft.tags
+    if context.session.note_id is None:
+        note = context.session.draft_note(topic, note_content, tags)
+    else:
+        note = context.note
+        if note is None:
+            note = await deps.notes.get(context.session.note_id)
+        if note is None:
+            return
+        await _reconcile_note_tags(
+            note, topic, tags, note_content, deps.note_vocabulary
+        )
+    await deps.notes.add(note)
+    context.note = note
 
 
 _ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessed](

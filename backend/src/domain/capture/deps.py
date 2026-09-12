@@ -11,6 +11,18 @@ from domain.capture.ports import (
 from domain.capture.vocabulary import VocabularyResolver
 
 
+@dataclass(frozen=True)
+class RepositoryCaptureDeps:
+    """Live repository ports plus vocabulary for one turn inside a unit of work."""
+
+    messages: MessageRepository
+    notes: NoteRepository
+    topics: TopicRepository
+    tags: TagRepository
+    note_vocabulary: NoteVocabularyRepository
+    vocabulary: VocabularyResolver
+
+
 class CaptureDeps(Protocol):
     """Collaborators a capture graph action may reach for.
 
