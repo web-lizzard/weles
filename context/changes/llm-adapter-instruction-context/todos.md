@@ -14,7 +14,7 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 1.1 Make the instruction-model suite pass, moving code where it disagrees with a docstring
+- [x] 1.1 Make the instruction-model suite pass, moving code where it disagrees with a docstring — a73c310
 
 ### Phase 2: Coverage arithmetic and coverage policy
 
