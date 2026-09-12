@@ -12,6 +12,7 @@ from domain.capture.message import Message
 from domain.capture.turn import (
     AgentEvent,
     CaptureTurn,
+    CoverageAssessed,
     DraftingConsentSignalled,
     NoteContentProduced,
     NoteTagProposed,
@@ -19,7 +20,13 @@ from domain.capture.turn import (
     ReplyProduced,
     SessionTopicProposed,
 )
-from domain.capture.value_objects import Label, MessageRole, NoteContent, SessionTopic
+from domain.capture.value_objects import (
+    Coverage,
+    Label,
+    MessageRole,
+    NoteContent,
+    SessionTopic,
+)
 from domain.shared.graph.model import Tool, ToolResult
 from domain.shared.instruction.model import Instruction
 
@@ -102,7 +109,10 @@ class DeterministicCaptureAgentAdapter:
 
         transcript = _transcript(turn)
         assessment = _assess(transcript)
-        turn.coverage_confidence = assessment.coverage_confidence
+        if "assess_coverage" in tools_by_name:
+            yield CoverageAssessed(
+                coverage=Coverage(value=assessment.coverage_confidence)
+            )
         reply = _conversational_reply(assessment)
         async for chunk in _yield_reply(reply):
             yield chunk

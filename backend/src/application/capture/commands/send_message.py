@@ -126,11 +126,13 @@ class GenerateReplyCommand:
                 done_message_id = buffers.agent_message.id.value
                 done_content = buffers.agent_message.content.value
             topic_value = session.topic.value if session.topic is not None else ""
+            assessments = session.assessments
+            coverage_confidence = assessments[-1].value if assessments else 0.0
             done_event = ReplyDoneEvent(
                 message_id=done_message_id,
                 content=done_content,
                 topic=topic_value,
-                coverage_confidence=context.coverage_confidence,
+                coverage_confidence=coverage_confidence,
             )
 
             await uow.capture_sessions.save(session)

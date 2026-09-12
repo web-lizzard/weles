@@ -17,6 +17,7 @@ from domain.capture.turn import (
     CaptureEvent,
     CaptureTurn,
     ConversationRequested,
+    CoverageAssessed,
     DraftCompleted,
     DraftingConsentSignalled,
     NoteContentProduced,
@@ -129,6 +130,8 @@ class Conversing(State[CaptureTurn, CaptureDeps, CaptureEvent]):
             selected.append(_assign_session_topic)
         if isinstance(event, DraftingConsentSignalled):
             selected.append(_record_drafting_consent)
+        if isinstance(event, CoverageAssessed):
+            selected.append(_record_coverage_assessment)
         selected.extend(_message_recording_actions(event))
         return tuple(selected)
 
@@ -265,8 +268,9 @@ async def _assess_coverage(
 async def _record_coverage_assessment(
     context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
 ) -> None:
-    _ = context, deps, event
-    raise NotImplementedError
+    _ = deps
+    if isinstance(event, CoverageAssessed):
+        context.session.record_assessment(event.coverage)
 
 
 async def _propose_session_topic(

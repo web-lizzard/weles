@@ -13,7 +13,8 @@ from pytest_bdd import given, then
 from adapters.out.in_memory.capture.capture_agent import (
     DeterministicCaptureAgentAdapter,
 )
-from domain.capture.turn import AgentEvent, CaptureTurn
+from domain.capture.turn import AgentEvent, CaptureTurn, CoverageAssessed
+from domain.capture.value_objects import Coverage
 from domain.shared.graph.model import Tool, ToolResult
 from domain.shared.instruction.model import Instruction
 
@@ -31,7 +32,7 @@ class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
             async def with_full_coverage() -> AsyncGenerator[AgentEvent, None]:
                 async for event in events:
                     yield event
-                turn.coverage_confidence = 1.0
+                yield CoverageAssessed(coverage=Coverage(value=1.0))
 
             yield with_full_coverage()
 
