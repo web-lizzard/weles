@@ -60,8 +60,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 6.1 AgentEvent and the two message events import by name
-- [x] 6.2 Basedpyright reports zero errors over the capture domain
+- [x] 6.1 AgentEvent and the two message events import by name — c3d778c
+- [x] 6.2 Basedpyright reports zero errors over the capture domain — c3d778c
 
 ### Phase 7: A turn's own messages reach the machine
 
