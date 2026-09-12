@@ -2,11 +2,13 @@ from collections.abc import Sequence
 from typing import Literal, override
 
 from domain.capture.turn import (
+    AssistantMessageRecorded,
     CaptureEvent,
     CaptureTurn,
     ConversationRequested,
     DraftingConsentSignalled,
     SessionTopicProposed,
+    UserMessageRecorded,
 )
 from domain.capture.value_objects import (
     CapturePhase,
@@ -90,13 +92,16 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
         self, context: CaptureTurn, event: CaptureEvent
     ) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
         """Assigning the session topic runs on a `SessionTopicProposed` and on
-        nothing else; recording consent runs only on `DraftingConsentSignalled`."""
+        nothing else; recording consent runs only on `DraftingConsentSignalled`.
+        A recorded message is appended in either phase."""
         _ = context
+        selected: list[Action[CaptureTurn, CaptureEvent]] = []
         if isinstance(event, SessionTopicProposed):
-            return (_assign_session_topic,)
+            selected.append(_assign_session_topic)
         if isinstance(event, DraftingConsentSignalled):
-            return (_record_drafting_consent,)
-        return ()
+            selected.append(_record_drafting_consent)
+        selected.extend(_message_recording_actions(event))
+        return tuple(selected)
 
 
 class Drafting(State[CaptureTurn, CaptureEvent]):
@@ -132,9 +137,11 @@ class Drafting(State[CaptureTurn, CaptureEvent]):
         self, context: CaptureTurn, event: CaptureEvent
     ) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
         _ = context
+        selected: list[Action[CaptureTurn, CaptureEvent]] = []
         if isinstance(event, ConversationRequested):
-            return (_record_conversation_request,)
-        return ()
+            selected.append(_record_conversation_request)
+        selected.extend(_message_recording_actions(event))
+        return tuple(selected)
 
 
 class CoverageAssessed(ToolResult, frozen=True):
@@ -282,12 +289,24 @@ async def _consume_conversation_request(context: CaptureTurn) -> None:
     context.session.clear_conversation_request()
 
 
+def _message_recording_actions(
+    event: CaptureEvent,
+) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+    if isinstance(event, UserMessageRecorded):
+        return (_record_user_message,)
+    if isinstance(event, AssistantMessageRecorded):
+        return (_record_assistant_message,)
+    return ()
+
+
 async def _record_user_message(context: CaptureTurn, event: CaptureEvent) -> None:
-    _ = context, event
+    if isinstance(event, UserMessageRecorded):
+        context.record_message(event.message)
 
 
 async def _record_assistant_message(context: CaptureTurn, event: CaptureEvent) -> None:
-    _ = context, event
+    if isinstance(event, AssistantMessageRecorded):
+        context.record_message(event.message)
 
 
 _ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessed](

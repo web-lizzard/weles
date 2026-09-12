@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 7
-next_step: 7.1
-next_command: /unit-test llm-adapter-capture-modes phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /implement llm-adapter-capture-modes phase 8
 updated: 2026-09-12
 ---
 
@@ -67,12 +67,12 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e8cd947
 
 #### Automated
 
-- [ ] 7.1 Capture graph suite passes, including consent recorded from the turn's own first message
-- [ ] 7.2 Basedpyright reports zero errors over the domain layer
+- [x] 7.1 Capture graph suite passes, including consent recorded from the turn's own first message
+- [x] 7.2 Basedpyright reports zero errors over the domain layer
 
 ### Phase 8: Pydantic AI capture agent adapter (stubs)
 

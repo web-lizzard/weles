@@ -31,7 +31,7 @@ class CaptureTurn(BaseModel):
 
     def record_message(self, message: Message) -> None:
         """Append a message onto this turn's conversation in memory."""
-        _ = message
+        self.messages = (*self.messages, message)
 
 
 class ReplyProduced(BaseModel, frozen=True):
