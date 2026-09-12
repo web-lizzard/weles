@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
 current_phase: 9
-next_step: 9.0
-next_command: /unit-test llm-adapter-capture-modes phase 9
+next_step: 9.4
+next_command: /implement llm-adapter-capture-modes phase 9
 updated: 2026-09-12
 ---
 
@@ -89,13 +89,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1c11ef4
 
 #### Automated
 
-- [ ] 9.1 Pydantic AI capture agent suite passes on TestModel and FunctionModel
-- [ ] 9.2 Capture agent contract suite passes for the Pydantic AI implementation
-- [ ] 9.3 Basedpyright reports zero errors over the adapters layer
+- [x] 9.1 Pydantic AI capture agent suite passes on TestModel and FunctionModel
+- [x] 9.2 Capture agent contract suite passes for the Pydantic AI implementation
+- [x] 9.3 Basedpyright reports zero errors over the adapters layer
 
 #### Manual
 
