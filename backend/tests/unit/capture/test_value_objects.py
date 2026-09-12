@@ -1,6 +1,9 @@
+from math import inf, nan
+
 import pytest
 
 from domain.capture.exceptions import (
+    CoverageOutOfRangeError,
     EmptyEmbeddingError,
     EmptyLabelError,
     EmptyMessageContentError,
@@ -8,7 +11,15 @@ from domain.capture.exceptions import (
     MessageContentTooLongError,
     SessionTopicTooLongError,
 )
-from domain.capture.value_objects import Embedding, Label, MessageContent, SessionTopic
+from domain.capture.value_objects import (
+    COVERAGE_MAX,
+    COVERAGE_MIN,
+    Coverage,
+    Embedding,
+    Label,
+    MessageContent,
+    SessionTopic,
+)
 
 
 def test_session_topic_empty_after_strip_raises_empty_session_topic_error() -> None:
@@ -55,3 +66,26 @@ def test_label_empty_after_strip_raises_empty_label_error() -> None:
 def test_embedding_empty_values_raises_empty_embedding_error() -> None:
     with pytest.raises(EmptyEmbeddingError):
         _ = Embedding(values=())
+
+
+def test_coverage_accepts_closed_unit_interval() -> None:
+    low = Coverage(value=COVERAGE_MIN)
+    high = Coverage(value=COVERAGE_MAX)
+
+    assert low.value == COVERAGE_MIN
+    assert high.value == COVERAGE_MAX
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        -0.01,
+        1.01,
+        nan,
+        inf,
+        -inf,
+    ],
+)
+def test_coverage_raises_out_of_range_for_invalid_values(value: float) -> None:
+    with pytest.raises(CoverageOutOfRangeError):
+        _ = Coverage(value=value)
