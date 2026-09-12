@@ -3,11 +3,11 @@ from datetime import timedelta
 from typing import cast
 
 from adapters.out.fsrs.scheduler import FsrsScheduler
+from adapters.out.in_memory.capture.capture_agent import (
+    DeterministicCaptureAgentAdapter,
+)
 from adapters.out.in_memory.capture.capture_session_repository import (
     InMemoryCaptureSessionRepository,
-)
-from adapters.out.in_memory.capture.confidence_assessment import (
-    DeterministicConfidenceAssessmentAdapter,
 )
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.in_memory.capture.message_repository import (
@@ -18,17 +18,8 @@ from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepositor
 from adapters.out.in_memory.capture.note_vocabulary_repository import (
     InMemoryNoteVocabularyRepository,
 )
-from adapters.out.in_memory.capture.reply_generation import (
-    DeterministicReplyGenerationAdapter,
-)
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
-from adapters.out.in_memory.capture.topic_extraction import (
-    DeterministicTopicExtractionAdapter,
-)
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
-from adapters.out.in_memory.capture.transcript_query import (
-    InMemoryTranscriptQueryAdapter,
-)
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.distill.card_generation import (
     DeterministicCardGenerationAdapter,
@@ -134,10 +125,7 @@ _card_factory = CardFactory(
         front_max=_settings.card_front_max, back_max=_settings.card_back_max
     )
 )
-_transcript_query = InMemoryTranscriptQueryAdapter(_store)
-_topic_extraction = DeterministicTopicExtractionAdapter()
-_confidence_assessment = DeterministicConfidenceAssessmentAdapter()
-_reply_generation = DeterministicReplyGenerationAdapter()
+_capture_agent = DeterministicCaptureAgentAdapter()
 
 
 def _build_embedding_port(settings: Settings) -> EmbeddingPort:
@@ -251,10 +239,7 @@ def get_generate_reply_command() -> GenerateReplyCommand:
     return GenerateReplyCommand(
         capture_sessions=_capture_session_repository,
         uow=_unit_of_work(),
-        transcript_query=_transcript_query,
-        topic_extraction=_topic_extraction,
-        confidence_assessment=_confidence_assessment,
-        reply_generation=_reply_generation,
+        capture_agent=_capture_agent,
         vocabulary=_vocabulary,
     )
 

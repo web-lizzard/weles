@@ -9,6 +9,9 @@ from adapters.compose import (
     get_outbox_envelope_query,
     get_start_capture_session_command,
 )
+from adapters.out.in_memory.capture.capture_agent import (
+    DeterministicCaptureAgentAdapter,
+)
 from adapters.out.in_memory.capture.capture_session_repository import (
     InMemoryCaptureSessionRepository,
 )
@@ -68,6 +71,7 @@ class InMemoryCaptureComposition:
     topic_extraction: DeterministicTopicExtractionAdapter
     confidence_assessment: ConfidenceAssessmentPort
     reply_generation: DeterministicReplyGenerationAdapter
+    capture_agent: DeterministicCaptureAgentAdapter
     embedding: DeterministicEmbeddingAdapter
     vocabulary: VocabularyResolver
 
@@ -97,6 +101,7 @@ class InMemoryCaptureComposition:
             topic_extraction=DeterministicTopicExtractionAdapter(),
             confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
             reply_generation=DeterministicReplyGenerationAdapter(),
+            capture_agent=DeterministicCaptureAgentAdapter(),
             embedding=embedding,
             vocabulary=VocabularyResolver(
                 embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
@@ -133,10 +138,7 @@ class InMemoryCaptureComposition:
             return GenerateReplyCommand(
                 capture_sessions=composition.capture_sessions,
                 uow=cast(UnitOfWork, cast(object, composition.unit_of_work())),
-                transcript_query=composition.transcript_query,
-                topic_extraction=composition.topic_extraction,
-                confidence_assessment=composition.confidence_assessment,
-                reply_generation=composition.reply_generation,
+                capture_agent=composition.capture_agent,
                 vocabulary=composition.vocabulary,
             )
 

@@ -1,15 +1,15 @@
 from collections.abc import AsyncGenerator, AsyncIterator, Callable, Sequence
-from contextlib import aclosing
+from contextlib import aclosing, asynccontextmanager
 from datetime import UTC, datetime
 from typing import cast, override
 
 import pytest
 
+from adapters.out.in_memory.capture.capture_agent import (
+    DeterministicCaptureAgentAdapter,
+)
 from adapters.out.in_memory.capture.capture_session_repository import (
     InMemoryCaptureSessionRepository,
-)
-from adapters.out.in_memory.capture.confidence_assessment import (
-    DeterministicConfidenceAssessmentAdapter,
 )
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.in_memory.capture.message_repository import (
@@ -24,13 +24,7 @@ from adapters.out.in_memory.capture.reply_generation import (
     DeterministicReplyGenerationAdapter,
 )
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
-from adapters.out.in_memory.capture.topic_extraction import (
-    DeterministicTopicExtractionAdapter,
-)
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
-from adapters.out.in_memory.capture.transcript_query import (
-    InMemoryTranscriptQueryAdapter,
-)
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
@@ -899,11 +893,23 @@ class _ScriptedCaptureAgent:
         self._scripts = [list(script) for script in scripts]
         self.converse_calls = 0
 
+    @asynccontextmanager
     async def converse(
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
-    ) -> AsyncIterator[AgentEvent]:
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        events = self._events(turn, tools)
+        try:
+            yield events
+        finally:
+            await events.aclose()
+
+    async def _events(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncGenerator[AgentEvent, None]:
         _ = turn, tools
         self.converse_calls += 1
         script = self._scripts.pop(0)
@@ -919,11 +925,23 @@ class _OscillatingCaptureAgent:
     def __init__(self) -> None:
         self.converse_calls = 0
 
+    @asynccontextmanager
     async def converse(
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
-    ) -> AsyncIterator[AgentEvent]:
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        events = self._events(turn, tools)
+        try:
+            yield events
+        finally:
+            await events.aclose()
+
+    async def _events(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncGenerator[AgentEvent, None]:
         _ = turn
         self.converse_calls += 1
         if self.converse_calls > 2:
@@ -965,14 +983,11 @@ def _make_command_stack(
     message_repo = InMemoryMessageRepository(store)
     uow = _SpyUnitOfWork(session_repo, message_repo, store)
     embedding = DeterministicEmbeddingAdapter()
+    _ = confidence_assessment, reply_generation
     command = GenerateReplyCommand(
         capture_sessions=session_repo,
         uow=uow,  # pyright: ignore[reportArgumentType]
-        transcript_query=InMemoryTranscriptQueryAdapter(store),
-        topic_extraction=DeterministicTopicExtractionAdapter(),
-        confidence_assessment=confidence_assessment
-        or DeterministicConfidenceAssessmentAdapter(),
-        reply_generation=reply_generation or DeterministicReplyGenerationAdapter(),
+        capture_agent=DeterministicCaptureAgentAdapter(),
         vocabulary=VocabularyResolver(
             embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
         ),

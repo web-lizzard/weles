@@ -1,5 +1,6 @@
 import asyncio
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncGenerator, AsyncIterator, Sequence
+from contextlib import asynccontextmanager
 
 from application.capture.value_objects import (
     ConfidenceAssessment,
@@ -45,11 +46,23 @@ _NOTE_TOOL_NAMES = frozenset(
 
 
 class DeterministicCaptureAgentAdapter:
+    @asynccontextmanager
     async def converse(
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
-    ) -> AsyncIterator[AgentEvent]:
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        events = self._events(turn, tools)
+        try:
+            yield events
+        finally:
+            await events.aclose()
+
+    async def _events(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncGenerator[AgentEvent, None]:
         tools_by_name = {tool.name: tool for tool in tools}
         last_user = _last_user_message(turn)
 
