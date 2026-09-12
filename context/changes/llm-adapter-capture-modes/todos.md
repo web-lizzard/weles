@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test llm-adapter-capture-modes phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement llm-adapter-capture-modes phase 4
 updated: 2026-09-12
 ---
 
@@ -29,13 +29,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 64ba2f5
 
 #### Automated
 
-- [ ] 3.1 State machine suite passes, including available_transitions and refused targets
-- [ ] 3.2 Graph model suite still passes after the edge alias split
-- [ ] 3.3 Basedpyright reports zero errors over the graph package
+- [x] 3.1 State machine suite passes, including available_transitions and refused targets
+- [x] 3.2 Graph model suite still passes after the edge alias split
+- [x] 3.3 Basedpyright reports zero errors over the graph package
 
 ### Phase 4: Consent and return-to-conversation symbols (stubs)
 
