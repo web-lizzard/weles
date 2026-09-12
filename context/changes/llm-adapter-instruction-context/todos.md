@@ -2,7 +2,7 @@
 change_id: llm-adapter-instruction-context
 current_phase: 2
 next_step: 2.1
-next_command: /unit-test llm-adapter-instruction-context phase 2
+next_command: /implement llm-adapter-instruction-context phase 2
 updated: 2026-09-12
 ---
 
@@ -20,7 +20,7 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — ad664ea
 
 #### Automated
 
