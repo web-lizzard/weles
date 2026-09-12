@@ -5,7 +5,8 @@ import pytest
 
 from domain.shared.graph.model import (
     Action,
-    Condition,
+    EdgeAction,
+    EdgeCondition,
     Graph,
     State,
     Tool,
@@ -41,7 +42,7 @@ async def _noop(_context: object, _event: str) -> None:
     return None
 
 
-def _never(_context: object, _event: str) -> bool:
+def _never(_context: object) -> bool:
     return False
 
 
@@ -64,6 +65,11 @@ class _Open(State[object, str]):
     def actions(self) -> tuple[Action[object, str], ...]:
         return (_noop,)
 
+    @property
+    @override
+    def description(self) -> str:
+        return "Open intake phase."
+
 
 class _Waiting(State[object, str]):
     @property
@@ -75,6 +81,11 @@ class _Waiting(State[object, str]):
     @override
     def actions(self) -> tuple[Action[object, str], ...]:
         return ()
+
+    @property
+    @override
+    def description(self) -> str:
+        return "Waiting before closure."
 
 
 class _Closed(State[object, str]):
@@ -88,12 +99,17 @@ class _Closed(State[object, str]):
     def actions(self) -> tuple[Action[object, str], ...]:
         return ()
 
+    @property
+    @override
+    def description(self) -> str:
+        return "Closed intake phase."
+
 
 def _intake_graph(
     *,
-    waiting_guard: Condition[object, str] | None = _never,
-    open_actions: tuple[Action[object, str], ...] = (),
-    waiting_actions: tuple[Action[object, str], ...] = (),
+    waiting_guard: EdgeCondition[object] | None = _never,
+    open_actions: tuple[EdgeAction[object], ...] = (),
+    waiting_actions: tuple[EdgeAction[object], ...] = (),
 ) -> Graph[object, str, _Phase]:
     return Graph[object, str, _Phase](
         states={
@@ -140,6 +156,11 @@ def test_get_actions_offers_the_whole_inventory_when_the_state_does_not_filter()
         def actions(self) -> tuple[Action[object, str], ...]:
             return (stamp,)
 
+        @property
+        @override
+        def description(self) -> str:
+            return "Stamping state-action on events."
+
     state = _Stamping()
 
     assert state.get_actions(object(), "arrived") == (stamp,)
@@ -149,11 +170,11 @@ def test_get_actions_offers_the_whole_inventory_when_the_state_does_not_filter()
 def test_outgoing_lists_edges_by_target_and_is_empty_when_the_source_has_none() -> None:
     invoked: list[str] = []
 
-    def refuse(_context: object, _event: str) -> bool:
+    def refuse(_context: object) -> bool:
         invoked.append("guard")
         return False
 
-    async def seal(_context: object, _event: str) -> None:
+    async def seal(_context: object) -> None:
         invoked.append("edge-action")
 
     graph = _intake_graph(waiting_guard=refuse, open_actions=(seal,))
@@ -179,11 +200,11 @@ def test_terminal_states_are_those_with_no_outgoing_edge() -> None:
 def test_reachable_from_follows_edges_without_evaluating_guards() -> None:
     invoked: list[str] = []
 
-    def refuse(_context: object, _event: str) -> bool:
+    def refuse(_context: object) -> bool:
         invoked.append("guard")
         return False
 
-    async def seal(_context: object, _event: str) -> None:
+    async def seal(_context: object) -> None:
         invoked.append("edge-action")
 
     graph = _intake_graph(

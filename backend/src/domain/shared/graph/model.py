@@ -13,6 +13,14 @@ type Action[ContextT, EventT] = Callable[[ContextT, EventT], Awaitable[None]]
 """Deterministic domain work. May mutate the context in memory and may call a
 domain port; never persists and never commits."""
 
+type EdgeCondition[ContextT] = Callable[[ContextT], bool]
+"""Whether an edge may be taken after a turn segment. Reads only the context —
+no event requests the move."""
+
+type EdgeAction[ContextT] = Callable[[ContextT], Awaitable[None]]
+"""Deterministic domain work run when an edge is taken. May mutate the context
+in memory and may call a domain port; never persists and never commits."""
+
 
 class ToolResult(BaseModel, frozen=True):
     """The base of every tool's return model.
@@ -99,6 +107,12 @@ class State[ContextT, EventT](ABC):
         """Every action this state can ever run, unfiltered."""
         ...
 
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """What a model reads when choosing where to go next from this phase."""
+        ...
+
     def get_tools(self, context: ContextT) -> Sequence[Tool[ContextT, ToolResult]]:
         """The tools to offer the model this turn, recomputed from the context
         every time so a tool whose work is already done is not offered again.
@@ -127,8 +141,8 @@ class Transition[ContextT, EventT](BaseModel, frozen=True):
     `Graph`, so an edge cannot claim endpoints it is not filed under.
     """
 
-    guard: Condition[ContextT, EventT] | None = None
-    actions: Sequence[Action[ContextT, EventT]] = ()
+    guard: EdgeCondition[ContextT] | None = None
+    actions: Sequence[EdgeAction[ContextT]] = ()
 
 
 class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):

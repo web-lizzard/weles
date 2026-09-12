@@ -5,7 +5,7 @@
 # ruff: noqa: B027
 # pyright: reportUnusedParameter=false
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from enum import StrEnum
 
 from domain.shared.graph.model import Graph, State, Tool, ToolResult
@@ -36,6 +36,11 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         """The declared state the context's state name resolves to."""
         ...
 
+    @property
+    def current_state_name(self) -> NameT:
+        """The state name currently held on the aggregate."""
+        ...
+
     def get_tools(self) -> Sequence[Tool[ContextT, ToolResult]]:
         """What the current state offers the context this turn — the machine
         asks the state and hands the answer on unchanged.
@@ -53,18 +58,12 @@ class StateMachine[ContextT, EventT, NameT: StrEnum](ABC):
         """
         ...
 
-    def can_transition(self, target: NameT, event: EventT) -> bool:
-        """Whether this move is available right now: an edge exists from the
-        current state to target, and its guard passes.
-
-        One bool for two different facts, deliberately — it is what a caller
-        about to move needs. A caller that must tell them apart asks the graph
-        instead: absence from `graph.outgoing(name)` is permanent and a failing
-        guard is about this turn only.
-        """
+    def available_transitions(self) -> Mapping[NameT, str]:
+        """Every target reachable from the current state whose guard passes,
+        mapped to that state's description."""
         ...
 
-    async def transition(self, target: NameT, event: EventT) -> bool:
+    async def transition(self, target: NameT) -> bool:
         """Take the edge to target: run its actions, then write the new state
         name onto the context.
 

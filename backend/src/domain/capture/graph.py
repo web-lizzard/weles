@@ -47,6 +47,11 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
 
     @property
     @override
+    def description(self) -> str:
+        return "Talk through the session topic with the user."
+
+    @property
+    @override
     def tools(self) -> Sequence[Tool[CaptureTurn, ToolResult]]:
         return (_ASSESS_COVERAGE, _PROPOSE_SESSION_TOPIC)
 
@@ -76,6 +81,11 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
 class Drafting(State[CaptureTurn, CaptureEvent]):
     """Writing the note. Every tool here proposes a part of it; assembling and
     persisting the note stays with the command."""
+
+    @property
+    @override
+    def description(self) -> str:
+        return "Draft the note from what the session captured."
 
     @property
     @override
@@ -116,7 +126,7 @@ class NoteContentProposal(ToolResult, frozen=True):
     content: NoteContent
 
 
-def consent_given(context: CaptureTurn, event: CaptureEvent) -> bool:
+def consent_given(context: CaptureTurn) -> bool:
     """The guard into drafting: the session already holds messages, and the
     user's latest message was read as consent (FR-01).
 
