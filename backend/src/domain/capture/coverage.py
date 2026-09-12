@@ -37,8 +37,19 @@ def trend_of(assessments: Sequence[Coverage]) -> CoverageTrend:
     no direction, and reporting a direction that cannot exist would be a lie the
     reading then repeats.
     """
-    _ = assessments
-    raise NotImplementedError
+    if len(assessments) < 2:
+        return CoverageTrend.FLAT
+
+    window = assessments[-COVERAGE_TREND_WINDOW:]
+    if len(window) < 2:
+        return CoverageTrend.FLAT
+
+    delta = window[-1].value - window[0].value
+    if abs(delta) <= COVERAGE_FLAT_BAND:
+        return CoverageTrend.FLAT
+    if delta > 0:
+        return CoverageTrend.RISING
+    return CoverageTrend.FALLING
 
 
 def reading_of(assessments: Sequence[Coverage]) -> CoverageReading | None:
@@ -54,5 +65,16 @@ def reading_of(assessments: Sequence[Coverage]) -> CoverageReading | None:
     Splitting the two is what lets the arithmetic be pinned by a test while the
     tone stays revisable without touching it.
     """
-    _ = assessments
-    raise NotImplementedError
+    if not assessments:
+        return None
+
+    trend = trend_of(assessments)
+    level = assessments[-1].value
+
+    if trend is CoverageTrend.FALLING:
+        return CoverageReading.WIDENING
+    if trend is CoverageTrend.RISING:
+        return CoverageReading.DEEPENING
+    if level >= COVERAGE_HIGH:
+        return CoverageReading.SETTLED
+    return CoverageReading.EARLY
