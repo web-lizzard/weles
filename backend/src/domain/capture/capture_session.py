@@ -51,15 +51,17 @@ class CaptureSession(BaseModel):
             raise CaptureSessionClosedError
         self.phase = phase
 
-    def record_drafting_consent(self, consent: DraftingConsent) -> None:  # pyright: ignore[reportUnusedParameter]
-        ...
+    def record_drafting_consent(self, consent: DraftingConsent) -> None:
+        self.drafting_consent = consent
 
-    def record_conversation_request(self, request: ConversationRequest) -> None:  # pyright: ignore[reportUnusedParameter]
-        ...
+    def record_conversation_request(self, request: ConversationRequest) -> None:
+        self.conversation_request = request
 
-    def clear_drafting_consent(self) -> None: ...
+    def clear_drafting_consent(self) -> None:
+        self.drafting_consent = None
 
-    def clear_conversation_request(self) -> None: ...
+    def clear_conversation_request(self) -> None:
+        self.conversation_request = None
 
     def assign_topic(self, topic: SessionTopic) -> None:
         if self.topic is not None:
