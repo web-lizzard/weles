@@ -33,9 +33,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 3.1 State machine suite passes, including available_transitions and refused targets
-- [x] 3.2 Graph model suite still passes after the edge alias split
-- [x] 3.3 Basedpyright reports zero errors over the graph package
+- [x] 3.1 State machine suite passes, including available_transitions and refused targets — d3682c9
+- [x] 3.2 Graph model suite still passes after the edge alias split — d3682c9
+- [x] 3.3 Basedpyright reports zero errors over the graph package — d3682c9
 
 ### Phase 4: Consent and return-to-conversation symbols (stubs)
 
