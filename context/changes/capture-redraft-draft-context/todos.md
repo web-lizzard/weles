@@ -1,16 +1,16 @@
 ---
 change_id: capture-redraft-draft-context
-current_phase: 1
-next_step: 1.1
-next_command: /implement capture-redraft-draft-context phase 1
-updated: 2026-09-12
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test capture-redraft-draft-context phase 2
+updated: 2026-09-13
 ---
 
 ### Phase 1: Stubs — declare the hydration action
 
 #### Automated
 
-- [ ] 1.1 Declare `_hydrate_draft_from_note` (unimplemented) and wire it into `Drafting.get_actions` for `UserMessageRecorded`
+- [x] 1.1 Declare `_hydrate_draft_from_note` (unimplemented) and wire it into `Drafting.get_actions` for `UserMessageRecorded` — 0b9a441
 
 ### Phase 2: Behavior — rebuild the draft from the persisted note
 
