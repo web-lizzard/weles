@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 8
-next_step: 8.1
-next_command: /implement llm-adapter-capture-modes phase 8
+current_phase: 9
+next_step: 9.0
+next_command: /unit-test llm-adapter-capture-modes phase 9
 updated: 2026-09-12
 ---
 
@@ -82,8 +82,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 8.1 Pydantic AI capture agent module imports cleanly
-- [ ] 8.2 Embedding adapter suite still passes after the tracing signature change
+- [x] 8.1 Pydantic AI capture agent module imports cleanly
+- [x] 8.2 Embedding adapter suite still passes after the tracing signature change
 
 ### Phase 9: Pydantic AI adapter — stream mapping and tracing
 
