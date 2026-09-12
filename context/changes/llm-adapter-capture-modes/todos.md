@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 1
-next_step: 1.1
-next_command: /unit-test llm-adapter-capture-modes phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test llm-adapter-capture-modes phase 2
 updated: 2026-09-12
 ---
 
@@ -10,13 +10,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5fcd343
 
 #### Automated
 
-- [ ] 1.1 Graph mechanics suite passes against a non-capture graph
-- [ ] 1.2 Ruff reports no B027 suppression left in the graph package
-- [ ] 1.3 Basedpyright reports zero errors over the graph package
+- [x] 1.1 Graph mechanics suite passes against a non-capture graph
+- [x] 1.2 Ruff reports no B027 suppression left in the graph package
+- [x] 1.3 Basedpyright reports zero errors over the graph package
 
 ### Phase 2: State machine bodies and the transition predicate
 

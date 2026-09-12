@@ -1,8 +1,3 @@
-# Blocking comments. Both exist only while the method bodies below are absent —
-# a parameter reads as unused in a `...` body, and B027 fires on a concrete
-# method of an ABC that has none. Remove both once the bodies land.
-# ruff: noqa: B027
-# pyright: reportUnusedParameter=false
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from enum import StrEnum
@@ -66,6 +61,16 @@ class Tool[ContextT, ResultT: ToolResult](BaseModel, frozen=True):
     result: type[ResultT]
     handler: ToolHandler[ContextT, ResultT]
 
+    @model_validator(mode="after")
+    def _result_discriminator_matches_name(self) -> "Tool[ContextT, ResultT]":
+        """A result's pinned `tool` default must equal this tool's `name` —
+        otherwise the discriminator cannot identify which tool produced it."""
+        declared_tool = self.result.model_construct().tool
+        if declared_tool != self.name:
+            message = "tool result discriminator {!r} does not match name {!r}"
+            raise ValueError(message.format(declared_tool, self.name))
+        return self
+
 
 class State[ContextT, EventT](ABC):
     """One node of the graph: a phase a context can sit in for many turns.
@@ -100,7 +105,8 @@ class State[ContextT, EventT](ABC):
 
         Defaults to the whole inventory; a state that filters overrides this.
         """
-        ...
+        _ = context
+        return self.tools
 
     def get_actions(
         self, context: ContextT, event: EventT
@@ -109,7 +115,8 @@ class State[ContextT, EventT](ABC):
 
         Defaults to the whole inventory; a state that filters overrides this.
         """
-        ...
+        _ = context, event
+        return self.actions
 
 
 class Transition[ContextT, EventT](BaseModel, frozen=True):
@@ -155,7 +162,7 @@ class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
 
         Empty for a state with no outgoing edge, rather than absent.
         """
-        ...
+        return self.transitions.get(source, {})
 
     def is_terminal(self, name: NameT) -> bool:
         """Whether this state has no outgoing edge at all.
@@ -163,7 +170,7 @@ class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
         The singular of `terminal_states`, and structurally terminal in the
         same limited sense — see there.
         """
-        ...
+        return not self.outgoing(name)
 
     @property
     def terminal_states(self) -> frozenset[NameT]:
@@ -185,7 +192,7 @@ class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
         the mechanics only report them. A graph that forbids them, as capture's
         does under FR-02, asserts this is empty in its own suite.
         """
-        ...
+        return frozenset(name for name in self.states if self.is_terminal(name))
 
     def reachable_from(self, source: NameT) -> frozenset[NameT]:
         """Every state reachable from source by following one or more edges,
@@ -196,7 +203,17 @@ class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
         one edge, decided per turn, so that entering a phase always means a
         turn happened in it.
         """
-        ...
+        reached: set[NameT] = set()
+        frontier = list(self.outgoing(source))
+        while frontier:
+            name = frontier.pop()
+            if name in reached:
+                continue
+            reached.add(name)
+            frontier.extend(
+                target for target in self.outgoing(name) if target not in reached
+            )
+        return frozenset(reached)
 
     @model_validator(mode="after")
     def _validate_edges(self) -> "Graph[ContextT, EventT, NameT]":
