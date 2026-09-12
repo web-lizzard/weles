@@ -12,7 +12,8 @@ _FEATURES_LOADER = _TESTS_ROOT / "features" / "test_bdd.py"
 _BDD_SHIM = _TESTS_ROOT / "bdd" / "test_features.py"
 
 
-def pytest_configure(_config: pytest.Config) -> None:
+def pytest_configure(config: pytest.Config) -> None:
+    _ = config
     # Keep the suite offline: production defaults to OpenRouter + tracing on.
     _ = os.environ.setdefault("EMBEDDING_PROVIDER", "deterministic")
     _ = os.environ.setdefault("TRACING_ENABLED", "false")

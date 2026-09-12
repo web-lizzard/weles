@@ -12,3 +12,7 @@ slice_ref: S-02
 ## Notes
 
 <!-- Materialized from effort `llm-adapter`, slice S-02. Run /plan llm-adapter-capture-modes to write the plan. -->
+
+- `tests/unit/capture/contracts/test_message_repository_contract.py` is **skipped** until
+  `InMemoryMessageRepository` implements `MessageRepository.history` (port extended during
+  discover-contracts). Remove `pytestmark` when that adapter work lands in `/implement`.
