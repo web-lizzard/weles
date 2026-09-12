@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import final, override
 
+from domain.capture.coverage import reading_of
 from domain.capture.turn import CaptureTurn
 from domain.capture.value_objects import CoverageReading
 from domain.shared.instruction.model import (
@@ -30,8 +31,9 @@ class CaptureInstructionBuilder(InstructionBuilder[CaptureTurn], ABC):
     not author, and a phase part it does.
 
     **The general part is required of capture, not of each phase separately.**
-    `FLOW` says what a capture session is for and `LANGUAGE` constrains how the
-    agent answers; both are true in every phase, so no phase is given the choice
+    `FLOW` says what a capture session is for — including speaking Socratically
+    to the user while conversing — and `LANGUAGE` constrains how the agent
+    answers; both are true in every phase, so no phase is given the choice
     to drop them. `required` unions the general floor into whatever the phase
     declares, which is why `phase_required` names only the phase's own — a
     subclass has no way to subtract, and a phase added later inherits the floor
@@ -80,7 +82,8 @@ class CaptureInstructionBuilder(InstructionBuilder[CaptureTurn], ABC):
 
         A phase overrides `phase_blocks` and `phase_required`, never this.
         """
-        ...
+        blocks = (_FLOW, _LANGUAGE, *self.phase_blocks(context))
+        return Instruction(blocks=blocks, required=self.required)
 
 
 class ConversingInstructionBuilder(CaptureInstructionBuilder):
@@ -90,11 +93,11 @@ class ConversingInstructionBuilder(CaptureInstructionBuilder):
 
     Optional, each present only when it has something to say:
 
-    - `SESSION_TOPIC` — present iff `turn.session.topic is not None`. Before the
+    - `SESSION_TOPIC` — present if `turn.session.topic is not None`. Before the
       session is named there is no topic to hold the agent to, and the exchange
       itself already shows the session is new, so the block is absent rather
       than saying so in prose.
-    - `COVERAGE_TREND` — present iff the session holds enough assessments for a
+    - `COVERAGE_TREND` — present if the session holds enough assessments for a
       reading to exist. This is the block FR-03 rests on: the reading is computed
       in the domain and crosses the port as a word, never as the float. It
       carries the encouragement with the reading, because a word on its own would
@@ -107,7 +110,25 @@ class ConversingInstructionBuilder(CaptureInstructionBuilder):
         return frozenset({TASK})
 
     @override
-    def phase_blocks(self, context: CaptureTurn) -> tuple[InstructionBlock, ...]: ...
+    def phase_blocks(self, context: CaptureTurn) -> tuple[InstructionBlock, ...]:
+        blocks: list[InstructionBlock] = [_CONVERSING_TASK]
+        if context.session.topic is not None:
+            blocks.append(
+                InstructionBlock.rendered(
+                    SESSION_TOPIC,
+                    _SESSION_TOPIC_TEMPLATE,
+                    topic=context.session.topic.value,
+                )
+            )
+        reading = reading_of(context.session.assessments)
+        if reading is not None:
+            blocks.append(
+                InstructionBlock(
+                    name=COVERAGE_TREND,
+                    text=_COVERAGE_READING_PROSE[reading],
+                )
+            )
+        return tuple(blocks)
 
 
 class DraftingInstructionBuilder(CaptureInstructionBuilder):
@@ -139,7 +160,42 @@ class DraftingInstructionBuilder(CaptureInstructionBuilder):
         return frozenset({TASK, DRAFT_STATE})
 
     @override
-    def phase_blocks(self, context: CaptureTurn) -> tuple[InstructionBlock, ...]: ...
+    def phase_blocks(self, context: CaptureTurn) -> tuple[InstructionBlock, ...]:
+        blocks: list[InstructionBlock] = [_DRAFTING_TASK]
+        if context.draft is not None:
+            draft = context.draft
+            topic = (
+                draft.topic.label.value
+                if draft.topic is not None
+                else "the session's topic"
+            )
+            tags = ", ".join(tag.label.value for tag in draft.tags) or "none yet"
+            blocks.append(
+                InstructionBlock.rendered(
+                    DRAFT_STATE,
+                    _DRAFT_STATE_UNDERWAY_TEMPLATE,
+                    topic=topic,
+                    tags=tags,
+                )
+            )
+        elif context.session.note_id is not None:
+            topic = (
+                context.session.topic.value
+                if context.session.topic is not None
+                else "the note's topic"
+            )
+            blocks.append(
+                InstructionBlock.rendered(
+                    DRAFT_STATE,
+                    _DRAFT_STATE_REVISING_TEMPLATE,
+                    topic=topic,
+                )
+            )
+        else:
+            blocks.append(_DRAFT_STATE_EMPTY)
+        if context.draft is None and context.session.note_id is None:
+            blocks.append(_HANDOFF)
+        return tuple(blocks)
 
 
 _GENERAL_REQUIRED = frozenset({FLOW, LANGUAGE})
@@ -147,10 +203,14 @@ _GENERAL_REQUIRED = frozenset({FLOW, LANGUAGE})
 _FLOW = InstructionBlock(
     name=FLOW,
     text=(
-        "You are in a capture session. Its purpose is to turn a conversation "
-        "into a note the user owns: their material, organised, in their words. "
-        "The session belongs to the user throughout — you draw things out and "
-        "write them down, and you do not decide on their behalf when it is done."
+        "You are in a capture session. Its purpose is to help the user work "
+        "through a topic until what they understand is genuinely their own — "
+        "their reasoning and their words — and later to turn that into a note "
+        "they keep. While you are conversing, speak to the user Socratically: "
+        "explain what they need to grasp, then ask questions that help them "
+        "think it through instead of handing them finished conclusions. The "
+        "session belongs to the user throughout; you guide and probe, and you "
+        "do not decide on their behalf when it is done."
     ),
 )
 
@@ -162,9 +222,10 @@ _LANGUAGE = InstructionBlock(
 _CONVERSING_TASK = InstructionBlock(
     name=TASK,
     text=(
-        "Talk this session's topic through with the user. Draw out what they "
-        "have not yet unpacked, and judge how fully the topic has been covered "
-        "as you go."
+        "On this turn, stay with the session's topic. When the user needs a "
+        "concept, explain it plainly; then ask focused questions that surface "
+        "what they already understand and where their grasp is still shaky. "
+        "Judge how fully the topic has been covered as you go."
     ),
 )
 
@@ -215,9 +276,9 @@ template and supplies values; it never writes prose of its own.
 
 _COVERAGE_READING_PROSE: Mapping[CoverageReading, str] = {
     CoverageReading.EARLY: (
-        "The topic has barely been opened. Keep drawing it out, and do not "
-        "raise finishing the session at all — there is not yet enough here for "
-        "that question to be fair."
+        "The topic has barely been opened. Keep explaining and questioning "
+        "Socratically, and do not raise finishing the session at all — there "
+        "is not yet enough here for that question to be fair."
     ),
     CoverageReading.DEEPENING: (
         "The conversation is covering more ground each turn. It is working; "

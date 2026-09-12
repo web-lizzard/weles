@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-instruction-context
-current_phase: 3
-next_step: tests
-next_command: /unit-test llm-adapter-instruction-context phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement llm-adapter-instruction-context phase 4
 updated: 2026-09-12
 ---
 
@@ -31,13 +31,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5b3a805
 
 #### Automated
 
-- [ ] 3.1 Implement CaptureInstructionBuilder.build as the final composition
-- [ ] 3.2 Implement ConversingInstructionBuilder.phase_blocks with its two optional blocks
-- [ ] 3.3 Implement DraftingInstructionBuilder.phase_blocks with the three draft states and the handoff
+- [x] 3.1 Implement CaptureInstructionBuilder.build as the final composition
+- [x] 3.2 Implement ConversingInstructionBuilder.phase_blocks with its two optional blocks
+- [x] 3.3 Implement DraftingInstructionBuilder.phase_blocks with the three draft states and the handoff
 
 ### Phase 4: Declare the wiring symbols
 
