@@ -75,16 +75,16 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 6.1 Declare both capture phases' instruction builders
-- [x] 6.2 Implement StateMachine.build_instruction
-- [x] 6.3 Give the 11 fake states an instruction builder
-- [x] 6.4 Pass the instruction from send_message across the port
-- [x] 6.5 Render blocks as the instructions sequence and delete the adapter's prose constants
-- [x] 6.6 Carry the third argument through the agent contract suite
+- [x] 6.1 Declare both capture phases' instruction builders — ca5fe82
+- [x] 6.2 Implement StateMachine.build_instruction — ca5fe82
+- [x] 6.3 Give the 11 fake states an instruction builder — ca5fe82
+- [x] 6.4 Pass the instruction from send_message across the port — ca5fe82
+- [x] 6.5 Render blocks as the instructions sequence and delete the adapter's prose constants — ca5fe82
+- [x] 6.6 Carry the third argument through the agent contract suite — ca5fe82
 
 #### Manual
 
-- [x] 6.7 Run a capture session end to end and confirm reply streaming and the drafting handoff
+- [x] 6.7 Run a capture session end to end and confirm reply streaming and the drafting handoff — ca5fe82
 
 ### Phase 7: The deterministic double speaks from blocks
 
