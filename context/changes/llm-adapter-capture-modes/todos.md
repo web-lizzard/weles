@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 5
-next_step: 5.1
-next_command: /unit-test llm-adapter-capture-modes phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /implement llm-adapter-capture-modes phase 6
 updated: 2026-09-12
 ---
 
@@ -48,13 +48,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 89c4873
 
 #### Automated
 
-- [ ] 5.1 Capture graph suite passes, pinning empty terminal states, both edges reachable, and at most one transition available
-- [ ] 5.2 Capture domain model suite passes
-- [ ] 5.3 Basedpyright reports zero errors over the domain layer
+- [x] 5.1 Capture graph suite passes, pinning empty terminal states, both edges reachable, and at most one transition available
+- [x] 5.2 Capture domain model suite passes
+- [x] 5.3 Basedpyright reports zero errors over the domain layer
 
 ### Phase 6: Pydantic AI capture agent adapter (stubs)
 

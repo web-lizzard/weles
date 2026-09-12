@@ -1,12 +1,21 @@
-# Blocking comment. Present only while the handler, guard and action bodies
-# below are absent — each reads its parameters nowhere in a `...` body. Remove
-# it once the bodies land.
-# pyright: reportUnusedParameter=false, reportUnusedFunction=false
 from collections.abc import Sequence
 from typing import Literal, override
 
-from domain.capture.turn import CaptureEvent, CaptureTurn
-from domain.capture.value_objects import CapturePhase, Label, NoteContent, SessionTopic
+from domain.capture.turn import (
+    CaptureEvent,
+    CaptureTurn,
+    ConversationRequested,
+    DraftingConsentSignalled,
+    SessionTopicProposed,
+)
+from domain.capture.value_objects import (
+    CapturePhase,
+    ConversationRequest,
+    DraftingConsent,
+    Label,
+    NoteContent,
+    SessionTopic,
+)
 from domain.shared.graph.machine import StateMachine
 from domain.shared.graph.model import (
     Action,
@@ -53,12 +62,12 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
     @property
     @override
     def tools(self) -> Sequence[Tool[CaptureTurn, ToolResult]]:
-        return (_ASSESS_COVERAGE, _PROPOSE_SESSION_TOPIC)
+        return (_ASSESS_COVERAGE, _PROPOSE_SESSION_TOPIC, _SIGNAL_DRAFTING_CONSENT)
 
     @property
     @override
     def actions(self) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
-        return (_assign_session_topic,)
+        return (_assign_session_topic, _record_drafting_consent)
 
     @override
     def get_tools(
@@ -67,15 +76,22 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
         """Naming the session's topic is offered only until it has one — the
         filter `send_message.py:83` performs today as `if session.topic is
         None`, moved off the command and onto the phase that owns it."""
-        ...
+        if context.session.topic is not None:
+            return (_ASSESS_COVERAGE, _SIGNAL_DRAFTING_CONSENT)
+        return self.tools
 
     @override
     def get_actions(
         self, context: CaptureTurn, event: CaptureEvent
     ) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
         """Assigning the session topic runs on a `SessionTopicProposed` and on
-        nothing else."""
-        ...
+        nothing else; recording consent runs only on `DraftingConsentSignalled`."""
+        _ = context
+        if isinstance(event, SessionTopicProposed):
+            return (_assign_session_topic,)
+        if isinstance(event, DraftingConsentSignalled):
+            return (_record_drafting_consent,)
+        return ()
 
 
 class Drafting(State[CaptureTurn, CaptureEvent]):
@@ -90,11 +106,25 @@ class Drafting(State[CaptureTurn, CaptureEvent]):
     @property
     @override
     def tools(self) -> Sequence[Tool[CaptureTurn, ToolResult]]:
-        return (_PROPOSE_NOTE_TOPIC, _PROPOSE_NOTE_TAG, _PROPOSE_NOTE_CONTENT)
+        return (
+            _PROPOSE_NOTE_TOPIC,
+            _PROPOSE_NOTE_TAG,
+            _PROPOSE_NOTE_CONTENT,
+            _REQUEST_CONVERSATION,
+        )
 
     @property
     @override
     def actions(self) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+        return (_record_conversation_request,)
+
+    @override
+    def get_actions(
+        self, context: CaptureTurn, event: CaptureEvent
+    ) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+        _ = context
+        if isinstance(event, ConversationRequested):
+            return (_record_conversation_request,)
         return ()
 
 
@@ -135,79 +165,112 @@ class ConversationRequestSignal(ToolResult, frozen=True):
 
 
 def consent_given(context: CaptureTurn) -> bool:
-    """The guard into drafting: the session already holds messages, and the
-    user's latest message was read as consent (FR-01).
-
-    Named rather than inlined because it is the most-read decision in this
-    graph. Both halves are required: the messages half is a genuine port of
-    `_should_draft` (`reply_generation.py:74`), which returns False with no user
-    entry; the consent half replaces that function's phrase list, which is not
-    ported — no fixed phrase stands in for the user's word.
+    """The guard into drafting: the session already holds a drafting consent
+    (FR-01). Messages are required when that consent is recorded, not here —
+    an empty conversation cannot persist the intent in the first place.
     """
-    ...
+    return context.session.drafting_consent is not None
 
 
 def conversation_requested(context: CaptureTurn) -> bool:
     """Whether the session holds a return-to-conversation intent (FR-02)."""
-    ...
+    return context.session.conversation_request is not None
+
+
+def _require_str(arguments: ToolArguments, key: str) -> str:
+    value = arguments[key]
+    if not isinstance(value, str):
+        raise TypeError(f"{key} must be a string")
+    return value
+
+
+def _require_float(arguments: ToolArguments, key: str) -> float:
+    value = arguments[key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise TypeError(f"{key} must be a number")
+    return float(value)
 
 
 async def _assess_coverage(
     context: CaptureTurn, arguments: ToolArguments
-) -> CoverageAssessed: ...
+) -> CoverageAssessed:
+    _ = context
+    return CoverageAssessed(coverage=_require_float(arguments, "coverage"))
 
 
 async def _propose_session_topic(
     context: CaptureTurn, arguments: ToolArguments
-) -> SessionTopicProposal: ...
+) -> SessionTopicProposal:
+    _ = context
+    return SessionTopicProposal(
+        topic=SessionTopic(value=_require_str(arguments, "topic"))
+    )
 
 
 async def _propose_note_topic(
     context: CaptureTurn, arguments: ToolArguments
-) -> NoteTopicProposal: ...
+) -> NoteTopicProposal:
+    _ = context
+    return NoteTopicProposal(label=Label(value=_require_str(arguments, "label")))
 
 
 async def _propose_note_tag(
     context: CaptureTurn, arguments: ToolArguments
-) -> NoteTagProposal: ...
+) -> NoteTagProposal:
+    _ = context
+    return NoteTagProposal(label=Label(value=_require_str(arguments, "label")))
 
 
 async def _propose_note_content(
     context: CaptureTurn, arguments: ToolArguments
-) -> NoteContentProposal: ...
+) -> NoteContentProposal:
+    _ = context
+    return NoteContentProposal(
+        content=NoteContent(value=_require_str(arguments, "content"))
+    )
 
 
 async def _signal_drafting_consent(
     context: CaptureTurn, arguments: ToolArguments
-) -> DraftingConsentSignal: ...
+) -> DraftingConsentSignal:
+    _ = context, arguments
+    return DraftingConsentSignal()
 
 
 async def _request_conversation(
     context: CaptureTurn, arguments: ToolArguments
-) -> ConversationRequestSignal: ...
+) -> ConversationRequestSignal:
+    _ = context, arguments
+    return ConversationRequestSignal()
 
 
 async def _assign_session_topic(context: CaptureTurn, event: CaptureEvent) -> None:
     """Put the proposed topic on the session, in memory. `assign_topic` refuses
     a second assignment, which is why `Conversing` withdraws the tool once the
     session has one."""
-    ...
+    if isinstance(event, SessionTopicProposed):
+        context.session.assign_topic(event.topic)
 
 
-async def _record_drafting_consent(
-    context: CaptureTurn, event: CaptureEvent
-) -> None: ...
+async def _record_drafting_consent(context: CaptureTurn, event: CaptureEvent) -> None:
+    _ = event
+    if context.messages:
+        context.session.record_drafting_consent(DraftingConsent())
 
 
 async def _record_conversation_request(
     context: CaptureTurn, event: CaptureEvent
-) -> None: ...
+) -> None:
+    _ = event
+    context.session.record_conversation_request(ConversationRequest())
 
 
-async def _consume_drafting_consent(context: CaptureTurn) -> None: ...
+async def _consume_drafting_consent(context: CaptureTurn) -> None:
+    context.session.clear_drafting_consent()
 
 
-async def _consume_conversation_request(context: CaptureTurn) -> None: ...
+async def _consume_conversation_request(context: CaptureTurn) -> None:
+    context.session.clear_conversation_request()
 
 
 _ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessed](
@@ -269,14 +332,19 @@ _CAPTURE_GRAPH = Graph[CaptureTurn, CaptureEvent, CapturePhase](
     transitions={
         CapturePhase.CONVERSING: {
             CapturePhase.DRAFTING: Transition[CaptureTurn, CaptureEvent](
-                guard=consent_given
+                guard=consent_given,
+                actions=(_consume_drafting_consent,),
             )
         },
-        # Unguarded on purpose. FR-02 requires that note drafting never become
-        # terminal, and the cheapest way to guarantee a guard is never
-        # permanently unsatisfiable is for there to be no guard at all.
+        # Guarded on purpose. Without `conversation_requested`, every drafting
+        # turn would burn a segment returning to a conversation nobody asked
+        # for. The consume action keeps the intent single-use so the command's
+        # loop stays finite while FR-02 still forbids a terminal drafting phase.
         CapturePhase.DRAFTING: {
-            CapturePhase.CONVERSING: Transition[CaptureTurn, CaptureEvent]()
+            CapturePhase.CONVERSING: Transition[CaptureTurn, CaptureEvent](
+                guard=conversation_requested,
+                actions=(_consume_conversation_request,),
+            )
         },
     },
 )
