@@ -14,6 +14,7 @@ from domain.capture.topic import Topic
 from domain.capture.value_objects import (
     CapturePhase,
     ConversationRequest,
+    Coverage,
     DraftingConsent,
     NoteContent,
     NoteId,
@@ -31,6 +32,7 @@ class CaptureSession(BaseModel):
     phase: CapturePhase = CapturePhase.CONVERSING
     drafting_consent: DraftingConsent | None = None
     conversation_request: ConversationRequest | None = None
+    assessments: tuple[Coverage, ...] = ()
     created_at: datetime
 
     @classmethod
@@ -50,6 +52,20 @@ class CaptureSession(BaseModel):
         if self.status != SessionStatus.OPEN:
             raise CaptureSessionClosedError
         self.phase = phase
+
+    def record_assessment(self, coverage: Coverage) -> None:
+        """Keep a coverage assessment on the session, in order.
+
+        Appending rather than overwriting. A single current value would be
+        enough to say how covered the topic is, but not which way it moved, and
+        FR-03 rests on the movement. A discarded assessment cannot be recovered
+        later; a kept one can always be ignored, and `COVERAGE_TREND_WINDOW`
+        is where ignoring happens.
+
+        The session is the aggregate, so this is where the history is durable —
+        the turn carries it only for the length of the turn.
+        """
+        self.assessments = (*self.assessments, coverage)
 
     def record_drafting_consent(self, consent: DraftingConsent) -> None:
         self.drafting_consent = consent
