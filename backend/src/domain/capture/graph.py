@@ -357,7 +357,12 @@ async def _resolve_note_topic(
     if not isinstance(event, NoteTopicProposed):
         return
     resolution = await deps.vocabulary.resolve_topic(event.label, deps.topics)
-    context.draft = NoteDraft(topic=resolution.topic, tags=[], content="")
+    context.draft = NoteDraft(
+        topic=resolution.topic,
+        topic_reused=resolution.reused,
+        tags=[],
+        content="",
+    )
 
 
 async def _resolve_note_tag(
@@ -369,6 +374,7 @@ async def _resolve_note_tag(
         raise DraftTopicMissingError
     resolution = await deps.vocabulary.resolve_tag(event.label, deps.tags)
     context.draft.tags.append(resolution.tag)
+    context.draft.tag_reused.append(resolution.reused)
 
 
 async def _append_note_content(

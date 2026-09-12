@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
 current_phase: 17
-next_step: 17.Tests
-next_command: /unit-test llm-adapter-capture-modes phase 17
+next_step: epilogue
+next_command: /archive llm-adapter-capture-modes
 updated: 2026-09-12
 ---
 
@@ -99,7 +99,7 @@ updated: 2026-09-12
 
 #### Manual
 
-- [ ] 9.4 Confirm one real capture turn groups its observations under the session id in Langfuse
+- [x] 9.4 Confirm one real capture turn groups its observations under the session id in Langfuse
 
 ### Phase 10: Deterministic in-memory capture agent adapter (stubs)
 
@@ -133,7 +133,7 @@ updated: 2026-09-12
 
 #### Manual
 
-- [ ] 12.4 Stream two turns over HTTP and confirm draft events arrive in the consent turn
+- [x] 12.4 Stream two turns over HTTP and confirm draft events arrive in the consent turn
 
 ### Phase 13: Remove the superseded ports and rewire composition
 
@@ -184,16 +184,16 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 29c0f0b
 
 #### Automated
 
-- [ ] 17.1 Send-message command suite passes for a drafting and a redrafting turn
-- [ ] 17.2 Full pytest run passes across every suite
-- [ ] 17.3 Ruff is clean over src and tests
-- [ ] 17.4 Basedpyright reports zero errors over src and tests
-- [ ] 17.5 Grep finds no resolved_topic, resolved_tags or draft_text on _TurnBuffers
+- [x] 17.1 Send-message command suite passes for a drafting and a redrafting turn
+- [x] 17.2 Full pytest run passes across every suite
+- [x] 17.3 Ruff is clean over src and tests
+- [x] 17.4 Basedpyright reports zero errors over src and tests
+- [x] 17.5 Grep finds no resolved_topic, resolved_tags or draft_text on _TurnBuffers
 
 #### Manual
 
-- [ ] 17.6 Stream one drafting turn over HTTP and confirm the draft event sequence is unchanged
+- [x] 17.6 Stream one drafting turn over HTTP and confirm the draft event sequence is unchanged

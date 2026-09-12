@@ -15,7 +15,9 @@ class NoteDraft(BaseModel):
     """A note under construction before it can become a domain `Note`."""
 
     topic: Topic | None = None
+    topic_reused: bool = False
     tags: list[Tag] = Field(default_factory=list)
+    tag_reused: list[bool] = Field(default_factory=list)
     content: str = ""
 
 
