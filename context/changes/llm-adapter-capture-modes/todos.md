@@ -93,9 +93,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 9.1 Pydantic AI capture agent suite passes on TestModel and FunctionModel
-- [x] 9.2 Capture agent contract suite passes for the Pydantic AI implementation
-- [x] 9.3 Basedpyright reports zero errors over the adapters layer
+- [x] 9.1 Pydantic AI capture agent suite passes on TestModel and FunctionModel — 91093b5
+- [x] 9.2 Capture agent contract suite passes for the Pydantic AI implementation — 91093b5
+- [x] 9.3 Basedpyright reports zero errors over the adapters layer — 91093b5
 
 #### Manual
 
