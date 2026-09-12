@@ -1,9 +1,9 @@
 ---
 change_id: llm-adapter-instruction-context
 current_phase: 7
-next_step: 7.0
-next_command: /unit-test llm-adapter-instruction-context phase 7
-updated: 2026-09-12
+next_step: epilogue
+next_command: /archive llm-adapter-instruction-context
+updated: 2026-09-13
 ---
 
 ### Phase 1: Pin the shared instruction model
@@ -90,14 +90,14 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 9372db2
 
 #### Automated
 
-- [ ] 7.1 Delete the double's prose constants and speak the handoff block
-- [ ] 7.2 Compose the conversational reply from the blocks it was handed
-- [ ] 7.3 Branch on the DRAFT_STATE block instead of the note tool names
+- [x] 7.1 Delete the double's prose constants and speak the handoff block — e42fe11
+- [x] 7.2 Compose the conversational reply from the blocks it was handed — e42fe11
+- [x] 7.3 Branch on the DRAFT_STATE block instead of the note tool names — e42fe11
 
 #### Manual
 
-- [ ] 7.4 Read an in-memory session's reply and trace every sentence to a block
+- [x] 7.4 Read an in-memory session's reply and trace every sentence to a block
