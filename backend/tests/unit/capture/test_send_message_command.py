@@ -39,6 +39,7 @@ from domain.capture.exceptions import (
     CaptureSessionNotFoundError,
     EmptyMessageContentError,
 )
+from domain.capture.message import Message
 from domain.capture.turn import (
     AgentEvent,
     CaptureTurn,
@@ -688,6 +689,93 @@ async def test_no_turn_opens_three_segments_even_when_a_move_remains() -> None:
     assert any(isinstance(event, ReplyDoneEvent) for event in events)
 
 
+async def test_conversational_turn_adds_each_message_to_the_repository_once() -> None:
+    stack, message_repo = _make_command_stack_with_message_add_counter()
+
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+    _ = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Explain TCP handshakes"),
+        )
+    ]
+
+    assert message_repo.add_calls == 2
+    assert len(stack.store.list_by_session(session.id)) == 2
+
+
+async def test_drafting_consent_turn_adds_each_message_to_the_repository_once() -> None:
+    stack, message_repo = _make_agent_command_stack_with_message_add_counter(
+        _ScriptedCaptureAgent(
+            [
+                [
+                    ReplyProduced(text="handoff"),
+                    DraftingConsentSignalled(),
+                ],
+                [
+                    NoteTopicProposed(label=Label(value="TCP handshakes")),
+                    NoteTagProposed(label=Label(value="networking")),
+                    NoteContentProduced(content=NoteContent(value="SYN then ACK.")),
+                ],
+            ]
+        )
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    _ = await _handle_confirmation_turn(stack, session)
+
+    assert message_repo.add_calls == 3
+    assert len(stack.store.list_by_session(session.id)) == 3
+
+
+async def test_redraft_turn_still_updates_note_while_staging_each_message_once() -> (
+    None
+):
+    stack, message_repo = _make_agent_command_stack_with_message_add_counter(
+        _ScriptedCaptureAgent(
+            [
+                [DraftingConsentSignalled()],
+                _draft_events(
+                    topic=Label(value="TCP handshakes"),
+                    tags=[Label(value="networking")],
+                    contents=["original body"],
+                ),
+                _draft_events(
+                    topic=Label(value="congestion control"),
+                    tags=[Label(value="performance")],
+                    contents=["revised body"],
+                ),
+            ]
+        )
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    _ = await _handle_confirmation_turn(stack, session)
+    add_calls_after_first_draft = message_repo.add_calls
+
+    second_events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Make it about congestion control instead"),
+        )
+    ]
+    second_draft_done = next(
+        event for event in second_events if isinstance(event, DraftDoneEvent)
+    )
+
+    assert message_repo.add_calls == add_calls_after_first_draft + 2
+    assert len(stack.store.list_by_session(session.id)) == 5
+    assert second_draft_done.topic == "congestion control"
+    assert second_draft_done.content == "revised body"
+
+
 async def test_mid_stream_agent_failure_rolls_back_the_uncommitted_turn() -> None:
     agent = _ScriptedCaptureAgent(
         [
@@ -913,6 +1001,61 @@ class _OscillatingCaptureAgent:
             yield ConversationRequested()
             return
         yield ReplyProduced(text="still here")
+
+
+class _CountingMessageRepository(InMemoryMessageRepository):
+    add_calls: int
+
+    def __init__(self, store: InMemoryMessageStore) -> None:
+        super().__init__(store)
+        self.add_calls = 0
+
+    @override
+    async def add(self, message: Message) -> None:
+        self.add_calls += 1
+        await super().add(message)
+
+
+def _make_command_stack_with_message_add_counter(
+    capture_agent: DeterministicCaptureAgentAdapter | None = None,
+) -> tuple[_CommandStack, _CountingMessageRepository]:
+    store = InMemoryMessageStore()
+    session_repo = InMemoryCaptureSessionRepository()
+    message_repo = _CountingMessageRepository(store)
+    uow = _SpyUnitOfWork(session_repo, message_repo, store)
+    embedding = DeterministicEmbeddingAdapter()
+    agent = capture_agent or DeterministicCaptureAgentAdapter()
+    command = GenerateReplyCommand(
+        capture_sessions=session_repo,
+        uow=uow,  # pyright: ignore[reportArgumentType]
+        capture_agent=agent,
+        vocabulary=VocabularyResolver(
+            embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+        ),
+    )
+    stack = _CommandStack(store, session_repo, message_repo, uow, command)
+    return stack, message_repo
+
+
+def _make_agent_command_stack_with_message_add_counter(
+    capture_agent: object,
+) -> tuple[_CommandStack, _CountingMessageRepository]:
+    store = InMemoryMessageStore()
+    session_repo = InMemoryCaptureSessionRepository()
+    message_repo = _CountingMessageRepository(store)
+    uow = _SpyUnitOfWork(session_repo, message_repo, store)
+    embedding = DeterministicEmbeddingAdapter()
+    factory = cast(Callable[..., GenerateReplyCommand], GenerateReplyCommand)
+    command = factory(
+        capture_sessions=session_repo,
+        uow=uow,
+        capture_agent=capture_agent,
+        vocabulary=VocabularyResolver(
+            embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+        ),
+    )
+    stack = _CommandStack(store, session_repo, message_repo, uow, command)
+    return stack, message_repo
 
 
 def _make_agent_command_stack(capture_agent: object) -> _CommandStack:
