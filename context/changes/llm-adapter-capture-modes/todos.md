@@ -176,9 +176,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 16.1 Capture graph suite passes, covering first draft, redraft and a tag before a topic
-- [x] 16.2 Capture domain suites pass
-- [x] 16.3 Basedpyright reports zero errors over src and tests
+- [x] 16.1 Capture graph suite passes, covering first draft, redraft and a tag before a topic — 9112ca8
+- [x] 16.2 Capture domain suites pass — 9112ca8
+- [x] 16.3 Basedpyright reports zero errors over src and tests — 9112ca8
 
 ### Phase 17: The command stops resolving vocabulary
 
