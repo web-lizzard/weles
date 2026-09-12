@@ -1,7 +1,7 @@
 ---
 change_id: llm-adapter-capture-modes
 title: A capture session moves between conversing and note drafting on the user's word
-status: preparing
+status: planned
 created: 2026-09-12
 updated: 2026-09-12
 archived_at: null
@@ -11,7 +11,7 @@ slice_ref: S-02
 
 ## Notes
 
-<!-- Materialized from effort `llm-adapter`, slice S-02. Run /plan llm-adapter-capture-modes to write the plan. -->
+<!-- Materialized from effort `llm-adapter`, slice S-02. Planned 2026-09-12; see plan.md. -->
 
 - `tests/unit/capture/contracts/test_message_repository_contract.py` is **skipped** until
   `InMemoryMessageRepository` implements `MessageRepository.history` (port extended during
