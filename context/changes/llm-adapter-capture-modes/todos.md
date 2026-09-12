@@ -164,9 +164,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 15.1 CaptureDeps, NoteDraft, DraftCompleted and the moved resolver import by name
-- [x] 15.2 Full pytest run passes after the relocation
-- [x] 15.3 Basedpyright reports zero errors over src and tests
+- [x] 15.1 CaptureDeps, NoteDraft, DraftCompleted and the moved resolver import by name — 7ecf80c
+- [x] 15.2 Full pytest run passes after the relocation — 7ecf80c
+- [x] 15.3 Basedpyright reports zero errors over src and tests — 7ecf80c
 
 ### Phase 16: Drafting actions build the note
 
