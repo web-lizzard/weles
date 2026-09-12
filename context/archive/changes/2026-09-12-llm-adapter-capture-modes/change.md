@@ -1,10 +1,10 @@
 ---
 change_id: llm-adapter-capture-modes
 title: A capture session moves between conversing and note drafting on the user's word
-status: implemented
+status: archived
 created: 2026-09-12
 updated: 2026-09-12
-archived_at: null
+archived_at: 2026-09-12T18:04:12Z
 effort_id: llm-adapter
 slice_ref: S-02
 ---
