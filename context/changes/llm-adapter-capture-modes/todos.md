@@ -139,14 +139,14 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 13.1 Full pytest run passes, including the distill-flow features
-- [x] 13.2 Ruff is clean over src and tests
-- [x] 13.3 Basedpyright reports zero errors over src and tests
-- [x] 13.4 Grep finds no superseded port or ReplyChunk reference
+- [x] 13.1 Full pytest run passes, including the distill-flow features — 349b4dc
+- [x] 13.2 Ruff is clean over src and tests — 349b4dc
+- [x] 13.3 Basedpyright reports zero errors over src and tests — 349b4dc
+- [x] 13.4 Grep finds no superseded port or ReplyChunk reference — 349b4dc
 
 #### Manual
 
-- [x] 13.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged
+- [x] 13.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged — 349b4dc
 
 ### Phase 14: Dependencies reach actions
 
