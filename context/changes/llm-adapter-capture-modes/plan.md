@@ -343,6 +343,13 @@ drafting turn burns a segment returning to a conversation nobody asked for. Both
 - `cd backend && uv run pytest tests/unit/capture/test_model.py -v` passes
 - `cd backend && uv run basedpyright src/domain` reports zero errors
 
+### Review r5
+
+Artifact: `reviews/2026-09-12-r5-mutation-test-phases-5-6-7-.md`
+
+- `R5-F2` — Capture graph tests must assert `CaptureSession.start()` stamps UTC-aware `created_at`
+  Fix: A capture graph test that uses `CaptureSession.start()` must assert `created_at.tzinfo is UTC` so mutmut’s dependency-selected suite catches naive timestamps
+
 ---
 
 ## Phase 6: Message-recording events and the agent/command event split (stubs)

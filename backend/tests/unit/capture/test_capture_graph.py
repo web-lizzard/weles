@@ -1,5 +1,7 @@
 from collections.abc import Sequence
 
+import pytest
+
 from domain.capture.capture_session import CaptureSession
 from domain.capture.graph import (
     CaptureMachine,
@@ -227,6 +229,15 @@ async def test_applying_drafting_consent_without_messages_does_not_open_drafting
     assert machine.context.session.drafting_consent is None
     assert machine.available_transitions() == {}
     assert await machine.transition(CapturePhase.DRAFTING) is False
+
+
+async def test_assess_coverage_rejects_bool_coverage() -> None:
+    """Bool must not coerce to a coverage score."""
+    conversing = CaptureMachine(_turn())
+    assess = next(tool for tool in Conversing().tools if tool.name == "assess_coverage")
+
+    with pytest.raises(TypeError):
+        _ = await assess.handler(conversing.context, {"coverage": True})
 
 
 async def test_proposal_tools_return_results_built_from_the_model_arguments() -> None:
