@@ -2,6 +2,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel
 
+from domain.capture.exceptions import EmbeddingDimensionMismatchError
 from domain.capture.ports import EmbeddingPort, TagRepository, TopicRepository
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
@@ -21,12 +22,14 @@ class MatchCriteria(BaseModel, frozen=True):
         target: Embedding,
         candidates: Sequence[VocabularyEntryT],
     ) -> VocabularyMatch[VocabularyEntryT] | None:
-        matches = [
-            VocabularyMatch(entry=candidate, score=score)
-            for candidate in candidates
-            if (score := target.cosine_similarity(candidate.embedding)).value
-            >= self.threshold.value
-        ]
+        matches: list[VocabularyMatch[VocabularyEntryT]] = []
+        for candidate in candidates:
+            try:
+                score = target.cosine_similarity(candidate.embedding)
+            except EmbeddingDimensionMismatchError:
+                continue
+            if score.value >= self.threshold.value:
+                matches.append(VocabularyMatch(entry=candidate, score=score))
         if not matches:
             return None
         return min(

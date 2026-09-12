@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 16
-next_step: 16.1
-next_command: /unit-test llm-adapter-capture-modes phase 16
+current_phase: 17
+next_step: 17.Tests
+next_command: /unit-test llm-adapter-capture-modes phase 17
 updated: 2026-09-12
 ---
 
@@ -172,13 +172,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 29a3f33
 
 #### Automated
 
-- [ ] 16.1 Capture graph suite passes, covering first draft, redraft and a tag before a topic
-- [ ] 16.2 Capture domain suites pass
-- [ ] 16.3 Basedpyright reports zero errors over src and tests
+- [x] 16.1 Capture graph suite passes, covering first draft, redraft and a tag before a topic
+- [x] 16.2 Capture domain suites pass
+- [x] 16.3 Basedpyright reports zero errors over src and tests
 
 ### Phase 17: The command stops resolving vocabulary
 

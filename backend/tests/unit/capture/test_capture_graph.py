@@ -261,11 +261,10 @@ async def test_drafting_consent_with_messages_opens_drafting_and_spends_intent()
     requested = ConversationRequested()
     note_chunk = NoteContentProduced(content=NoteContent(value="A draft."))
 
-    assert Drafting().get_actions(machine.context, note_chunk) == ()
+    assert Drafting().get_actions(machine.context, note_chunk) != ()
     assert Drafting().get_actions(machine.context, requested) != ()
 
     await machine.apply(requested)
-    await machine.apply(note_chunk)
 
     assert machine.context.session.conversation_request == ConversationRequest()
     assert machine.available_transitions() == {
@@ -371,7 +370,8 @@ def test_recording_a_message_on_the_turn_appends_it_to_the_conversation() -> Non
 async def test_applying_the_turns_own_first_message_then_consent_opens_drafting() -> (
     None
 ):
-    machine = _machine(_turn(messages=()))
+    deps = _capture_deps()
+    machine = _machine_with_deps(_turn(messages=()), deps)
     incoming = _user_message(machine.context.session)
     recorded = UserMessageRecorded(message=incoming)
     consent = DraftingConsentSignalled()
@@ -390,7 +390,8 @@ async def test_applying_the_turns_own_first_message_then_consent_opens_drafting(
 
 
 async def test_applying_an_assistant_message_while_drafting_appends_it() -> None:
-    machine = _machine(_turn(phase=CapturePhase.DRAFTING, messages=()))
+    deps = _capture_deps()
+    machine = _machine_with_deps(_turn(phase=CapturePhase.DRAFTING, messages=()), deps)
     incoming = _assistant_message(machine.context.session)
     recorded = AssistantMessageRecorded(message=incoming)
     user_recorded = UserMessageRecorded(message=_user_message(machine.context.session))

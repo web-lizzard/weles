@@ -12,7 +12,7 @@ from application.capture.dto import (
 )
 from application.capture.ports import UnitOfWork
 from domain.capture.capture_session import CaptureSession
-from domain.capture.deps import NULL_CAPTURE_DEPS
+from domain.capture.deps import RepositoryCaptureDeps
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
@@ -42,6 +42,8 @@ from domain.capture.value_objects import (
     NoteContent,
     SessionId,
     SessionStatus,
+    TagId,
+    TopicId,
 )
 from domain.capture.vocabulary import VocabularyResolver
 
@@ -92,7 +94,15 @@ class GenerateReplyCommand:
                     raise NoteNotFoundError
 
             turn = CaptureTurn(session=session, messages=prior, note=note)
-            machine = CaptureMachine(turn, NULL_CAPTURE_DEPS)
+            deps = RepositoryCaptureDeps(
+                messages=uow.messages,
+                notes=uow.notes,
+                topics=uow.topics,
+                tags=uow.tags,
+                note_vocabulary=uow.note_vocabulary,
+                vocabulary=self._vocabulary,
+            )
+            machine = CaptureMachine(turn, deps)
             await machine.apply(UserMessageRecorded(message=user_message))
 
             buffers = _TurnBuffers()
@@ -210,9 +220,15 @@ class GenerateReplyCommand:
         reply_buffer = ""
         async with self._capture_agent.converse(turn, machine.get_tools()) as events:
             async for event in events:
+                topic_ids_before = {topic.id for topic in await uow.topics.candidates()}
+                tag_ids_before = {tag.id for tag in await uow.tags.candidates()}
                 await machine.apply(event)
                 mapped = await self._map_agent_event(
-                    uow, event, buffers.resolved_topic, buffers.resolved_tags
+                    machine,
+                    event,
+                    buffers,
+                    topic_ids_before,
+                    tag_ids_before,
                 )
                 if mapped is None:
                     continue
@@ -235,41 +251,46 @@ class GenerateReplyCommand:
 
     async def _map_agent_event(
         self,
-        uow: UnitOfWork,
+        machine: CaptureMachine,
         event: AgentEvent,
-        resolved_topic: Topic | None,
-        resolved_tags: list[Tag],
+        buffers: _TurnBuffers,
+        topic_ids_before: set[TopicId],
+        tag_ids_before: set[TagId],
     ) -> tuple[ReplyStreamEvent, Topic | None, str | None] | None:
         if isinstance(event, ReplyProduced):
-            return ReplyDeltaEvent(text=event.text), resolved_topic, event.text
+            return ReplyDeltaEvent(text=event.text), buffers.resolved_topic, event.text
+        draft = machine.context.draft
         if isinstance(event, NoteTopicProposed):
-            resolution = await self._vocabulary.resolve_topic(event.label, uow.topics)
+            if draft is None or draft.topic is None:
+                raise DraftTopicMissingError
+            buffers.resolved_topic = draft.topic
             return (
                 DraftTopicEvent(
-                    label=resolution.topic.label.value, reused=resolution.reused
+                    label=draft.topic.label.value,
+                    reused=draft.topic.id in topic_ids_before,
                 ),
-                resolution.topic,
+                draft.topic,
                 None,
             )
         if isinstance(event, NoteTagProposed):
-            if resolved_topic is None:
+            if draft is None or draft.topic is None or not draft.tags:
                 raise DraftTopicMissingError
-            tag_resolution = await self._vocabulary.resolve_tag(event.label, uow.tags)
-            resolved_tags.append(tag_resolution.tag)
+            tag = draft.tags[-1]
+            buffers.resolved_tags.append(tag)
             return (
                 DraftTagEvent(
-                    label=tag_resolution.tag.label.value,
-                    reused=tag_resolution.reused,
+                    label=tag.label.value,
+                    reused=tag.id in tag_ids_before,
                 ),
-                resolved_topic,
+                draft.topic,
                 None,
             )
         if isinstance(event, NoteContentProduced):
-            if resolved_topic is None:
+            if draft is None or draft.topic is None:
                 raise DraftTopicMissingError
             return (
                 DraftDeltaEvent(text=event.content.value),
-                resolved_topic,
+                draft.topic,
                 event.content.value,
             )
         return None
