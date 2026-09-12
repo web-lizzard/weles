@@ -29,6 +29,10 @@ class CaptureTurn(BaseModel):
     messages: Sequence[Message]
     note: Note | None = None
 
+    def record_message(self, message: Message) -> None:
+        """Append a message onto this turn's conversation in memory."""
+        _ = message
+
 
 class ReplyProduced(BaseModel, frozen=True):
     """A piece of conversational reply arrived."""
@@ -80,7 +84,21 @@ class ConversationRequested(BaseModel, frozen=True):
     kind: Literal["conversation_requested"] = "conversation_requested"
 
 
-type CaptureEvent = Annotated[
+class UserMessageRecorded(BaseModel, frozen=True):
+    """The command recorded the user's message onto this turn."""
+
+    kind: Literal["user_message_recorded"] = "user_message_recorded"
+    message: Message
+
+
+class AssistantMessageRecorded(BaseModel, frozen=True):
+    """The command recorded the assistant's message onto this turn."""
+
+    kind: Literal["assistant_message_recorded"] = "assistant_message_recorded"
+    message: Message
+
+
+type AgentEvent = Annotated[
     ReplyProduced
     | SessionTopicProposed
     | NoteTopicProposed
@@ -90,16 +108,15 @@ type CaptureEvent = Annotated[
     | ConversationRequested,
     Field(discriminator="kind"),
 ]
+"""What a capture-agent adapter may yield.
+
+The two message-recording events are raised by the command, not the model, so
+they are not in this union: yielding one from an adapter is a type error.
+"""
+
+type CaptureEvent = AgentEvent | UserMessageRecorded | AssistantMessageRecorded
 """What the command applies to the machine over a turn.
 
-Domain vocabulary, and the domain's own: `CaptureAgentPort` both takes and
-yields these, so nothing from the adapter's world crosses the seam.
-
-A discriminated union rather than an envelope with a payload. The payloads do
-differ, but these events never leave the process — adapter to command to
-machine, all inside one turn — so the union carries full types the whole way
-and a guard or action narrows on `isinstance` with the fields already known.
-An envelope is what `OutboxEnvelope` is for: a `dict[str, object]` payload,
-opaque because it has to survive serialization to another process. Paying that
-price here would buy nothing and lose the narrowing.
+`AgentEvent` is everything the model produces; the two message events are
+raised by the command so a turn's own exchange can reach the machine.
 """

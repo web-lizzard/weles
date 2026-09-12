@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 6
-next_step: 6.1
-next_command: /implement llm-adapter-capture-modes phase 6
+current_phase: 7
+next_step: 7.1
+next_command: /unit-test llm-adapter-capture-modes phase 7
 updated: 2026-09-12
 ---
 
@@ -60,8 +60,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 6.1 AgentEvent and the two message events import by name
-- [ ] 6.2 Basedpyright reports zero errors over the capture domain
+- [x] 6.1 AgentEvent and the two message events import by name
+- [x] 6.2 Basedpyright reports zero errors over the capture domain
 
 ### Phase 7: A turn's own messages reach the machine
 

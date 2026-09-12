@@ -67,7 +67,12 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
     @property
     @override
     def actions(self) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
-        return (_assign_session_topic, _record_drafting_consent)
+        return (
+            _assign_session_topic,
+            _record_drafting_consent,
+            _record_user_message,
+            _record_assistant_message,
+        )
 
     @override
     def get_tools(
@@ -116,7 +121,11 @@ class Drafting(State[CaptureTurn, CaptureEvent]):
     @property
     @override
     def actions(self) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
-        return (_record_conversation_request,)
+        return (
+            _record_conversation_request,
+            _record_user_message,
+            _record_assistant_message,
+        )
 
     @override
     def get_actions(
@@ -271,6 +280,14 @@ async def _consume_drafting_consent(context: CaptureTurn) -> None:
 
 async def _consume_conversation_request(context: CaptureTurn) -> None:
     context.session.clear_conversation_request()
+
+
+async def _record_user_message(context: CaptureTurn, event: CaptureEvent) -> None:
+    _ = context, event
+
+
+async def _record_assistant_message(context: CaptureTurn, event: CaptureEvent) -> None:
+    _ = context, event
 
 
 _ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessed](

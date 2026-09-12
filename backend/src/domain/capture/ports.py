@@ -7,7 +7,7 @@ from domain.capture.note import Note
 from domain.capture.note_vocabulary import NoteVocabulary
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
-from domain.capture.turn import CaptureEvent, CaptureTurn
+from domain.capture.turn import AgentEvent, CaptureTurn
 from domain.capture.value_objects import NoteId, SessionId, TagId, TopicId
 from domain.shared.graph.model import Tool, ToolResult
 
@@ -18,7 +18,7 @@ class CaptureAgentPort(Protocol):
 
     It is a domain port, not an application one, and it earns that by owing
     nothing to any transport: it takes the turn and the tools the current phase
-    offers, and yields `CaptureEvent`s. No chunk type, no provider type, no
+    offers, and yields `AgentEvent`s. No chunk type, no provider type, no
     streaming protocol crosses it — `AsyncIterator` is the only borrowed
     concept and it is stdlib. Replacing the adapter library changes nothing
     here, which is FR-09.
@@ -37,7 +37,7 @@ class CaptureAgentPort(Protocol):
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
-    ) -> AsyncIterator[CaptureEvent]: ...
+    ) -> AsyncIterator[AgentEvent]: ...
 
 
 class CaptureSessionRepository(Protocol):
