@@ -194,6 +194,8 @@ class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
             selected.append(_materialise_note)
         if isinstance(event, ConversationRequested):
             selected.append(_record_conversation_request)
+        if isinstance(event, UserMessageRecorded):
+            selected.append(_hydrate_draft_from_note)
         selected.extend(_message_recording_actions(event))
         return tuple(selected)
 
@@ -387,6 +389,12 @@ async def _record_assistant_message(
     if isinstance(event, AssistantMessageRecorded):
         context.record_message(event.message)
         await _stage_message(deps, event.message)
+
+
+async def _hydrate_draft_from_note(
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
+) -> None:
+    _ = context, deps, event
 
 
 async def _resolve_note_topic(
