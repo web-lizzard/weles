@@ -27,6 +27,7 @@ from domain.capture.graph import (
     ConversationRequestSignal,
     CoverageAssessment,
     DraftingConsentSignal,
+    NoteContentProposal,
     NoteTagProposal,
     NoteTopicProposal,
     SessionTopicProposal,
@@ -236,6 +237,8 @@ def _event_from_tool_result(result: ToolResult) -> AgentEvent | None:
         return NoteTopicProposed(label=result.label)
     if isinstance(result, NoteTagProposal):
         return NoteTagProposed(label=result.label)
+    if isinstance(result, NoteContentProposal):
+        return NoteContentProduced(content=result.content)
     if isinstance(result, DraftingConsentSignal):
         return DraftingConsentSignalled()
     if isinstance(result, ConversationRequestSignal):
