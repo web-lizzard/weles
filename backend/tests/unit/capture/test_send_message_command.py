@@ -1,4 +1,4 @@
-from collections.abc import AsyncGenerator, AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator, Callable, Sequence
 from contextlib import aclosing
 from datetime import UTC, datetime
 from typing import cast, override
@@ -61,9 +61,21 @@ from domain.capture.exceptions import (
     CaptureSessionNotFoundError,
     EmptyMessageContentError,
 )
+from domain.capture.turn import (
+    AgentEvent,
+    CaptureTurn,
+    ConversationRequested,
+    DraftingConsentSignalled,
+    NoteContentProduced,
+    NoteTagProposed,
+    NoteTopicProposed,
+    ReplyProduced,
+)
 from domain.capture.value_objects import (
+    CapturePhase,
     Label,
     MessageContent,
+    NoteContent,
     NoteStatus,
     SessionId,
     SessionStatus,
@@ -72,6 +84,7 @@ from domain.capture.value_objects import (
 )
 from domain.capture.vocabulary import MatchCriteria
 from domain.exceptions import CoreException
+from domain.shared.graph.model import Tool, ToolResult
 
 _CONFIRMATION_PHRASE = "that's all"
 
@@ -614,6 +627,114 @@ async def test_draft_tag_without_prior_topic_raises_core_exception() -> None:
             pass
 
 
+async def test_ordinary_turn_opens_one_converse_segment_and_stays_conversing() -> None:
+    agent = _ScriptedCaptureAgent(
+        [
+            [ReplyProduced(text="Let's unpack the handshake.")],
+        ]
+    )
+    stack = _make_agent_command_stack(agent)
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+
+    events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Explain TCP handshakes"),
+        )
+    ]
+
+    assert agent.converse_calls == 1
+    event_types = [event.type for event in events]
+    assert "delta" in event_types
+    assert event_types[-1] == "done"
+    assert "draft_topic" not in event_types
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.phase is CapturePhase.CONVERSING
+
+
+async def test_consent_turn_runs_two_segments_streaming_reply_then_draft() -> None:
+    agent = _ScriptedCaptureAgent(
+        [
+            [
+                ReplyProduced(text="handoff"),
+                DraftingConsentSignalled(),
+            ],
+            [
+                NoteTopicProposed(label=Label(value="TCP handshakes")),
+                NoteTagProposed(label=Label(value="networking")),
+                NoteContentProduced(content=NoteContent(value="SYN then ACK.")),
+            ],
+        ]
+    )
+    stack = _make_agent_command_stack(agent)
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value=_CONFIRMATION_PHRASE),
+        )
+    ]
+
+    assert agent.converse_calls == 2
+    event_types = [event.type for event in events]
+    assert event_types.index("delta") < event_types.index("draft_topic")
+    assert "draft_done" in event_types
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.phase is CapturePhase.DRAFTING
+    assert persisted.note_id is not None
+
+
+async def test_no_turn_opens_three_segments_even_when_a_move_remains() -> None:
+    agent = _OscillatingCaptureAgent()
+    stack = _make_agent_command_stack(agent)
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+
+    events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value=_CONFIRMATION_PHRASE),
+        )
+    ]
+
+    assert agent.converse_calls == 2
+    assert any(isinstance(event, ReplyDoneEvent) for event in events)
+
+
+async def test_mid_stream_agent_failure_rolls_back_the_uncommitted_turn() -> None:
+    agent = _ScriptedCaptureAgent(
+        [
+            [ReplyProduced(text="partial"), _RAISE],
+        ]
+    )
+    stack = _make_agent_command_stack(agent)
+    session = CaptureSession.start()
+    await stack.session_repo.save(session)
+
+    with pytest.raises(RuntimeError, match="simulated mid-stream failure"):
+        async for _ in stack.command.handle(
+            session.id,
+            MessageContent(value="What is slow start?"),
+        ):
+            pass
+
+    assert stack.store.list_by_session(session.id) == []
+    persisted = await stack.session_repo.get(session.id)
+    assert persisted is not None
+    assert persisted.topic is None
+    assert persisted.phase is CapturePhase.CONVERSING
+    assert stack.uow.commit_count == 0
+
+
 class _FixedChunkReplyGenerationAdapter:
     _chunks: list[ReplyChunk]
 
@@ -765,6 +886,74 @@ class _CommandStack:
         self.message_repo = message_repo
         self.uow = uow
         self.command = command
+
+
+_RAISE = object()
+
+
+class _ScriptedCaptureAgent:
+    converse_calls: int
+    _scripts: list[list[object]]
+
+    def __init__(self, scripts: list[list[object]]) -> None:
+        self._scripts = [list(script) for script in scripts]
+        self.converse_calls = 0
+
+    async def converse(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncIterator[AgentEvent]:
+        _ = turn, tools
+        self.converse_calls += 1
+        script = self._scripts.pop(0)
+        for item in script:
+            if item is _RAISE:
+                raise RuntimeError("simulated mid-stream failure")
+            yield cast(AgentEvent, item)
+
+
+class _OscillatingCaptureAgent:
+    converse_calls: int
+
+    def __init__(self) -> None:
+        self.converse_calls = 0
+
+    async def converse(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncIterator[AgentEvent]:
+        _ = turn
+        self.converse_calls += 1
+        if self.converse_calls > 2:
+            raise RuntimeError("opened a third segment")
+        names = {tool.name for tool in tools}
+        if "signal_drafting_consent" in names:
+            yield DraftingConsentSignalled()
+            return
+        if "request_conversation" in names:
+            yield ConversationRequested()
+            return
+        yield ReplyProduced(text="still here")
+
+
+def _make_agent_command_stack(capture_agent: object) -> _CommandStack:
+    store = InMemoryMessageStore()
+    session_repo = InMemoryCaptureSessionRepository()
+    message_repo = InMemoryMessageRepository(store)
+    uow = _SpyUnitOfWork(session_repo, message_repo, store)
+    embedding = DeterministicEmbeddingAdapter()
+    factory = cast(Callable[..., GenerateReplyCommand], GenerateReplyCommand)
+    command = factory(
+        capture_sessions=session_repo,
+        uow=uow,
+        capture_agent=capture_agent,
+        vocabulary=VocabularyResolver(
+            embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
+        ),
+    )
+    return _CommandStack(store, session_repo, message_repo, uow, command)
 
 
 def _make_command_stack(
