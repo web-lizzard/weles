@@ -79,7 +79,9 @@ async def _collect(
     turn: CaptureTurn,
     tools: Sequence[Tool[CaptureTurn, ToolResult]],
 ) -> list[object]:
-    async with adapter.converse(turn, tools) as events:
+    machine = CaptureMachine(turn, NULL_CAPTURE_DEPS)
+    instruction = machine.current_state.instruction_builder.build(turn)
+    async with adapter.converse(turn, tools, instruction) as events:
         return [event async for event in events]
 
 

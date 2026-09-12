@@ -12,6 +12,7 @@ from domain.capture.exceptions import CaptureSessionClosedError
 from domain.capture.ports import CaptureAgentPort
 from domain.capture.turn import AgentEvent, CaptureTurn, ReplyProduced
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.instruction.model import Instruction
 from main import app
 
 from .support.in_memory_capture import InMemoryCaptureComposition
@@ -124,8 +125,9 @@ class _OneChunkThenFailCaptureAgent:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        _ = turn, tools
+        _ = turn, tools, instruction
 
         async def events() -> AsyncGenerator[AgentEvent, None]:
             yield ReplyProduced(text="partial")

@@ -3,6 +3,10 @@ from typing import Literal, override
 
 from domain.capture.deps import CaptureDeps
 from domain.capture.exceptions import DraftTopicMissingError
+from domain.capture.instructions import (
+    ConversingInstructionBuilder,
+    DraftingInstructionBuilder,
+)
 from domain.capture.message import Message
 from domain.capture.note import Note
 from domain.capture.ports import NoteVocabularyRepository
@@ -25,6 +29,7 @@ from domain.capture.turn import (
 from domain.capture.value_objects import (
     CapturePhase,
     ConversationRequest,
+    Coverage,
     DraftingConsent,
     Label,
     NoteContent,
@@ -66,6 +71,10 @@ class CaptureMachine(
         context.session.enter_phase(name)
 
 
+_CONVERSING_INSTRUCTION_BUILDER = ConversingInstructionBuilder()
+_DRAFTING_INSTRUCTION_BUILDER = DraftingInstructionBuilder()
+
+
 class Conversing(State[CaptureTurn, CaptureDeps, CaptureEvent]):
     """Talking the topic through. The session sits here for many turns, and its
     tool set narrows as the turns do their work."""
@@ -85,10 +94,16 @@ class Conversing(State[CaptureTurn, CaptureDeps, CaptureEvent]):
     def actions(self) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         return (
             _assign_session_topic,
+            _record_coverage_assessment,
             _record_drafting_consent,
             _record_user_message,
             _record_assistant_message,
         )
+
+    @property
+    @override
+    def instruction_builder(self) -> ConversingInstructionBuilder:
+        return _CONVERSING_INSTRUCTION_BUILDER
 
     @override
     def get_tools(
@@ -150,6 +165,11 @@ class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
             _record_assistant_message,
         )
 
+    @property
+    @override
+    def instruction_builder(self) -> DraftingInstructionBuilder:
+        return _DRAFTING_INSTRUCTION_BUILDER
+
     @override
     def get_actions(
         self, context: CaptureTurn, event: CaptureEvent
@@ -170,12 +190,12 @@ class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
         return tuple(selected)
 
 
-class CoverageAssessed(ToolResult, frozen=True):
+class CoverageAssessment(ToolResult, frozen=True):
     """How sure of the topic the user seems. Shapes what the agent says and
     gates nothing — no guard reads it at any value, including 1.0 (FR-03)."""
 
     tool: Literal["assess_coverage"] = "assess_coverage"
-    coverage: float
+    coverage: Coverage
 
 
 class SessionTopicProposal(ToolResult, frozen=True):
@@ -235,9 +255,18 @@ def _require_float(arguments: ToolArguments, key: str) -> float:
 
 async def _assess_coverage(
     context: CaptureTurn, arguments: ToolArguments
-) -> CoverageAssessed:
+) -> CoverageAssessment:
     _ = context
-    return CoverageAssessed(coverage=_require_float(arguments, "coverage"))
+    return CoverageAssessment(
+        coverage=Coverage(value=_require_float(arguments, "coverage"))
+    )
+
+
+async def _record_coverage_assessment(
+    context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
+) -> None:
+    _ = context, deps, event
+    raise NotImplementedError
 
 
 async def _propose_session_topic(
@@ -434,10 +463,10 @@ async def _materialise_note(
     context.note = note
 
 
-_ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessed](
+_ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessment](
     name="assess_coverage",
     description="Judge how fully the user has covered the topic so far.",
-    result=CoverageAssessed,
+    result=CoverageAssessment,
     handler=_assess_coverage,
 )
 

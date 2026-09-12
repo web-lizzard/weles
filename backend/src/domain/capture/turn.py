@@ -8,7 +8,7 @@ from domain.capture.message import Message
 from domain.capture.note import Note
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
-from domain.capture.value_objects import Label, NoteContent, SessionTopic
+from domain.capture.value_objects import Coverage, Label, NoteContent, SessionTopic
 
 
 class NoteDraft(BaseModel):
@@ -98,6 +98,13 @@ class ConversationRequested(BaseModel, frozen=True):
     kind: Literal["conversation_requested"] = "conversation_requested"
 
 
+class CoverageAssessed(BaseModel, frozen=True):
+    """The model judged how fully the session's topic has been covered."""
+
+    kind: Literal["coverage_assessed"] = "coverage_assessed"
+    coverage: Coverage
+
+
 class UserMessageRecorded(BaseModel, frozen=True):
     """The command recorded the user's message onto this turn."""
 
@@ -125,7 +132,8 @@ type AgentEvent = Annotated[
     | NoteTagProposed
     | NoteContentProduced
     | DraftingConsentSignalled
-    | ConversationRequested,
+    | ConversationRequested
+    | CoverageAssessed,
     Field(discriminator="kind"),
 ]
 """What a capture-agent adapter may yield.

@@ -14,6 +14,9 @@ from domain.shared.graph.model import (
     ToolResult,
     Transition,
 )
+from domain.shared.instruction.model import InstructionBuilder
+
+from .graph_instruction_builder import GRAPH_TEST_INSTRUCTION_BUILDER
 
 
 class _Phase(StrEnum):
@@ -67,6 +70,11 @@ class _Open(State[object, object, str]):
 
     @property
     @override
+    def instruction_builder(self) -> InstructionBuilder[object]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
+
+    @property
+    @override
     def description(self) -> str:
         return "Open intake phase."
 
@@ -84,6 +92,11 @@ class _Waiting(State[object, object, str]):
 
     @property
     @override
+    def instruction_builder(self) -> InstructionBuilder[object]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
+
+    @property
+    @override
     def description(self) -> str:
         return "Waiting before closure."
 
@@ -98,6 +111,11 @@ class _Closed(State[object, object, str]):
     @override
     def actions(self) -> tuple[Action[object, object, str], ...]:
         return ()
+
+    @property
+    @override
+    def instruction_builder(self) -> InstructionBuilder[object]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
 
     @property
     @override
@@ -155,6 +173,11 @@ def test_get_actions_offers_the_whole_inventory_when_the_state_does_not_filter()
         @override
         def actions(self) -> tuple[Action[object, object, str], ...]:
             return (stamp,)
+
+        @property
+        @override
+        def instruction_builder(self) -> InstructionBuilder[object]:
+            return GRAPH_TEST_INSTRUCTION_BUILDER
 
         @property
         @override

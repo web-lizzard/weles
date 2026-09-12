@@ -8,6 +8,7 @@ from typing import override
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from unit.shared.graph_instruction_builder import GRAPH_TEST_INSTRUCTION_BUILDER
 
 from domain.shared.graph.machine import StateMachine
 from domain.shared.graph.model import (
@@ -19,6 +20,7 @@ from domain.shared.graph.model import (
     ToolResult,
     Transition,
 )
+from domain.shared.instruction.model import InstructionBuilder
 
 
 class _Node(StrEnum):
@@ -56,6 +58,11 @@ class _Described(State[_Context, object, str]):
     @override
     def actions(self) -> tuple[Action[_Context, object, str], ...]:
         return ()
+
+    @property
+    @override
+    def instruction_builder(self) -> InstructionBuilder[_Context]:
+        return GRAPH_TEST_INSTRUCTION_BUILDER
 
     @property
     @override
