@@ -2,7 +2,7 @@
 change_id: llm-adapter-instruction-context
 current_phase: 7
 next_step: epilogue
-next_command: /archive llm-adapter-instruction-context
+next_command: /impl-review llm-adapter-instruction-context
 updated: 2026-09-13
 ---
 
@@ -100,4 +100,4 @@ updated: 2026-09-13
 
 #### Manual
 
-- [x] 7.4 Read an in-memory session's reply and trace every sentence to a block
+- [x] 7.4 Read an in-memory session's reply and trace every sentence to a block — f4cb3b1
