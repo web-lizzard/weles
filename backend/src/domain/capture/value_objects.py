@@ -37,6 +37,14 @@ class SessionStatus(StrEnum):
     CLOSED = "closed"
 
 
+class CapturePhase(StrEnum):
+    """Which part of the capture flow a session is in. Neither is terminal
+    while the session is open (FR-02)."""
+
+    CONVERSING = "conversing"
+    DRAFTING = "drafting"
+
+
 class NoteStatus(StrEnum):
     DRAFT = "draft"
     APPROVED = "approved"
