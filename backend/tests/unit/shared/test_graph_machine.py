@@ -51,7 +51,7 @@ _PING = Tool[_Context, _PingResult](
 )
 
 
-class _Open(State[_Context, str]):
+class _Open(State[_Context, _Deps, str]):
     @property
     @override
     def tools(self) -> tuple[Tool[_Context, ToolResult], ...]:
@@ -59,7 +59,7 @@ class _Open(State[_Context, str]):
 
     @property
     @override
-    def actions(self) -> tuple[Action[_Context, str], ...]:
+    def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
         return ()
 
     @property
@@ -68,7 +68,7 @@ class _Open(State[_Context, str]):
         return "Open intake phase."
 
 
-class _Waiting(State[_Context, str]):
+class _Waiting(State[_Context, _Deps, str]):
     @property
     @override
     def tools(self) -> tuple[Tool[_Context, ToolResult], ...]:
@@ -76,7 +76,7 @@ class _Waiting(State[_Context, str]):
 
     @property
     @override
-    def actions(self) -> tuple[Action[_Context, str], ...]:
+    def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
         return ()
 
     @property
@@ -85,7 +85,7 @@ class _Waiting(State[_Context, str]):
         return "Waiting before closure."
 
 
-class _Closed(State[_Context, str]):
+class _Closed(State[_Context, _Deps, str]):
     @property
     @override
     def tools(self) -> tuple[Tool[_Context, ToolResult], ...]:
@@ -93,7 +93,7 @@ class _Closed(State[_Context, str]):
 
     @property
     @override
-    def actions(self) -> tuple[Action[_Context, str], ...]:
+    def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
         return ()
 
     @property
@@ -105,10 +105,10 @@ class _Closed(State[_Context, str]):
 def _intake_graph(
     *,
     waiting_guard: EdgeCondition[_Context] | None = None,
-    open_actions: tuple[EdgeAction[_Context], ...] = (),
-    waiting_actions: tuple[EdgeAction[_Context], ...] = (),
-) -> Graph[_Context, str, _Phase]:
-    return Graph[_Context, str, _Phase](
+    open_actions: tuple[EdgeAction[_Context, _Deps], ...] = (),
+    waiting_actions: tuple[EdgeAction[_Context, _Deps], ...] = (),
+) -> Graph[_Context, _Deps, str, _Phase]:
+    return Graph[_Context, _Deps, str, _Phase](
         states={
             _Phase.OPEN: _Open(),
             _Phase.WAITING: _Waiting(),
@@ -116,10 +116,10 @@ def _intake_graph(
         },
         transitions={
             _Phase.OPEN: {
-                _Phase.WAITING: Transition[_Context, str](actions=open_actions),
+                _Phase.WAITING: Transition[_Context, _Deps, str](actions=open_actions),
             },
             _Phase.WAITING: {
-                _Phase.CLOSED: Transition[_Context, str](
+                _Phase.CLOSED: Transition[_Context, _Deps, str](
                     guard=waiting_guard,
                     actions=waiting_actions,
                 ),
@@ -128,23 +128,21 @@ def _intake_graph(
     )
 
 
-class _IntakeMachine(StateMachine[_Context, str, _Phase]):
-    _graph: Graph[_Context, str, _Phase]
-    _deps: _Deps
+class _IntakeMachine(StateMachine[_Context, _Deps, str, _Phase]):
+    _graph: Graph[_Context, _Deps, str, _Phase]
 
     def __init__(
         self,
         context: _Context,
         deps: _Deps,
-        graph: Graph[_Context, str, _Phase],
+        graph: Graph[_Context, _Deps, str, _Phase],
     ) -> None:
-        super().__init__(context)
-        self._deps = deps
+        super().__init__(context, deps)
         self._graph = graph
 
     @property
     @override
-    def graph(self) -> Graph[_Context, str, _Phase]:
+    def graph(self) -> Graph[_Context, _Deps, str, _Phase]:
         return self._graph
 
     @override
@@ -161,8 +159,8 @@ def _machine(
     *,
     deps: _Deps | None = None,
     waiting_guard: EdgeCondition[_Context] | None = None,
-    open_actions: tuple[EdgeAction[_Context], ...] = (),
-    waiting_actions: tuple[EdgeAction[_Context], ...] = (),
+    open_actions: tuple[EdgeAction[_Context, _Deps], ...] = (),
+    waiting_actions: tuple[EdgeAction[_Context, _Deps], ...] = (),
 ) -> _IntakeMachine:
     context = _Context(phase)
     resolved_deps = deps if deps is not None else _Deps("machine-default")
@@ -191,10 +189,10 @@ def test_get_tools_delegates_to_the_current_state_for_this_context() -> None:
 async def test_apply_runs_matching_state_actions_without_leaving_the_phase() -> None:
     invoked: list[str] = []
 
-    async def stamp(_context: _Context, _event: str) -> None:
+    async def stamp(_context: _Context, _deps: _Deps, _event: str) -> None:
         invoked.append("state-action")
 
-    class _Stamping(State[_Context, str]):
+    class _Stamping(State[_Context, _Deps, str]):
         @property
         @override
         def tools(self) -> tuple[Tool[_Context, ToolResult], ...]:
@@ -202,7 +200,7 @@ async def test_apply_runs_matching_state_actions_without_leaving_the_phase() -> 
 
         @property
         @override
-        def actions(self) -> tuple[Action[_Context, str], ...]:
+        def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
             return (stamp,)
 
         @property
@@ -213,18 +211,18 @@ async def test_apply_runs_matching_state_actions_without_leaving_the_phase() -> 
         @override
         def get_actions(
             self, context: _Context, event: str
-        ) -> tuple[Action[_Context, str], ...]:
+        ) -> tuple[Action[_Context, _Deps, str], ...]:
             _ = context
             return (stamp,) if event == "arrived" else ()
 
-    graph = Graph[_Context, str, _Phase](
+    graph = Graph[_Context, _Deps, str, _Phase](
         states={
             _Phase.OPEN: _Stamping(),
             _Phase.WAITING: _Waiting(),
             _Phase.CLOSED: _Closed(),
         },
         transitions={
-            _Phase.OPEN: {_Phase.WAITING: Transition[_Context, str]()},
+            _Phase.OPEN: {_Phase.WAITING: Transition[_Context, _Deps, str]()},
         },
     )
     context = _Context(_Phase.OPEN)
@@ -249,7 +247,7 @@ def test_available_transitions_lists_only_guarded_targets_mapped_to_descriptions
         guard_invoked.append("close-guard")
         return True
 
-    graph = Graph[_Context, str, _Phase](
+    graph = Graph[_Context, _Deps, str, _Phase](
         states={
             _Phase.OPEN: _Open(),
             _Phase.WAITING: _Waiting(),
@@ -257,11 +255,11 @@ def test_available_transitions_lists_only_guarded_targets_mapped_to_descriptions
         },
         transitions={
             _Phase.OPEN: {
-                _Phase.WAITING: Transition[_Context, str](),
-                _Phase.CLOSED: Transition[_Context, str](guard=allow),
+                _Phase.WAITING: Transition[_Context, _Deps, str](),
+                _Phase.CLOSED: Transition[_Context, _Deps, str](guard=allow),
             },
             _Phase.WAITING: {
-                _Phase.CLOSED: Transition[_Context, str](guard=refuse),
+                _Phase.CLOSED: Transition[_Context, _Deps, str](guard=refuse),
             },
         },
     )
@@ -285,7 +283,7 @@ async def test_transition_runs_edge_actions_and_writes_the_new_phase_when_allowe
 ):
     edge_invoked: list[str] = []
 
-    async def seal(_context: _Context) -> None:
+    async def seal(_context: _Context, _deps: _Deps) -> None:
         edge_invoked.append("seal")
 
     machine = _machine(open_actions=(seal,))
@@ -301,7 +299,7 @@ async def test_transition_runs_edge_actions_and_writes_the_new_phase_when_allowe
 async def test_transition_refuses_a_target_that_is_not_currently_available() -> None:
     edge_invoked: list[str] = []
 
-    async def seal(_context: _Context) -> None:
+    async def seal(_context: _Context, _deps: _Deps) -> None:
         edge_invoked.append("seal")
 
     def refuse(_context: _Context) -> bool:
@@ -327,7 +325,7 @@ async def test_apply_passes_construction_deps_to_state_actions() -> None:
     async def record_deps(_context: _Context, passed_deps: _Deps, _event: str) -> None:
         received.append(passed_deps)
 
-    class _Recording(State[_Context, str]):
+    class _Recording(State[_Context, _Deps, str]):
         @property
         @override
         def tools(self) -> tuple[Tool[_Context, ToolResult], ...]:
@@ -335,8 +333,8 @@ async def test_apply_passes_construction_deps_to_state_actions() -> None:
 
         @property
         @override
-        def actions(self) -> tuple[Action[_Context, str], ...]:
-            return (cast(Action[_Context, str], record_deps),)
+        def actions(self) -> tuple[Action[_Context, _Deps, str], ...]:
+            return (cast(Action[_Context, _Deps, str], record_deps),)
 
         @property
         @override
@@ -346,19 +344,19 @@ async def test_apply_passes_construction_deps_to_state_actions() -> None:
         @override
         def get_actions(
             self, context: _Context, event: str
-        ) -> tuple[Action[_Context, str], ...]:
+        ) -> tuple[Action[_Context, _Deps, str], ...]:
             _ = context
-            stamped = cast(Action[_Context, str], record_deps)
+            stamped = cast(Action[_Context, _Deps, str], record_deps)
             return (stamped,) if event == "arrived" else ()
 
-    graph = Graph[_Context, str, _Phase](
+    graph = Graph[_Context, _Deps, str, _Phase](
         states={
             _Phase.OPEN: _Recording(),
             _Phase.WAITING: _Waiting(),
             _Phase.CLOSED: _Closed(),
         },
         transitions={
-            _Phase.OPEN: {_Phase.WAITING: Transition[_Context, str]()},
+            _Phase.OPEN: {_Phase.WAITING: Transition[_Context, _Deps, str]()},
         },
     )
     machine = _IntakeMachine(_Context(_Phase.OPEN), deps, graph)
@@ -379,7 +377,7 @@ async def test_transition_passes_construction_deps_to_edge_actions() -> None:
     machine = _machine(
         _Phase.OPEN,
         deps=deps,
-        open_actions=(cast(EdgeAction[_Context], record_deps),),
+        open_actions=(cast(EdgeAction[_Context, _Deps], record_deps),),
     )
 
     moved = await machine.transition(_Phase.WAITING)

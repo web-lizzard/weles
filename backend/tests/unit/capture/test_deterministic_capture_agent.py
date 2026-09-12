@@ -4,6 +4,7 @@ from adapters.out.in_memory.capture.capture_agent import (
     DeterministicCaptureAgentAdapter,
 )
 from domain.capture.capture_session import CaptureSession
+from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.graph import CaptureMachine
 from domain.capture.message import Message
 from domain.capture.turn import (
@@ -66,7 +67,7 @@ def _drafting_confirmation_turn() -> CaptureTurn:
 
 
 def _tool_named(turn: CaptureTurn, name: str) -> Tool[CaptureTurn, ToolResult]:
-    tools = CaptureMachine(turn).get_tools()
+    tools = CaptureMachine(turn, NULL_CAPTURE_DEPS).get_tools()
     for tool in tools:
         if tool.name == name:
             return tool
@@ -109,7 +110,7 @@ async def test_confirmation_yields_drafting_consent_signalled_when_tool_offered(
 async def test_drafting_tools_yield_topic_tags_and_chunked_note_content() -> None:
     adapter = DeterministicCaptureAgentAdapter()
     turn = _turn(phase=CapturePhase.DRAFTING)
-    tools = CaptureMachine(turn).get_tools()
+    tools = CaptureMachine(turn, NULL_CAPTURE_DEPS).get_tools()
 
     events = await _collect(adapter, turn, tools)
 

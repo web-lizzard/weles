@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from typing import Literal, override
 
+from domain.capture.deps import CaptureDeps
 from domain.capture.turn import (
     AssistantMessageRecorded,
     CaptureEvent,
@@ -30,7 +31,9 @@ from domain.shared.graph.model import (
 )
 
 
-class CaptureMachine(StateMachine[CaptureTurn, CaptureEvent, CapturePhase]):
+class CaptureMachine(
+    StateMachine[CaptureTurn, CaptureDeps, CaptureEvent, CapturePhase]
+):
     """Capture's phase graph, bound to the capture session.
 
     The first concrete composition of `domain/shared/graph/`. It supplies the
@@ -40,7 +43,7 @@ class CaptureMachine(StateMachine[CaptureTurn, CaptureEvent, CapturePhase]):
 
     @property
     @override
-    def graph(self) -> Graph[CaptureTurn, CaptureEvent, CapturePhase]:
+    def graph(self) -> Graph[CaptureTurn, CaptureDeps, CaptureEvent, CapturePhase]:
         return _CAPTURE_GRAPH
 
     @override
@@ -52,7 +55,7 @@ class CaptureMachine(StateMachine[CaptureTurn, CaptureEvent, CapturePhase]):
         context.session.enter_phase(name)
 
 
-class Conversing(State[CaptureTurn, CaptureEvent]):
+class Conversing(State[CaptureTurn, CaptureDeps, CaptureEvent]):
     """Talking the topic through. The session sits here for many turns, and its
     tool set narrows as the turns do their work."""
 
@@ -68,7 +71,7 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
 
     @property
     @override
-    def actions(self) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+    def actions(self) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         return (
             _assign_session_topic,
             _record_drafting_consent,
@@ -90,12 +93,12 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
     @override
     def get_actions(
         self, context: CaptureTurn, event: CaptureEvent
-    ) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+    ) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         """Assigning the session topic runs on a `SessionTopicProposed` and on
         nothing else; recording consent runs only on `DraftingConsentSignalled`.
         A recorded message is appended in either phase."""
         _ = context
-        selected: list[Action[CaptureTurn, CaptureEvent]] = []
+        selected: list[Action[CaptureTurn, CaptureDeps, CaptureEvent]] = []
         if isinstance(event, SessionTopicProposed):
             selected.append(_assign_session_topic)
         if isinstance(event, DraftingConsentSignalled):
@@ -104,7 +107,7 @@ class Conversing(State[CaptureTurn, CaptureEvent]):
         return tuple(selected)
 
 
-class Drafting(State[CaptureTurn, CaptureEvent]):
+class Drafting(State[CaptureTurn, CaptureDeps, CaptureEvent]):
     """Writing the note. Every tool here proposes a part of it; assembling and
     persisting the note stays with the command."""
 
@@ -125,7 +128,7 @@ class Drafting(State[CaptureTurn, CaptureEvent]):
 
     @property
     @override
-    def actions(self) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+    def actions(self) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         return (
             _record_conversation_request,
             _record_user_message,
@@ -135,9 +138,9 @@ class Drafting(State[CaptureTurn, CaptureEvent]):
     @override
     def get_actions(
         self, context: CaptureTurn, event: CaptureEvent
-    ) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+    ) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
         _ = context
-        selected: list[Action[CaptureTurn, CaptureEvent]] = []
+        selected: list[Action[CaptureTurn, CaptureDeps, CaptureEvent]] = []
         if isinstance(event, ConversationRequested):
             selected.append(_record_conversation_request)
         selected.extend(_message_recording_actions(event))
@@ -260,7 +263,9 @@ async def _request_conversation(
     return ConversationRequestSignal()
 
 
-async def _assign_session_topic(context: CaptureTurn, event: CaptureEvent) -> None:
+async def _assign_session_topic(
+    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
+) -> None:
     """Put the proposed topic on the session, in memory. `assign_topic` refuses
     a second assignment, which is why `Conversing` withdraws the tool once the
     session has one."""
@@ -268,30 +273,34 @@ async def _assign_session_topic(context: CaptureTurn, event: CaptureEvent) -> No
         context.session.assign_topic(event.topic)
 
 
-async def _record_drafting_consent(context: CaptureTurn, event: CaptureEvent) -> None:
+async def _record_drafting_consent(
+    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
+) -> None:
     _ = event
     if context.messages:
         context.session.record_drafting_consent(DraftingConsent())
 
 
 async def _record_conversation_request(
-    context: CaptureTurn, event: CaptureEvent
+    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
 ) -> None:
     _ = event
     context.session.record_conversation_request(ConversationRequest())
 
 
-async def _consume_drafting_consent(context: CaptureTurn) -> None:
+async def _consume_drafting_consent(context: CaptureTurn, _deps: CaptureDeps) -> None:
     context.session.clear_drafting_consent()
 
 
-async def _consume_conversation_request(context: CaptureTurn) -> None:
+async def _consume_conversation_request(
+    context: CaptureTurn, _deps: CaptureDeps
+) -> None:
     context.session.clear_conversation_request()
 
 
 def _message_recording_actions(
     event: CaptureEvent,
-) -> Sequence[Action[CaptureTurn, CaptureEvent]]:
+) -> Sequence[Action[CaptureTurn, CaptureDeps, CaptureEvent]]:
     if isinstance(event, UserMessageRecorded):
         return (_record_user_message,)
     if isinstance(event, AssistantMessageRecorded):
@@ -299,12 +308,16 @@ def _message_recording_actions(
     return ()
 
 
-async def _record_user_message(context: CaptureTurn, event: CaptureEvent) -> None:
+async def _record_user_message(
+    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
+) -> None:
     if isinstance(event, UserMessageRecorded):
         context.record_message(event.message)
 
 
-async def _record_assistant_message(context: CaptureTurn, event: CaptureEvent) -> None:
+async def _record_assistant_message(
+    context: CaptureTurn, _deps: CaptureDeps, event: CaptureEvent
+) -> None:
     if isinstance(event, AssistantMessageRecorded):
         context.record_message(event.message)
 
@@ -360,14 +373,14 @@ _REQUEST_CONVERSATION = Tool[CaptureTurn, ConversationRequestSignal](
     handler=_request_conversation,
 )
 
-_CAPTURE_GRAPH = Graph[CaptureTurn, CaptureEvent, CapturePhase](
+_CAPTURE_GRAPH = Graph[CaptureTurn, CaptureDeps, CaptureEvent, CapturePhase](
     states={
         CapturePhase.CONVERSING: Conversing(),
         CapturePhase.DRAFTING: Drafting(),
     },
     transitions={
         CapturePhase.CONVERSING: {
-            CapturePhase.DRAFTING: Transition[CaptureTurn, CaptureEvent](
+            CapturePhase.DRAFTING: Transition[CaptureTurn, CaptureDeps, CaptureEvent](
                 guard=consent_given,
                 actions=(_consume_drafting_consent,),
             )
@@ -377,7 +390,7 @@ _CAPTURE_GRAPH = Graph[CaptureTurn, CaptureEvent, CapturePhase](
         # for. The consume action keeps the intent single-use so the command's
         # loop stays finite while FR-02 still forbids a terminal drafting phase.
         CapturePhase.DRAFTING: {
-            CapturePhase.CONVERSING: Transition[CaptureTurn, CaptureEvent](
+            CapturePhase.CONVERSING: Transition[CaptureTurn, CaptureDeps, CaptureEvent](
                 guard=conversation_requested,
                 actions=(_consume_conversation_request,),
             )

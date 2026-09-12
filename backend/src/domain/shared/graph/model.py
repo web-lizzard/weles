@@ -9,7 +9,9 @@ type Condition[ContextT, EventT] = Callable[[ContextT, EventT], bool]
 """Whether an edge may be taken. Reads the context and the event that is being
 applied."""
 
-type Action[ContextT, EventT] = Callable[[ContextT, EventT], Awaitable[None]]
+type Action[ContextT, DepsT, EventT] = Callable[
+    [ContextT, DepsT, EventT], Awaitable[None]
+]
 """Deterministic domain work. May mutate the context in memory and may call a
 domain port; never persists and never commits."""
 
@@ -17,7 +19,7 @@ type EdgeCondition[ContextT] = Callable[[ContextT], bool]
 """Whether an edge may be taken after a turn segment. Reads only the context —
 no event requests the move."""
 
-type EdgeAction[ContextT] = Callable[[ContextT], Awaitable[None]]
+type EdgeAction[ContextT, DepsT] = Callable[[ContextT, DepsT], Awaitable[None]]
 """Deterministic domain work run when an edge is taken. May mutate the context
 in memory and may call a domain port; never persists and never commits."""
 
@@ -80,7 +82,7 @@ class Tool[ContextT, ResultT: ToolResult](BaseModel, frozen=True):
         return self
 
 
-class State[ContextT, EventT](ABC):
+class State[ContextT, DepsT, EventT](ABC):
     """One node of the graph: a phase a context can sit in for many turns.
 
     A state declares its full inventory of tools and actions, and decides per
@@ -103,7 +105,7 @@ class State[ContextT, EventT](ABC):
 
     @property
     @abstractmethod
-    def actions(self) -> Sequence[Action[ContextT, EventT]]:
+    def actions(self) -> Sequence[Action[ContextT, DepsT, EventT]]:
         """Every action this state can ever run, unfiltered."""
         ...
 
@@ -124,7 +126,7 @@ class State[ContextT, EventT](ABC):
 
     def get_actions(
         self, context: ContextT, event: EventT
-    ) -> Sequence[Action[ContextT, EventT]]:
+    ) -> Sequence[Action[ContextT, DepsT, EventT]]:
         """The actions this event warrants running against the context.
 
         Defaults to the whole inventory; a state that filters overrides this.
@@ -133,7 +135,7 @@ class State[ContextT, EventT](ABC):
         return self.actions
 
 
-class Transition[ContextT, EventT](BaseModel, frozen=True):
+class Transition[ContextT, DepsT, EventT](BaseModel, frozen=True):
     """One edge of the graph: what it takes to make a move, and what happens
     when it is made.
 
@@ -142,10 +144,10 @@ class Transition[ContextT, EventT](BaseModel, frozen=True):
     """
 
     guard: EdgeCondition[ContextT] | None = None
-    actions: Sequence[EdgeAction[ContextT]] = ()
+    actions: Sequence[EdgeAction[ContextT, DepsT]] = ()
 
 
-class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
+class Graph[ContextT, DepsT, EventT, NameT: StrEnum](BaseModel, frozen=True):
     """A whole phase graph as one artifact: its states by name, and its edges
     by source and then target.
 
@@ -167,10 +169,12 @@ class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
 
     model_config: ClassVar[ConfigDict] = ConfigDict(arbitrary_types_allowed=True)
 
-    states: Mapping[NameT, State[ContextT, EventT]]
-    transitions: Mapping[NameT, Mapping[NameT, Transition[ContextT, EventT]]]
+    states: Mapping[NameT, State[ContextT, DepsT, EventT]]
+    transitions: Mapping[NameT, Mapping[NameT, Transition[ContextT, DepsT, EventT]]]
 
-    def outgoing(self, source: NameT) -> Mapping[NameT, Transition[ContextT, EventT]]:
+    def outgoing(
+        self, source: NameT
+    ) -> Mapping[NameT, Transition[ContextT, DepsT, EventT]]:
         """Every edge leaving this state, by target. Guards are not evaluated:
         this is what the graph permits in principle, not what is permitted now.
 
@@ -230,7 +234,7 @@ class Graph[ContextT, EventT, NameT: StrEnum](BaseModel, frozen=True):
         return frozenset(reached)
 
     @model_validator(mode="after")
-    def _validate_edges(self) -> "Graph[ContextT, EventT, NameT]":
+    def _validate_edges(self) -> "Graph[ContextT, DepsT, EventT, NameT]":
         """Every endpoint is a declared state, and no edge returns to its own
         state — the two invariants the keying does not give for free."""
         for source, targets in self.transitions.items():

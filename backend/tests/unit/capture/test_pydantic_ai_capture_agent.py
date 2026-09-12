@@ -19,6 +19,7 @@ from adapters.out.llm.tracing import (
     SESSION_ID,
 )
 from domain.capture.capture_session import CaptureSession
+from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.graph import CaptureMachine
 from domain.capture.message import Message
 from domain.capture.turn import (
@@ -81,7 +82,7 @@ async def _collect(
 
 
 def _tool_named(turn: CaptureTurn, name: str) -> Tool[CaptureTurn, ToolResult]:
-    tools = CaptureMachine(turn).get_tools()
+    tools = CaptureMachine(turn, NULL_CAPTURE_DEPS).get_tools()
     for tool in tools:
         if tool.name == name:
             return tool

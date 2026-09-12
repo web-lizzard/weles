@@ -14,6 +14,7 @@ from application.capture.exceptions import DraftTopicMissingError
 from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
 from domain.capture.capture_session import CaptureSession
+from domain.capture.deps import NULL_CAPTURE_DEPS
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
     CaptureSessionNotFoundError,
@@ -91,7 +92,7 @@ class GenerateReplyCommand:
                     raise NoteNotFoundError
 
             turn = CaptureTurn(session=session, messages=prior, note=note)
-            machine = CaptureMachine(turn)
+            machine = CaptureMachine(turn, NULL_CAPTURE_DEPS)
             await machine.apply(UserMessageRecorded(message=user_message))
 
             buffers = _TurnBuffers()
