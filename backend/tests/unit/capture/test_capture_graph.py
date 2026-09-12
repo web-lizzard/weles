@@ -44,6 +44,7 @@ from domain.capture.turn import (
     DraftCompleted,
     DraftingConsentSignalled,
     NoteContentProduced,
+    NoteDraft,
     NoteTagProposed,
     NoteTopicProposed,
     ReplyProduced,
@@ -527,3 +528,93 @@ async def test_applying_a_tag_before_a_topic_raises_draft_topic_missing_error() 
 
     with pytest.raises(DraftTopicMissingError):
         await machine.apply(tag_event)
+
+
+async def test_user_message_hydrates_draft_from_persisted_note() -> None:
+    deps = _capture_deps()
+    session = CaptureSession.start()
+    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2, 0.3)))
+    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.4, 0.5, 0.6)))
+    note = Note.draft(
+        session.id,
+        topic,
+        NoteContent(value="Persisted body"),
+        [tag],
+    )
+    session.note_id = note.id
+    session.phase = CapturePhase.DRAFTING
+    await deps.topics.add(topic)
+    await deps.tags.add(tag)
+    await deps.notes.add(note)
+    machine = _machine_with_deps(
+        CaptureTurn(
+            session=session,
+            messages=(_user_message(session),),
+            note=note,
+            draft=None,
+        ),
+        deps,
+    )
+    recorded = UserMessageRecorded(message=_user_message(session))
+
+    await machine.apply(recorded)
+
+    assert machine.context.draft is not None
+    assert machine.context.draft.topic is not None
+    assert machine.context.draft.topic.label == Label(value="TCP handshakes")
+    assert machine.context.draft.topic_reused is True
+    assert len(machine.context.draft.tags) == 1
+    assert machine.context.draft.tags[0].label == Label(value="networking")
+    assert machine.context.draft.tag_reused == [True]
+    assert machine.context.draft.content == "Persisted body"
+
+
+async def test_user_message_recorded_skips_hydration_when_draft_already_set() -> None:
+    deps = _capture_deps()
+    session = CaptureSession.start()
+    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2, 0.3)))
+    note = Note.draft(session.id, topic, NoteContent(value="Persisted body"), [])
+    session.note_id = note.id
+    session.phase = CapturePhase.DRAFTING
+    await deps.topics.add(topic)
+    await deps.notes.add(note)
+    existing_draft = NoteDraft(
+        topic=topic,
+        topic_reused=False,
+        tags=[],
+        tag_reused=[],
+        content="Already set",
+    )
+    machine = _machine_with_deps(
+        CaptureTurn(
+            session=session,
+            messages=(_user_message(session),),
+            note=note,
+            draft=existing_draft,
+        ),
+        deps,
+    )
+
+    await machine.apply(UserMessageRecorded(message=_user_message(session)))
+
+    assert machine.context.draft is existing_draft
+    assert existing_draft.content == "Already set"
+
+
+async def test_user_message_recorded_skips_hydration_when_note_is_absent() -> None:
+    deps = _capture_deps()
+    session = CaptureSession.start()
+    session.phase = CapturePhase.DRAFTING
+    machine = _machine_with_deps(
+        CaptureTurn(
+            session=session,
+            messages=(_user_message(session),),
+            note=None,
+            draft=None,
+        ),
+        deps,
+    )
+
+    await machine.apply(UserMessageRecorded(message=_user_message(session)))
+
+    assert machine.context.draft is None

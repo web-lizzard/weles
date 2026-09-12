@@ -369,6 +369,53 @@ async def test_second_confirmation_turn_redrafts_note_keeping_same_id() -> None:
     assert persisted_session.note_id.value == first_draft_done.note_id
 
 
+async def test_redraft_content_without_reproposing_topic_keeps_prior_draft_context() -> (  # noqa: E501
+    None
+):
+    stack = _make_agent_command_stack(
+        _ScriptedCaptureAgent(
+            [
+                [DraftingConsentSignalled()],
+                _draft_events(
+                    topic=Label(value="TCP handshakes"),
+                    tags=[Label(value="networking")],
+                    contents=["first chunk"],
+                ),
+                [
+                    ReplyProduced(text="adding more"),
+                    NoteContentProduced(
+                        content=NoteContent(value=" second chunk"),
+                    ),
+                ],
+            ]
+        )
+    )
+    session = CaptureSession.start()
+    session.assign_topic(SessionTopic(value="TCP handshakes"))
+    await stack.session_repo.save(session)
+
+    first_events = await _handle_confirmation_turn(stack, session)
+    first_draft_done = next(
+        event for event in first_events if isinstance(event, DraftDoneEvent)
+    )
+
+    second_events = [
+        event
+        async for event in stack.command.handle(
+            session.id,
+            MessageContent(value="Add another paragraph"),
+        )
+    ]
+    second_draft_done = next(
+        event for event in second_events if isinstance(event, DraftDoneEvent)
+    )
+
+    assert second_draft_done.note_id == first_draft_done.note_id
+    assert second_draft_done.topic == "TCP handshakes"
+    assert second_draft_done.tags == ["networking"]
+    assert second_draft_done.content == "first chunk second chunk"
+
+
 async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id() -> (
     None
 ):
