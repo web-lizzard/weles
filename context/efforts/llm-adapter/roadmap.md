@@ -9,7 +9,7 @@ updated: 2026-09-12
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
 | S-01 | Vocabulary reuse runs on a real embedding model, traced in Langfuse | llm-adapter-embedding-tracer | done |
-| S-02 | A capture session moves between conversing and note drafting on the user's word | llm-adapter-capture-modes | in_progress |
+| S-02 | A capture session moves between conversing and note drafting on the user's word | llm-adapter-capture-modes | done |
 | S-03 | Capture's instructions are domain artifacts that cannot dispatch without their context | llm-adapter-instruction-context | in_progress |
 | S-04 | The model reaches the domain only through tools that never mutate an aggregate | llm-adapter-domain-tools | pending |
 | S-05 | Capture converses end to end against a real provider | llm-adapter-capture-live | pending |
@@ -53,7 +53,7 @@ against the new adapter without changing the port signature.
 - **Outcome:** A capture session moves between conversing and note drafting on the user's word
 - **Acceptance criteria:** FR-01, FR-02, FR-03, FR-04
 - **Change ID:** llm-adapter-capture-modes
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-01
 - **Research:** current-context
 
@@ -139,3 +139,4 @@ Langfuse.
 ## Done
 
 - **S-01: Vocabulary reuse runs on a real embedding model, traced in Langfuse** — Archived 2026-09-12 → `context/archive/changes/2026-09-11-llm-adapter-embedding-tracer/`. Lesson: —.
+- **S-02: A capture session moves between conversing and note drafting on the user's word** — Archived 2026-09-12 → `context/archive/changes/2026-09-12-llm-adapter-capture-modes/`. Lesson: —.
