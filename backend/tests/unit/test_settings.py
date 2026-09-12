@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
+from pydantic_settings import SettingsConfigDict
 
 from config.settings import Settings
 
@@ -8,8 +11,19 @@ _DATABASE_URL = "postgresql+asyncpg://weles:weles@postgres:5432/weles"
 
 def test_settings_raises_when_database_url_missing(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
+    env_file = tmp_path / ".env"
+    monkeypatch.setattr(
+        Settings,
+        "model_config",
+        SettingsConfigDict(
+            env_file=str(env_file),
+            env_file_encoding="utf-8",
+            extra="forbid",
+        ),
+    )
     with pytest.raises(ValidationError):
         _ = Settings()  # pyright: ignore[reportCallIssue]
 
