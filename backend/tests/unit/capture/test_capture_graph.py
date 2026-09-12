@@ -17,7 +17,7 @@ from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from domain.capture.capture_session import CaptureSession
 from domain.capture.deps import NULL_CAPTURE_DEPS, CaptureDeps
-from domain.capture.exceptions import DraftTopicMissingError
+from domain.capture.exceptions import CoverageOutOfRangeError, DraftTopicMissingError
 from domain.capture.graph import (
     CaptureMachine,
     ConversationRequestSignal,
@@ -40,6 +40,7 @@ from domain.capture.turn import (
     AssistantMessageRecorded,
     CaptureTurn,
     ConversationRequested,
+    CoverageAssessed,
     DraftCompleted,
     DraftingConsentSignalled,
     NoteContentProduced,
@@ -302,6 +303,41 @@ async def test_assess_coverage_rejects_bool_coverage() -> None:
 
     with pytest.raises(TypeError):
         _ = await assess.handler(conversing.context, {"coverage": True})
+
+
+async def test_assess_coverage_rejects_a_score_outside_the_closed_unit_interval() -> (
+    None
+):
+    conversing = _machine(_turn())
+    assess = next(tool for tool in Conversing().tools if tool.name == "assess_coverage")
+
+    with pytest.raises(CoverageOutOfRangeError):
+        _ = await assess.handler(conversing.context, {"coverage": 1.01})
+
+
+async def test_coverage_assessed_appends_to_session_assessments() -> None:
+    machine = _machine(_turn())
+    assessed = CoverageAssessed(coverage=Coverage(value=0.55))
+
+    assert Conversing().get_actions(machine.context, assessed) != ()
+
+    await machine.apply(assessed)
+
+    assert machine.context.session.assessments == (Coverage(value=0.55),)
+
+
+async def test_two_coverage_assessed_events_append_in_order_on_session() -> None:
+    machine = _machine(_turn())
+    first = CoverageAssessed(coverage=Coverage(value=0.25))
+    second = CoverageAssessed(coverage=Coverage(value=0.9))
+
+    await machine.apply(first)
+    await machine.apply(second)
+
+    assert machine.context.session.assessments == (
+        Coverage(value=0.25),
+        Coverage(value=0.9),
+    )
 
 
 async def test_proposal_tools_return_results_built_from_the_model_arguments() -> None:
