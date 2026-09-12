@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from datetime import UTC
 
 import pytest
 
@@ -78,6 +79,12 @@ def _turn(
 
 def _tool_names(tools: Sequence[Tool[CaptureTurn, ToolResult]]) -> set[str]:
     return {tool.name for tool in tools}
+
+
+def test_turn_bootstrap_stamps_session_created_at_in_utc() -> None:
+    turn = _turn()
+
+    assert turn.session.created_at.tzinfo is UTC
 
 
 async def test_at_most_one_available_transition_and_each_intent_opens_its_edge() -> (
