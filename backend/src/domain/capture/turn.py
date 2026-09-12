@@ -30,15 +30,6 @@ class CaptureTurn(BaseModel):
     note: Note | None = None
 
 
-class TurnOpened(BaseModel, frozen=True):
-    """The start of a turn, before the model is called. Carries whether the
-    user's latest message was read as consent to start drafting — a reading the
-    model makes and never generates on its own (FR-01)."""
-
-    kind: Literal["turn_opened"] = "turn_opened"
-    consent_signalled: bool
-
-
 class ReplyProduced(BaseModel, frozen=True):
     """A piece of conversational reply arrived."""
 
@@ -76,13 +67,27 @@ class NoteContentProduced(BaseModel, frozen=True):
     content: NoteContent
 
 
+class DraftingConsentSignalled(BaseModel, frozen=True):
+    """The model read the user's latest message as consent to start drafting."""
+
+    kind: Literal["drafting_consent_signalled"] = "drafting_consent_signalled"
+
+
+class ConversationRequested(BaseModel, frozen=True):
+    """The model read the user's latest message as a request to return to
+    conversation."""
+
+    kind: Literal["conversation_requested"] = "conversation_requested"
+
+
 type CaptureEvent = Annotated[
-    TurnOpened
-    | ReplyProduced
+    ReplyProduced
     | SessionTopicProposed
     | NoteTopicProposed
     | NoteTagProposed
-    | NoteContentProduced,
+    | NoteContentProduced
+    | DraftingConsentSignalled
+    | ConversationRequested,
     Field(discriminator="kind"),
 ]
 """What the command applies to the machine over a turn.

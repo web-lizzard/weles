@@ -45,6 +45,15 @@ class CapturePhase(StrEnum):
     DRAFTING = "drafting"
 
 
+class DraftingConsent(BaseModel, frozen=True):
+    """The user's expressed wish to draft. Disjoint from `ConversationRequest`."""
+
+
+class ConversationRequest(BaseModel, frozen=True):
+    """The user's expressed wish to return to conversation. Disjoint from
+    `DraftingConsent`."""
+
+
 class NoteStatus(StrEnum):
     DRAFT = "draft"
     APPROVED = "approved"

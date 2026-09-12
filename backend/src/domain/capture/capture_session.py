@@ -13,6 +13,8 @@ from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import (
     CapturePhase,
+    ConversationRequest,
+    DraftingConsent,
     NoteContent,
     NoteId,
     SessionId,
@@ -27,6 +29,8 @@ class CaptureSession(BaseModel):
     note_id: NoteId | None = None
     status: SessionStatus
     phase: CapturePhase = CapturePhase.CONVERSING
+    drafting_consent: DraftingConsent | None = None
+    conversation_request: ConversationRequest | None = None
     created_at: datetime
 
     @classmethod
@@ -46,6 +50,16 @@ class CaptureSession(BaseModel):
         if self.status != SessionStatus.OPEN:
             raise CaptureSessionClosedError
         self.phase = phase
+
+    def record_drafting_consent(self, consent: DraftingConsent) -> None:  # pyright: ignore[reportUnusedParameter]
+        ...
+
+    def record_conversation_request(self, request: ConversationRequest) -> None:  # pyright: ignore[reportUnusedParameter]
+        ...
+
+    def clear_drafting_consent(self) -> None: ...
+
+    def clear_conversation_request(self) -> None: ...
 
     def assign_topic(self, topic: SessionTopic) -> None:
         if self.topic is not None:
