@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-instruction-context
-current_phase: 2
-next_step: 2.1
-next_command: /implement llm-adapter-instruction-context phase 2
+current_phase: 3
+next_step: tests
+next_command: /unit-test llm-adapter-instruction-context phase 3
 updated: 2026-09-12
 ---
 
@@ -24,8 +24,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 2.1 Implement trend_of over the window and the flat band
-- [ ] 2.2 Implement reading_of against COVERAGE_HIGH and the trend
+- [x] 2.1 Implement trend_of over the window and the flat band
+- [x] 2.2 Implement reading_of against COVERAGE_HIGH and the trend
 
 ### Phase 3: Capture's phase builders build
 
