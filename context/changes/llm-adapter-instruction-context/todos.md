@@ -3,7 +3,7 @@ change_id: llm-adapter-instruction-context
 current_phase: 5
 next_step: tests
 next_command: /unit-test llm-adapter-instruction-context phase 5
-updated: 2026-09-12T23:15:00
+updated: 2026-09-12T23:20:00
 ---
 
 ### Phase 1: Pin the shared instruction model
@@ -43,10 +43,10 @@ updated: 2026-09-12T23:15:00
 
 #### Automated
 
-- [x] 4.1 Declare State.instruction_builder and StateMachine.build_instruction
-- [x] 4.2 Rename the tool result to CoverageAssessment with a Coverage field and declare the recording action
-- [x] 4.3 Declare the CoverageAssessed event and add it to the AgentEvent union
-- [x] 4.4 Widen CaptureAgentPort.converse and both adapters with the instruction parameter
+- [x] 4.1 Declare State.instruction_builder and StateMachine.build_instruction — fdcd09c
+- [x] 4.2 Rename the tool result to CoverageAssessment with a Coverage field and declare the recording action — fdcd09c
+- [x] 4.3 Declare the CoverageAssessed event and add it to the AgentEvent union — fdcd09c
+- [x] 4.4 Widen CaptureAgentPort.converse and both adapters with the instruction parameter — fdcd09c
 
 ### Phase 5: The session keeps what the model assessed
 
