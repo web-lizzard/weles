@@ -58,7 +58,7 @@ updated: 2026-09-12
 
 #### Triage
 
-- [x] 5.4 R5-F2 Capture graph tests must assert CaptureSession.start() stamps UTC-aware created_at
+- [x] 5.4 R5-F2 Capture graph tests must assert CaptureSession.start() stamps UTC-aware created_at — 48fd3f4
 
 ### Phase 6: Message-recording events and the agent/command event split (stubs)
 
