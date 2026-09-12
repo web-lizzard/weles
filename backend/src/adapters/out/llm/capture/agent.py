@@ -48,16 +48,6 @@ from domain.capture.value_objects import CapturePhase, MessageRole, NoteContent
 from domain.shared.graph.model import Tool, ToolResult
 from domain.shared.instruction.model import Instruction
 
-_CONVERSING_INSTRUCTIONS = (
-    "Continue this capture conversation with the user. "
-    "Stay on their topic and reply in their language."
-)
-_DRAFTING_INSTRUCTIONS = (
-    "Continue this capture conversation. "
-    "You are drafting a note from what was said. "
-    "Write in the user's language."
-)
-
 
 class PydanticAiCaptureAgentAdapter:
     _agent: Agent
@@ -74,7 +64,6 @@ class PydanticAiCaptureAgentAdapter:
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
         instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        _ = instruction
         user_prompt, message_history = _prompt_and_history(turn)
         toolset = FunctionToolset[object](
             tools=[_pydantic_tool(tool, turn) for tool in tools]
@@ -90,7 +79,7 @@ class PydanticAiCaptureAgentAdapter:
             async with self._agent.run_stream_events(
                 user_prompt,
                 message_history=message_history,
-                instructions=_instructions_for(turn),
+                instructions=[block.text for block in instruction.blocks],
                 toolsets=[toolset],
             ) as raw:
                 events = _mapped_events(raw, turn, tools_by_name, recorder)
@@ -118,12 +107,6 @@ async def _mapped_events(
                     "output": usage.output_tokens,
                 }
             )
-
-
-def _instructions_for(turn: CaptureTurn) -> str:
-    if turn.session.phase is CapturePhase.DRAFTING:
-        return _DRAFTING_INSTRUCTIONS
-    return _CONVERSING_INSTRUCTIONS
 
 
 def _prompt_and_history(

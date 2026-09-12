@@ -1,9 +1,9 @@
 ---
 change_id: llm-adapter-instruction-context
-current_phase: 6
-next_step: 6.1
-next_command: /implement llm-adapter-instruction-context phase 6
-updated: 2026-09-13
+current_phase: 7
+next_step: 7.0
+next_command: /unit-test llm-adapter-instruction-context phase 7
+updated: 2026-09-12
 ---
 
 ### Phase 1: Pin the shared instruction model
@@ -75,16 +75,16 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 6.1 Declare both capture phases' instruction builders
-- [ ] 6.2 Implement StateMachine.build_instruction
-- [ ] 6.3 Give the 11 fake states an instruction builder
-- [ ] 6.4 Pass the instruction from send_message across the port
-- [ ] 6.5 Render blocks as the instructions sequence and delete the adapter's prose constants
-- [ ] 6.6 Carry the third argument through the agent contract suite
+- [x] 6.1 Declare both capture phases' instruction builders
+- [x] 6.2 Implement StateMachine.build_instruction
+- [x] 6.3 Give the 11 fake states an instruction builder
+- [x] 6.4 Pass the instruction from send_message across the port
+- [x] 6.5 Render blocks as the instructions sequence and delete the adapter's prose constants
+- [x] 6.6 Carry the third argument through the agent contract suite
 
 #### Manual
 
-- [ ] 6.7 Run a capture session end to end and confirm reply streaming and the drafting handoff
+- [x] 6.7 Run a capture session end to end and confirm reply streaming and the drafting handoff
 
 ### Phase 7: The deterministic double speaks from blocks
 
