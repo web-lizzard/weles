@@ -1,10 +1,23 @@
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import UTC
 
 import pytest
 
+from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
+from adapters.out.in_memory.capture.message_repository import (
+    InMemoryMessageRepository,
+)
+from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
+from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.capture.note_vocabulary_repository import (
+    InMemoryNoteVocabularyRepository,
+)
+from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
+from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from domain.capture.capture_session import CaptureSession
-from domain.capture.deps import NULL_CAPTURE_DEPS
+from domain.capture.deps import NULL_CAPTURE_DEPS, CaptureDeps
+from domain.capture.exceptions import DraftTopicMissingError
 from domain.capture.graph import (
     CaptureMachine,
     ConversationRequestSignal,
@@ -20,12 +33,18 @@ from domain.capture.graph import (
     conversation_requested,
 )
 from domain.capture.message import Message
+from domain.capture.note import Note
+from domain.capture.tag import Tag
+from domain.capture.topic import Topic
 from domain.capture.turn import (
     AssistantMessageRecorded,
     CaptureTurn,
     ConversationRequested,
+    DraftCompleted,
     DraftingConsentSignalled,
     NoteContentProduced,
+    NoteTagProposed,
+    NoteTopicProposed,
     ReplyProduced,
     SessionTopicProposed,
     UserMessageRecorded,
@@ -34,12 +53,15 @@ from domain.capture.value_objects import (
     CapturePhase,
     ConversationRequest,
     DraftingConsent,
+    Embedding,
     Label,
     MessageContent,
     MessageRole,
     NoteContent,
     SessionTopic,
+    SimilarityScore,
 )
+from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.shared.graph.model import Tool, ToolResult
 
 
@@ -80,6 +102,36 @@ def _turn(
 
 def _machine(turn: CaptureTurn) -> CaptureMachine:
     return CaptureMachine(turn, NULL_CAPTURE_DEPS)
+
+
+@dataclass
+class _CaptureDeps:
+    messages: InMemoryMessageRepository
+    notes: InMemoryNoteRepository
+    topics: InMemoryTopicRepository
+    tags: InMemoryTagRepository
+    note_vocabulary: InMemoryNoteVocabularyRepository
+    vocabulary: VocabularyResolver
+
+
+def _capture_deps() -> _CaptureDeps:
+    topics = InMemoryTopicRepository()
+    tags = InMemoryTagRepository()
+    return _CaptureDeps(
+        messages=InMemoryMessageRepository(InMemoryMessageStore()),
+        notes=InMemoryNoteRepository(),
+        topics=topics,
+        tags=tags,
+        note_vocabulary=InMemoryNoteVocabularyRepository(topics, tags),
+        vocabulary=VocabularyResolver(
+            DeterministicEmbeddingAdapter(),
+            MatchCriteria(threshold=SimilarityScore(value=0.85)),
+        ),
+    )
+
+
+def _machine_with_deps(turn: CaptureTurn, deps: CaptureDeps) -> CaptureMachine:
+    return CaptureMachine(turn, deps)
 
 
 def _tool_names(tools: Sequence[Tool[CaptureTurn, ToolResult]]) -> set[str]:
@@ -350,3 +402,90 @@ async def test_applying_an_assistant_message_while_drafting_appends_it() -> None
     await machine.apply(recorded)
 
     assert incoming in machine.context.messages
+
+
+async def test_first_draft_materialises_note_from_drafting_events() -> None:
+    deps = _capture_deps()
+    machine = _machine_with_deps(_turn(phase=CapturePhase.DRAFTING), deps)
+    topic_event = NoteTopicProposed(label=Label(value="TCP handshakes"))
+    tag_event = NoteTagProposed(label=Label(value="networking"))
+    content_event = NoteContentProduced(
+        content=NoteContent(value="We discussed how connections are established.")
+    )
+
+    assert Drafting().get_actions(machine.context, topic_event) != ()
+    assert Drafting().get_actions(machine.context, tag_event) != ()
+    assert Drafting().get_actions(machine.context, content_event) != ()
+
+    await machine.apply(topic_event)
+    await machine.apply(tag_event)
+    await machine.apply(content_event)
+
+    assert machine.context.draft is not None
+    assert machine.context.draft.topic is not None
+    assert machine.context.draft.topic.label == Label(value="TCP handshakes")
+    assert len(machine.context.draft.tags) == 1
+    assert machine.context.draft.tags[0].label == Label(value="networking")
+    assert (
+        machine.context.draft.content == "We discussed how connections are established."
+    )
+
+    await machine.apply(DraftCompleted())
+
+    note = machine.context.note
+    assert note is not None
+    assert machine.context.session.note_id == note.id
+    persisted = await deps.notes.get(note.id)
+    assert persisted is not None
+    assert persisted.content == NoteContent(
+        value="We discussed how connections are established."
+    )
+
+
+async def test_redraft_reconciles_tags_and_content_on_existing_note() -> None:
+    deps = _capture_deps()
+    session = CaptureSession.start()
+    old_topic = Topic.mint(Label(value="Old topic"), Embedding(values=(0.1, 0.2, 0.3)))
+    kept_tag = Tag.mint(Label(value="kept"), Embedding(values=(0.4, 0.5, 0.6)))
+    dropped_tag = Tag.mint(Label(value="dropped"), Embedding(values=(0.7, 0.8, 0.9)))
+    note = Note.draft(
+        session.id,
+        old_topic,
+        NoteContent(value="Old body"),
+        [kept_tag, dropped_tag],
+    )
+    session.note_id = note.id
+    session.phase = CapturePhase.DRAFTING
+    await deps.topics.add(old_topic)
+    await deps.tags.add(kept_tag)
+    await deps.tags.add(dropped_tag)
+    await deps.notes.add(note)
+    machine = _machine_with_deps(
+        CaptureTurn(session=session, messages=(_user_message(session),), note=note),
+        deps,
+    )
+
+    await machine.apply(NoteTopicProposed(label=Label(value="New topic")))
+    await machine.apply(NoteTagProposed(label=Label(value="kept")))
+    await machine.apply(NoteTagProposed(label=Label(value="fresh")))
+    await machine.apply(NoteContentProduced(content=NoteContent(value="New body")))
+    await machine.apply(DraftCompleted())
+
+    redrafted = await deps.notes.get(note.id)
+    assert redrafted is not None
+    assert redrafted.content == NoteContent(value="New body")
+    resolved = await deps.note_vocabulary.resolve(redrafted)
+    assert {tag.label.value for tag in resolved.tags} == {"kept", "fresh"}
+    assert "dropped" not in {tag.label.value for tag in resolved.tags}
+    assert resolved.topic.label == Label(value="New topic")
+
+
+async def test_applying_a_tag_before_a_topic_raises_draft_topic_missing_error() -> None:
+    deps = _capture_deps()
+    machine = _machine_with_deps(_turn(phase=CapturePhase.DRAFTING), deps)
+    tag_event = NoteTagProposed(label=Label(value="networking"))
+
+    assert Drafting().get_actions(machine.context, tag_event) != ()
+
+    with pytest.raises(DraftTopicMissingError):
+        await machine.apply(tag_event)
