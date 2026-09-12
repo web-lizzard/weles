@@ -20,9 +20,6 @@ from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepositor
 from adapters.out.in_memory.capture.note_vocabulary_repository import (
     InMemoryNoteVocabularyRepository,
 )
-from adapters.out.in_memory.capture.reply_generation import (
-    DeterministicReplyGenerationAdapter,
-)
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
@@ -36,19 +33,7 @@ from application.capture.dto import (
     ReplyDoneEvent,
     ReplyStreamEvent,
 )
-from application.capture.ports import ConfidenceAssessmentPort, ReplyGenerationPort
 from application.capture.services.vocabulary import VocabularyResolver
-from application.capture.value_objects import (
-    ConfidenceAssessment,
-    ConfidencePoint,
-    ConfidencePointKind,
-    DraftContentChunk,
-    DraftTagChunk,
-    DraftTopicChunk,
-    ReplyChunk,
-    ReplyTextChunk,
-    Transcript,
-)
 from domain.capture.capture_session import CaptureSession
 from domain.capture.exceptions import (
     CaptureSessionClosedError,
@@ -213,9 +198,7 @@ async def test_generate_reply_raises_closed_if_session_closed_at_handle_time() -
 
 
 async def test_done_event_reports_full_coverage_when_assessment_is_all_solid() -> None:
-    stack = _make_command_stack(
-        confidence_assessment=_AllSolidConfidenceAssessmentAdapter(),
-    )
+    stack = _make_command_stack(capture_agent=_FullCoverageCaptureAgent())
     session = CaptureSession.start()
     await stack.session_repo.save(session)
     content = MessageContent(value="I think we've covered TCP thoroughly")
@@ -248,16 +231,14 @@ async def test_drafting_turn_emits_draft_events_before_done() -> None:
 
 
 async def test_drafting_turn_forwards_tag_reused_flag_from_resolver() -> None:
-    stack = _make_command_stack(
-        reply_generation=_FixedChunkReplyGenerationAdapter(
-            [
-                ReplyTextChunk(text="handoff"),
-                DraftTopicChunk(label=Label(value="topic")),
-                DraftTagChunk(label=Label(value="networking")),
-                DraftTagChunk(label=Label(value="networking")),
-                DraftContentChunk(text="note body"),
-            ]
-        ),
+    stack = _make_agent_command_stack(
+        _consent_then_draft_agent(
+            _draft_events(
+                topic=Label(value="topic"),
+                tags=[Label(value="networking"), Label(value="networking")],
+                contents=["note body"],
+            )
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -300,9 +281,19 @@ async def test_drafting_turn_persists_note_and_links_session_note_id() -> None:
 
 
 async def test_drafting_mid_stream_failure_rolls_back_draft_artifacts() -> None:
-    stack = _make_command_stack(
-        reply_generation=_FailMidDraftReplyGenerationAdapter(),
+    agent = _ScriptedCaptureAgent(
+        [
+            [ReplyProduced(text="Let's continue.")],
+            [DraftingConsentSignalled()],
+            [
+                ReplyProduced(text="handoff"),
+                NoteTopicProposed(label=Label(value="TCP handshakes")),
+                NoteTagProposed(label=Label(value="networking")),
+                _RAISE,
+            ],
+        ]
     )
+    stack = _make_agent_command_stack(agent)
     session = await _start_session_with_topic(stack, "TCP handshakes")
     message_count_before = len(stack.store.list_by_session(session.id))
 
@@ -345,23 +336,22 @@ async def test_second_confirmation_turn_redrafts_note_keeping_same_id() -> None:
 async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id() -> (
     None
 ):
-    stack = _make_command_stack(
-        reply_generation=_SequencedChunksReplyGenerationAdapter(
+    stack = _make_agent_command_stack(
+        _ScriptedCaptureAgent(
             [
-                [
-                    ReplyTextChunk(text="handoff"),
-                    DraftTopicChunk(label=Label(value="TCP handshakes")),
-                    DraftTagChunk(label=Label(value="networking")),
-                    DraftContentChunk(text="original body"),
-                ],
-                [
-                    ReplyTextChunk(text="handoff"),
-                    DraftTopicChunk(label=Label(value="congestion control")),
-                    DraftTagChunk(label=Label(value="performance")),
-                    DraftContentChunk(text="revised body"),
-                ],
+                [DraftingConsentSignalled()],
+                _draft_events(
+                    topic=Label(value="TCP handshakes"),
+                    tags=[Label(value="networking")],
+                    contents=["original body"],
+                ),
+                _draft_events(
+                    topic=Label(value="congestion control"),
+                    tags=[Label(value="performance")],
+                    contents=["revised body"],
+                ),
             ]
-        ),
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -402,23 +392,22 @@ async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id(
 
 async def test_redraft_removes_dropped_tags_from_persisted_note_R2_F4() -> None:
     """R2-F4: redraft must remove tags absent from the turn's resolved set."""
-    stack = _make_command_stack(
-        reply_generation=_SequencedChunksReplyGenerationAdapter(
+    stack = _make_agent_command_stack(
+        _ScriptedCaptureAgent(
             [
-                [
-                    ReplyTextChunk(text="handoff"),
-                    DraftTopicChunk(label=Label(value="TCP handshakes")),
-                    DraftTagChunk(label=Label(value="networking")),
-                    DraftContentChunk(text="original body"),
-                ],
-                [
-                    ReplyTextChunk(text="handoff"),
-                    DraftTopicChunk(label=Label(value="congestion control")),
-                    DraftTagChunk(label=Label(value="performance")),
-                    DraftContentChunk(text="revised body"),
-                ],
+                [DraftingConsentSignalled()],
+                _draft_events(
+                    topic=Label(value="TCP handshakes"),
+                    tags=[Label(value="networking")],
+                    contents=["original body"],
+                ),
+                _draft_events(
+                    topic=Label(value="congestion control"),
+                    tags=[Label(value="performance")],
+                    contents=["revised body"],
+                ),
             ]
-        ),
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -451,16 +440,16 @@ async def test_redraft_removes_dropped_tags_from_persisted_note_R2_F4() -> None:
 
 
 async def test_draft_content_accumulates_across_multiple_chunks() -> None:
-    """R2-F6: two DraftContentChunk values in one turn concatenate on note and event."""
-    stack = _make_command_stack(
-        reply_generation=_FixedChunkReplyGenerationAdapter(
+    """R2-F6: two note content chunks in one turn concatenate on note and event."""
+    stack = _make_agent_command_stack(
+        _consent_then_draft_agent(
             [
-                ReplyTextChunk(text="handoff"),
-                DraftTopicChunk(label=Label(value="topic")),
-                DraftContentChunk(text="first part "),
-                DraftContentChunk(text="second part"),
+                ReplyProduced(text="handoff"),
+                NoteTopicProposed(label=Label(value="topic")),
+                NoteContentProduced(content=NoteContent(value="first part")),
+                NoteContentProduced(content=NoteContent(value=" second part")),
             ]
-        ),
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -469,7 +458,7 @@ async def test_draft_content_accumulates_across_multiple_chunks() -> None:
     events = await _handle_confirmation_turn(stack, session)
 
     draft_done = next(event for event in events if isinstance(event, DraftDoneEvent))
-    expected_content = "first part second part"
+    expected_content = "first partsecond part"
     assert draft_done.content == expected_content
 
     persisted_session = await stack.session_repo.get(session.id)
@@ -482,22 +471,21 @@ async def test_draft_content_accumulates_across_multiple_chunks() -> None:
 
 async def test_redraft_adds_new_tags_to_persisted_note_R2_F5() -> None:
     """R2-F5: redraft must add tags present in the turn but missing on the note."""
-    stack = _make_command_stack(
-        reply_generation=_SequencedChunksReplyGenerationAdapter(
+    stack = _make_agent_command_stack(
+        _ScriptedCaptureAgent(
             [
-                [
-                    ReplyTextChunk(text="handoff"),
-                    DraftTopicChunk(label=Label(value="TCP handshakes")),
-                    DraftContentChunk(text="original body"),
-                ],
-                [
-                    ReplyTextChunk(text="handoff"),
-                    DraftTopicChunk(label=Label(value="TCP handshakes")),
-                    DraftTagChunk(label=Label(value="performance")),
-                    DraftContentChunk(text="revised body"),
-                ],
+                [DraftingConsentSignalled()],
+                _draft_events(
+                    topic=Label(value="TCP handshakes"),
+                    contents=["original body"],
+                ),
+                _draft_events(
+                    topic=Label(value="TCP handshakes"),
+                    tags=[Label(value="performance")],
+                    contents=["revised body"],
+                ),
             ]
-        ),
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -546,9 +534,7 @@ async def test_conversational_turn_emits_only_delta_and_done_events() -> None:
 async def test_full_coverage_does_not_close_session_or_block_follow_up_message() -> (
     None
 ):
-    stack = _make_command_stack(
-        confidence_assessment=_AllSolidConfidenceAssessmentAdapter(),
-    )
+    stack = _make_command_stack(capture_agent=_FullCoverageCaptureAgent())
     session = CaptureSession.start()
     await stack.session_repo.save(session)
     first_content = MessageContent(value="We've covered everything about TCP")
@@ -576,14 +562,13 @@ async def test_full_coverage_does_not_close_session_or_block_follow_up_message()
 
 
 async def test_draft_done_content_matches_persisted_note_content() -> None:
-    stack = _make_command_stack(
-        reply_generation=_FixedChunkReplyGenerationAdapter(
-            [
-                ReplyTextChunk(text="handoff"),
-                DraftTopicChunk(label=Label(value="topic")),
-                DraftContentChunk(text="  padded body  "),
-            ]
-        ),
+    stack = _make_agent_command_stack(
+        _consent_then_draft_agent(
+            _draft_events(
+                topic=Label(value="topic"),
+                contents=["  padded body  "],
+            )
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -601,13 +586,13 @@ async def test_draft_done_content_matches_persisted_note_content() -> None:
 
 
 async def test_draft_tag_without_prior_topic_raises_core_exception() -> None:
-    stack = _make_command_stack(
-        reply_generation=_FixedChunkReplyGenerationAdapter(
+    stack = _make_agent_command_stack(
+        _consent_then_draft_agent(
             [
-                ReplyTextChunk(text="handoff"),
-                DraftTagChunk(label=Label(value="orphan-tag")),
+                ReplyProduced(text="handoff"),
+                NoteTagProposed(label=Label(value="orphan-tag")),
             ]
-        ),
+        )
     )
     session = CaptureSession.start()
     session.assign_topic(SessionTopic(value="TCP handshakes"))
@@ -729,54 +714,39 @@ async def test_mid_stream_agent_failure_rolls_back_the_uncommitted_turn() -> Non
     assert stack.uow.commit_count == 0
 
 
-class _FixedChunkReplyGenerationAdapter:
-    _chunks: list[ReplyChunk]
+def _draft_events(
+    *,
+    topic: Label,
+    tags: list[Label] | None = None,
+    contents: list[str],
+    reply_text: str = "handoff",
+) -> list[object]:
+    events: list[object] = [
+        ReplyProduced(text=reply_text),
+        NoteTopicProposed(label=topic),
+    ]
+    for tag in tags or []:
+        events.append(NoteTagProposed(label=tag))
+    for text in contents:
+        events.append(NoteContentProduced(content=NoteContent(value=text)))
+    return events
 
-    def __init__(self, chunks: list[ReplyChunk]) -> None:
-        self._chunks = chunks
 
-    async def generate(
+class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
+    @asynccontextmanager
+    async def converse(
         self,
-        transcript: Transcript,
-        assessment: ConfidenceAssessment,
-    ) -> AsyncIterator[ReplyChunk]:
-        _ = transcript, assessment
-        for chunk in self._chunks:
-            yield chunk
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        async with super().converse(turn, tools) as events:
 
+            async def with_full_coverage() -> AsyncGenerator[AgentEvent, None]:
+                async for event in events:
+                    yield event
+                turn.coverage_confidence = 1.0
 
-class _SequencedChunksReplyGenerationAdapter:
-    _turns: list[list[ReplyChunk]]
-
-    def __init__(self, turns: list[list[ReplyChunk]]) -> None:
-        self._turns = list(turns)
-
-    async def generate(
-        self,
-        transcript: Transcript,
-        assessment: ConfidenceAssessment,
-    ) -> AsyncIterator[ReplyChunk]:
-        _ = transcript, assessment
-        chunks = self._turns.pop(0)
-        for chunk in chunks:
-            yield chunk
-
-
-class _FailMidDraftReplyGenerationAdapter:
-    _inner: DeterministicReplyGenerationAdapter
-
-    def __init__(self) -> None:
-        self._inner = DeterministicReplyGenerationAdapter()
-
-    async def generate(
-        self,
-        transcript: Transcript,
-        assessment: ConfidenceAssessment,
-    ) -> AsyncIterator[ReplyChunk]:
-        async for chunk in self._inner.generate(transcript, assessment):
-            yield chunk
-            if isinstance(chunk, DraftTagChunk):
-                raise RuntimeError("simulated mid-stream failure")
+            yield with_full_coverage()
 
 
 def _assert_drafting_event_sequence(events: list[ReplyStreamEvent]) -> None:
@@ -846,20 +816,6 @@ async def _handle_confirmation_turn(
     ]
 
 
-class _AllSolidConfidenceAssessmentAdapter:
-    async def assess(self, transcript: Transcript) -> ConfidenceAssessment:
-        _ = transcript
-        return ConfidenceAssessment(
-            points=[
-                ConfidencePoint(
-                    kind=ConfidencePointKind.SOLID,
-                    note="Topic appears fully covered",
-                ),
-            ],
-            coverage_confidence=1.0,
-        )
-
-
 class _CommandStack:
     store: InMemoryMessageStore
     session_repo: InMemoryCaptureSessionRepository
@@ -919,6 +875,10 @@ class _ScriptedCaptureAgent:
             yield cast(AgentEvent, item)
 
 
+def _consent_then_draft_agent(draft_script: list[object]) -> "_ScriptedCaptureAgent":
+    return _ScriptedCaptureAgent([[DraftingConsentSignalled()], draft_script])
+
+
 class _OscillatingCaptureAgent:
     converse_calls: int
 
@@ -975,19 +935,18 @@ def _make_agent_command_stack(capture_agent: object) -> _CommandStack:
 
 
 def _make_command_stack(
-    confidence_assessment: ConfidenceAssessmentPort | None = None,
-    reply_generation: ReplyGenerationPort | None = None,
+    capture_agent: DeterministicCaptureAgentAdapter | None = None,
 ) -> _CommandStack:
     store = InMemoryMessageStore()
     session_repo = InMemoryCaptureSessionRepository()
     message_repo = InMemoryMessageRepository(store)
     uow = _SpyUnitOfWork(session_repo, message_repo, store)
     embedding = DeterministicEmbeddingAdapter()
-    _ = confidence_assessment, reply_generation
+    agent = capture_agent or DeterministicCaptureAgentAdapter()
     command = GenerateReplyCommand(
         capture_sessions=session_repo,
         uow=uow,  # pyright: ignore[reportArgumentType]
-        capture_agent=DeterministicCaptureAgentAdapter(),
+        capture_agent=agent,
         vocabulary=VocabularyResolver(
             embedding, MatchCriteria(threshold=SimilarityScore(value=0.85))
         ),

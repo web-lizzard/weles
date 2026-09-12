@@ -27,7 +27,7 @@ class ToolResult(BaseModel, frozen=True):
 
     A concrete result is a child that pins `tool` to a `Literal`, so the
     results a state's tools can produce form a discriminated union — the same
-    shape `ReplyChunk` already uses in `application/capture/value_objects.py`.
+    shape capture stream chunks already use via discriminated unions elsewhere.
     A child must repeat `frozen=True`, or pydantic refuses the subclass.
 
     Invariant: a result's pinned `tool` equals the `name` of the `Tool` that

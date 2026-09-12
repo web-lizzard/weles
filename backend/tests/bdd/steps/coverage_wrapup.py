@@ -1,38 +1,47 @@
 """Step definitions for coverage wrap-up acceptance scenarios."""
 
+from collections.abc import AsyncGenerator, AsyncIterator, Sequence
+from contextlib import asynccontextmanager
+from typing import cast
+
 from bdd.steps.capture import CaptureFlowContext
 from integration.support.in_memory_capture import (
     InMemoryCaptureComposition,
 )
 from pytest_bdd import given, then
 
-from application.capture.value_objects import (
-    ConfidenceAssessment,
-    ConfidencePoint,
-    ConfidencePointKind,
-    Transcript,
+from adapters.out.in_memory.capture.capture_agent import (
+    DeterministicCaptureAgentAdapter,
 )
+from domain.capture.turn import AgentEvent, CaptureTurn
+from domain.shared.graph.model import Tool, ToolResult
 
 
-class _AllSolidConfidenceAssessmentAdapter:
-    async def assess(self, transcript: Transcript) -> ConfidenceAssessment:
-        _ = transcript
-        return ConfidenceAssessment(
-            points=[
-                ConfidencePoint(
-                    kind=ConfidencePointKind.SOLID,
-                    note="Topic appears fully covered",
-                ),
-            ],
-            coverage_confidence=1.0,
-        )
+class _FullCoverageCaptureAgent(DeterministicCaptureAgentAdapter):
+    @asynccontextmanager
+    async def converse(
+        self,
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        async with super().converse(turn, tools) as events:
+
+            async def with_full_coverage() -> AsyncGenerator[AgentEvent, None]:
+                async for event in events:
+                    yield event
+                turn.coverage_confidence = 1.0
+
+            yield with_full_coverage()
 
 
 @given("the confidence assessment reports full coverage")
 def confidence_assessment_reports_full_coverage(
     capture_composition: InMemoryCaptureComposition,
 ) -> None:
-    capture_composition.confidence_assessment = _AllSolidConfidenceAssessmentAdapter()
+    capture_composition.capture_agent = cast(
+        DeterministicCaptureAgentAdapter,
+        cast(object, _FullCoverageCaptureAgent()),
+    )
 
 
 @then("the done event coverage confidence is fully covered")
