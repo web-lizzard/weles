@@ -394,7 +394,17 @@ async def _record_assistant_message(
 async def _hydrate_draft_from_note(
     context: CaptureTurn, deps: CaptureDeps, event: CaptureEvent
 ) -> None:
-    _ = context, deps, event
+    _ = event
+    if context.draft is not None or context.note is None:
+        return
+    vocabulary = await deps.note_vocabulary.resolve(context.note)
+    context.draft = NoteDraft(
+        topic=vocabulary.topic,
+        topic_reused=True,
+        tags=vocabulary.tags,
+        tag_reused=[True] * len(vocabulary.tags),
+        content=context.note.content.value,
+    )
 
 
 async def _resolve_note_topic(
