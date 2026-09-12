@@ -41,8 +41,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 4.1 Capture graph and turn modules import cleanly
-- [x] 4.2 Basedpyright reports zero errors over the capture domain
+- [x] 4.1 Capture graph and turn modules import cleanly — 33c8d3c
+- [x] 4.2 Basedpyright reports zero errors over the capture domain — 33c8d3c
 
 ### Phase 5: Capture graph behaviour — guards, actions and tool filtering
 
