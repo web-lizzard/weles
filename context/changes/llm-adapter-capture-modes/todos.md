@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 2
-next_step: 2.1
-next_command: /implement llm-adapter-capture-modes phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test llm-adapter-capture-modes phase 3
 updated: 2026-09-12
 ---
 
@@ -22,8 +22,8 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 2.1 Edge alias symbols import by name
-- [ ] 2.2 Basedpyright reports zero errors over the graph package
+- [x] 2.1 Edge alias symbols import by name — c313c45
+- [x] 2.2 Basedpyright reports zero errors over the graph package — c313c45
 
 ### Phase 3: State machine behaviour — reporting available transitions
 
