@@ -41,7 +41,6 @@ class CaptureTurn(BaseModel):
     messages: Sequence[Message]
     note: Note | None = None
     draft: NoteDraft | None = None
-    coverage_confidence: float = 0.0
 
     def record_message(self, message: Message) -> None:
         """Append a message onto this turn's conversation in memory."""

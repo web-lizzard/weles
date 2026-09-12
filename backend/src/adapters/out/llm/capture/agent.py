@@ -25,6 +25,7 @@ from pydantic_ai.tools import Tool as PydanticAiTool
 from adapters.out.llm.tracing import ObservationRecorder, observation
 from domain.capture.graph import (
     ConversationRequestSignal,
+    CoverageAssessment,
     DraftingConsentSignal,
     NoteTagProposal,
     NoteTopicProposal,
@@ -35,6 +36,7 @@ from domain.capture.turn import (
     AgentEvent,
     CaptureTurn,
     ConversationRequested,
+    CoverageAssessed,
     DraftingConsentSignalled,
     NoteContentProduced,
     NoteTagProposed,
@@ -255,4 +257,6 @@ def _event_from_tool_result(result: ToolResult) -> AgentEvent | None:
         return DraftingConsentSignalled()
     if isinstance(result, ConversationRequestSignal):
         return ConversationRequested()
+    if isinstance(result, CoverageAssessment):
+        return CoverageAssessed(coverage=result.coverage)
     return None
