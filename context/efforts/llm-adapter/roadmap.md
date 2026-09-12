@@ -11,7 +11,7 @@ updated: 2026-09-12
 | S-01 | Vocabulary reuse runs on a real embedding model, traced in Langfuse | llm-adapter-embedding-tracer | done |
 | S-02 | A capture session moves between conversing and note drafting on the user's word | llm-adapter-capture-modes | done |
 | S-03 | Capture's instructions are domain artifacts that cannot dispatch without their context | llm-adapter-instruction-context | in_progress |
-| S-04 | The model reaches the domain only through tools that never mutate an aggregate | llm-adapter-domain-tools | pending |
+| S-04 | The model reaches the domain only through tools that never mutate an aggregate | llm-adapter-domain-tools | in_progress |
 | S-05 | Capture converses end to end against a real provider | llm-adapter-capture-live | pending |
 | S-06 | Distill generates cards end to end against a real provider | llm-adapter-distill-live | pending |
 
@@ -88,7 +88,7 @@ model and no adapter in the loop.
 - **Outcome:** The model reaches the domain only through tools that never mutate an aggregate
 - **Acceptance criteria:** FR-06, FR-07
 - **Change ID:** llm-adapter-domain-tools
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-02
 - **Parallel with:** S-03
 - **Research:** current-context
