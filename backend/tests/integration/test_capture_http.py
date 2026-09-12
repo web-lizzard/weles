@@ -1,5 +1,6 @@
 import json
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncGenerator, AsyncIterator, Iterator, Sequence
+from contextlib import asynccontextmanager
 from typing import Protocol, cast
 from uuid import UUID
 
@@ -7,16 +8,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from adapters.http.capture import router as capture_router
-from adapters.out.in_memory.capture.reply_generation import (
-    DeterministicReplyGenerationAdapter,
-)
-from application.capture.value_objects import (
-    ConfidenceAssessment,
-    ReplyChunk,
-    ReplyTextChunk,
-    Transcript,
-)
 from domain.capture.exceptions import CaptureSessionClosedError
+from domain.capture.ports import CaptureAgentPort
+from domain.capture.turn import AgentEvent, CaptureTurn, ReplyProduced
+from domain.shared.graph.model import Tool, ToolResult
 from main import app
 
 from .support.in_memory_capture import InMemoryCaptureComposition
@@ -123,16 +118,24 @@ def test_empty_message_content_returns_clean_422_before_streaming(
     assert response.json()["code"] == "empty_message_content"
 
 
-class _OneChunkThenFailReplyGeneration:
-    async def generate(
+class _OneChunkThenFailCaptureAgent:
+    @asynccontextmanager
+    async def converse(
         self,
-        transcript: Transcript,
-        assessment: ConfidenceAssessment,
-    ) -> AsyncIterator[ReplyChunk]:
-        _ = transcript
-        _ = assessment
-        yield ReplyTextChunk(text="partial")
-        raise CaptureSessionClosedError
+        turn: CaptureTurn,
+        tools: Sequence[Tool[CaptureTurn, ToolResult]],
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
+        _ = turn, tools
+
+        async def events() -> AsyncGenerator[AgentEvent, None]:
+            yield ReplyProduced(text="partial")
+            raise CaptureSessionClosedError
+
+        stream = events()
+        try:
+            yield stream
+        finally:
+            await stream.aclose()
 
 
 def _capture_routes_registered(application: FastAPI) -> bool:
@@ -332,9 +335,9 @@ def test_core_exception_during_generation_yields_in_band_error_event() -> None:
         app.include_router(capture_router)
 
     composition = InMemoryCaptureComposition.create()
-    composition.reply_generation = cast(
-        DeterministicReplyGenerationAdapter,
-        cast(object, _OneChunkThenFailReplyGeneration()),
+    composition.capture_agent = cast(
+        CaptureAgentPort,
+        cast(object, _OneChunkThenFailCaptureAgent()),
     )
     app.dependency_overrides.update(composition.dependency_overrides())
     try:

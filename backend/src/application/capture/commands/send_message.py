@@ -143,7 +143,7 @@ class GenerateReplyCommand:
                 message_id=done_message_id,
                 content=done_content,
                 topic=topic_value,
-                coverage_confidence=0.0,
+                coverage_confidence=context.coverage_confidence,
             )
 
             prior_ids = {message.id.value for message in prior}

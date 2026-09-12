@@ -88,8 +88,8 @@ from application.remember.queries.card_source import CardSourceQuery
 from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
-from config.settings import EmbeddingProvider, Settings
-from domain.capture.ports import CaptureSessionRepository
+from config.settings import CaptureAgentProvider, EmbeddingProvider, Settings
+from domain.capture.ports import CaptureAgentPort, CaptureSessionRepository
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 from domain.distill.card_factory import CardFactory
@@ -125,7 +125,26 @@ _card_factory = CardFactory(
         front_max=_settings.card_front_max, back_max=_settings.card_back_max
     )
 )
-_capture_agent = DeterministicCaptureAgentAdapter()
+
+
+def _build_capture_agent_port(settings: Settings) -> CaptureAgentPort:
+    if settings.capture_agent_provider == CaptureAgentProvider.DETERMINISTIC:
+        return DeterministicCaptureAgentAdapter()
+    from pydantic_ai import Agent
+    from pydantic_ai.models.openai import OpenAIChatModel
+    from pydantic_ai.providers.openrouter import OpenRouterProvider
+
+    from adapters.out.llm.capture.agent import PydanticAiCaptureAgentAdapter
+
+    model = OpenAIChatModel(
+        settings.capture_model,
+        provider=OpenRouterProvider(api_key=settings.openrouter_api_key),
+    )
+    agent = Agent(model=model)
+    return cast(
+        CaptureAgentPort,
+        cast(object, PydanticAiCaptureAgentAdapter(agent, settings.capture_model)),
+    )
 
 
 def _build_embedding_port(settings: Settings) -> EmbeddingPort:
@@ -148,6 +167,7 @@ def _build_embedding_port(settings: Settings) -> EmbeddingPort:
     )
 
 
+_capture_agent = _build_capture_agent_port(_settings)
 _embedding = _build_embedding_port(_settings)
 _vocabulary = VocabularyResolver(
     _embedding,

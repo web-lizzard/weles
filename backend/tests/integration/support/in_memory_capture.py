@@ -15,9 +15,6 @@ from adapters.out.in_memory.capture.capture_agent import (
 from adapters.out.in_memory.capture.capture_session_repository import (
     InMemoryCaptureSessionRepository,
 )
-from adapters.out.in_memory.capture.confidence_assessment import (
-    DeterministicConfidenceAssessmentAdapter,
-)
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.in_memory.capture.message_repository import (
     InMemoryMessageRepository,
@@ -27,17 +24,8 @@ from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepositor
 from adapters.out.in_memory.capture.note_vocabulary_repository import (
     InMemoryNoteVocabularyRepository,
 )
-from adapters.out.in_memory.capture.reply_generation import (
-    DeterministicReplyGenerationAdapter,
-)
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
-from adapters.out.in_memory.capture.topic_extraction import (
-    DeterministicTopicExtractionAdapter,
-)
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
-from adapters.out.in_memory.capture.transcript_query import (
-    InMemoryTranscriptQueryAdapter,
-)
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.envelope_query import (
@@ -49,9 +37,10 @@ from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
-from application.capture.ports import ConfidenceAssessmentPort, UnitOfWork
+from application.capture.ports import UnitOfWork
 from application.capture.services.vocabulary import VocabularyResolver
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
+from domain.capture.ports import CaptureAgentPort
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria
 
@@ -67,11 +56,7 @@ class InMemoryCaptureComposition:
     outbox_store: InMemoryOutboxStore
     outbox: InMemoryOutboxAppender
     outbox_query: InMemoryOutboxEnvelopeQueryAdapter
-    transcript_query: InMemoryTranscriptQueryAdapter
-    topic_extraction: DeterministicTopicExtractionAdapter
-    confidence_assessment: ConfidenceAssessmentPort
-    reply_generation: DeterministicReplyGenerationAdapter
-    capture_agent: DeterministicCaptureAgentAdapter
+    capture_agent: CaptureAgentPort
     embedding: DeterministicEmbeddingAdapter
     vocabulary: VocabularyResolver
 
@@ -97,10 +82,6 @@ class InMemoryCaptureComposition:
             outbox_store=outbox_store,
             outbox=outbox,
             outbox_query=outbox_query,
-            transcript_query=InMemoryTranscriptQueryAdapter(store),
-            topic_extraction=DeterministicTopicExtractionAdapter(),
-            confidence_assessment=DeterministicConfidenceAssessmentAdapter(),
-            reply_generation=DeterministicReplyGenerationAdapter(),
             capture_agent=DeterministicCaptureAgentAdapter(),
             embedding=embedding,
             vocabulary=VocabularyResolver(

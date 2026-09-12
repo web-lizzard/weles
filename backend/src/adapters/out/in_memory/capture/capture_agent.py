@@ -8,6 +8,7 @@ from application.capture.value_objects import (
     Transcript,
     TranscriptEntry,
 )
+from domain.capture.message import Message
 from domain.capture.turn import (
     AgentEvent,
     CaptureTurn,
@@ -16,14 +17,19 @@ from domain.capture.turn import (
     NoteTagProposed,
     NoteTopicProposed,
     ReplyProduced,
+    SessionTopicProposed,
 )
-from domain.capture.value_objects import Label, MessageRole, NoteContent
+from domain.capture.value_objects import Label, MessageRole, NoteContent, SessionTopic
 from domain.shared.graph.model import Tool, ToolResult
 
 _CHUNK_SIZE = 12
 _CHUNK_DELAY_SECONDS = 0.01
+_HANDOFF_LINE = "I'll draft a note summarizing our conversation."
 _DEFAULT_SOLID = "what you've said so far"
 _DEFAULT_SHAKY = "the parts you haven't unpacked yet"
+
+_MAX_TOPIC_WORDS = 8
+_DEFAULT_TOPIC = "Untitled capture session"
 
 _CONFIRMATION_PHRASES = frozenset(
     {
@@ -75,6 +81,8 @@ class DeterministicCaptureAgentAdapter:
             return
 
         if _NOTE_TOOL_NAMES.issubset(tools_by_name):
+            async for chunk in _yield_reply(_HANDOFF_LINE):
+                yield chunk
             transcript = _transcript(turn)
             assessment = _assess(transcript)
             topic_label = _derive_topic_label(transcript, assessment)
@@ -86,8 +94,12 @@ class DeterministicCaptureAgentAdapter:
                 yield chunk
             return
 
+        if turn.session.topic is None and last_user is not None:
+            yield SessionTopicProposed(topic=_session_topic_from_message(last_user))
+
         transcript = _transcript(turn)
         assessment = _assess(transcript)
+        turn.coverage_confidence = assessment.coverage_confidence
         reply = _conversational_reply(assessment)
         async for chunk in _yield_reply(reply):
             yield chunk
@@ -98,6 +110,12 @@ def _transcript(turn: CaptureTurn) -> Transcript:
         TranscriptEntry(role=message.role, content=message.content)
         for message in turn.messages
     ]
+
+
+def _session_topic_from_message(message: Message) -> SessionTopic:
+    words = message.content.value.strip().split()
+    value = " ".join(words[:_MAX_TOPIC_WORDS]) or _DEFAULT_TOPIC
+    return SessionTopic(value=value)
 
 
 def _normalize_phrase(text: str) -> str:

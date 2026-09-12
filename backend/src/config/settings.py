@@ -15,6 +15,11 @@ class EmbeddingProvider(StrEnum):
     OPENROUTER = "openrouter"
 
 
+class CaptureAgentProvider(StrEnum):
+    DETERMINISTIC = "deterministic"
+    PYDANTIC_AI = "pydantic_ai"
+
+
 class Settings(BaseSettings):
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file=".env",
@@ -35,9 +40,11 @@ class Settings(BaseSettings):
     sitting_max_showings: int = 2
     sitting_resume_horizon_hours: float = 24.0
     embedding_provider: EmbeddingProvider = EmbeddingProvider.OPENROUTER
+    capture_agent_provider: CaptureAgentProvider = CaptureAgentProvider.DETERMINISTIC
     openrouter_api_key: str | None = None
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimensions: int | None = None
+    capture_model: str = "openai/gpt-4o-mini"
     tracing_enabled: bool = True
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = None

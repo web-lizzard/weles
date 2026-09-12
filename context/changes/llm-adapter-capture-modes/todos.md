@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 12
-next_step: 12.4
-next_command: /implement llm-adapter-capture-modes phase 12
+current_phase: 14
+next_step: 14.0
+next_command: /unit-test llm-adapter-capture-modes phase 14
 updated: 2026-09-12
 ---
 
@@ -139,14 +139,14 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 13.1 Full pytest run passes, including the distill-flow features
-- [ ] 13.2 Ruff is clean over src and tests
-- [ ] 13.3 Basedpyright reports zero errors over src and tests
-- [ ] 13.4 Grep finds no superseded port or ReplyChunk reference
+- [x] 13.1 Full pytest run passes, including the distill-flow features
+- [x] 13.2 Ruff is clean over src and tests
+- [x] 13.3 Basedpyright reports zero errors over src and tests
+- [x] 13.4 Grep finds no superseded port or ReplyChunk reference
 
 #### Manual
 
-- [ ] 13.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged
+- [x] 13.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged
 
 ### Phase 14: Dependencies reach actions
 
