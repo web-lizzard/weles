@@ -59,18 +59,19 @@ and 7 introduce new classes; the rest add methods to classes that already exist.
 | Phase | What it delivers | Key risk |
 | --- | --- | --- |
 | 1. Graph mechanics bodies | Executable mechanics plus the tool-name validator | Validator needs pydantic introspection in the domain |
-| 2. Edge vocabulary and available transitions | Edge aliases, `State.description`, `available_transitions` | Supersedes the shaping session's `guard-concept` decision |
-| 3. Consent symbols (stubs) | Value object, tools, results, events | `TurnOpened` removal touches the event union |
-| 4. Capture graph behaviour | Guards, actions, per-turn tool filtering | Consent guard must read persisted state, not the event |
-| 5. Pydantic AI adapter (stubs) | Adapter skeleton, session id on tracing | Tracing change is shared with the embedding adapter |
-| 6. Pydantic AI stream mapping | `run_stream_events` → `CaptureEvent`, traced | Library event surface is the least familiar ground here |
-| 7. In-memory adapter (stubs) | Stand-in skeleton | — |
-| 8. Stand-in behaviour + history | Acceptance scenarios keep running; port satisfied again | Losing `"that's all"` would break distill-flow too |
-| 9. Command rewrite | One port, the turn loop, rollback posture | The loop must terminate; 827 lines of tests rewritten |
-| 10. Remove superseded ports | One route to a model; composition rewired | Widest blast radius — compose, integration, BDD |
+| 2. Edge vocabulary (stubs) | Edge aliases, `State.description`, new machine surface | Supersedes the shaping session's `guard-concept` decision |
+| 3. State machine behaviour | `available_transitions`, `transition`, `current_state_name` | The machine must report, never choose |
+| 4. Consent symbols (stubs) | Value object, tools, results, events | `TurnOpened` removal touches the event union |
+| 5. Capture graph behaviour | Guards, actions, per-turn tool filtering | Consent guard must read persisted state, not the event |
+| 6. Pydantic AI adapter (stubs) | Adapter skeleton, session id on tracing | Tracing change is shared with the embedding adapter |
+| 7. Pydantic AI stream mapping | `run_stream_events` → `CaptureEvent`, traced | Library event surface is the least familiar ground here |
+| 8. In-memory adapter (stubs) | Stand-in skeleton | — |
+| 9. Stand-in behaviour + history | Acceptance scenarios keep running; port satisfied again | Losing `"that's all"` would break distill-flow too |
+| 10. Command rewrite | One port, the turn loop, rollback posture | The loop must terminate; 827 lines of tests rewritten |
+| 11. Remove superseded ports | One route to a model; composition rewired | Widest blast radius — compose, integration, BDD |
 
 **Prerequisites:** none beyond the closed `frame.md` and `discover-contracts.md`; S-01 landed the
-`adapters/out/llm/` package and tracing. **Estimated effort:** large — ten phases, six test-driven.
+`adapters/out/llm/` package and tracing. **Estimated effort:** large — eleven phases, six test-driven.
 
 ## Open Risks & Assumptions
 
