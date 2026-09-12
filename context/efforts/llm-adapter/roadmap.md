@@ -12,7 +12,7 @@ updated: 2026-09-13
 | S-02 | A capture session moves between conversing and note drafting on the user's word | llm-adapter-capture-modes | done |
 | S-03 | Capture's instructions are domain artifacts that cannot dispatch without their context | llm-adapter-instruction-context | done |
 | S-04 | The model reaches the domain only through tools that never mutate an aggregate | llm-adapter-domain-tools | done |
-| S-05 | Capture converses end to end against a real provider | llm-adapter-capture-live | in_progress |
+| S-05 | Capture converses end to end against a real provider | llm-adapter-capture-live | done |
 | S-06 | Distill generates cards end to end against a real provider | llm-adapter-distill-live | in_progress |
 
 ## Dependencies
@@ -105,7 +105,7 @@ S-03 — tools and instructions attach to the same phase surface independently.
 - **Outcome:** Capture converses end to end against a real provider
 - **Acceptance criteria:** FR-08, FR-09
 - **Change ID:** llm-adapter-capture-live
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-01, S-03, S-04
 - **Parallel with:** S-06
 - **Research:** current-context, pydantic-ai, langfuse
@@ -142,3 +142,4 @@ Langfuse.
 - **S-02: A capture session moves between conversing and note drafting on the user's word** — Archived 2026-09-12 → `context/archive/changes/2026-09-12-llm-adapter-capture-modes/`. Lesson: —.
 - **S-04: The model reaches the domain only through tools that never mutate an aggregate** — Archived 2026-09-12 → `context/archive/changes/2026-09-12-llm-adapter-domain-tools/`. Lesson: —.
 - **S-03: Capture's instructions are domain artifacts that cannot dispatch without their context** — Archived 2026-09-13 → `context/archive/changes/2026-09-12-llm-adapter-instruction-context/`. Lesson: —.
+- **S-05: Capture converses end to end against a real provider** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-llm-adapter-capture-live/`. Lesson: —.
