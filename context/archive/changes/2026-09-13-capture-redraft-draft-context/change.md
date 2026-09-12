@@ -1,10 +1,10 @@
 ---
 change_id: capture-redraft-draft-context
 title: Restore in-memory draft context on redraft passes through the capture machine
-status: implementing
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
+archived_at: 2026-09-12T23:04:17Z
 origin: llm-adapter-instruction-context
 effort_id: llm-adapter
 ---
