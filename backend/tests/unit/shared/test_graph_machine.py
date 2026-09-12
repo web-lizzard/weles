@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Literal, override
+from typing import Literal, cast, override
 
 from domain.shared.graph.machine import StateMachine
 from domain.shared.graph.model import (
@@ -19,6 +19,13 @@ class _Phase(StrEnum):
     OPEN = "open"
     WAITING = "waiting"
     CLOSED = "closed"
+
+
+class _Deps:
+    token: str
+
+    def __init__(self, token: str) -> None:
+        self.token = token
 
 
 class _Context:
@@ -123,9 +130,16 @@ def _intake_graph(
 
 class _IntakeMachine(StateMachine[_Context, str, _Phase]):
     _graph: Graph[_Context, str, _Phase]
+    _deps: _Deps
 
-    def __init__(self, context: _Context, graph: Graph[_Context, str, _Phase]) -> None:
+    def __init__(
+        self,
+        context: _Context,
+        deps: _Deps,
+        graph: Graph[_Context, str, _Phase],
+    ) -> None:
         super().__init__(context)
+        self._deps = deps
         self._graph = graph
 
     @property
@@ -145,17 +159,19 @@ class _IntakeMachine(StateMachine[_Context, str, _Phase]):
 def _machine(
     phase: _Phase = _Phase.OPEN,
     *,
+    deps: _Deps | None = None,
     waiting_guard: EdgeCondition[_Context] | None = None,
     open_actions: tuple[EdgeAction[_Context], ...] = (),
     waiting_actions: tuple[EdgeAction[_Context], ...] = (),
 ) -> _IntakeMachine:
     context = _Context(phase)
+    resolved_deps = deps if deps is not None else _Deps("machine-default")
     graph = _intake_graph(
         waiting_guard=waiting_guard,
         open_actions=open_actions,
         waiting_actions=waiting_actions,
     )
-    return _IntakeMachine(context, graph)
+    return _IntakeMachine(context, resolved_deps, graph)
 
 
 def test_current_state_and_name_resolve_from_the_aggregate_phase_field() -> None:
@@ -212,7 +228,7 @@ async def test_apply_runs_matching_state_actions_without_leaving_the_phase() -> 
         },
     )
     context = _Context(_Phase.OPEN)
-    machine = _IntakeMachine(context, graph)
+    machine = _IntakeMachine(context, _Deps("apply-stamp"), graph)
 
     await machine.apply("arrived")
 
@@ -249,7 +265,7 @@ def test_available_transitions_lists_only_guarded_targets_mapped_to_descriptions
             },
         },
     )
-    machine = _IntakeMachine(_Context(_Phase.OPEN), graph)
+    machine = _IntakeMachine(_Context(_Phase.OPEN), _Deps("available"), graph)
 
     assert machine.available_transitions() == {
         _Phase.WAITING: "Waiting before closure.",
@@ -257,7 +273,9 @@ def test_available_transitions_lists_only_guarded_targets_mapped_to_descriptions
     }
     assert guard_invoked == ["close-guard"]
 
-    waiting_machine = _IntakeMachine(_Context(_Phase.WAITING), graph)
+    waiting_machine = _IntakeMachine(
+        _Context(_Phase.WAITING), _Deps("available-waiting"), graph
+    )
     assert waiting_machine.available_transitions() == {}
     assert guard_invoked == ["close-guard", "waiting-guard"]
 
@@ -300,3 +318,72 @@ async def test_transition_refuses_a_target_that_is_not_currently_available() -> 
     assert moved is False
     assert edge_invoked == []
     assert machine.current_state_name is _Phase.WAITING
+
+
+async def test_apply_passes_construction_deps_to_state_actions() -> None:
+    deps = _Deps("apply-forward")
+    received: list[_Deps] = []
+
+    async def record_deps(_context: _Context, passed_deps: _Deps, _event: str) -> None:
+        received.append(passed_deps)
+
+    class _Recording(State[_Context, str]):
+        @property
+        @override
+        def tools(self) -> tuple[Tool[_Context, ToolResult], ...]:
+            return ()
+
+        @property
+        @override
+        def actions(self) -> tuple[Action[_Context, str], ...]:
+            return (cast(Action[_Context, str], record_deps),)
+
+        @property
+        @override
+        def description(self) -> str:
+            return "Records deps on events."
+
+        @override
+        def get_actions(
+            self, context: _Context, event: str
+        ) -> tuple[Action[_Context, str], ...]:
+            _ = context
+            stamped = cast(Action[_Context, str], record_deps)
+            return (stamped,) if event == "arrived" else ()
+
+    graph = Graph[_Context, str, _Phase](
+        states={
+            _Phase.OPEN: _Recording(),
+            _Phase.WAITING: _Waiting(),
+            _Phase.CLOSED: _Closed(),
+        },
+        transitions={
+            _Phase.OPEN: {_Phase.WAITING: Transition[_Context, str]()},
+        },
+    )
+    machine = _IntakeMachine(_Context(_Phase.OPEN), deps, graph)
+
+    await machine.apply("arrived")
+
+    assert received == [deps]
+    assert received[0] is deps
+
+
+async def test_transition_passes_construction_deps_to_edge_actions() -> None:
+    deps = _Deps("transition-forward")
+    received: list[_Deps] = []
+
+    async def record_deps(_context: _Context, passed_deps: _Deps) -> None:
+        received.append(passed_deps)
+
+    machine = _machine(
+        _Phase.OPEN,
+        deps=deps,
+        open_actions=(cast(EdgeAction[_Context], record_deps),),
+    )
+
+    moved = await machine.transition(_Phase.WAITING)
+
+    assert moved is True
+    assert received == [deps]
+    assert received[0] is deps
