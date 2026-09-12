@@ -61,7 +61,8 @@ async def _collect(
     turn: CaptureTurn,
     tools: Sequence[Tool[CaptureTurn, ToolResult]],
 ) -> list[object]:
-    return [event async for event in adapter.converse(turn, tools)]
+    async with adapter.converse(turn, tools) as events:
+        return [event async for event in events]
 
 
 @pytest.mark.parametrize(

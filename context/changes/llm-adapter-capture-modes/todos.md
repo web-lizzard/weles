@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 9
-next_step: 9.4
-next_command: /implement llm-adapter-capture-modes phase 9
+current_phase: 12
+next_step: 12.4
+next_command: /implement llm-adapter-capture-modes phase 12
 updated: 2026-09-12
 ---
 
@@ -123,13 +123,13 @@ updated: 2026-09-12
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — db334d8
 
 #### Automated
 
-- [ ] 12.1 Send-message command suite passes, covering both segments and rollback
-- [ ] 12.2 No turn opens a third segment
-- [ ] 12.3 Basedpyright reports zero errors over the application layer
+- [x] 12.1 Send-message command suite passes, covering both segments and rollback
+- [x] 12.2 No turn opens a third segment
+- [x] 12.3 Basedpyright reports zero errors over the application layer
 
 #### Manual
 
@@ -147,3 +147,53 @@ updated: 2026-09-12
 #### Manual
 
 - [ ] 13.5 Walk one session end to end over HTTP and confirm the SSE sequence is unchanged
+
+### Phase 14: Dependencies reach actions
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 14.1 Graph mechanics suite passes, asserting deps reach both actions and edge actions
+- [ ] 14.2 Capture suites pass unchanged after the widening
+- [ ] 14.3 Basedpyright reports zero errors over src and tests
+
+### Phase 15: Vocabulary resolution and the dependency set move into the domain (stubs)
+
+#### Automated
+
+- [ ] 15.1 CaptureDeps, NoteDraft, DraftCompleted and the moved resolver import by name
+- [ ] 15.2 Full pytest run passes after the relocation
+- [ ] 15.3 Basedpyright reports zero errors over src and tests
+
+### Phase 16: Drafting actions build the note
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 16.1 Capture graph suite passes, covering first draft, redraft and a tag before a topic
+- [ ] 16.2 Capture domain suites pass
+- [ ] 16.3 Basedpyright reports zero errors over src and tests
+
+### Phase 17: The command stops resolving vocabulary
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 17.1 Send-message command suite passes for a drafting and a redrafting turn
+- [ ] 17.2 Full pytest run passes across every suite
+- [ ] 17.3 Ruff is clean over src and tests
+- [ ] 17.4 Basedpyright reports zero errors over src and tests
+- [ ] 17.5 Grep finds no resolved_topic, resolved_tags or draft_text on _TurnBuffers
+
+#### Manual
+
+- [ ] 17.6 Stream one drafting turn over HTTP and confirm the draft event sequence is unchanged

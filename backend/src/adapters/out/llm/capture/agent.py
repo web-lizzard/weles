@@ -1,5 +1,6 @@
 import inspect
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncGenerator, AsyncIterator, Sequence
+from contextlib import asynccontextmanager
 
 from pydantic import BaseModel, ValidationError
 from pydantic_ai import (
@@ -21,7 +22,7 @@ from pydantic_ai.messages import (
 )
 from pydantic_ai.tools import Tool as PydanticAiTool
 
-from adapters.out.llm.tracing import observation
+from adapters.out.llm.tracing import ObservationRecorder, observation
 from domain.capture.graph import (
     ConversationRequestSignal,
     DraftingConsentSignal,
@@ -63,11 +64,12 @@ class PydanticAiCaptureAgentAdapter:
         self._agent = agent
         self._model_name = model_name
 
+    @asynccontextmanager
     async def converse(
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
-    ) -> AsyncIterator[AgentEvent]:
+    ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
         user_prompt, message_history = _prompt_and_history(turn)
         toolset = FunctionToolset[object](
             tools=[_pydantic_tool(tool, turn) for tool in tools]
@@ -85,19 +87,32 @@ class PydanticAiCaptureAgentAdapter:
                 message_history=message_history,
                 instructions=_instructions_for(turn),
                 toolsets=[toolset],
-            ) as events:
-                async for event in events:
-                    mapped = _agent_event(event, turn, tools_by_name)
-                    if mapped is not None:
-                        yield mapped
-                    if isinstance(event, AgentRunResultEvent):
-                        usage = event.result.usage
-                        recorder.record_usage(
-                            {
-                                "input": usage.input_tokens,
-                                "output": usage.output_tokens,
-                            }
-                        )
+            ) as raw:
+                events = _mapped_events(raw, turn, tools_by_name, recorder)
+                try:
+                    yield events
+                finally:
+                    await events.aclose()
+
+
+async def _mapped_events(
+    raw: AsyncIterator[object],
+    turn: CaptureTurn,
+    tools_by_name: dict[str, Tool[CaptureTurn, ToolResult]],
+    recorder: ObservationRecorder,
+) -> AsyncGenerator[AgentEvent, None]:
+    async for event in raw:
+        mapped = _agent_event(event, turn, tools_by_name)
+        if mapped is not None:
+            yield mapped
+        if isinstance(event, AgentRunResultEvent):
+            usage = event.result.usage
+            recorder.record_usage(
+                {
+                    "input": usage.input_tokens,
+                    "output": usage.output_tokens,
+                }
+            )
 
 
 def _instructions_for(turn: CaptureTurn) -> str:

@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator, Sequence
+from contextlib import AbstractAsyncContextManager
 from typing import Protocol
 
 from domain.capture.capture_session import CaptureSession
@@ -18,10 +19,11 @@ class CaptureAgentPort(Protocol):
 
     It is a domain port, not an application one, and it earns that by owing
     nothing to any transport: it takes the turn and the tools the current phase
-    offers, and yields `AgentEvent`s. No chunk type, no provider type, no
-    streaming protocol crosses it — `AsyncIterator` is the only borrowed
-    concept and it is stdlib. Replacing the adapter library changes nothing
-    here, which is FR-09.
+    offers, and enters a conversation that yields `AgentEvent`s. Exiting the
+    context closes the provider run. No chunk type, no provider type, no
+    streaming protocol crosses it — `AbstractAsyncContextManager` and
+    `AsyncIterator` are the only borrowed concepts and they are stdlib.
+    Replacing the adapter library changes nothing here, which is FR-09.
 
     The tools arrive already filtered by the phase, and the adapter invokes
     their handlers with the same `turn` it was given. A tool reads and computes
@@ -37,7 +39,7 @@ class CaptureAgentPort(Protocol):
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
-    ) -> AsyncIterator[AgentEvent]: ...
+    ) -> AbstractAsyncContextManager[AsyncIterator[AgentEvent]]: ...
 
 
 class CaptureSessionRepository(Protocol):
