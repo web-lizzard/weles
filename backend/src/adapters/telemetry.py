@@ -8,6 +8,15 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from config.settings import Settings
 
 
+def langfuse_otlp_traces_endpoint(endpoint: str) -> str:
+    """Langfuse documents ``/api/public/otel``; the HTTP OTLP exporter posts to
+    ``.../otel/v1/traces``. A base URL without the suffix returns 404."""
+    normalized = endpoint.rstrip("/")
+    if normalized.endswith("/v1/traces"):
+        return normalized
+    return f"{normalized}/v1/traces"
+
+
 def configure_tracing(settings: Settings) -> None:
     if not settings.tracing_enabled:
         return
@@ -22,7 +31,7 @@ def configure_tracing(settings: Settings) -> None:
         "x-langfuse-ingestion-version": "4",
     }
     exporter = OTLPSpanExporter(
-        endpoint=settings.langfuse_otlp_endpoint,
+        endpoint=langfuse_otlp_traces_endpoint(settings.langfuse_otlp_endpoint),
         headers=headers,
     )
     provider = TracerProvider()

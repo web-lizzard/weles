@@ -8,6 +8,7 @@ from application.capture.value_objects import (
     Transcript,
     TranscriptEntry,
 )
+from domain.capture.instructions import DRAFT_STATE, HANDOFF
 from domain.capture.message import Message
 from domain.capture.turn import (
     AgentEvent,
@@ -32,9 +33,6 @@ from domain.shared.instruction.model import Instruction
 
 _CHUNK_SIZE = 12
 _CHUNK_DELAY_SECONDS = 0.01
-_HANDOFF_LINE = "I'll draft a note summarizing our conversation."
-_DEFAULT_SOLID = "what you've said so far"
-_DEFAULT_SHAKY = "the parts you haven't unpacked yet"
 
 _MAX_TOPIC_WORDS = 8
 _DEFAULT_TOPIC = "Untitled capture session"
@@ -50,14 +48,6 @@ _CONFIRMATION_PHRASES = frozenset(
     }
 )
 
-_NOTE_TOOL_NAMES = frozenset(
-    {
-        "propose_note_topic",
-        "propose_note_tag",
-        "propose_note_content",
-    }
-)
-
 
 class DeterministicCaptureAgentAdapter:
     @asynccontextmanager
@@ -67,8 +57,7 @@ class DeterministicCaptureAgentAdapter:
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
         instruction: Instruction,
     ) -> AsyncGenerator[AsyncIterator[AgentEvent], None]:
-        _ = instruction
-        events = self._events(turn, tools)
+        events = self._events(turn, tools, instruction)
         try:
             yield events
         finally:
@@ -78,6 +67,7 @@ class DeterministicCaptureAgentAdapter:
         self,
         turn: CaptureTurn,
         tools: Sequence[Tool[CaptureTurn, ToolResult]],
+        instruction: Instruction,
     ) -> AsyncGenerator[AgentEvent, None]:
         tools_by_name = {tool.name: tool for tool in tools}
         last_user = _last_user_message(turn)
@@ -90,9 +80,10 @@ class DeterministicCaptureAgentAdapter:
             yield DraftingConsentSignalled()
             return
 
-        if _NOTE_TOOL_NAMES.issubset(tools_by_name):
-            async for chunk in _yield_reply(_HANDOFF_LINE):
-                yield chunk
+        if _has_block(instruction, DRAFT_STATE):
+            if _has_block(instruction, HANDOFF):
+                async for chunk in _yield_reply(_block_text(instruction, HANDOFF)):
+                    yield chunk
             transcript = _transcript(turn)
             assessment = _assess(transcript)
             topic_label = _derive_topic_label(transcript, assessment)
@@ -113,9 +104,24 @@ class DeterministicCaptureAgentAdapter:
             yield CoverageAssessed(
                 coverage=Coverage(value=assessment.coverage_confidence)
             )
-        reply = _conversational_reply(assessment)
+        reply = _conversational_reply(instruction)
         async for chunk in _yield_reply(reply):
             yield chunk
+
+
+def _has_block(instruction: Instruction, name: str) -> bool:
+    return any(block.name == name for block in instruction.blocks)
+
+
+def _block_text(instruction: Instruction, name: str) -> str:
+    for block in instruction.blocks:
+        if block.name == name:
+            return block.text
+    raise KeyError(name)
+
+
+def _conversational_reply(instruction: Instruction) -> str:
+    return " ".join(block.text for block in instruction.blocks)
 
 
 def _transcript(turn: CaptureTurn) -> Transcript:
@@ -208,26 +214,6 @@ def _derive_note_body(transcript: Transcript) -> str:
         speaker = "User" if entry.role is MessageRole.USER else "Agent"
         lines.append(f"{speaker}: {entry.content.value.strip()}")
     return "\n\n".join(lines)
-
-
-def _conversational_reply(assessment: ConfidenceAssessment) -> str:
-    solid = next(
-        (
-            point.note
-            for point in assessment.points
-            if point.kind is ConfidencePointKind.SOLID
-        ),
-        _DEFAULT_SOLID,
-    )
-    shaky = next(
-        (
-            point.note
-            for point in assessment.points
-            if point.kind is ConfidencePointKind.SHAKY
-        ),
-        _DEFAULT_SHAKY,
-    )
-    return f"You've got a handle on: {solid}. Let's dig into: {shaky}."
 
 
 async def _yield_reply(text: str) -> AsyncIterator[ReplyProduced]:

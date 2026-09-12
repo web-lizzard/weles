@@ -205,7 +205,7 @@ def _agent_event(
         result = _parse_tool_result(event.part.content, domain_tool.result)
         if result is None:
             return None
-        return _event_from_tool_result(result)
+        return _event_from_tool_result(result, turn)
     return None
 
 
@@ -213,7 +213,10 @@ def _text_event(turn: CaptureTurn, text: str) -> AgentEvent | None:
     if turn.session.phase is CapturePhase.DRAFTING:
         if not text.strip():
             return None
-        return NoteContentProduced(content=NoteContent(value=text))
+        draft = turn.draft
+        if draft is not None and draft.topic is not None:
+            return NoteContentProduced(content=NoteContent(value=text))
+        return ReplyProduced(text=text)
     if not text:
         return None
     return ReplyProduced(text=text)
@@ -230,14 +233,18 @@ def _parse_tool_result(
         return None
 
 
-def _event_from_tool_result(result: ToolResult) -> AgentEvent | None:
+def _event_from_tool_result(result: ToolResult, turn: CaptureTurn) -> AgentEvent | None:
     if isinstance(result, SessionTopicProposal):
         return SessionTopicProposed(topic=result.topic)
     if isinstance(result, NoteTopicProposal):
         return NoteTopicProposed(label=result.label)
     if isinstance(result, NoteTagProposal):
+        if turn.draft is None or turn.draft.topic is None:
+            return None
         return NoteTagProposed(label=result.label)
     if isinstance(result, NoteContentProposal):
+        if turn.draft is None or turn.draft.topic is None:
+            return ReplyProduced(text=result.content.value)
         return NoteContentProduced(content=result.content)
     if isinstance(result, DraftingConsentSignal):
         return DraftingConsentSignalled()

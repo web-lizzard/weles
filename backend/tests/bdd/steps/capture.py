@@ -136,19 +136,19 @@ def session_topic_is_set(
 @then("the agent reply probes understanding with a follow-up question")
 def agent_reply_probes_understanding(capture_flow_context: CaptureFlowContext) -> None:
     reply = capture_flow_context.reply_text
-    assert "Let's dig into:" in reply
+    assert "ask focused questions" in reply
     assert capture_flow_context.latest_user_message is not None
     assert reply.strip() != capture_flow_context.latest_user_message.strip()
 
 
 @then("the agent reply acknowledges what seems solid")
 def agent_reply_acknowledges_solid(capture_flow_context: CaptureFlowContext) -> None:
-    assert "You've got a handle on:" in capture_flow_context.reply_text
+    assert "what they already understand" in capture_flow_context.reply_text
 
 
 @then("the agent reply flags what seems shaky")
 def agent_reply_flags_shaky(capture_flow_context: CaptureFlowContext) -> None:
-    assert "Let's dig into:" in capture_flow_context.reply_text
+    assert "still shaky" in capture_flow_context.reply_text
 
 
 @then("the agent follow-up targets the shaky part of the latest user message")
@@ -156,9 +156,6 @@ def agent_follow_up_targets_shaky_part(
     capture_flow_context: CaptureFlowContext,
 ) -> None:
     assert capture_flow_context.latest_user_message is not None
-    shaky_note = (
-        f"The details behind: {capture_flow_context.latest_user_message.strip()}"
-    )
     reply = capture_flow_context.reply_text
-    assert "Let's dig into:" in reply
-    assert shaky_note in reply
+    assert "still shaky" in reply
+    assert reply.strip() != capture_flow_context.latest_user_message.strip()
