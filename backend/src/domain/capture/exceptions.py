@@ -87,3 +87,7 @@ class EmbeddingDimensionMismatchError(CoreException):
 
 class ZeroMagnitudeEmbeddingError(CoreException):
     pass
+
+
+class DraftTopicMissingError(CoreException):
+    pass

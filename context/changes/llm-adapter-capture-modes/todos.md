@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-capture-modes
-current_phase: 15
-next_step: 15.1
-next_command: /implement llm-adapter-capture-modes phase 15
+current_phase: 16
+next_step: 16.1
+next_command: /unit-test llm-adapter-capture-modes phase 16
 updated: 2026-09-12
 ---
 
@@ -164,9 +164,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [ ] 15.1 CaptureDeps, NoteDraft, DraftCompleted and the moved resolver import by name
-- [ ] 15.2 Full pytest run passes after the relocation
-- [ ] 15.3 Basedpyright reports zero errors over src and tests
+- [x] 15.1 CaptureDeps, NoteDraft, DraftCompleted and the moved resolver import by name
+- [x] 15.2 Full pytest run passes after the relocation
+- [x] 15.3 Basedpyright reports zero errors over src and tests
 
 ### Phase 16: Drafting actions build the note
 

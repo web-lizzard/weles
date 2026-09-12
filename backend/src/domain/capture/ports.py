@@ -9,8 +9,12 @@ from domain.capture.note_vocabulary import NoteVocabulary
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.turn import AgentEvent, CaptureTurn
-from domain.capture.value_objects import NoteId, SessionId, TagId, TopicId
+from domain.capture.value_objects import Embedding, NoteId, SessionId, TagId, TopicId
 from domain.shared.graph.model import Tool, ToolResult
+
+
+class EmbeddingPort(Protocol):
+    async def embed(self, text: str) -> Embedding: ...
 
 
 class CaptureAgentPort(Protocol):

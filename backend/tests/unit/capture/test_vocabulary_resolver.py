@@ -1,9 +1,8 @@
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
-from application.capture.services.vocabulary import VocabularyResolver
 from domain.capture.value_objects import Label, SimilarityScore
-from domain.capture.vocabulary import MatchCriteria
+from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 
 
 def _resolver() -> VocabularyResolver:

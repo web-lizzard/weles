@@ -13,8 +13,8 @@ from opentelemetry.sdk.trace import TracerProvider
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
 from adapters.out.llm.capture.embedding import OpenRouterEmbeddingAdapter
 from adapters.telemetry import configure_tracing
-from application.capture.ports import EmbeddingPort
 from config.settings import EmbeddingProvider, Settings
+from domain.capture.ports import EmbeddingPort
 
 if TYPE_CHECKING:
     from pydantic_ai.embeddings import Embedder

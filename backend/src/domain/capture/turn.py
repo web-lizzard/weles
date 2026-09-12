@@ -6,7 +6,17 @@ from pydantic import BaseModel, Field
 from domain.capture.capture_session import CaptureSession
 from domain.capture.message import Message
 from domain.capture.note import Note
+from domain.capture.tag import Tag
+from domain.capture.topic import Topic
 from domain.capture.value_objects import Label, NoteContent, SessionTopic
+
+
+class NoteDraft(BaseModel):
+    """A note under construction before it can become a domain `Note`."""
+
+    topic: Topic | None = None
+    tags: list[Tag] = Field(default_factory=list)
+    content: str = ""
 
 
 class CaptureTurn(BaseModel):
@@ -28,6 +38,7 @@ class CaptureTurn(BaseModel):
     session: CaptureSession
     messages: Sequence[Message]
     note: Note | None = None
+    draft: NoteDraft | None = None
     coverage_confidence: float = 0.0
 
     def record_message(self, message: Message) -> None:
@@ -99,6 +110,12 @@ class AssistantMessageRecorded(BaseModel, frozen=True):
     message: Message
 
 
+class DraftCompleted(BaseModel, frozen=True):
+    """The command closed a drafting segment and will materialise the draft."""
+
+    kind: Literal["draft_completed"] = "draft_completed"
+
+
 type AgentEvent = Annotated[
     ReplyProduced
     | SessionTopicProposed
@@ -115,7 +132,9 @@ The two message-recording events are raised by the command, not the model, so
 they are not in this union: yielding one from an adapter is a type error.
 """
 
-type CaptureEvent = AgentEvent | UserMessageRecorded | AssistantMessageRecorded
+type CaptureEvent = (
+    AgentEvent | UserMessageRecorded | AssistantMessageRecorded | DraftCompleted
+)
 """What the command applies to the machine over a turn.
 
 `AgentEvent` is everything the model produces; the two message events are

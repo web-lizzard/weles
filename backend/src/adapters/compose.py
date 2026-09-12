@@ -70,8 +70,7 @@ from application.capture.commands.send_message import GenerateReplyCommand
 from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
-from application.capture.ports import EmbeddingPort, UnitOfWork
-from application.capture.services.vocabulary import VocabularyResolver
+from application.capture.ports import UnitOfWork
 from application.distill.commands.discard_card import DiscardCardCommand
 from application.distill.commands.generate_cards import GenerateCardsCommand
 from application.distill.commands.save_note import SaveNoteCommand
@@ -89,9 +88,13 @@ from application.remember.queries.current_card import CurrentCardQuery
 from application.remember.queries.due_count import DueCountQuery
 from application.shared.outbox.queries.envelopes import OutboxEnvelopeQueryPort
 from config.settings import CaptureAgentProvider, EmbeddingProvider, Settings
-from domain.capture.ports import CaptureAgentPort, CaptureSessionRepository
+from domain.capture.ports import (
+    CaptureAgentPort,
+    CaptureSessionRepository,
+    EmbeddingPort,
+)
 from domain.capture.value_objects import SimilarityScore
-from domain.capture.vocabulary import MatchCriteria
+from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.distill.card_factory import CardFactory
 from domain.distill.value_objects import CardLengthPolicy
 from domain.remember.ports import CardSourceLocator
