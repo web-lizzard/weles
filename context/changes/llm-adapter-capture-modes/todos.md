@@ -52,9 +52,9 @@ updated: 2026-09-12
 
 #### Automated
 
-- [x] 5.1 Capture graph suite passes, pinning empty terminal states, both edges reachable, and at most one transition available
-- [x] 5.2 Capture domain model suite passes
-- [x] 5.3 Basedpyright reports zero errors over the domain layer
+- [x] 5.1 Capture graph suite passes, pinning empty terminal states, both edges reachable, and at most one transition available — e0cfce9
+- [x] 5.2 Capture domain model suite passes — e0cfce9
+- [x] 5.3 Basedpyright reports zero errors over the domain layer — e0cfce9
 
 ### Phase 6: Pydantic AI capture agent adapter (stubs)
 
