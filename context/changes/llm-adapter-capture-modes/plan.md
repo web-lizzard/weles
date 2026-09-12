@@ -1,6 +1,6 @@
 # Capture Capture-Mode Graph and the Pydantic AI Agent Adapter — Implementation Plan
 
-> Revision 2 (2026-09-12): the machine reports available transitions and the command decides; guards read disjoint intents off the aggregate instead of the event, and each edge consumes the intent that let it through. Phase 1 is executed and untouched; phases 2, 3, 4 and 9 are rewritten. Prior version: plan-versions/v1-plan.md
+> Revision 2 (2026-09-12): the machine reports available transitions and the command decides; guards read disjoint intents off the aggregate instead of the event, and each edge consumes the intent that let it through. Phase 1 is executed and untouched; phase 2 is split into a stubs and a behaviour phase, shifting later phases by one. Prior version: plan-versions/v1-plan.md
 
 ## Overview
 
@@ -12,7 +12,7 @@ in the shape the planning session settled, rewrites `GenerateReplyCommand` onto 
 `CaptureAgentPort`, and builds two adapters behind that port — the Pydantic AI one first.
 
 The working tree is knowingly red at the start: `InMemoryMessageRepository` no longer satisfies
-`MessageRepository`, and its contract suite is skipped. Phase 8 closes that.
+`MessageRepository`, and its contract suite is skipped. Phase 9 closes that.
 
 ## Current State Analysis
 
@@ -102,15 +102,15 @@ module whose `pytestmark` is removed.
 
 ## Implementation Approach
 
-Bottom-up, because each layer's tests need the one below to exist. Mechanics first (phases 1–2),
+Bottom-up, because each layer's tests need the one below to exist. Mechanics first (phases 1–3),
 then the capture composition's consent and return model (3–4), then the adapters behind the already
 declared port (5–8) with Pydantic AI ahead of the in-memory one at the user's direction, then the
 command that consumes all of it (9), then removal of what the new seam replaces (10).
 
-Stubs phases appear only where a test would otherwise fail to collect. Phases 1, 2, 8 and 9 add
+Stubs phases appear only where a test would otherwise fail to collect. Phases 1, 3, 9 and 10 add
 methods to classes and modules that already exist — a test importing them collects and fails on
-behaviour, which is the red half doing its job. Phases 3, 5 and 7 introduce new classes and modules,
-so each is preceded by its own stubs phase.
+behaviour, which is the red half doing its job. Phases 2, 4, 6 and 8 introduce symbols the suites
+import by name — new aliases, new classes, new modules — so each is a stubs phase of its own.
 
 ## Critical Implementation Details
 
@@ -163,12 +163,13 @@ blocking comments at the top of the file once bodies land.
 
 ---
 
-## Phase 2: Edge vocabulary, state descriptions, and available transitions
+## Phase 2: Edge vocabulary and state descriptions (stubs)
 
 ### Overview
 
-Split the edge vocabulary from the phase vocabulary, give a state a description the model will one
-day read, and fill `StateMachine` so it *reports* what is available without deciding anything.
+Materialize the contract phase 3's tests import. A guard now runs after a whole stream segment, when
+no event requests the move, so the edge-side callables lose their event parameter — and the graph's
+own test suite imports those aliases by name, so they must exist before a test can collect.
 
 ### Changes Required:
 
@@ -176,36 +177,60 @@ day read, and fill `StateMachine` so it *reports* what is available without deci
 
 **File**: `backend/src/domain/shared/graph/model.py`
 
-**Intent**: A guard runs after a whole stream segment, when no event "requests" the move, so the
-event parameter has nothing to bind to; and a state needs a description because choosing the next
-phase is a decision a model will eventually make from a list.
+**Intent**: Separate what an edge sees from what a phase sees, and give a state the description a
+model will one day read when it chooses where to go next.
 
-**Contract**: Two new aliases for edge-side callables — `EdgeCondition[ContextT]` taking only the
-context, and `EdgeAction[ContextT]` returning an awaitable and taking only the context.
-`Transition.guard` becomes `EdgeCondition[ContextT] | None` and `Transition.actions` becomes
-`Sequence[EdgeAction[ContextT]]`. `Condition` and `Action` keep their event parameter and stay in use
-for `State.get_actions`, which still runs per event. `State` gains an abstract
-`description: str` property, the state-level counterpart of `Tool.description`. This supersedes the
-`guard-concept` entry in `discover-contracts-log.md`, whose premise — that a guard is evaluated
-against the event requesting the move — no longer holds.
+**Contract**: `EdgeCondition[ContextT]` taking only the context and returning `bool`;
+`EdgeAction[ContextT]` taking only the context and returning an awaitable. `Transition.guard` becomes
+`EdgeCondition[ContextT] | None` and `Transition.actions` becomes `Sequence[EdgeAction[ContextT]]`.
+`Condition` and `Action` keep their event parameter and stay in use for `State.get_actions`, which
+still runs per event. `State` gains an abstract `description: str` property, the state-level
+counterpart of `Tool.description`. This supersedes the `guard-concept` entry in
+`discover-contracts-log.md`, whose premise — that a guard is evaluated against the event requesting
+the move — no longer holds.
 
-#### 2. State machine
+#### 2. State machine surface
+
+**File**: `backend/src/domain/shared/graph/machine.py`
+
+**Intent**: Declare the reporting surface before giving it behaviour.
+
+**Contract**: `current_state_name -> NameT` and `available_transitions() -> Mapping[NameT, str]`
+declared with empty bodies. `transition(target) -> bool` loses its event parameter. `can_transition`
+is removed: membership in `available_transitions()` answers the same question, and two ways to learn
+one fact drift apart. `can_advance` and `advance` are never introduced.
+
+### Success Criteria:
+
+#### Automated Verification:
+- `cd backend && uv run python -c "from domain.shared.graph.model import EdgeCondition, EdgeAction"` succeeds
+- `cd backend && uv run basedpyright src/domain/shared/graph` reports zero errors
+
+---
+
+## Phase 3: State machine behaviour — reporting available transitions
+
+### Overview
+
+Fill `StateMachine` so it reports what is available and moves when told, without ever choosing.
+
+### Changes Required:
+
+#### 1. State machine
 
 **File**: `backend/src/domain/shared/graph/machine.py`
 
 **Intent**: Let the machine answer "where can this context go from here, and what are those places"
 while leaving the choice to the caller.
 
-**Contract**: `__init__(context)` stores the context; `context`, `current_state` and a new
+**Contract**: `__init__(context)` stores the context; `context`, `current_state` and
 `current_state_name` expose it, the resolved `State`, and its name. `get_tools()` delegates to the
 current state. `apply(event)` runs the actions the current state warrants for that event and crosses
-no edge. `available_transitions() -> Mapping[NameT, str]` returns every target whose edge guard
-passes, mapped to that target state's `description` — the keys are what a command matches on, the
-values are what a model would read. `transition(target) -> bool` runs the edge's actions, writes the
-new name via `enter_state`, and reports whether the move happened; it refuses a target that is not
-currently available. There is no `can_transition`, no `can_advance` and no `advance`: membership in
-`available_transitions()` already answers the question, and two ways to learn one fact drift apart.
-Remove both blocking comments.
+no edge. `available_transitions()` returns every target whose edge guard passes, mapped to that
+target state's `description` — the keys are what a command matches on, the values are what a model
+would read. `transition(target)` runs the edge's actions, writes the new name via `enter_state`, and
+reports whether the move happened; it refuses a target that is not currently available. Remove both
+blocking comments.
 
 ### Success Criteria:
 
@@ -216,11 +241,11 @@ Remove both blocking comments.
 
 ---
 
-## Phase 3: Consent and return-to-conversation symbols (stubs)
+## Phase 4: Consent and return-to-conversation symbols (stubs)
 
 ### Overview
 
-Materialize the symbols phase 4's tests import. No behaviour — declarations and empty bodies only.
+Materialize the symbols phase 5's tests import. No behaviour — declarations and empty bodies only.
 
 ### Changes Required:
 
@@ -264,7 +289,7 @@ union; `TurnOpened` is removed along with its `consent_signalled` field.
 
 ---
 
-## Phase 4: Capture graph behaviour — guards, actions and tool filtering
+## Phase 5: Capture graph behaviour — guards, actions and tool filtering
 
 ### Overview
 
@@ -318,11 +343,11 @@ drafting turn burns a segment returning to a conversation nobody asked for. Both
 
 ---
 
-## Phase 5: Pydantic AI capture agent adapter (stubs)
+## Phase 6: Pydantic AI capture agent adapter (stubs)
 
 ### Overview
 
-Materialize the adapter module and class phase 6's tests import.
+Materialize the adapter module and class phase 7's tests import.
 
 ### Changes Required:
 
@@ -356,7 +381,7 @@ defaults to `None` and `OpenRouterEmbeddingAdapter` is not required to pass it.
 
 ---
 
-## Phase 6: Pydantic AI adapter — stream mapping and tracing
+## Phase 7: Pydantic AI adapter — stream mapping and tracing
 
 ### Overview
 
@@ -396,7 +421,7 @@ and usage. Tool handlers are invoked with the same `turn` the adapter received.
 
 ---
 
-## Phase 7: Deterministic in-memory capture agent adapter (stubs)
+## Phase 8: Deterministic in-memory capture agent adapter (stubs)
 
 ### Overview
 
@@ -420,7 +445,7 @@ Materialize the in-memory implementation of the same port.
 
 ---
 
-## Phase 8: Deterministic adapter behaviour and message history
+## Phase 9: Deterministic adapter behaviour and message history
 
 ### Overview
 
@@ -463,7 +488,7 @@ messages for that session, empty list when none. The module-level `pytestmark` s
 
 ---
 
-## Phase 9: Command rewrite — one port and the turn loop
+## Phase 10: Command rewrite — one port and the turn loop
 
 ### Overview
 
@@ -521,7 +546,7 @@ on that exception path, not as a mid-stream break mechanism.
 
 ---
 
-## Phase 10: Remove the superseded ports and rewire composition
+## Phase 11: Remove the superseded ports and rewire composition
 
 ### Overview
 
@@ -575,19 +600,19 @@ updated only where the removed symbols or the changed constructor made them fail
 ## Testing Strategy
 
 ### Unit Tests:
-Mechanics (phases 1–2) are proven against a throwaway two-phase graph that is not capture's, so
-reusability is tested rather than asserted. Capture's own graph (phase 4) is tested for its guards,
+Mechanics (phases 1–3) are proven against a throwaway two-phase graph that is not capture's, so
+reusability is tested rather than asserted. Capture's own graph (phase 5) is tested for its guards,
 its per-turn tool filtering, and two invariants `frame.md` demands: `graph.terminal_states` is empty,
-and both edges stay reachable. Adapter tests (6, 8) use `TestModel`/`FunctionModel` and the real
-in-memory store respectively. Command tests (9) cover the single-segment turn, the transition turn
+and both edges stay reachable. Adapter tests (7, 9) use `TestModel`/`FunctionModel` and the real
+in-memory store respectively. Command tests (10) cover the single-segment turn, the transition turn
 with two segments, and rollback on a mid-stream failure.
 
 ### Integration Tests:
-`tests/integration/test_capture_http.py` exercises the SSE contract unchanged; phase 10 updates it
+`tests/integration/test_capture_http.py` exercises the SSE contract unchanged; phase 11 updates it
 only where removed symbols force it.
 
 ### Manual Testing Steps:
-Per-phase Manual bullets above. The Langfuse session-grouping check in phase 6 is the one step that
+Per-phase Manual bullets above. The Langfuse session-grouping check in phase 7 is the one step that
 cannot be automated here, since it requires a real provider call and the Langfuse UI.
 
 ## Performance Considerations
