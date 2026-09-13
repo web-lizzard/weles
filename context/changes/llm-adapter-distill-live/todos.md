@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 10
-next_step: 10.1
-next_command: /implement llm-adapter-distill-live phase 10
+current_phase: 11
+next_step: 11.1
+next_command: /implement llm-adapter-distill-live phase 11
 updated: 2026-09-13
 ---
 
@@ -103,11 +103,11 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 10.1 Distill unit suite passes
-- [ ] 10.2 BDD distill-flow scenarios pass
-- [ ] 10.3 Integration suite passes
-- [ ] 10.4 adapters.compose imports
-- [ ] 10.5 No CardGeneration reference remains under backend
+- [x] 10.1 Distill unit suite passes — e3d5895
+- [x] 10.2 BDD distill-flow scenarios pass — e3d5895
+- [x] 10.3 Integration suite passes — e3d5895
+- [x] 10.4 adapters.compose imports — e3d5895
+- [x] 10.5 No CardGeneration reference remains under backend — e3d5895
 
 ### Phase 11: pydantic-ai structured task adapter — stubs and interfaces
 
