@@ -49,10 +49,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 4.1 pytest tests/unit/capture/contracts passes with in_memory and postgres ids
-- [x] 4.2 pytest -m postgres passes
-- [x] 4.3 pytest passes
-- [x] 4.4 basedpyright and ruff check src tests clean
+- [x] 4.1 pytest tests/unit/capture/contracts passes with in_memory and postgres ids — c5918c7
+- [x] 4.2 pytest -m postgres passes — c5918c7
+- [x] 4.3 pytest passes — c5918c7
+- [x] 4.4 basedpyright and ruff check src tests clean — c5918c7
 
 ### Phase 5: Capture unit of work and conflict stubs
 
