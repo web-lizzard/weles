@@ -124,8 +124,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 12.1 pydantic-ai structured task suite passes
-- [x] 12.2 basedpyright clean over src/adapters
+- [x] 12.1 pydantic-ai structured task suite passes — f2c76ce
+- [x] 12.2 basedpyright clean over src/adapters — f2c76ce
 
 ### Phase 13: Live composition and run tracing
 
