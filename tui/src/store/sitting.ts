@@ -120,12 +120,8 @@ async function probeCurrentCardSource(
   sittingId: string,
   cardId: string,
 ): Promise<void> {
-  try {
-    const source = await probeCardSource(sittingId, cardId);
-    set({ cardSource: source, isCardSourceProbeComplete: true });
-  } catch {
-    set({ cardSource: null, isCardSourceProbeComplete: true });
-  }
+  const source = await probeCardSource(sittingId, cardId);
+  set({ cardSource: source, isCardSourceProbeComplete: true });
 }
 
 function sittingHttpErrorState(error: SittingHttpError): Partial<SittingState> {
@@ -376,14 +372,7 @@ export const useSittingStore = create<SittingState & SittingActions>(
             set(sittingHttpErrorState(error));
           }
         } else {
-          set({
-            phase: "error",
-            error: {
-              code: "request_failed",
-              detail: error instanceof Error ? error.message : "Request failed",
-            },
-            isSubmitting: false,
-          });
+          throw error;
         }
       }
     },
