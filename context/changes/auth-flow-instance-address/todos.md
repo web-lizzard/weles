@@ -53,12 +53,12 @@ updated: 2026-09-13
 
 #### Manual
 
-- [x] 4.6 Run the built TUI with an empty config directory and confirm the refusal message and exit code 1
-- [x] 4.7 Set an ftp address and confirm the scheme error and exit code 2
-- [x] 4.8 Set http://localhost:8000/ and confirm weles instance prints it without the trailing slash
-- [x] 4.9 Start the TUI against a running backend and confirm notes and due count load
-- [x] 4.10 Set a port with no backend and confirm the TUI shows load failures and none of the previous notes
-- [x] 4.11 Confirm dist/cli.js contains no localhost:8000
+- [x] 4.6 Run the built TUI with an empty config directory and confirm the refusal message and exit code 1 — df5572b
+- [x] 4.7 Set an ftp address and confirm the scheme error and exit code 2 — df5572b
+- [x] 4.8 Set http://localhost:8000/ and confirm weles instance prints it without the trailing slash — df5572b
+- [x] 4.9 Start the TUI against a running backend and confirm notes and due count load — df5572b
+- [x] 4.10 Set a port with no backend and confirm the TUI shows load failures and none of the previous notes — df5572b
+- [x] 4.11 Confirm dist/cli.js contains no localhost:8000 — df5572b
 
 #### Triage
 
