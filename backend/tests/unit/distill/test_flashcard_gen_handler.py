@@ -111,11 +111,11 @@ def _make_handler_stack() -> _HandlerStack:
         return InMemoryUnitOfWork(notes_repo, cards_repo, outbox_store, outbox)
 
     card_factory = CardFactory(CardLengthPolicy(front_max=200, back_max=600))
-    command = GenerateCardsCommand(  # pyright: ignore[reportCallIssue]
-        uow_factory=uow_factory,
-        structured_task=DeterministicStructuredTaskAdapter(),  # pyright: ignore[reportCallIssue]
+    command = GenerateCardsCommand(
+        uow_factory=uow_factory,  # pyright: ignore[reportArgumentType]
+        structured_task=DeterministicStructuredTaskAdapter(),
         card_factory=card_factory,
-        regeneration_policy=_never_regenerate_policy(),  # pyright: ignore[reportCallIssue]
+        regeneration_policy=_never_regenerate_policy(),
     )
     handler = FlashcardGenHandler(command)
     return _HandlerStack(notes_repo, cards_repo, handler)

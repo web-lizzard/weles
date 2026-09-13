@@ -21,9 +21,6 @@ from adapters.out.in_memory.capture.note_vocabulary_repository import (
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
 from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
-from adapters.out.in_memory.distill.card_generation import (
-    DeterministicCardGenerationAdapter,
-)
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.get_note_query import (
     InMemoryGetNoteQueryAdapter,
@@ -36,6 +33,9 @@ from adapters.out.in_memory.distill.list_notes_query import (
 )
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
+)
+from adapters.out.in_memory.distill.structured_task import (
+    DeterministicStructuredTaskAdapter,
 )
 from adapters.out.in_memory.distill.unit_of_work import (
     InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
@@ -96,6 +96,7 @@ from domain.capture.ports import (
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.distill.card_factory import CardFactory
+from domain.distill.regeneration import RegenerationPolicy, ThresholdTier
 from domain.distill.value_objects import CardLengthPolicy
 from domain.remember.ports import CardSourceLocator
 from domain.remember.value_objects import ResumeHorizon, ShowingLimit
@@ -122,10 +123,17 @@ _get_note_query = InMemoryGetNoteQueryAdapter(_distill_note_repository)
 _list_cards_for_note_query = InMemoryListCardsForNoteQueryAdapter(
     _distill_note_repository, _distill_card_repository
 )
-_card_generation = DeterministicCardGenerationAdapter()
+_structured_task = DeterministicStructuredTaskAdapter()
 _card_factory = CardFactory(
     CardLengthPolicy(
         front_max=_settings.card_front_max, back_max=_settings.card_back_max
+    )
+)
+_REGENERATION_POLICY = RegenerationPolicy(
+    tiers=(
+        ThresholdTier(max_length=1500, min_accepted_share=0.5),
+        ThresholdTier(max_length=6000, min_accepted_share=0.6),
+        ThresholdTier(max_length=None, min_accepted_share=0.7),
     )
 )
 
@@ -235,8 +243,9 @@ _save_note_command = SaveNoteCommand(uow_factory=_distill_unit_of_work)
 _save_note_handler = SaveNoteHandler(_save_note_command)
 _generate_cards_command = GenerateCardsCommand(
     uow_factory=_distill_unit_of_work,
-    card_generation=_card_generation,
+    structured_task=_structured_task,
     card_factory=_card_factory,
+    regeneration_policy=_REGENERATION_POLICY,
 )
 _flashcard_gen_handler = FlashcardGenHandler(_generate_cards_command)
 _discard_card_command = DiscardCardCommand(uow_factory=_distill_unit_of_work)
