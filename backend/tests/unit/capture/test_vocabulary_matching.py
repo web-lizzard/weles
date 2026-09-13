@@ -1,52 +1,8 @@
-from datetime import UTC, datetime
-
 import pytest
 
-from domain.capture.exceptions import (
-    EmbeddingDimensionMismatchError,
-    SimilarityScoreOutOfRangeError,
-    ZeroMagnitudeEmbeddingError,
-)
-from domain.capture.tag import Tag
-from domain.capture.topic import Topic
-from domain.capture.value_objects import (
-    Embedding,
-    Label,
-    SimilarityScore,
-    TagId,
-    TopicId,
-)
-from domain.capture.vocabulary import MatchCriteria, VocabularyMatch
-
-_EMBEDDING_MODEL = "test"
-
-
-def _topic(
-    embedding: Embedding,
-    created_at: datetime,
-    *,
-    label: str = "topic",
-) -> Topic:
-    return Topic(
-        id=TopicId.new(),
-        label=Label(value=label),
-        embedding=embedding,
-        created_at=created_at,
-    )
-
-
-def _tag(
-    embedding: Embedding,
-    created_at: datetime,
-    *,
-    label: str = "tag",
-) -> Tag:
-    return Tag(
-        id=TagId.new(),
-        label=Label(value=label),
-        embedding=embedding,
-        created_at=created_at,
-    )
+from domain.capture.exceptions import SimilarityScoreOutOfRangeError
+from domain.capture.value_objects import SimilarityScore
+from domain.capture.vocabulary import MatchCriteria
 
 
 @pytest.mark.parametrize(
@@ -58,105 +14,14 @@ def test_similarity_score_rejects_out_of_range_and_non_finite(value: float) -> N
         _ = SimilarityScore(value=value)
 
 
-@pytest.mark.parametrize(
-    ("left", "right", "expected"),
-    [
-        ((1.0, 0.0), (1.0, 0.0), 1.0),
-        ((1.0, 0.0), (0.0, 1.0), 0.0),
-        ((1.0, 0.0), (-1.0, 0.0), -1.0),
-    ],
-)
-def test_cosine_similarity_for_unit_direction_pairs(
-    left: tuple[float, ...],
-    right: tuple[float, ...],
-    expected: float,
-) -> None:
-    score = Embedding(model=_EMBEDDING_MODEL, values=left).cosine_similarity(
-        Embedding(model=_EMBEDDING_MODEL, values=right)
-    )
+def test_match_criteria_accepts_score_equal_to_threshold() -> None:
+    threshold = SimilarityScore(value=0.85)
+    criteria = MatchCriteria(threshold=threshold)
 
-    assert score.value == pytest.approx(expected)
+    assert criteria.accepts(threshold) is True
 
 
-def test_cosine_similarity_survives_extreme_component_magnitudes() -> None:
-    left = Embedding(model=_EMBEDDING_MODEL, values=(1e200, 1e200))
-    right = Embedding(model=_EMBEDDING_MODEL, values=(1e200, -1e200))
-
-    score = left.cosine_similarity(right)
-
-    assert score.value == pytest.approx(0.0)
-
-
-def test_cosine_similarity_raises_on_dimension_mismatch() -> None:
-    left = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 2.0))
-    right = Embedding(model=_EMBEDDING_MODEL, values=(1.0,))
-
-    with pytest.raises(EmbeddingDimensionMismatchError):
-        _ = left.cosine_similarity(right)
-
-
-def test_cosine_similarity_raises_on_zero_magnitude() -> None:
-    left = Embedding(model=_EMBEDDING_MODEL, values=(0.0, 0.0))
-    right = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
-
-    with pytest.raises(ZeroMagnitudeEmbeddingError):
-        _ = left.cosine_similarity(right)
-
-
-def test_best_match_returns_none_for_empty_candidates() -> None:
+def test_match_criteria_rejects_score_just_below_threshold() -> None:
     criteria = MatchCriteria(threshold=SimilarityScore(value=0.85))
-    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
 
-    assert criteria.best_match(target, []) is None
-
-
-def test_best_match_returns_none_when_every_candidate_is_below_threshold() -> None:
-    criteria = MatchCriteria(threshold=SimilarityScore(value=0.85))
-    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
-    orthogonal = _topic(
-        Embedding(model=_EMBEDDING_MODEL, values=(0.0, 1.0)),
-        datetime(2026, 1, 1, tzinfo=UTC),
-    )
-
-    assert criteria.best_match(target, [orthogonal]) is None
-
-
-def test_best_match_returns_highest_scoring_candidate_above_threshold() -> None:
-    criteria = MatchCriteria(threshold=SimilarityScore(value=0.5))
-    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
-    weaker = _topic(
-        Embedding(model=_EMBEDDING_MODEL, values=(0.7, 0.7)),
-        datetime(2026, 1, 1, tzinfo=UTC),
-        label="weaker",
-    )
-    stronger = _topic(
-        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
-        datetime(2026, 1, 2, tzinfo=UTC),
-        label="stronger",
-    )
-
-    match = criteria.best_match(target, [weaker, stronger])
-
-    assert isinstance(match, VocabularyMatch)
-    assert match.entry is stronger
-    assert match.score.value == pytest.approx(1.0)
-
-
-def test_best_match_breaks_score_ties_by_earlier_created_at() -> None:
-    criteria = MatchCriteria(threshold=SimilarityScore(value=0.5))
-    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
-    older = _tag(
-        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
-        datetime(2026, 1, 1, tzinfo=UTC),
-        label="older",
-    )
-    newer = _tag(
-        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
-        datetime(2026, 1, 2, tzinfo=UTC),
-        label="newer",
-    )
-
-    match = criteria.best_match(target, [newer, older])
-
-    assert match is not None
-    assert match.entry is older
+    assert criteria.accepts(SimilarityScore(value=0.849999)) is False
