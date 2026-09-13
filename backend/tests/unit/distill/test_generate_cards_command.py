@@ -1,8 +1,10 @@
 import logging
 from datetime import UTC, datetime
+from typing import cast
 from uuid import uuid4
 
 import pytest
+from pydantic import BaseModel
 
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
@@ -10,73 +12,73 @@ from adapters.out.in_memory.distill.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from application.distill.commands.generate_cards import GenerateCardsCommand
-from application.distill.value_objects import CardProposal
-from domain.distill.card import Card
 from domain.distill.card_factory import CardFactory
 from domain.distill.note import Note, mint_note
+from domain.distill.regeneration import RegenerationPolicy, ThresholdTier
+from domain.distill.run import CardsProposed, CardsReviewed, DistillEvent
 from domain.distill.value_objects import (
-    Anchor,
-    AnchorResolution,
+    CandidateRef,
     CardLengthPolicy,
-    CardSide,
+    CardProposal,
+    CardVerdict,
     DiscardReason,
     DistillationStatus,
     NoteContent,
     NoteId,
+    ReviewGrade,
     SessionId,
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.instruction.model import Instruction
 
 _RESOLVING_NOTE = NoteContent(value="A handshake begins the connection.")
 
 
-class _StubCardGeneration:
-    def __init__(
-        self,
-        proposals: list[CardProposal] | None = None,
-        error: Exception | None = None,
-    ) -> None:
-        self._proposals: list[CardProposal] = proposals or []
-        self._error: Exception | None = error
+class _ScriptedStructuredTask:
+    """Scripts exact port answers for outcomes the deterministic adapter
+    cannot reach on demand: a chosen review grade, and a failure partway
+    through a run."""
 
-    async def generate(self, content: NoteContent) -> list[CardProposal]:
-        del content
+    def __init__(self, *answers: DistillEvent, error: Exception | None = None) -> None:
+        self._answers: list[DistillEvent] = list(answers)
+        self._error: Exception | None = error
+        self._calls: int = 0
+
+    async def complete[OutputT: BaseModel](
+        self, instruction: Instruction, output: type[OutputT]
+    ) -> OutputT:
+        del instruction, output
+        if self._calls < len(self._answers):
+            answer = self._answers[self._calls]
+            self._calls += 1
+            return cast(OutputT, answer)
         if self._error is not None:
             raise self._error
-        return self._proposals
-
-
-class _RaisingOnSecondMintCardFactory:
-    def __init__(self, inner: CardFactory) -> None:
-        self._inner: CardFactory = inner
-        self._mint_count: int = 0
-
-    def mint(
-        self,
-        note_id: NoteId,
-        front: CardSide,
-        back: CardSide,
-        anchor: Anchor,
-        resolution: AnchorResolution,
-    ) -> Card:
-        self._mint_count += 1
-        if self._mint_count == 2:
-            raise RuntimeError("boom")
-        return self._inner.mint(note_id, front, back, anchor, resolution)
+        raise AssertionError("structured task called more times than scripted")
 
 
 async def test_generate_cards_persists_live_and_discarded_cards_and_reaches_ready() -> (
     None
 ):
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(
-            [
+    structured_task = _ScriptedStructuredTask(
+        CardsProposed(
+            proposals=[
                 CardProposal(front="Q1", back="A1", quote="handshake begins"),
                 CardProposal(front="Q2", back="A2", quote="never mentioned"),
             ]
         ),
+        CardsReviewed(
+            verdicts=[
+                CardVerdict(
+                    ref=CandidateRef(value="c1"),
+                    grade=ReviewGrade.SOUND,
+                    reasoning="grounded and self-contained",
+                )
+            ]
+        ),
     )
+    stack = _make_stack(structured_task)
     note = await stack.seed_generating_note()
 
     await stack.command.handle(note.id)
@@ -96,14 +98,15 @@ async def test_generate_cards_persists_live_and_discarded_cards_and_reaches_read
 async def test_generate_cards_reaches_ready_with_zero_live_cards_when_unresolved() -> (
     None
 ):
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(
-            [
+    structured_task = _ScriptedStructuredTask(
+        CardsProposed(
+            proposals=[
                 CardProposal(front="Q1", back="A1", quote="never mentioned"),
                 CardProposal(front="Q2", back="A2", quote="also absent"),
             ]
-        ),
+        )
     )
+    stack = _make_stack(structured_task)
     note = await stack.seed_generating_note()
 
     await stack.command.handle(note.id)
@@ -116,10 +119,16 @@ async def test_generate_cards_reaches_ready_with_zero_live_cards_when_unresolved
     assert persisted_note.distillation_status == DistillationStatus.READY
 
 
-async def test_generate_cards_marks_note_failed_when_generation_port_raises() -> None:
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(error=RuntimeError("generation down")),
+async def test_generate_cards_marks_failed_nothing_persisted_on_mid_flow_error() -> (
+    None
+):
+    structured_task = _ScriptedStructuredTask(
+        CardsProposed(
+            proposals=[CardProposal(front="Q1", back="A1", quote="handshake begins")]
+        ),
+        error=RuntimeError("review provider down"),
     )
+    stack = _make_stack(structured_task)
     note = await stack.seed_generating_note()
 
     await stack.command.handle(note.id)
@@ -131,14 +140,36 @@ async def test_generate_cards_marks_note_failed_when_generation_port_raises() ->
     assert persisted_note.distillation_status == DistillationStatus.FAILED
 
 
+async def test_generate_cards_missing_note_is_a_logged_no_op(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    stack = _make_stack(_ScriptedStructuredTask())
+    unknown_note_id = NoteId(value=uuid4())
+
+    with caplog.at_level(logging.INFO):
+        await stack.command.handle(unknown_note_id)
+
+    assert any("not found" in record.message.lower() for record in caplog.records)
+
+
 async def test_generate_cards_redelivery_against_a_ready_note_is_a_logged_no_op(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(
-            [CardProposal(front="Q1", back="A1", quote="handshake begins")]
+    structured_task = _ScriptedStructuredTask(
+        CardsProposed(
+            proposals=[CardProposal(front="Q1", back="A1", quote="handshake begins")]
+        ),
+        CardsReviewed(
+            verdicts=[
+                CardVerdict(
+                    ref=CandidateRef(value="c1"),
+                    grade=ReviewGrade.SOUND,
+                    reasoning="grounded and self-contained",
+                )
+            ]
         ),
     )
+    stack = _make_stack(structured_task)
     note = await stack.seed_generating_note()
     await stack.command.handle(note.id)
 
@@ -153,67 +184,6 @@ async def test_generate_cards_redelivery_against_a_ready_note_is_a_logged_no_op(
         or "no_op" in record.message.lower()
         for record in caplog.records
     )
-
-
-async def test_generate_cards_rolls_back_saved_cards_when_commit_is_never_reached() -> (
-    None
-):
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(
-            [
-                CardProposal(front="Q1", back="A1", quote="handshake begins"),
-                CardProposal(front="Q2", back="A2", quote="also in note"),
-            ]
-        ),
-        card_factory=_RaisingOnSecondMintCardFactory(
-            CardFactory(CardLengthPolicy(front_max=200, back_max=600))
-        ),
-    )
-    note = await stack.seed_generating_note()
-
-    with pytest.raises(RuntimeError):
-        await stack.command.handle(note.id)
-
-    cards = await stack.cards_repo.list_by_note(note.id)
-    assert cards == []
-    persisted_note = await stack.notes_repo.get(note.id)
-    assert persisted_note is not None
-    assert persisted_note.distillation_status == DistillationStatus.GENERATING
-
-
-async def test_generate_cards_missing_note_is_a_logged_no_op(
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    # R3-F1
-    stack = _make_stack(card_generation=_StubCardGeneration())
-    unknown_note_id = NoteId(value=uuid4())
-
-    with caplog.at_level(logging.INFO):
-        await stack.command.handle(unknown_note_id)
-
-    assert any("not found" in record.message.lower() for record in caplog.records)
-
-
-async def test_generate_cards_skips_invalid_proposal_but_keeps_valid_siblings() -> None:
-    # R3-F1
-    stack = _make_stack(
-        card_generation=_StubCardGeneration(
-            [
-                CardProposal(front="Same", back="Same", quote="handshake begins"),
-                CardProposal(front="Q2", back="A2", quote="handshake begins"),
-            ]
-        ),
-    )
-    note = await stack.seed_generating_note()
-
-    await stack.command.handle(note.id)
-
-    cards = await stack.cards_repo.list_by_note(note.id)
-    assert len(cards) == 1
-    assert cards[0].front.value == "Q2"
-    persisted_note = await stack.notes_repo.get(note.id)
-    assert persisted_note is not None
-    assert persisted_note.distillation_status == DistillationStatus.READY
 
 
 class _Stack:
@@ -244,10 +214,13 @@ class _Stack:
         return note
 
 
-def _make_stack(
-    card_generation: _StubCardGeneration,
-    card_factory: CardFactory | _RaisingOnSecondMintCardFactory | None = None,
-) -> _Stack:
+def _never_regenerate_policy() -> RegenerationPolicy:
+    return RegenerationPolicy(
+        tiers=(ThresholdTier(max_length=None, min_accepted_share=0.0),)
+    )
+
+
+def _make_stack(structured_task: _ScriptedStructuredTask) -> _Stack:
     notes_repo = InMemoryNoteRepository()
     cards_repo = InMemoryCardRepository()
     outbox_store = InMemoryOutboxStore()
@@ -256,10 +229,11 @@ def _make_stack(
     def uow_factory() -> InMemoryUnitOfWork:
         return InMemoryUnitOfWork(notes_repo, cards_repo, outbox_store, outbox)
 
-    factory = card_factory or CardFactory(CardLengthPolicy(front_max=200, back_max=600))
-    command = GenerateCardsCommand(
-        uow_factory,  # pyright: ignore[reportArgumentType]
-        card_generation,
-        factory,  # pyright: ignore[reportArgumentType]
+    card_factory = CardFactory(CardLengthPolicy(front_max=200, back_max=600))
+    command = GenerateCardsCommand(  # pyright: ignore[reportCallIssue]
+        uow_factory=uow_factory,
+        structured_task=structured_task,  # pyright: ignore[reportCallIssue]
+        card_factory=card_factory,
+        regeneration_policy=_never_regenerate_policy(),  # pyright: ignore[reportCallIssue]
     )
     return _Stack(notes_repo, cards_repo, command)

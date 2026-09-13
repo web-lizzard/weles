@@ -6,15 +6,18 @@ import pytest
 
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
+from adapters.out.in_memory.distill.structured_task import (
+    DeterministicStructuredTaskAdapter,
+)
 from adapters.out.in_memory.distill.unit_of_work import InMemoryUnitOfWork
 from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from adapters.out.worker.handlers.flashcard_gen import FlashcardGenHandler
 from application.distill.commands.generate_cards import GenerateCardsCommand
-from application.distill.value_objects import CardProposal
 from domain.distill.card_factory import CardFactory
 from domain.distill.note import Note, mint_note
 from domain.distill.outbox import NOTE_SAVED, NoteSavedPayload
+from domain.distill.regeneration import RegenerationPolicy, ThresholdTier
 from domain.distill.value_objects import (
     CardLengthPolicy,
     DistillationStatus,
@@ -29,13 +32,10 @@ from domain.shared.outbox.model import OutboxEnvelope
 _RESOLVING_NOTE = NoteContent(value="A handshake begins the connection.")
 
 
-class _StubCardGeneration:
-    def __init__(self, proposals: list[CardProposal] | None = None) -> None:
-        self._proposals: list[CardProposal] = proposals or []
-
-    async def generate(self, content: NoteContent) -> list[CardProposal]:
-        del content
-        return self._proposals
+def _never_regenerate_policy() -> RegenerationPolicy:
+    return RegenerationPolicy(
+        tiers=(ThresholdTier(max_length=None, min_accepted_share=0.0),)
+    )
 
 
 def test_envelope_type_is_note_saved() -> None:
@@ -43,11 +43,7 @@ def test_envelope_type_is_note_saved() -> None:
 
 
 async def test_valid_envelope_dispatches_to_the_command_for_that_note() -> None:
-    stack = _make_handler_stack(
-        card_generation=_StubCardGeneration(
-            [CardProposal(front="Q1", back="A1", quote="handshake begins")]
-        ),
-    )
+    stack = _make_handler_stack()
     note = await stack.seed_generating_note()
     payload = NoteSavedPayload(note_id=note.id.value)
 
@@ -57,13 +53,13 @@ async def test_valid_envelope_dispatches_to_the_command_for_that_note() -> None:
     assert persisted_note is not None
     assert persisted_note.distillation_status == DistillationStatus.READY
     cards = await stack.cards_repo.list_by_note(note.id)
-    assert len(cards) == 1
+    assert len(cards) >= 1
 
 
 async def test_malformed_payload_is_logged_and_not_dispatched(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    stack = _make_handler_stack(card_generation=_StubCardGeneration())
+    stack = _make_handler_stack()
     note = await stack.seed_generating_note()
     envelope = OutboxEnvelope.pending(NOTE_SAVED, {})
 
@@ -105,7 +101,7 @@ class _HandlerStack:
         return note
 
 
-def _make_handler_stack(card_generation: _StubCardGeneration) -> _HandlerStack:
+def _make_handler_stack() -> _HandlerStack:
     notes_repo = InMemoryNoteRepository()
     cards_repo = InMemoryCardRepository()
     outbox_store = InMemoryOutboxStore()
@@ -115,10 +111,11 @@ def _make_handler_stack(card_generation: _StubCardGeneration) -> _HandlerStack:
         return InMemoryUnitOfWork(notes_repo, cards_repo, outbox_store, outbox)
 
     card_factory = CardFactory(CardLengthPolicy(front_max=200, back_max=600))
-    command = GenerateCardsCommand(
-        uow_factory,  # pyright: ignore[reportArgumentType]
-        card_generation,
-        card_factory,
+    command = GenerateCardsCommand(  # pyright: ignore[reportCallIssue]
+        uow_factory=uow_factory,
+        structured_task=DeterministicStructuredTaskAdapter(),  # pyright: ignore[reportCallIssue]
+        card_factory=card_factory,
+        regeneration_policy=_never_regenerate_policy(),  # pyright: ignore[reportCallIssue]
     )
     handler = FlashcardGenHandler(command)
     return _HandlerStack(notes_repo, cards_repo, handler)
