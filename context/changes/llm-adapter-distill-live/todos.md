@@ -55,7 +55,7 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 5.1 Run merge suite passes
+- [x] 5.1 Run merge suite passes — 26c0b1e
 
 ### Phase 6: Distill instruction builders
 
