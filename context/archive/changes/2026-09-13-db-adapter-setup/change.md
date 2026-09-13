@@ -1,10 +1,10 @@
 ---
 change_id: db-adapter-setup
 title: The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision
-status: implementing
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
+archived_at: 2026-09-13T14:48:18Z
 effort_id: db-adapter
 slice_ref: S-01
 ---
