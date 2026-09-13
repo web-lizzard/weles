@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Any, override
+from typing import Any, cast, override
 
 from domain.capture.value_objects import (
     ConversationRequest,
@@ -29,11 +29,11 @@ class SessionIdType(TypeDecorator[SessionId]):
 
     @override
     def process_bind_param(self, value: SessionId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> SessionId | None:
-        raise NotImplementedError
+        return SessionId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class MessageIdType(TypeDecorator[MessageId]):
@@ -42,11 +42,11 @@ class MessageIdType(TypeDecorator[MessageId]):
 
     @override
     def process_bind_param(self, value: MessageId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> MessageId | None:
-        raise NotImplementedError
+        return MessageId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class NoteIdType(TypeDecorator[NoteId]):
@@ -55,11 +55,11 @@ class NoteIdType(TypeDecorator[NoteId]):
 
     @override
     def process_bind_param(self, value: NoteId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> NoteId | None:
-        raise NotImplementedError
+        return NoteId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class TopicIdType(TypeDecorator[TopicId]):
@@ -68,11 +68,11 @@ class TopicIdType(TypeDecorator[TopicId]):
 
     @override
     def process_bind_param(self, value: TopicId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> TopicId | None:
-        raise NotImplementedError
+        return TopicId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class TagIdType(TypeDecorator[TagId]):
@@ -81,11 +81,11 @@ class TagIdType(TypeDecorator[TagId]):
 
     @override
     def process_bind_param(self, value: TagId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> TagId | None:
-        raise NotImplementedError
+        return TagId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class SessionTopicType(TypeDecorator[SessionTopic]):
@@ -96,13 +96,13 @@ class SessionTopicType(TypeDecorator[SessionTopic]):
     def process_bind_param(
         self, value: SessionTopic | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> SessionTopic | None:
-        raise NotImplementedError
+        return SessionTopic(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class LabelType(TypeDecorator[Label]):
@@ -111,11 +111,11 @@ class LabelType(TypeDecorator[Label]):
 
     @override
     def process_bind_param(self, value: Label | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> Label | None:
-        raise NotImplementedError
+        return Label(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class MessageContentType(TypeDecorator[MessageContent]):
@@ -126,13 +126,13 @@ class MessageContentType(TypeDecorator[MessageContent]):
     def process_bind_param(
         self, value: MessageContent | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> MessageContent | None:
-        raise NotImplementedError
+        return MessageContent(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class NoteContentType(TypeDecorator[NoteContent]):
@@ -141,13 +141,13 @@ class NoteContentType(TypeDecorator[NoteContent]):
 
     @override
     def process_bind_param(self, value: NoteContent | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> NoteContent | None:
-        raise NotImplementedError
+        return NoteContent(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class StrEnumType[EnumT: StrEnum](TypeDecorator[EnumT]):
@@ -160,11 +160,11 @@ class StrEnumType[EnumT: StrEnum](TypeDecorator[EnumT]):
 
     @override
     def process_bind_param(self, value: EnumT | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> EnumT | None:
-        raise NotImplementedError
+        return self._enum_cls(value) if value is not None else None
 
 
 class CoverageHistoryType(TypeDecorator[tuple[Coverage, ...]]):
@@ -175,13 +175,16 @@ class CoverageHistoryType(TypeDecorator[tuple[Coverage, ...]]):
     def process_bind_param(
         self, value: tuple[Coverage, ...] | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return [coverage.value for coverage in value] if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> tuple[Coverage, ...] | None:
-        raise NotImplementedError
+        if value is None:
+            return None
+        components = cast(list[float], value)
+        return tuple(Coverage(value=component) for component in components)
 
 
 class DraftingConsentType(TypeDecorator[DraftingConsent | None]):
@@ -192,13 +195,13 @@ class DraftingConsentType(TypeDecorator[DraftingConsent | None]):
     def process_bind_param(
         self, value: DraftingConsent | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value is not None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> DraftingConsent | None:
-        raise NotImplementedError
+        return DraftingConsent() if value else None
 
 
 class ConversationRequestType(TypeDecorator[ConversationRequest | None]):
@@ -209,13 +212,13 @@ class ConversationRequestType(TypeDecorator[ConversationRequest | None]):
     def process_bind_param(
         self, value: ConversationRequest | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value is not None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> ConversationRequest | None:
-        raise NotImplementedError
+        return ConversationRequest() if value else None
 
 
 class VectorType(UserDefinedType[tuple[float, ...]]):
@@ -228,15 +231,20 @@ class VectorType(UserDefinedType[tuple[float, ...]]):
     @override
     def bind_processor(self, dialect: Dialect):
         def process(value: tuple[float, ...] | None) -> str | None:
-            _ = value
-            raise NotImplementedError
+            if value is None:
+                return None
+            return "[" + ",".join(repr(component) for component in value) + "]"
 
         return process
 
     @override
     def result_processor(self, dialect: Dialect, coltype: object):
         def process(value: object) -> tuple[float, ...] | None:
-            _ = value
-            raise NotImplementedError
+            if value is None:
+                return None
+            text = cast(str, value).strip("[]")
+            if not text:
+                return ()
+            return tuple(float(component) for component in text.split(","))
 
         return process

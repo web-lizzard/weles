@@ -130,7 +130,7 @@ async def test_nearest_returns_highest_scoring_entry_with_its_score(
     match = await repository.nearest(query)
 
     assert match is not None
-    assert match.entry is stronger
+    assert match.entry == stronger
     assert match.score.value == pytest.approx(1.0)
 
 
@@ -154,7 +154,7 @@ async def test_nearest_breaks_equal_scores_by_earlier_created_at(
     match = await repository.nearest(query)
 
     assert match is not None
-    assert match.entry is older
+    assert match.entry == older
 
 
 async def test_nearest_ignores_other_model_and_dimension(
