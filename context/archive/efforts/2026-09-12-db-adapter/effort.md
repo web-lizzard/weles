@@ -4,7 +4,7 @@ title: Db adapter
 status: done
 created: 2026-09-12
 updated: 2026-09-14
-archived_at: null
+archived_at: 2026-09-13T22:05:20Z
 ---
 
 ## Goal
