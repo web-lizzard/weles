@@ -12,6 +12,8 @@ dependencies = [
     "alembic>=1.14.0",
     "notion-client>=2.0.0",
     "pydantic-ai-slim>=0.0.14",
+    "opentelemetry-sdk>=1.44.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.44.0",
 ]
 
 [dependency-groups]
@@ -62,6 +64,7 @@ markers = [
     "AC-21: acceptance criterion 21",
     "AC-22: acceptance criterion 22",
     "AC-23: acceptance criterion 23",
+    "postgres: needs a reachable Postgres at TEST_DATABASE_URL",
 ]
 
 [tool.ruff]
