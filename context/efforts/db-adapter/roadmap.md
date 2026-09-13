@@ -1,7 +1,7 @@
 ---
 effort_id: db-adapter
 created: 2026-09-13
-updated: 2026-09-13
+updated: 2026-09-14
 ---
 
 ## At a glance
@@ -13,7 +13,7 @@ updated: 2026-09-13
 | S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | done |
 | S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | done |
 | S-05 | Remember persists in Postgres and a card rejection discards the distill card through the outbox | db-adapter-remember | done |
-| S-06 | The daemon runs on Postgres and its state survives a restart | db-adapter-runtime-switch | in_progress |
+| S-06 | The daemon runs on Postgres and its state survives a restart | db-adapter-runtime-switch | done |
 
 ## Dependencies
 
@@ -111,7 +111,7 @@ lock is gone.
 - **Outcome:** The daemon runs on Postgres and its state survives a restart
 - **Acceptance criteria:** FR-01, FR-02, FR-03, FR-04
 - **Change ID:** db-adapter-runtime-switch
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-05
 - **Research:** sql-alchemy
 
@@ -127,3 +127,4 @@ S-05 proved in tests.
 - **S-03: Capture persists in Postgres and commits atomically with its envelopes** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-capture/`. Lesson: —.
 - **S-04: Distill persists in Postgres and a capture approval becomes cards through the outbox** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-distill/`. Lesson: —.
 - **S-05: Remember persists in Postgres and a card rejection discards the distill card through the outbox** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-remember/`. Lesson: —.
+- **S-06: The daemon runs on Postgres and its state survives a restart** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-runtime-switch/`. Lesson: —.
