@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-outbox
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test db-adapter-outbox phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement db-adapter-outbox phase 3
 updated: 2026-09-13
 ---
 
@@ -25,14 +25,14 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 3cca3ce
 
 #### Automated
 
-- [ ] 2.1 Outbox contract suite passes for in_memory and postgres
-- [ ] 2.2 Postgres suite passes
-- [ ] 2.3 Full backend suite passes
-- [ ] 2.4 basedpyright and ruff clean
+- [x] 2.1 Outbox contract suite passes for in_memory and postgres
+- [x] 2.2 Postgres suite passes
+- [x] 2.3 Full backend suite passes
+- [x] 2.4 basedpyright and ruff clean
 
 ### Phase 3: Postgres envelope query stubs
 
