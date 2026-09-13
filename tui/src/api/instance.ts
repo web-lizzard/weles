@@ -1,5 +1,7 @@
 import type { Client } from "openapi-fetch";
+import createClient from "openapi-fetch";
 import type { InstanceAddress } from "../instance/address.js";
+import { delegatedFetch } from "./client.js";
 import type { paths } from "./generated/schema.js";
 
 export class InstanceNotConfiguredError extends Error {
@@ -9,14 +11,31 @@ export class InstanceNotConfiguredError extends Error {
   }
 }
 
-export function setInstanceAddress(_address: InstanceAddress): void {
-  throw new Error("Not implemented");
+let configuredAddress: InstanceAddress | undefined;
+let memoizedClient: Client<paths> | undefined;
+let memoizedForAddress: InstanceAddress | undefined;
+
+export function setInstanceAddress(address: InstanceAddress): void {
+  configuredAddress = address;
 }
 
 export function instanceAddress(): InstanceAddress {
-  throw new Error("Not implemented");
+  if (configuredAddress === undefined) {
+    throw new InstanceNotConfiguredError(
+      "No Weles instance address configured for this process",
+    );
+  }
+  return configuredAddress;
 }
 
 export function getClient(): Client<paths> {
-  throw new Error("Not implemented");
+  const address = instanceAddress();
+  if (memoizedClient === undefined || memoizedForAddress !== address) {
+    memoizedClient = createClient<paths>({
+      baseUrl: address,
+      fetch: delegatedFetch,
+    });
+    memoizedForAddress = address;
+  }
+  return memoizedClient;
 }

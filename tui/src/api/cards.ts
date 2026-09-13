@@ -1,4 +1,4 @@
-import { client } from "./client.js";
+import { getClient } from "./instance.js";
 
 export type AnchorLocation = {
   blockIndex: number;
@@ -17,9 +17,12 @@ export type Card = {
 };
 
 export async function listCards(noteId: string): Promise<Card[]> {
-  const { data, error, response } = await client.GET("/notes/{note_id}/cards", {
-    params: { path: { note_id: noteId } },
-  });
+  const { data, error, response } = await getClient().GET(
+    "/notes/{note_id}/cards",
+    {
+      params: { path: { note_id: noteId } },
+    },
+  );
   if (error || !data) {
     if (response.status === 404) throw new Error("Note not found");
     throw new Error("Failed to load cards");

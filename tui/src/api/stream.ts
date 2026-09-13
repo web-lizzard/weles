@@ -3,9 +3,7 @@
 // (openapi-typescript 7.x does not surface FastAPI's itemSchema union) — see
 // context/changes/capture-flow-socratic-conversation/plan.md Phase 10.
 
-import { client } from "./client.js";
-
-const API_BASE_URL = "http://localhost:8000";
+import { getClient, instanceAddress } from "./instance.js";
 
 export type ReplyDeltaEvent = {
   type: "delta";
@@ -71,7 +69,7 @@ export class SendMessageHttpError extends Error {
 }
 
 export async function startCaptureSession(): Promise<{ sessionId: string }> {
-  const { data, error } = await client.POST("/capture-sessions");
+  const { data, error } = await getClient().POST("/capture-sessions");
   if (error || !data) {
     throw new Error("Failed to start capture session");
   }
@@ -81,7 +79,7 @@ export async function startCaptureSession(): Promise<{ sessionId: string }> {
 export async function approveNote(
   sessionId: string,
 ): Promise<{ noteId: string; topic: string; tags: string[] }> {
-  const { data, error, response } = await client.POST(
+  const { data, error, response } = await getClient().POST(
     "/capture-sessions/{session_id}/approval",
     { params: { path: { session_id: sessionId } } },
   );
@@ -104,7 +102,7 @@ export async function* sendMessage(
   content: string,
 ): AsyncGenerator<ReplyStreamEvent> {
   const response = await fetch(
-    `${API_BASE_URL}/capture-sessions/${sessionId}/messages`,
+    `${instanceAddress()}/capture-sessions/${sessionId}/messages`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

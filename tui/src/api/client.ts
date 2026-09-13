@@ -1,6 +1,3 @@
-import createClient from "openapi-fetch";
-import type { paths } from "./generated/schema.js";
-
 export async function delegatedFetch(
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -15,16 +12,20 @@ export async function delegatedFetch(
       const name = key === "content-type" ? "Content-Type" : key;
       headers[name] = value;
     });
-    return globalThis.fetch(input.url, {
+    const response = await globalThis.fetch(input.url, {
       method: input.method,
       headers,
       body,
     });
+    return cloneResponse(response);
   }
-  return globalThis.fetch(input, init);
+  const response = await globalThis.fetch(input, init);
+  return cloneResponse(response);
 }
 
-export const client = createClient<paths>({
-  baseUrl: "http://localhost:8000",
-  fetch: delegatedFetch,
-});
+function cloneResponse(response: Response): Response {
+  if (typeof response.clone === "function") {
+    return response.clone();
+  }
+  return response;
+}
