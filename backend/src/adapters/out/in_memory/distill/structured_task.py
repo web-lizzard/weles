@@ -89,12 +89,21 @@ def _paragraph_blocks(content: str) -> list[str]:
 
 def _proposal_from_block(block: str) -> CardProposal | None:
     match = _SENTENCE_END_PATTERN.search(block)
-    split_at = match.end() if match else len(block)
+    split_at = match.end() if match else _midpoint_word_boundary(block)
     front = block[:split_at].strip()
     back = block[split_at:].strip()
     if not back:
         return None
     return CardProposal(front=front, back=back, quote=block)
+
+
+def _midpoint_word_boundary(block: str) -> int:
+    """Where to split a block with no sentence-ending punctuation: the first
+    space at or after its midpoint, so front and back both come back
+    non-empty instead of the whole block collapsing into `front`."""
+    midpoint = len(block) // 2
+    space = block.find(" ", midpoint)
+    return space if space != -1 else midpoint
 
 
 def _refs_from_candidates(text: str) -> list[CandidateRef]:

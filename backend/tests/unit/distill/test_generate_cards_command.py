@@ -230,10 +230,10 @@ def _make_stack(structured_task: _ScriptedStructuredTask) -> _Stack:
         return InMemoryUnitOfWork(notes_repo, cards_repo, outbox_store, outbox)
 
     card_factory = CardFactory(CardLengthPolicy(front_max=200, back_max=600))
-    command = GenerateCardsCommand(  # pyright: ignore[reportCallIssue]
-        uow_factory=uow_factory,
-        structured_task=structured_task,  # pyright: ignore[reportCallIssue]
+    command = GenerateCardsCommand(
+        uow_factory=uow_factory,  # pyright: ignore[reportArgumentType]
+        structured_task=structured_task,
         card_factory=card_factory,
-        regeneration_policy=_never_regenerate_policy(),  # pyright: ignore[reportCallIssue]
+        regeneration_policy=_never_regenerate_policy(),
     )
     return _Stack(notes_repo, cards_repo, command)
