@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
 current_phase: 13
-next_step: 13.1
-next_command: /unit-test llm-adapter-distill-live phase 13
+next_step: 13.4
+next_command: /implement llm-adapter-distill-live phase 13
 updated: 2026-09-13
 ---
 
@@ -131,13 +131,13 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 12b5889
 
 #### Automated
 
-- [ ] 13.1 Full backend suite passes
-- [ ] 13.2 basedpyright clean
-- [ ] 13.3 ruff check clean over src and tests
+- [x] 13.1 Full backend suite passes — 0f370b4
+- [x] 13.2 basedpyright clean — 0f370b4
+- [x] 13.3 ruff check clean over src and tests — 0f370b4
 
 #### Manual
 
