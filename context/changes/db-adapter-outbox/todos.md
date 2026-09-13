@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-outbox
-current_phase: 3
-next_step: 3.1
-next_command: /implement db-adapter-outbox phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test db-adapter-outbox phase 4
 updated: 2026-09-13
 ---
 
@@ -38,9 +38,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 3.1 basedpyright clean
-- [ ] 3.2 ruff check clean over src and tests
-- [ ] 3.3 Non-postgres suite passes
+- [x] 3.1 basedpyright clean
+- [x] 3.2 ruff check clean over src and tests
+- [x] 3.3 Non-postgres suite passes
 
 ### Phase 4: Envelope state survives a fresh engine and the worker runs on Postgres
 
