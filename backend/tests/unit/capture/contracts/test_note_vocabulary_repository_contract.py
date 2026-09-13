@@ -1,15 +1,22 @@
-from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from adapters.out.in_memory.capture.note_vocabulary_repository import (
     InMemoryNoteVocabularyRepository,
 )
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
 from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
+from adapters.out.sqlalchemy.capture.note_vocabulary_repository import (
+    SqlAlchemyNoteVocabularyRepository,
+)
+from adapters.out.sqlalchemy.capture.tag_repository import SqlAlchemyTagRepository
+from adapters.out.sqlalchemy.capture.topic_repository import SqlAlchemyTopicRepository
+from adapters.out.sqlalchemy.engine import create_session_factory
 from domain.capture.exceptions import NoteVocabularyIncompleteError
 from domain.capture.note import Note
+from domain.capture.ports import NoteVocabularyRepository
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import (
@@ -20,15 +27,46 @@ from domain.capture.value_objects import (
     TagId,
 )
 
+_EMBEDDING_MODEL = "test"
+
+
+class _CommittingTopicRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def add(self, topic: Topic) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyTopicRepository(db_session).add(topic)
+            await db_session.commit()
+
+
+class _CommittingTagRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def add(self, tag: Tag) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyTagRepository(db_session).add(tag)
+            await db_session.commit()
+
+
+class _CommittingNoteVocabularyRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def resolve(self, note: Note):
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyNoteVocabularyRepository(db_session).resolve(note)
+
 
 @dataclass
 class _VocabularyFixture:
-    topics: InMemoryTopicRepository
-    tags: InMemoryTagRepository
-    repository: InMemoryNoteVocabularyRepository
+    topics: InMemoryTopicRepository | _CommittingTopicRepository
+    tags: InMemoryTagRepository | _CommittingTagRepository
+    repository: NoteVocabularyRepository
 
 
-def _make_fixture() -> _VocabularyFixture:
+def _make_in_memory_fixture() -> _VocabularyFixture:
     topics = InMemoryTopicRepository()
     tags = InMemoryTagRepository()
     return _VocabularyFixture(
@@ -38,9 +76,21 @@ def _make_fixture() -> _VocabularyFixture:
     )
 
 
-_IMPLEMENTATIONS: list[Callable[[], _VocabularyFixture]] = [_make_fixture]
-
-_EMBEDDING_MODEL = "test"
+@pytest.fixture(
+    params=["in_memory", pytest.param("postgres", marks=pytest.mark.postgres)]
+)
+def vocabulary_fixture(request: pytest.FixtureRequest) -> _VocabularyFixture:
+    if request.param == "in_memory":  # pyright: ignore[reportAny]
+        return _make_in_memory_fixture()
+    engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
+    session_factory = create_session_factory(engine)
+    topics = _CommittingTopicRepository(session_factory)
+    tags = _CommittingTagRepository(session_factory)
+    return _VocabularyFixture(
+        topics=topics,
+        tags=tags,
+        repository=_CommittingNoteVocabularyRepository(session_factory),
+    )
 
 
 def _sample_topic() -> Topic:
@@ -66,65 +116,57 @@ def _note_for(topic: Topic, tags: list[Tag]) -> Note:
     )
 
 
-@pytest.mark.parametrize("make_fixture", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_resolve_returns_topic_and_tags_when_all_references_exist(
-    make_fixture: Callable[[], _VocabularyFixture],
+    vocabulary_fixture: _VocabularyFixture,
 ) -> None:
-    fixture = make_fixture()
     topic = _sample_topic()
     tag = _sample_tag()
     note = _note_for(topic, [tag])
-    await fixture.topics.add(topic)
-    await fixture.tags.add(tag)
+    await vocabulary_fixture.topics.add(topic)
+    await vocabulary_fixture.tags.add(tag)
 
-    vocabulary = await fixture.repository.resolve(note)
+    vocabulary = await vocabulary_fixture.repository.resolve(note)
 
     assert vocabulary.topic == topic
     assert vocabulary.tags == [tag]
 
 
-@pytest.mark.parametrize("make_fixture", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_resolve_raises_when_topic_is_missing(
-    make_fixture: Callable[[], _VocabularyFixture],
+    vocabulary_fixture: _VocabularyFixture,
 ) -> None:
-    fixture = make_fixture()
     topic = _sample_topic()
     tag = _sample_tag()
     note = _note_for(topic, [tag])
-    await fixture.tags.add(tag)
+    await vocabulary_fixture.tags.add(tag)
 
     with pytest.raises(NoteVocabularyIncompleteError):
-        _ = await fixture.repository.resolve(note)
+        _ = await vocabulary_fixture.repository.resolve(note)
 
 
-@pytest.mark.parametrize("make_fixture", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_resolve_raises_when_a_tag_is_missing(
-    make_fixture: Callable[[], _VocabularyFixture],
+    vocabulary_fixture: _VocabularyFixture,
 ) -> None:
-    fixture = make_fixture()
     topic = _sample_topic()
     present_tag = _sample_tag()
     missing_tag_id = TagId.new()
     note = _note_for(topic, [present_tag]).model_copy(
         update={"tag_ids": [present_tag.id, missing_tag_id]}
     )
-    await fixture.topics.add(topic)
-    await fixture.tags.add(present_tag)
+    await vocabulary_fixture.topics.add(topic)
+    await vocabulary_fixture.tags.add(present_tag)
 
     with pytest.raises(NoteVocabularyIncompleteError):
-        _ = await fixture.repository.resolve(note)
+        _ = await vocabulary_fixture.repository.resolve(note)
 
 
-@pytest.mark.parametrize("make_fixture", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_resolve_returns_empty_tags_when_note_has_no_tag_ids(
-    make_fixture: Callable[[], _VocabularyFixture],
+    vocabulary_fixture: _VocabularyFixture,
 ) -> None:
-    fixture = make_fixture()
     topic = _sample_topic()
     note = _note_for(topic, [])
-    await fixture.topics.add(topic)
+    await vocabulary_fixture.topics.add(topic)
 
-    vocabulary = await fixture.repository.resolve(note)
+    vocabulary = await vocabulary_fixture.repository.resolve(note)
 
     assert vocabulary.topic == topic
     assert vocabulary.tags == []
