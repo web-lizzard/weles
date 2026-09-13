@@ -1,6 +1,14 @@
-# pyright: reportUnusedParameter=false
 from collections.abc import Sequence
 
+from adapters.out.sqlalchemy.remember.review_event_store import (
+    SqlAlchemyReviewEventStore,
+)
+from adapters.out.sqlalchemy.remember.scheduling_state_repository import (
+    SqlAlchemySchedulingStateRepository,
+)
+from adapters.out.sqlalchemy.remember.sitting_repository import (
+    SqlAlchemySittingRepository,
+)
 from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
@@ -13,13 +21,17 @@ class ShortSessionSittingRepository:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def save(self, sitting: Sitting) -> None:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            await SqlAlchemySittingRepository(session).save(sitting)
+            await session.commit()
 
     async def get(self, sitting_id: SittingId) -> Sitting | None:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            return await SqlAlchemySittingRepository(session).get(sitting_id)
 
     async def latest(self) -> Sitting | None:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            return await SqlAlchemySittingRepository(session).latest()
 
 
 class ShortSessionReviewEventStore:
@@ -27,13 +39,17 @@ class ShortSessionReviewEventStore:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def save(self, event: ReviewEvent) -> None:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            await SqlAlchemyReviewEventStore(session).save(event)
+            await session.commit()
 
     async def list_by_card(self, card_id: CardId) -> Sequence[ReviewEvent]:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            return await SqlAlchemyReviewEventStore(session).list_by_card(card_id)
 
     async def list_by_sitting(self, sitting_id: SittingId) -> Sequence[ReviewEvent]:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            return await SqlAlchemyReviewEventStore(session).list_by_sitting(sitting_id)
 
 
 class ShortSessionSchedulingStateRepository:
@@ -41,12 +57,16 @@ class ShortSessionSchedulingStateRepository:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def save(self, state: SchedulingState) -> None:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            await SqlAlchemySchedulingStateRepository(session).save(state)
+            await session.commit()
 
     async def get(self, card_id: CardId) -> SchedulingState | None:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            return await SqlAlchemySchedulingStateRepository(session).get(card_id)
 
     async def get_many(
         self, card_ids: Sequence[CardId]
     ) -> dict[CardId, SchedulingState]:
-        raise NotImplementedError
+        async with self._session_factory() as session:
+            return await SqlAlchemySchedulingStateRepository(session).get_many(card_ids)

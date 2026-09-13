@@ -1,4 +1,3 @@
-# pyright: reportUnusedParameter=false
 from typing import Any, override
 
 from domain.remember.value_objects import (
@@ -23,11 +22,11 @@ class SittingIdType(TypeDecorator[SittingId]):
 
     @override
     def process_bind_param(self, value: SittingId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> SittingId | None:
-        raise NotImplementedError
+        return SittingId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class CardIdType(TypeDecorator[CardId]):
@@ -36,11 +35,11 @@ class CardIdType(TypeDecorator[CardId]):
 
     @override
     def process_bind_param(self, value: CardId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> CardId | None:
-        raise NotImplementedError
+        return CardId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class ShowingLimitType(TypeDecorator[ShowingLimit]):
@@ -51,13 +50,13 @@ class ShowingLimitType(TypeDecorator[ShowingLimit]):
     def process_bind_param(
         self, value: ShowingLimit | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> ShowingLimit | None:
-        raise NotImplementedError
+        return ShowingLimit(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class ResumeHorizonType(TypeDecorator[ResumeHorizon]):
@@ -68,13 +67,13 @@ class ResumeHorizonType(TypeDecorator[ResumeHorizon]):
     def process_bind_param(
         self, value: ResumeHorizon | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> ResumeHorizon | None:
-        raise NotImplementedError
+        return ResumeHorizon(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class OpaqueSchedulerStateType(TypeDecorator[OpaqueSchedulerState]):
@@ -85,10 +84,12 @@ class OpaqueSchedulerStateType(TypeDecorator[OpaqueSchedulerState]):
     def process_bind_param(
         self, value: OpaqueSchedulerState | None, dialect: Dialect
     ) -> object:
-        raise NotImplementedError
+        return value.payload if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> OpaqueSchedulerState | None:
-        raise NotImplementedError
+        return (
+            OpaqueSchedulerState(payload=value) if value is not None else None  # pyright: ignore[reportArgumentType]
+        )
