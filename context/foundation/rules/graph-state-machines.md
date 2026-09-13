@@ -39,8 +39,11 @@ everything else is inherited mechanics from `StateMachine`.
   subclass pinning a `Literal` discriminator matching `name`), and `handler`
   (reads context + arguments, computes, never mutates, never persists).
 - **`Transition[ContextT, DepsT, EventT]`** — one edge: an optional `guard`
-  (`EdgeCondition`, reads only the context) and `actions` (`EdgeAction`,
-  run when the edge is taken). Carries no source/target — those are the keys
+  (`EdgeCondition`, reads only the context) and `edge_actions` (`EdgeAction`,
+  run when the edge is taken) — named distinctly from `State.actions` so the
+  two can't be confused: one runs per event on the current phase (`apply`),
+  the other runs once, on the move itself (`transition`), before `enter_state`
+  writes the new phase name. Carries no source/target — those are the keys
   it sits under in the graph, so an edge can't claim endpoints it isn't filed
   under.
 - **`Graph[ContextT, DepsT, EventT, NameT]`** — `states` by name and

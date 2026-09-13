@@ -134,12 +134,14 @@ def _intake_graph(
         },
         transitions={
             _Phase.OPEN: {
-                _Phase.WAITING: Transition[_Context, _Deps, str](actions=open_actions),
+                _Phase.WAITING: Transition[_Context, _Deps, str](
+                    edge_actions=open_actions
+                ),
             },
             _Phase.WAITING: {
                 _Phase.CLOSED: Transition[_Context, _Deps, str](
                     guard=waiting_guard,
-                    actions=waiting_actions,
+                    edge_actions=waiting_actions,
                 ),
             },
         },
@@ -466,7 +468,7 @@ async def test_advance_leaves_the_phase_unmoved_when_two_outgoing_guards_pass() 
         },
         transitions={
             _Phase.OPEN: {
-                _Phase.WAITING: Transition[_Context, _Deps, str](actions=(stamp,)),
+                _Phase.WAITING: Transition[_Context, _Deps, str](edge_actions=(stamp,)),
                 _Phase.CLOSED: Transition[_Context, _Deps, str](guard=allow),
             },
         },
