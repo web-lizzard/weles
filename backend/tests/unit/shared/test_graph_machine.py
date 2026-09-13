@@ -413,3 +413,84 @@ async def test_transition_passes_construction_deps_to_edge_actions() -> None:
     assert moved is True
     assert received == [deps]
     assert received[0] is deps
+
+
+async def test_advance_leaves_a_terminal_phase_unmoved() -> None:
+    machine = _machine(_Phase.CLOSED)
+
+    moved = await machine.advance()
+
+    assert moved is False
+    assert machine.current_state_name is _Phase.CLOSED
+    assert machine.context.phase is _Phase.CLOSED
+
+
+async def test_advance_leaves_the_phase_unmoved_when_every_outgoing_guard_fails() -> (
+    None
+):
+    edge_invoked: list[str] = []
+
+    async def seal(_context: _Context, _deps: _Deps) -> None:
+        edge_invoked.append("seal")
+
+    def refuse(_context: _Context) -> bool:
+        return False
+
+    machine = _machine(
+        _Phase.WAITING,
+        waiting_guard=refuse,
+        waiting_actions=(seal,),
+    )
+
+    moved = await machine.advance()
+
+    assert moved is False
+    assert edge_invoked == []
+    assert machine.current_state_name is _Phase.WAITING
+
+
+async def test_advance_leaves_the_phase_unmoved_when_two_outgoing_guards_pass() -> None:
+    edge_invoked: list[str] = []
+
+    async def stamp(_context: _Context, _deps: _Deps) -> None:
+        edge_invoked.append("stamp")
+
+    def allow(_context: _Context) -> bool:
+        return True
+
+    graph = Graph[_Context, _Deps, str, _Phase](
+        states={
+            _Phase.OPEN: _Open(),
+            _Phase.WAITING: _Waiting(),
+            _Phase.CLOSED: _Closed(),
+        },
+        transitions={
+            _Phase.OPEN: {
+                _Phase.WAITING: Transition[_Context, _Deps, str](actions=(stamp,)),
+                _Phase.CLOSED: Transition[_Context, _Deps, str](guard=allow),
+            },
+        },
+    )
+    machine = _IntakeMachine(_Context(_Phase.OPEN), _Deps("two-pass"), graph)
+
+    moved = await machine.advance()
+
+    assert moved is False
+    assert edge_invoked == []
+    assert machine.current_state_name is _Phase.OPEN
+
+
+async def test_advance_moves_along_the_one_passing_edge_and_runs_its_actions() -> None:
+    edge_invoked: list[str] = []
+
+    async def seal(_context: _Context, _deps: _Deps) -> None:
+        edge_invoked.append("seal")
+
+    machine = _machine(open_actions=(seal,))
+
+    moved = await machine.advance()
+
+    assert moved is True
+    assert edge_invoked == ["seal"]
+    assert machine.current_state_name is _Phase.WAITING
+    assert machine.context.phase is _Phase.WAITING
