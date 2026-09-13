@@ -1,4 +1,3 @@
-import asyncio
 from collections.abc import Callable, Mapping, Sequence
 
 from application.remember.dto import DuePartitionDTO, GradeAppliedDTO
@@ -80,9 +79,8 @@ class GradeCardCommand:
                 due,
             )
 
-            async with asyncio.TaskGroup() as tg:
-                _ = tg.create_task(uow.review_events.save(event))
-                _ = tg.create_task(uow.scheduling_states.save(next_state))
+            await uow.review_events.save(event)
+            await uow.scheduling_states.save(next_state)
             await uow.commit()
 
         return result
