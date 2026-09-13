@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-distill
 current_phase: 6
-next_step: 6.1
-next_command: /unit-test db-adapter-distill phase 6
+next_step:
+next_command: /archive db-adapter-distill
 updated: 2026-09-13
 ---
 
@@ -66,10 +66,10 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 242f672
 
 #### Automated
 
-- [ ] 6.1 pytest test_distill_persistence.py and test_distill_relay.py pass
-- [ ] 6.2 pytest passes
-- [ ] 6.3 basedpyright and ruff check src tests clean
+- [x] 6.1 pytest test_distill_persistence.py and test_distill_relay.py pass — d3136cb
+- [x] 6.2 pytest passes — d3136cb
+- [x] 6.3 basedpyright and ruff check src tests clean — d3136cb
