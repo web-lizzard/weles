@@ -93,7 +93,7 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 9.1 Structured task port contract and deterministic adapter suites pass
+- [x] 9.1 Structured task port contract and deterministic adapter suites pass — 26464b1
 
 ### Phase 10: Command walks the flow; old seam removed
 
