@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-outbox
-current_phase: 1
-next_step: 1.5
-next_command: /implement db-adapter-outbox phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test db-adapter-outbox phase 2
 updated: 2026-09-13
 ---
 
@@ -10,16 +10,16 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 1.1 basedpyright clean
-- [x] 1.2 ruff check clean over src and tests
-- [x] 1.3 Non-postgres suite passes
-- [x] 1.4 Postgres tooling suite passes with the outbox revision at head
+- [x] 1.1 basedpyright clean — 6e2036a
+- [x] 1.2 ruff check clean over src and tests — 6e2036a
+- [x] 1.3 Non-postgres suite passes — 6e2036a
+- [x] 1.4 Postgres tooling suite passes with the outbox revision at head — 6e2036a
 
 #### Manual
 
-- [x] 1.5 Alembic CLI upgrades the dev database to the outbox revision
-- [x] 1.6 MCP server lists the outbox_envelopes columns
-- [x] 1.7 Downgrade removes outbox_envelopes and upgrade restores it
+- [x] 1.5 Alembic CLI upgrades the dev database to the outbox revision — 6e2036a
+- [x] 1.6 MCP server lists the outbox_envelopes columns — 6e2036a
+- [x] 1.7 Downgrade removes outbox_envelopes and upgrade restores it — 6e2036a
 
 ### Phase 2: Postgres append and claim
 
