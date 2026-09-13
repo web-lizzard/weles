@@ -22,11 +22,11 @@ class NoteIdType(TypeDecorator[NoteId]):
 
     @override
     def process_bind_param(self, value: NoteId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> NoteId | None:
-        raise NotImplementedError
+        return NoteId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class SessionIdType(TypeDecorator[SessionId]):
@@ -35,11 +35,11 @@ class SessionIdType(TypeDecorator[SessionId]):
 
     @override
     def process_bind_param(self, value: SessionId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> SessionId | None:
-        raise NotImplementedError
+        return SessionId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class CardIdType(TypeDecorator[CardId]):
@@ -48,11 +48,11 @@ class CardIdType(TypeDecorator[CardId]):
 
     @override
     def process_bind_param(self, value: CardId | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> CardId | None:
-        raise NotImplementedError
+        return CardId(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class NoteContentType(TypeDecorator[NoteContent]):
@@ -61,13 +61,13 @@ class NoteContentType(TypeDecorator[NoteContent]):
 
     @override
     def process_bind_param(self, value: NoteContent | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(
         self, value: object, dialect: Dialect
     ) -> NoteContent | None:
-        raise NotImplementedError
+        return NoteContent(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class CardSideType(TypeDecorator[CardSide]):
@@ -76,11 +76,11 @@ class CardSideType(TypeDecorator[CardSide]):
 
     @override
     def process_bind_param(self, value: CardSide | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.value if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> CardSide | None:
-        raise NotImplementedError
+        return CardSide(value=value) if value is not None else None  # pyright: ignore[reportArgumentType]
 
 
 class AnchorType(TypeDecorator[Anchor]):
@@ -89,8 +89,8 @@ class AnchorType(TypeDecorator[Anchor]):
 
     @override
     def process_bind_param(self, value: Anchor | None, dialect: Dialect) -> object:
-        raise NotImplementedError
+        return value.quote if value is not None else None
 
     @override
     def process_result_value(self, value: object, dialect: Dialect) -> Anchor | None:
-        raise NotImplementedError
+        return Anchor(quote=value) if value is not None else None  # pyright: ignore[reportArgumentType]
