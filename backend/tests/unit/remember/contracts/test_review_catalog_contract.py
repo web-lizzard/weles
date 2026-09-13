@@ -1,13 +1,17 @@
-from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import NamedTuple
 from uuid import uuid4
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
 from adapters.out.in_memory.remember.review_catalog import InMemoryReviewCatalog
+from adapters.out.sqlalchemy.distill.card_repository import SqlAlchemyCardRepository
+from adapters.out.sqlalchemy.distill.note_repository import SqlAlchemyNoteRepository
+from adapters.out.sqlalchemy.engine import create_session_factory
+from adapters.out.sqlalchemy.remember.review_catalog import SqlAlchemyReviewCatalog
 from domain.distill.card import Card
 from domain.distill.note import Note, mint_note
 from domain.distill.ports import CardRepository, NoteRepository
@@ -26,6 +30,42 @@ from domain.remember.ports import ReviewableCard, ReviewCatalog
 from domain.remember.value_objects import CardId
 
 
+class _CommittingNoteRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def save(self, note: Note) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyNoteRepository(db_session).save(note)
+            await db_session.commit()
+
+    async def get(self, note_id: NoteId) -> Note | None:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyNoteRepository(db_session).get(note_id)
+
+    async def list_all(self) -> list[Note]:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyNoteRepository(db_session).list_all()
+
+
+class _CommittingCardRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def save(self, card: Card) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyCardRepository(db_session).save(card)
+            await db_session.commit()
+
+    async def get(self, card_id: DistillCardId) -> Card | None:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyCardRepository(db_session).get(card_id)
+
+    async def list_by_note(self, note_id: NoteId) -> list[Card]:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyCardRepository(db_session).list_by_note(note_id)
+
+
 class _Catalog(NamedTuple):
     """The port under test plus the seams a contract case seeds through."""
 
@@ -34,13 +74,19 @@ class _Catalog(NamedTuple):
     cards: CardRepository
 
 
-def _in_memory() -> _Catalog:
-    notes = InMemoryNoteRepository()
-    cards = InMemoryCardRepository()
-    return _Catalog(InMemoryReviewCatalog(notes, cards), notes, cards)
-
-
-_IMPLEMENTATIONS: list[Callable[[], _Catalog]] = [_in_memory]
+@pytest.fixture(
+    params=["in_memory", pytest.param("postgres", marks=pytest.mark.postgres)]
+)
+def catalog_fixture(request: pytest.FixtureRequest) -> _Catalog:
+    if request.param == "in_memory":  # pyright: ignore[reportAny]
+        notes = InMemoryNoteRepository()
+        cards = InMemoryCardRepository()
+        return _Catalog(InMemoryReviewCatalog(notes, cards), notes, cards)
+    engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
+    session_factory = create_session_factory(engine)
+    notes = _CommittingNoteRepository(session_factory)
+    cards = _CommittingCardRepository(session_factory)
+    return _Catalog(SqlAlchemyReviewCatalog(session_factory), notes, cards)
 
 
 def _sample_note() -> Note:
@@ -80,11 +126,10 @@ def _discarded() -> Discard:
     )
 
 
-@pytest.mark.parametrize("make_catalog", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_list_reviewable_renders_a_live_card_under_remember_s_own_card_id(
-    make_catalog: Callable[[], _Catalog],
+    catalog_fixture: _Catalog,
 ) -> None:
-    catalog, notes, cards = make_catalog()
+    catalog, notes, cards = catalog_fixture
     note = _sample_note()
     card = _sample_card(note.id)
     await notes.save(note)
@@ -101,11 +146,10 @@ async def test_list_reviewable_renders_a_live_card_under_remember_s_own_card_id(
     ]
 
 
-@pytest.mark.parametrize("make_catalog", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_list_reviewable_spans_the_cards_of_every_note(
-    make_catalog: Callable[[], _Catalog],
+    catalog_fixture: _Catalog,
 ) -> None:
-    catalog, notes, cards = make_catalog()
+    catalog, notes, cards = catalog_fixture
     first_note = _sample_note()
     second_note = _sample_note()
     first_card = _sample_card(first_note.id, front="What is a port?")
@@ -123,11 +167,10 @@ async def test_list_reviewable_spans_the_cards_of_every_note(
     }
 
 
-@pytest.mark.parametrize("make_catalog", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_list_reviewable_omits_a_discarded_card_of_a_note_it_walks(
-    make_catalog: Callable[[], _Catalog],
+    catalog_fixture: _Catalog,
 ) -> None:
-    catalog, notes, cards = make_catalog()
+    catalog, notes, cards = catalog_fixture
     note = _sample_note()
     live = _sample_card(note.id, front="What is a port?")
     discarded = _sample_card(note.id, front="What is a socket?", discard=_discarded())
@@ -140,11 +183,10 @@ async def test_list_reviewable_omits_a_discarded_card_of_a_note_it_walks(
     assert [entry.id for entry in result] == [CardId(value=live.id.value)]
 
 
-@pytest.mark.parametrize("make_catalog", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_get_reviewable_returns_the_card_carrying_that_id(
-    make_catalog: Callable[[], _Catalog],
+    catalog_fixture: _Catalog,
 ) -> None:
-    catalog, notes, cards = make_catalog()
+    catalog, notes, cards = catalog_fixture
     note = _sample_note()
     wanted = _sample_card(note.id, front="What is a port?")
     other = _sample_card(note.id, front="What is a socket?")
@@ -161,11 +203,10 @@ async def test_get_reviewable_returns_the_card_carrying_that_id(
     )
 
 
-@pytest.mark.parametrize("make_catalog", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_get_reviewable_offers_a_live_card_but_not_a_discarded_sibling(
-    make_catalog: Callable[[], _Catalog],
+    catalog_fixture: _Catalog,
 ) -> None:
-    catalog, notes, cards = make_catalog()
+    catalog, notes, cards = catalog_fixture
     note = _sample_note()
     live = _sample_card(note.id, front="What is a port?")
     discarded = _sample_card(note.id, front="What is a socket?", discard=_discarded())
@@ -180,11 +221,10 @@ async def test_get_reviewable_offers_a_live_card_but_not_a_discarded_sibling(
     assert withheld is None
 
 
-@pytest.mark.parametrize("make_catalog", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_get_reviewable_returns_none_for_an_id_no_note_holds(
-    make_catalog: Callable[[], _Catalog],
+    catalog_fixture: _Catalog,
 ) -> None:
-    catalog, notes, cards = make_catalog()
+    catalog, notes, cards = catalog_fixture
     note = _sample_note()
     await notes.save(note)
     await cards.save(_sample_card(note.id))

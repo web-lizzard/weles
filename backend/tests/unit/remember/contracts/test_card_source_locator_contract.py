@@ -1,14 +1,20 @@
-from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import NamedTuple
 from uuid import uuid4
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
 from adapters.out.in_memory.distill.note_repository import InMemoryNoteRepository
 from adapters.out.in_memory.remember.card_source_locator import (
     InMemoryCardSourceLocator,
+)
+from adapters.out.sqlalchemy.distill.card_repository import SqlAlchemyCardRepository
+from adapters.out.sqlalchemy.distill.note_repository import SqlAlchemyNoteRepository
+from adapters.out.sqlalchemy.engine import create_session_factory
+from adapters.out.sqlalchemy.remember.card_source_locator import (
+    SqlAlchemyCardSourceLocator,
 )
 from domain.distill.card import Card
 from domain.distill.note import Note, mint_note
@@ -28,6 +34,42 @@ from domain.remember.ports import CardSource, CardSourceLocator, SourceBlock, So
 from domain.remember.value_objects import CardId
 
 
+class _CommittingNoteRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def save(self, note: Note) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyNoteRepository(db_session).save(note)
+            await db_session.commit()
+
+    async def get(self, note_id: NoteId) -> Note | None:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyNoteRepository(db_session).get(note_id)
+
+    async def list_all(self) -> list[Note]:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyNoteRepository(db_session).list_all()
+
+
+class _CommittingCardRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def save(self, card: Card) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyCardRepository(db_session).save(card)
+            await db_session.commit()
+
+    async def get(self, card_id: DistillCardId) -> Card | None:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyCardRepository(db_session).get(card_id)
+
+    async def list_by_note(self, note_id: NoteId) -> list[Card]:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyCardRepository(db_session).list_by_note(note_id)
+
+
 class _Locator(NamedTuple):
     """The port under test plus the seams a contract case seeds through."""
 
@@ -36,13 +78,26 @@ class _Locator(NamedTuple):
     cards: CardRepository
 
 
-def _in_memory() -> _Locator:
-    notes = InMemoryNoteRepository()
-    cards = InMemoryCardRepository()
-    return _Locator(InMemoryCardSourceLocator(notes, cards), notes, cards)
-
-
-_IMPLEMENTATIONS: list[Callable[[], _Locator]] = [_in_memory]
+@pytest.fixture(
+    params=["in_memory", pytest.param("postgres", marks=pytest.mark.postgres)]
+)
+def locator_fixture(
+    request: pytest.FixtureRequest,
+) -> tuple[_Locator, str]:
+    implementation = str(request.param)  # pyright: ignore[reportAny]
+    if implementation == "in_memory":
+        notes = InMemoryNoteRepository()
+        cards = InMemoryCardRepository()
+        return _Locator(InMemoryCardSourceLocator(notes, cards), notes, cards), (
+            implementation
+        )
+    engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
+    session_factory = create_session_factory(engine)
+    notes = _CommittingNoteRepository(session_factory)
+    cards = _CommittingCardRepository(session_factory)
+    return _Locator(SqlAlchemyCardSourceLocator(session_factory), notes, cards), (
+        implementation
+    )
 
 
 def _sample_note(content: str | None = None) -> Note:
@@ -86,11 +141,10 @@ def _discarded() -> Discard:
     )
 
 
-@pytest.mark.parametrize("make_locator", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_locate_returns_every_block_and_exact_span_when_anchor_matches(
-    make_locator: Callable[[], _Locator],
+    locator_fixture: tuple[_Locator, str],
 ) -> None:
-    locator, notes, cards = make_locator()
+    locator, notes, cards = locator_fixture[0]
     note_body = (
         "Lead paragraph.\n\n"
         "Connections are established via a three-way handshake.\n\n"
@@ -116,11 +170,10 @@ async def test_locate_returns_every_block_and_exact_span_when_anchor_matches(
     )
 
 
-@pytest.mark.parametrize("make_locator", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_locate_returns_none_for_a_card_id_no_repository_holds(
-    make_locator: Callable[[], _Locator],
+    locator_fixture: tuple[_Locator, str],
 ) -> None:
-    locator, notes, cards = make_locator()
+    locator, notes, cards = locator_fixture[0]
     note = _sample_note()
     card = _sample_card(note.id)
     await notes.save(note)
@@ -131,11 +184,10 @@ async def test_locate_returns_none_for_a_card_id_no_repository_holds(
     assert result is None
 
 
-@pytest.mark.parametrize("make_locator", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_locate_returns_none_for_a_discarded_card(
-    make_locator: Callable[[], _Locator],
+    locator_fixture: tuple[_Locator, str],
 ) -> None:
-    locator, notes, cards = make_locator()
+    locator, notes, cards = locator_fixture[0]
     note = _sample_note()
     card = _sample_card(note.id, discard=_discarded())
     await notes.save(note)
@@ -146,11 +198,15 @@ async def test_locate_returns_none_for_a_discarded_card(
     assert result is None
 
 
-@pytest.mark.parametrize("make_locator", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_locate_returns_none_when_the_note_behind_the_card_is_missing(
-    make_locator: Callable[[], _Locator],
+    locator_fixture: tuple[_Locator, str],
 ) -> None:
-    locator, _notes, cards = make_locator()
+    fixture, implementation = locator_fixture
+    if implementation == "postgres":
+        pytest.skip(
+            "distill_cards.note_id foreign key prevents orphan cards on Postgres"
+        )
+    locator, _notes, cards = fixture
     note = _sample_note()
     card = _sample_card(note.id)
     await cards.save(card)
@@ -160,11 +216,10 @@ async def test_locate_returns_none_when_the_note_behind_the_card_is_missing(
     assert result is None
 
 
-@pytest.mark.parametrize("make_locator", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_locate_returns_none_when_the_note_no_longer_contains_the_card_quote(
-    make_locator: Callable[[], _Locator],
+    locator_fixture: tuple[_Locator, str],
 ) -> None:
-    locator, notes, cards = make_locator()
+    locator, notes, cards = locator_fixture[0]
     note = _sample_note()
     card = _sample_card(note.id)
     await notes.save(note)
