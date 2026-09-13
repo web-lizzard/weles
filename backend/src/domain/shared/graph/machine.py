@@ -105,7 +105,13 @@ class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
         flow, and each phase entered gets its own step before the next
         `advance` — so a phase is never crossed without its work.
         """
-        raise NotImplementedError
+        if self.graph.is_terminal(self.current_state_name):
+            return False
+        available = self.available_transitions()
+        if len(available) != 1:
+            return False
+        target = next(iter(available))
+        return await self.transition(target)
 
     async def transition(self, target: NameT) -> bool:
         """Take the edge to target: run its actions, then write the new state
