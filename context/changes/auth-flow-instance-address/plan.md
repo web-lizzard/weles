@@ -332,6 +332,13 @@ On `ready` it calls `setInstanceAddress`, performs the existing TTY check, and r
 - `node dist/cli.js instance set http://localhost:8999`, then `pnpm start` shows load failures and none of the previous instance's notes
 - `grep -c "localhost:8000" dist/cli.js` prints `0`
 
+### Review r1
+
+Artifact: `reviews/2026-09-13-r1-impl-review.md`
+
+- `R1-F1` — Sitting store edits outside Phase 4 Changes Required
+  Fix: Keep instance-address work on the plan's listed paths; revert sitting-store behaviour changes here or track them under a change that owns sitting error UX.
+
 ---
 
 ## Testing Strategy
