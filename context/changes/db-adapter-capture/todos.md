@@ -22,9 +22,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 2.1 pytest tests/unit/capture passes
-- [x] 2.2 pytest passes
-- [x] 2.3 basedpyright and ruff check src tests clean
+- [x] 2.1 pytest tests/unit/capture passes — abcaa25
+- [x] 2.2 pytest passes — abcaa25
+- [x] 2.3 basedpyright and ruff check src tests clean — abcaa25
 
 ### Phase 3: Capture schema and Postgres repository stubs
 
