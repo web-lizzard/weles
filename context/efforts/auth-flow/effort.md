@@ -3,7 +3,7 @@ effort_id: auth-flow
 title: Auth flow
 status: active
 created: 2026-09-13
-updated: 2026-09-13
+updated: 2026-09-14
 archived_at: null
 ---
 
