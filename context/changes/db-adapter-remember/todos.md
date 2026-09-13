@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-remember
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test db-adapter-remember phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement db-adapter-remember phase 3
 updated: 2026-09-13
 ---
 
@@ -25,14 +25,14 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f8e3a92
 
 #### Automated
 
-- [ ] 2.1 pytest tests/unit/remember/contracts passes with in_memory and postgres ids
-- [ ] 2.2 pytest -m postgres passes
-- [ ] 2.3 pytest passes
-- [ ] 2.4 basedpyright and ruff check src tests clean
+- [x] 2.1 pytest tests/unit/remember/contracts passes with in_memory and postgres ids — ca268f8
+- [x] 2.2 pytest -m postgres passes — ca268f8
+- [x] 2.3 pytest passes — ca268f8
+- [x] 2.4 basedpyright and ruff check src tests clean — ca268f8
 
 ### Phase 3: Distill-reading catalog and source locator stubs
 
