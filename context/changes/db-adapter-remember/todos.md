@@ -1,7 +1,7 @@
 ---
 change_id: db-adapter-remember
 current_phase: 1
-next_step: 1.1
+next_step: 1.5
 next_command: /implement db-adapter-remember phase 1
 updated: 2026-09-13
 ---
@@ -10,10 +10,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 1.1 basedpyright clean
-- [ ] 1.2 ruff check src tests clean
-- [ ] 1.3 pytest -m 'not postgres' passes
-- [ ] 1.4 pytest -m postgres tests/integration/postgres passes
+- [x] 1.1 basedpyright clean
+- [x] 1.2 ruff check src tests clean
+- [x] 1.3 pytest -m 'not postgres' passes
+- [x] 1.4 pytest -m postgres tests/integration/postgres passes
 
 #### Manual
 
