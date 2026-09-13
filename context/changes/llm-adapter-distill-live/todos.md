@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 7
-next_step: 7.0
-next_command: /unit-test llm-adapter-distill-live phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test llm-adapter-distill-live phase 8
 updated: 2026-09-13
 ---
 
@@ -71,12 +71,12 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — efc7b00
 
 #### Automated
 
-- [ ] 7.1 Distill flow suite passes
-- [ ] 7.2 basedpyright clean over src/domain
+- [x] 7.1 Distill flow suite passes
+- [x] 7.2 basedpyright clean over src/domain
 
 ### Phase 8: Deterministic structured task adapter
 
