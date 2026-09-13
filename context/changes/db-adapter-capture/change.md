@@ -1,7 +1,7 @@
 ---
 change_id: db-adapter-capture
 title: Capture persists in Postgres and commits atomically with its envelopes
-status: new
+status: planned
 created: 2026-09-13
 updated: 2026-09-13
 archived_at: null
