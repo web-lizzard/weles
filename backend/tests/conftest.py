@@ -17,6 +17,7 @@ def pytest_configure(config: pytest.Config) -> None:
     # Keep the suite offline: production defaults to OpenRouter + tracing on.
     _ = os.environ.setdefault("EMBEDDING_PROVIDER", "deterministic")
     _ = os.environ.setdefault("CAPTURE_AGENT_PROVIDER", "deterministic")
+    _ = os.environ.setdefault("DISTILL_TASK_PROVIDER", "deterministic")
     _ = os.environ.setdefault("TRACING_ENABLED", "false")
 
 

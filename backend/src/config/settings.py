@@ -1,6 +1,8 @@
+import json
 from enum import StrEnum
-from typing import ClassVar
+from typing import ClassVar, cast
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +20,18 @@ class EmbeddingProvider(StrEnum):
 class CaptureAgentProvider(StrEnum):
     DETERMINISTIC = "deterministic"
     PYDANTIC_AI = "pydantic_ai"
+
+
+class DistillTaskProvider(StrEnum):
+    DETERMINISTIC = "deterministic"
+    PYDANTIC_AI = "pydantic_ai"
+
+
+_DEFAULT_DISTILL_REGENERATION_TIERS: list[tuple[int | None, float]] = [
+    (1500, 0.5),
+    (6000, 0.6),
+    (None, 0.7),
+]
 
 
 class Settings(BaseSettings):
@@ -45,7 +59,23 @@ class Settings(BaseSettings):
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimensions: int | None = None
     capture_model: str = "openai/gpt-4o-mini"
+    distill_task_provider: DistillTaskProvider = DistillTaskProvider.PYDANTIC_AI
+    distill_model: str = "openai/gpt-4o-mini"
+    distill_regeneration_tiers: list[tuple[int | None, float]] = (
+        _DEFAULT_DISTILL_REGENERATION_TIERS
+    )
     tracing_enabled: bool = True
     langfuse_public_key: str | None = None
     langfuse_secret_key: str | None = None
     langfuse_otlp_endpoint: str = "https://cloud.langfuse.com/api/public/otel/v1/traces"
+
+    @field_validator("distill_regeneration_tiers", mode="before")
+    @classmethod
+    def _parse_distill_regeneration_tiers(cls, value: object) -> object:
+        if isinstance(value, str):
+            parsed = cast(
+                list[list[int | None | float]],
+                json.loads(value),
+            )
+            return [(row[0], row[1]) for row in parsed]
+        return value
