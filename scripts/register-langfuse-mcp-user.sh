@@ -21,6 +21,14 @@ else:
     data = {}
 
 servers = data.setdefault("mcpServers", {})
+servers["postgres"] = {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["--with", "mcp<2", "postgres-mcp==0.3.0", "--access-mode=restricted"],
+    "env": {
+        "DATABASE_URI": "postgresql://weles:weles@postgres:5432/weles",
+    },
+}
 servers["langfuse"] = {
     "type": "stdio",
     "command": "bash",
@@ -28,6 +36,6 @@ servers["langfuse"] = {
 }
 
 user_mcp.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-print(f"Registered langfuse MCP in {user_mcp}")
+print(f"Registered postgres and langfuse MCP in {user_mcp}")
 print("Reload Cursor window, then: Customize → MCPs (scope: User or this folder).")
 PY
