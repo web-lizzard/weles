@@ -1,10 +1,11 @@
-from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import cast
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
+from adapters.out.sqlalchemy.capture.tag_repository import SqlAlchemyTagRepository
+from adapters.out.sqlalchemy.engine import create_session_factory
 from domain.capture.ports import TagRepository
 from domain.capture.tag import Tag
 from domain.capture.value_objects import Embedding, Label, TagId
@@ -12,9 +13,34 @@ from domain.capture.value_objects import Embedding, Label, TagId
 _EMBEDDING_MODEL = "test"
 _OTHER_MODEL = "other-model"
 
-_IMPLEMENTATIONS: list[Callable[[], TagRepository]] = [
-    cast(Callable[[], TagRepository], InMemoryTagRepository),
-]
+
+class _CommittingTagRepository:
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+
+    async def add(self, tag: Tag) -> None:
+        async with self._session_factory() as db_session:
+            await SqlAlchemyTagRepository(db_session).add(tag)
+            await db_session.commit()
+
+    async def get(self, tag_id: TagId) -> Tag | None:
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyTagRepository(db_session).get(tag_id)
+
+    async def nearest(self, embedding: Embedding):
+        async with self._session_factory() as db_session:
+            return await SqlAlchemyTagRepository(db_session).nearest(embedding)
+
+
+@pytest.fixture(
+    params=["in_memory", pytest.param("postgres", marks=pytest.mark.postgres)]
+)
+def repository(request: pytest.FixtureRequest) -> TagRepository:
+    if request.param == "in_memory":  # pyright: ignore[reportAny]
+        return InMemoryTagRepository()
+    engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
+    session_factory = create_session_factory(engine)
+    return _CommittingTagRepository(session_factory)
 
 
 def _sample_tag() -> Tag:
@@ -40,11 +66,7 @@ def _tag_with(
     )
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
-async def test_add_then_get_returns_the_saved_tag(
-    make_repository: Callable[[], TagRepository],
-) -> None:
-    repository = make_repository()
+async def test_add_then_get_returns_the_saved_tag(repository: TagRepository) -> None:
     tag = _sample_tag()
 
     await repository.add(tag)
@@ -53,22 +75,13 @@ async def test_add_then_get_returns_the_saved_tag(
     assert result == tag
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
-async def test_get_returns_none_for_unknown_tag_id(
-    make_repository: Callable[[], TagRepository],
-) -> None:
-    repository = make_repository()
-
+async def test_get_returns_none_for_unknown_tag_id(repository: TagRepository) -> None:
     result = await repository.get(TagId.new())
 
     assert result is None
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
-async def test_second_add_with_same_id_overwrites(
-    make_repository: Callable[[], TagRepository],
-) -> None:
-    repository = make_repository()
+async def test_second_add_with_same_id_overwrites(repository: TagRepository) -> None:
     original = _sample_tag()
     updated = original.model_copy(update={"label": Label(value="protocols")})
 
@@ -79,11 +92,7 @@ async def test_second_add_with_same_id_overwrites(
     assert result == updated
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
-async def test_nearest_returns_none_for_empty_store(
-    make_repository: Callable[[], TagRepository],
-) -> None:
-    repository = make_repository()
+async def test_nearest_returns_none_for_empty_store(repository: TagRepository) -> None:
     query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
 
     result = await repository.nearest(query)
@@ -91,11 +100,9 @@ async def test_nearest_returns_none_for_empty_store(
     assert result is None
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_nearest_returns_highest_scoring_entry_with_its_score(
-    make_repository: Callable[[], TagRepository],
+    repository: TagRepository,
 ) -> None:
-    repository = make_repository()
     query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
     weaker = _tag_with(
         Embedding(model=_EMBEDDING_MODEL, values=(0.7, 0.7)),
@@ -117,11 +124,9 @@ async def test_nearest_returns_highest_scoring_entry_with_its_score(
     assert match.score.value == pytest.approx(1.0)
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_nearest_breaks_equal_scores_by_earlier_created_at(
-    make_repository: Callable[[], TagRepository],
+    repository: TagRepository,
 ) -> None:
-    repository = make_repository()
     query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
     older = _tag_with(
         Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
@@ -142,11 +147,9 @@ async def test_nearest_breaks_equal_scores_by_earlier_created_at(
     assert match.entry is older
 
 
-@pytest.mark.parametrize("make_repository", _IMPLEMENTATIONS, ids=["in_memory"])
 async def test_nearest_ignores_other_model_and_dimension(
-    make_repository: Callable[[], TagRepository],
+    repository: TagRepository,
 ) -> None:
-    repository = make_repository()
     query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
     other_model = _tag_with(
         Embedding(model=_OTHER_MODEL, values=(1.0, 0.0)),
