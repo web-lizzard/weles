@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-remember
-current_phase: 3
-next_step: 3.1
-next_command: /implement db-adapter-remember phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test db-adapter-remember phase 4
 updated: 2026-09-13
 ---
 
@@ -38,9 +38,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 3.1 basedpyright clean
-- [ ] 3.2 ruff check src tests clean
-- [ ] 3.3 pytest -m 'not postgres' passes
+- [x] 3.1 basedpyright clean — 7aabd6d
+- [x] 3.2 ruff check src tests clean — 7aabd6d
+- [x] 3.3 pytest -m 'not postgres' passes — 7aabd6d
 
 ### Phase 4: Catalog, source locator and remember queries on Postgres
 
