@@ -1,7 +1,7 @@
 ---
 change_id: db-adapter-distill
 title: Distill persists in Postgres and a capture approval becomes cards through the outbox
-status: new
+status: planned
 created: 2026-09-13
 updated: 2026-09-13
 archived_at: null
