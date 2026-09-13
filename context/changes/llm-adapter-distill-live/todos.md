@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 5
-next_step: "Generate tests for phase 5: merge on the run"
-next_command: /unit-test llm-adapter-distill-live phase 5
+current_phase: 6
+next_step: 6.tests
+next_command: /unit-test llm-adapter-distill-live phase 6
 updated: 2026-09-13
 ---
 
@@ -51,11 +51,11 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f8638c8
 
 #### Automated
 
-- [ ] 5.1 Run merge suite passes
+- [x] 5.1 Run merge suite passes
 
 ### Phase 6: Distill instruction builders
 

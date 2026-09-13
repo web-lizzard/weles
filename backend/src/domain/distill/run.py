@@ -158,11 +158,27 @@ class DistillRun(BaseModel):
 
     def discard_duplicates(self, groups: Sequence[DuplicateGroup]) -> None:
         """In each group keep the member with the better grade — a replacement
-        over a first-round card on equal grades — and discard the rest
-        `DUPLICATE`, with the group's reasoning as detail. Only members of
-        `merge_pool` are touched."""
-        _ = groups
-        ...
+        over a first-round card on equal grades, then the earlier ref — and
+        discard the rest `DUPLICATE`, with the group's reasoning as detail.
+        Only members of `merge_pool` are touched; a group left with fewer than
+        two pool members is a no-op."""
+        pool = self.merge_pool()
+        pool_by_ref = {candidate.ref: candidate for candidate in pool}
+        order = {candidate.ref: index for index, candidate in enumerate(pool)}
+        for group in groups:
+            members = [pool_by_ref[ref] for ref in group.refs if ref in pool_by_ref]
+            if len(members) < 2:
+                continue
+            survivor = max(members, key=lambda candidate: _merge_rank(candidate, order))
+            for candidate in members:
+                if candidate is survivor:
+                    continue
+                assert candidate.card is not None
+                candidate.card.discard = Discard(
+                    reason=DiscardReason.DUPLICATE,
+                    detail=group.reasoning,
+                    discarded_at=datetime.now(UTC),
+                )
 
     def of_round(self, round: CandidateRound) -> list[Candidate]:
         """Every candidate of one round, in proposal order."""
@@ -198,8 +214,9 @@ class DistillRun(BaseModel):
         return None
 
     def merge_pool(self) -> list[Candidate]:
-        """Candidates accepted by either review — what merge judges."""
-        ...
+        """Candidates accepted by either review, in candidate order — what
+        merge judges."""
+        return [candidate for candidate in self.candidates if candidate.accepted]
 
     def cards(self) -> list[Card]:
         """Every minted card, surviving or discarded, for the command to
@@ -240,3 +257,16 @@ type DistillEvent = Annotated[
 ]
 """Everything a distill phase answers with, model or not. Each member is also
 a phase's declared `output`, so what the model returns is applied as is."""
+
+
+def _merge_rank(
+    candidate: Candidate, order: dict[CandidateRef, int]
+) -> tuple[int, bool, int]:
+    """Merge's survivor ordering: better grade, then a replacement over a
+    first-round card, then the earlier ref — each `max()`-maximized."""
+    assert candidate.verdict is not None
+    return (
+        candidate.verdict.grade.rank,
+        candidate.round is CandidateRound.REPLACEMENT,
+        -order[candidate.ref],
+    )
