@@ -14,8 +14,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 1.1 Graph machine suite passes
-- [x] 1.2 basedpyright clean over src/domain/shared
+- [x] 1.1 Graph machine suite passes — ab1e081
+- [x] 1.2 basedpyright clean over src/domain/shared — ab1e081
 
 ### Phase 2: Review grade and regeneration policy rules
 
