@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-instance-address
-current_phase: 1
-next_step: 1.1
-next_command: /implement auth-flow-instance-address phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test auth-flow-instance-address phase 2
 updated: 2026-09-13
 ---
 
@@ -10,10 +10,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 1.1 Add InstanceAddress, InvalidInstanceAddressError and the parseInstanceAddress signature in instance/address.ts
-- [ ] 1.2 Add ConfigLocation and the config store signatures in instance/configStore.ts
-- [ ] 1.3 Add InstanceCommandDeps and the runInstanceCommand signature in instance/command.ts
-- [ ] 1.4 Pass pnpm typecheck and pnpm lint
+- [x] 1.1 Add InstanceAddress, InvalidInstanceAddressError and the parseInstanceAddress signature in instance/address.ts
+- [x] 1.2 Add ConfigLocation and the config store signatures in instance/configStore.ts
+- [x] 1.3 Add InstanceCommandDeps and the runInstanceCommand signature in instance/command.ts
+- [x] 1.4 Pass pnpm typecheck and pnpm lint
 
 ### Phase 2: Instance address behaviour
 
