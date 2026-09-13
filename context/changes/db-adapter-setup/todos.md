@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-setup
-current_phase: 1
-next_step: 1.3
-next_command: /implement db-adapter-setup phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement db-adapter-setup phase 2
 updated: 2026-09-13
 ---
 
@@ -15,8 +15,8 @@ updated: 2026-09-13
 
 #### Manual
 
-- [ ] 1.3 Rebuild devcontainer and confirm vector extension and TEST_DATABASE_URL
-- [ ] 1.4 Query the dev database through the postgres MCP server and see writes refused
+- [x] 1.3 Rebuild devcontainer and confirm vector extension and TEST_DATABASE_URL
+- [x] 1.4 Query the dev database through the postgres MCP server and see writes refused
 
 ### Phase 2: SQLAlchemy adapter and Alembic environment stubs
 
