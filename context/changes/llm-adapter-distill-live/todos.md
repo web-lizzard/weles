@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
 current_phase: 13
-next_step: 13.4
-next_command: /implement llm-adapter-distill-live phase 13
+next_step: —
+next_command: /archive llm-adapter-distill-live
 updated: 2026-09-13
 ---
 
@@ -141,6 +141,6 @@ updated: 2026-09-13
 
 #### Manual
 
-- [ ] 13.4 Live run against OpenRouter persists grounded cards and note ends ready
-- [ ] 13.5 Langfuse shows one distill_run session per note with per-phase child spans
-- [ ] 13.6 One-sentence note ends ready with zero live cards
+- [x] 13.4 Live run against OpenRouter persists grounded cards and note ends ready
+- [x] 13.5 Langfuse shows one distill_run session per note with per-phase child spans
+- [x] 13.6 One-sentence note ends ready with zero live cards
