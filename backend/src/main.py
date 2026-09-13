@@ -2,8 +2,10 @@ import asyncio
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, Depends, FastAPI
 
+from adapters.auth.router import require_sign_in
+from adapters.auth.router import router as auth_router
 from adapters.compose import get_outbox_worker
 from adapters.http.capture import router as capture_router
 from adapters.http.errors import core_exception_handler
@@ -33,11 +35,17 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
             pass
 
 
+# Deny by default: every router mounted here requires a sign-in. Only the
+# routes mounted directly on `app` below are reachable without one.
+gated = APIRouter(dependencies=[Depends(require_sign_in)])
+gated.include_router(capture_router)
+gated.include_router(notes_router)
+gated.include_router(remember_router)
+
 app = FastAPI(lifespan=lifespan)
 app.include_router(health_router)
-app.include_router(capture_router)
-app.include_router(notes_router)
-app.include_router(remember_router)
+app.include_router(auth_router)
 if settings.environment_name != Environment.PROD:
     app.include_router(outbox_router)
+app.include_router(gated)
 app.add_exception_handler(CoreException, core_exception_handler)

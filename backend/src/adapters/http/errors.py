@@ -53,6 +53,14 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "sitting_expired": 409,
     "card_not_reviewable": 404,
     "source_not_available": 404,
+    "invalid_email_address": 422,
+    "password_too_short": 422,
+    "email_already_registered": 409,
+    "invalid_credentials": 401,
+    "sign_in_required": 401,
+    "password_minimum_below_floor": 500,
+    "non_positive_sign_in_lifetime": 500,
+    "signing_secret_too_short": 500,
 }
 
 
