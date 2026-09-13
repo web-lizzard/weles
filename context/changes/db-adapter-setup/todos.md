@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-setup
 current_phase: 3
-next_step: 3.4
-next_command: /implement db-adapter-setup phase 3
+next_step:
+next_command: /archive db-adapter-setup
 updated: 2026-09-13
 ---
 
@@ -40,5 +40,5 @@ updated: 2026-09-13
 
 #### Manual
 
-- [ ] 3.4 Alembic CLI upgrades the dev database through the adapter alembic.ini
-- [ ] 3.5 MCP server sees alembic_version on the dev database
+- [x] 3.4 Alembic CLI upgrades the dev database through the adapter alembic.ini
+- [x] 3.5 MCP server sees alembic_version on the dev database
