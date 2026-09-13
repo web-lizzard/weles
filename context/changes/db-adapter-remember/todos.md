@@ -10,10 +10,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 1.1 basedpyright clean
-- [x] 1.2 ruff check src tests clean
-- [x] 1.3 pytest -m 'not postgres' passes
-- [x] 1.4 pytest -m postgres tests/integration/postgres passes
+- [x] 1.1 basedpyright clean — 55d47fe
+- [x] 1.2 ruff check src tests clean — 55d47fe
+- [x] 1.3 pytest -m 'not postgres' passes — 55d47fe
+- [x] 1.4 pytest -m postgres tests/integration/postgres passes — 55d47fe
 
 #### Manual
 
