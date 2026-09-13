@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 12
-next_step: 12.1
-next_command: /unit-test llm-adapter-distill-live phase 12
+current_phase: 13
+next_step: 13.1
+next_command: /unit-test llm-adapter-distill-live phase 13
 updated: 2026-09-13
 ---
 
@@ -120,12 +120,12 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5173a5c
 
 #### Automated
 
-- [ ] 12.1 pydantic-ai structured task suite passes
-- [ ] 12.2 basedpyright clean over src/adapters
+- [x] 12.1 pydantic-ai structured task suite passes
+- [x] 12.2 basedpyright clean over src/adapters
 
 ### Phase 13: Live composition and run tracing
 
