@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 9
-next_step: 9.1
-next_command: /unit-test llm-adapter-distill-live phase 9
+current_phase: 10
+next_step: 10.0
+next_command: /unit-test llm-adapter-distill-live phase 10
 updated: 2026-09-13
 ---
 
@@ -89,11 +89,11 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 088fd9d
 
 #### Automated
 
-- [ ] 9.1 Structured task port contract and deterministic adapter suites pass
+- [x] 9.1 Structured task port contract and deterministic adapter suites pass
 
 ### Phase 10: Command walks the flow; old seam removed
 
