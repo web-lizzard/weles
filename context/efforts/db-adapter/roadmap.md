@@ -10,7 +10,7 @@ updated: 2026-09-13
 |----|---------|-----------|--------|
 | S-01 | The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision | db-adapter-setup | done |
 | S-02 | Outbox envelopes persist in Postgres | db-adapter-outbox | done |
-| S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | in_progress |
+| S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | done |
 | S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | pending |
 | S-05 | Remember persists in Postgres and a card rejection discards the distill card through the outbox | db-adapter-remember | pending |
 | S-06 | The daemon runs on Postgres and its state survives a restart | db-adapter-runtime-switch | pending |
@@ -63,7 +63,7 @@ memory until S-06.
 - **Outcome:** Capture persists in Postgres and commits atomically with its envelopes
 - **Acceptance criteria:** FR-02, FR-07
 - **Change ID:** db-adapter-capture
-- **Status:** in_progress
+- **Status:** done
 - **Prerequisites:** S-02
 - **Research:** sql-alchemy
 
@@ -124,3 +124,4 @@ S-05 proved in tests.
 
 - **S-01: The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-setup/`. Lesson: —.
 - **S-02: Outbox envelopes persist in Postgres** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-outbox/`. Lesson: —.
+- **S-03: Capture persists in Postgres and commits atomically with its envelopes** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-db-adapter-capture/`. Lesson: —.

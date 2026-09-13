@@ -1,10 +1,10 @@
 ---
 change_id: db-adapter-capture
 title: Capture persists in Postgres and commits atomically with its envelopes
-status: implementing
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
+archived_at: 2026-09-13T19:01:42Z
 effort_id: db-adapter
 slice_ref: S-03
 ---
