@@ -40,8 +40,7 @@ persisted and the note ends `READY` (even with zero cards). Any model failure le
 ## Architecture / Approach
 Inside-out: shared mechanic → domain rules → run behaviour (mint, review, merge) → builders →
 machine route → deterministic adapter → command + seam swap → real adapter → live wiring.
-Test-first throughout, except the two adapters: discover-contracts-log.md flagged both as
-never stubbed, so each gets its own stubs-and-interfaces phase first (Revision 1).
+Every phase is test-first; no stubs phase since contracts already exist.
 
 ## Phases at a Glance
 
@@ -54,15 +53,13 @@ never stubbed, so each gets its own stubs-and-interfaces phase first (Revision 1
 | 5. Run merge | Survivor rule | Tie ordering |
 | 6. Builders | Phase prose, required blocks | `NOTE` block shape the deterministic adapter reads |
 | 7. Machine & route | Walkable graph, both routes proven | Empty-phase answers |
-| 8. Deterministic adapter — stubs | Class + method shape, no behaviour | — |
-| 9. Deterministic adapter | In-memory port + contract | Keeping BDD's control card |
-| 10. Command & seam swap | Loop, persistence, old seam gone | Constructor change breaks compose/BDD |
-| 11. pydantic-ai adapter — stubs | Class + method shape, no behaviour | — |
-| 12. pydantic-ai adapter | Structured calls, per-call spans | pydantic-ai output API details |
-| 13. Live wiring | Settings, provider switch, run span, manual FR-08 | Real-model output quality |
+| 8. Deterministic adapter | In-memory port + contract | Keeping BDD's control card |
+| 9. Command & seam swap | Loop, persistence, old seam gone | Constructor change breaks compose/BDD |
+| 10. pydantic-ai adapter | Structured calls, per-call spans | pydantic-ai output API details |
+| 11. Live wiring | Settings, provider switch, run span, manual FR-08 | Real-model output quality |
 
-**Prerequisites:** S-01, S-03, S-04 archived done; OpenRouter and Langfuse keys for Phase 13.
-**Estimated effort:** 13 phases — 11 test-first (2–6 tests each) plus 2 stubs-and-interfaces.
+**Prerequisites:** S-01, S-03, S-04 archived done; OpenRouter and Langfuse keys for Phase 11.
+**Estimated effort:** 11 test-first phases, each 2–6 tests.
 
 ## Open Risks & Assumptions
 - Real-model review may grade harshly and trigger regeneration often; tiers are tunable in settings.
