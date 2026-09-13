@@ -1,3 +1,4 @@
+from adapters.auth import sqlalchemy_models as auth_models
 from adapters.out.sqlalchemy.base import Base
 from adapters.out.sqlalchemy.capture import models as capture_models
 from adapters.out.sqlalchemy.distill import models as distill_models
@@ -5,6 +6,7 @@ from adapters.out.sqlalchemy.remember import models as remember_models
 from adapters.out.sqlalchemy.shared.outbox import models as outbox_models
 from sqlalchemy import MetaData
 
+_ = auth_models
 _ = outbox_models
 _ = capture_models
 _ = distill_models
