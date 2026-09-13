@@ -196,7 +196,7 @@ class Transition[ContextT, DepsT, EventT](BaseModel, frozen=True):
     """
 
     guard: EdgeCondition[ContextT] | None = None
-    actions: Sequence[EdgeAction[ContextT, DepsT]] = ()
+    edge_actions: Sequence[EdgeAction[ContextT, DepsT]] = ()
 
 
 class Graph[ContextT, DepsT, EventT, NameT: StrEnum](BaseModel, frozen=True):

@@ -130,7 +130,7 @@ class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
             return False
         source = self.current_state_name
         edge = self.graph.outgoing(source)[target]
-        for action in edge.actions:
+        for action in edge.edge_actions:
             await action(self._context, self._deps)
         self.enter_state(self._context, target)
         return True

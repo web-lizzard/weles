@@ -137,12 +137,14 @@ def _intake_graph(
         },
         transitions={
             _Phase.OPEN: {
-                _Phase.WAITING: Transition[object, object, str](actions=open_actions),
+                _Phase.WAITING: Transition[object, object, str](
+                    edge_actions=open_actions
+                ),
             },
             _Phase.WAITING: {
                 _Phase.CLOSED: Transition[object, object, str](
                     guard=waiting_guard,
-                    actions=waiting_actions,
+                    edge_actions=waiting_actions,
                 ),
             },
         },
@@ -203,7 +205,7 @@ def test_outgoing_lists_edges_by_target_and_is_empty_when_the_source_has_none() 
     graph = _intake_graph(waiting_guard=refuse, open_actions=(seal,))
 
     assert graph.outgoing(_Phase.OPEN) == {
-        _Phase.WAITING: Transition[object, object, str](actions=(seal,)),
+        _Phase.WAITING: Transition[object, object, str](edge_actions=(seal,)),
     }
     assert graph.outgoing(_Phase.WAITING) == {
         _Phase.CLOSED: Transition[object, object, str](guard=refuse),

@@ -550,7 +550,7 @@ _CAPTURE_GRAPH = Graph[CaptureTurn, CaptureDeps, CaptureEvent, CapturePhase](
         CapturePhase.CONVERSING: {
             CapturePhase.DRAFTING: Transition[CaptureTurn, CaptureDeps, CaptureEvent](
                 guard=consent_given,
-                actions=(_consume_drafting_consent,),
+                edge_actions=(_consume_drafting_consent,),
             )
         },
         # Guarded on purpose. Without `conversation_requested`, every drafting
@@ -560,7 +560,7 @@ _CAPTURE_GRAPH = Graph[CaptureTurn, CaptureDeps, CaptureEvent, CapturePhase](
         CapturePhase.DRAFTING: {
             CapturePhase.CONVERSING: Transition[CaptureTurn, CaptureDeps, CaptureEvent](
                 guard=conversation_requested,
-                actions=(_consume_conversation_request,),
+                edge_actions=(_consume_conversation_request,),
             )
         },
     },
