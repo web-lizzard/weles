@@ -10,10 +10,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 1.1 Add InstanceAddress, InvalidInstanceAddressError and the parseInstanceAddress signature in instance/address.ts
-- [x] 1.2 Add ConfigLocation and the config store signatures in instance/configStore.ts
-- [x] 1.3 Add InstanceCommandDeps and the runInstanceCommand signature in instance/command.ts
-- [x] 1.4 Pass pnpm typecheck and pnpm lint
+- [x] 1.1 Add InstanceAddress, InvalidInstanceAddressError and the parseInstanceAddress signature in instance/address.ts — a2d37e9
+- [x] 1.2 Add ConfigLocation and the config store signatures in instance/configStore.ts — a2d37e9
+- [x] 1.3 Add InstanceCommandDeps and the runInstanceCommand signature in instance/command.ts — a2d37e9
+- [x] 1.4 Pass pnpm typecheck and pnpm lint — a2d37e9
 
 ### Phase 2: Instance address behaviour
 
