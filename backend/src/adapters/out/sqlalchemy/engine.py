@@ -1,11 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 
-def create_engine(_url: str) -> AsyncEngine:
-    raise NotImplementedError
+def create_engine(url: str) -> AsyncEngine:
+    return create_async_engine(url)
 
 
 def create_session_factory(
-    _engine: AsyncEngine,
+    engine: AsyncEngine,
 ) -> async_sessionmaker[AsyncSession]:
-    raise NotImplementedError
+    return async_sessionmaker(engine, expire_on_commit=False)
