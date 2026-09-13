@@ -38,9 +38,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 3.1 basedpyright clean
-- [x] 3.2 ruff check clean over src and tests
-- [x] 3.3 Non-postgres suite passes
+- [x] 3.1 basedpyright clean — fbf6d88
+- [x] 3.2 ruff check clean over src and tests — fbf6d88
+- [x] 3.3 Non-postgres suite passes — fbf6d88
 
 ### Phase 4: Envelope state survives a fresh engine and the worker runs on Postgres
 
