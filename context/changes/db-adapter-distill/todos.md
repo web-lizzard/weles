@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-distill
-current_phase: 3
-next_step: 3.1
-next_command: /implement db-adapter-distill phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test db-adapter-distill phase 4
 updated: 2026-09-13
 ---
 
@@ -38,9 +38,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 3.1 basedpyright clean
-- [ ] 3.2 ruff check src tests clean
-- [ ] 3.3 pytest -m 'not postgres' passes
+- [x] 3.1 basedpyright clean
+- [x] 3.2 ruff check src tests clean
+- [x] 3.3 pytest -m 'not postgres' passes
 
 ### Phase 4: Distill queries on Postgres
 
