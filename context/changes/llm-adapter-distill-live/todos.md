@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test llm-adapter-distill-live phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test llm-adapter-distill-live phase 3
 updated: 2026-09-13
 ---
 
@@ -21,11 +21,11 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8967851
 
 #### Automated
 
-- [ ] 2.1 Value object and regeneration policy suites pass
+- [x] 2.1 Value object and regeneration policy suites pass
 
 ### Phase 3: Minting a round on the run
 

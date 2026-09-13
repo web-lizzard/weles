@@ -190,12 +190,12 @@ class ReviewGrade(StrEnum):
     @property
     def rank(self) -> int:
         """Position on the scale, higher is better. What merge compares."""
-        ...
+        return list(ReviewGrade).index(self)
 
     @property
     def passes(self) -> bool:
         """Whether a card with this grade is accepted."""
-        ...
+        return self in (ReviewGrade.SOUND, ReviewGrade.STRONG)
 
 
 class CardVerdict(BaseModel, frozen=True):
