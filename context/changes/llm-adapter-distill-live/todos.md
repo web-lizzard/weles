@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 6
-next_step: 6.tests
-next_command: /unit-test llm-adapter-distill-live phase 6
+current_phase: 7
+next_step: 7.0
+next_command: /unit-test llm-adapter-distill-live phase 7
 updated: 2026-09-13
 ---
 
@@ -61,11 +61,11 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 26ce180
 
 #### Automated
 
-- [ ] 6.1 Distill instructions suite passes
+- [x] 6.1 Distill instructions suite passes — <PENDING_SHA>
 
 ### Phase 7: Distill machine wiring and route
 
