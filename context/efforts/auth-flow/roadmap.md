@@ -42,8 +42,8 @@ Every other slice needs a signed-in person, so identity and the gate come first.
 together because a gate without sign-in only breaks the TUI and demonstrates nothing. The same
 rules hold on localhost. This slice also carries FR-009, which has no story: rejecting a caller
 who is not signed in consumes neither database nor LLM resources, while sign-in and
-registration themselves are exempt. The slice runs on in-memory adapters; people, sign-ins, and
-data ownership reach Postgres in one separate change that is not a slice of this roadmap.
+registration themselves are exempt. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change. Work on this effort starts only after
+`db-adapter` is complete, so the daemon already runs on Postgres.
 
 ### S-02: A person can point the TUI at an instance of their choosing
 
@@ -69,7 +69,7 @@ sends the old instance's sign-in to the new one.
 
 The exact validity period is PRD Open Question 1, resolved in this change's `/plan`. Expiry
 during a capture conversation or a review sitting tells the person and lets them sign in
-again; the PRD does not commit to the in-progress work surviving.
+again; the PRD does not commit to the in-progress work surviving. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
 ### S-04: Each person's captures, notes, and the cards distilled from them belong only to that person
 
@@ -83,9 +83,7 @@ again; the PRD does not commit to the in-progress work surviving.
 Capture and distill are cut together because cards are generated in the background from a
 person's notes, so ownership has to travel with the approval across the outbox. Until S-05
 lands, remember still reads across people; that intermediate state is acceptable only because
-the hosted instance stays off public addresses until FR-007 and FR-008 hold. Runs on in-memory
-adapters; `db-adapter` proceeds in parallel, and ownership on Postgres arrives in the separate
-change noted on S-01.
+the hosted instance stays off public addresses until FR-007 and FR-008 hold. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
 ### S-05: Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain
 
@@ -98,8 +96,7 @@ change noted on S-01.
 
 Remember follows capture and distill because its catalog and source lookup read distill's cards
 and notes. This slice closes the whole chain, so it carries the chain-wide criteria: no read and
-no change crosses between people at any stage. Runs on in-memory adapters, with Postgres
-ownership in the separate change noted on S-01.
+no change crosses between people at any stage. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
 ### S-06: A person can sign out and hand the TUI to another account without leaking the previous person's data
 
@@ -111,7 +108,7 @@ ownership in the separate change noted on S-01.
 - **Parallel with:** S-02, S-03, S-07
 
 Waits on S-05 because "none of the previous person's data is visible" is only a meaningful check
-once data is separated across the whole chain.
+once data is separated across the whole chain. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
 ### S-07: Repeated sign-in and registration attempts from one source are limited
 
@@ -123,6 +120,6 @@ once data is separated across the whole chain.
 - **Parallel with:** S-02, S-03, S-04, S-05, S-06
 
 Realizes the nice-to-have FR-010. The limit itself is PRD Open Question 2, resolved in this
-change's `/plan`.
+change's `/plan`. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
 ## Done
