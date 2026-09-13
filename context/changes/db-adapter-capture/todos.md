@@ -30,16 +30,16 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 3.1 basedpyright clean
-- [x] 3.2 ruff check src tests clean
-- [x] 3.3 pytest -m 'not postgres' passes
-- [x] 3.4 pytest -m postgres tests/integration/postgres passes
+- [x] 3.1 basedpyright clean — 1b07ae5
+- [x] 3.2 ruff check src tests clean — 1b07ae5
+- [x] 3.3 pytest -m 'not postgres' passes — 1b07ae5
+- [x] 3.4 pytest -m postgres tests/integration/postgres passes — 1b07ae5
 
 #### Manual
 
-- [x] 3.5 alembic upgrade head exits 0 on the dev database and current prints the capture revision as head
-- [x] 3.6 postgres MCP finds the vector extension and the six capture tables
-- [x] 3.7 alembic downgrade -1 removes the capture tables and vector extension, and upgrade head restores them
+- [x] 3.5 alembic upgrade head exits 0 on the dev database and current prints the capture revision as head — 1b07ae5
+- [x] 3.6 postgres MCP finds the vector extension and the six capture tables — 1b07ae5
+- [x] 3.7 alembic downgrade -1 removes the capture tables and vector extension, and upgrade head restores them — 1b07ae5
 
 ### Phase 4: Capture repositories on Postgres
 
