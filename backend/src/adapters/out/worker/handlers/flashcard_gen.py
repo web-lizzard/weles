@@ -2,6 +2,7 @@ import logging
 
 from pydantic import ValidationError
 
+from adapters.out.llm.tracing import observation
 from application.distill.commands.generate_cards import GenerateCardsCommand
 from domain.distill.outbox import NOTE_SAVED, NoteSavedPayload
 from domain.distill.value_objects import NoteId
@@ -23,4 +24,11 @@ class FlashcardGenHandler:
             logger.exception("malformed note_saved envelope: id=%s", envelope.id)
             return
 
-        await self._command.handle(NoteId(value=payload.note_id))
+        note_id = payload.note_id
+        with observation(
+            "distill_run",
+            observation_type="chain",
+            input_value={"note_id": str(note_id)},
+            session_id=str(note_id),
+        ):
+            await self._command.handle(NoteId(value=note_id))
