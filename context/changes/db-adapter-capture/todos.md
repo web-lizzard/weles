@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-capture
 current_phase: 6
-next_step: tests
-next_command: /unit-test db-adapter-capture phase 6
+next_step:
+next_command: /archive db-adapter-capture
 updated: 2026-09-13
 ---
 
@@ -66,10 +66,10 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a557bfe
 
 #### Automated
 
-- [ ] 6.1 pytest tests/integration/postgres/test_capture_persistence.py passes
-- [ ] 6.2 pytest passes
-- [ ] 6.3 basedpyright and ruff check src tests clean
+- [x] 6.1 pytest tests/integration/postgres/test_capture_persistence.py passes
+- [x] 6.2 pytest passes
+- [x] 6.3 basedpyright and ruff check src tests clean

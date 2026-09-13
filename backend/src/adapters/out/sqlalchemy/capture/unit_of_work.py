@@ -29,6 +29,8 @@ class SqlAlchemyCaptureUnitOfWork:
 
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
+        self._committed: bool = False
+        self._session: AsyncSession | None = None
         _session = cast(AsyncSession, object())
         self.capture_sessions = SqlAlchemyCaptureSessionRepository(_session)
         self.messages = SqlAlchemyMessageRepository(_session)
@@ -39,10 +41,31 @@ class SqlAlchemyCaptureUnitOfWork:
         self.outbox = SqlAlchemyOutboxAppender(_session)
 
     async def __aenter__(self) -> "SqlAlchemyCaptureUnitOfWork":
-        raise NotImplementedError
+        self._committed = False
+        session = self._session_factory()
+        self._session = session
+        self.capture_sessions = SqlAlchemyCaptureSessionRepository(session)
+        self.messages = SqlAlchemyMessageRepository(session)
+        self.notes = SqlAlchemyNoteRepository(session)
+        self.topics = SqlAlchemyTopicRepository(session)
+        self.tags = SqlAlchemyTagRepository(session)
+        self.note_vocabulary = SqlAlchemyNoteVocabularyRepository(session)
+        self.outbox = SqlAlchemyOutboxAppender(session)
+        return self
 
     async def __aexit__(self, *exc: object) -> None:
-        raise NotImplementedError
+        session = self._session
+        if session is None:
+            return
+        try:
+            if not self._committed:
+                await session.rollback()
+        finally:
+            await session.close()
+            self._session = None
 
     async def commit(self) -> None:
-        raise NotImplementedError
+        session = self._session
+        assert session is not None
+        await session.commit()
+        self._committed = True
