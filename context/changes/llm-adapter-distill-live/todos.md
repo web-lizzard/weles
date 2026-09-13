@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 11
-next_step: 11.1
-next_command: /implement llm-adapter-distill-live phase 11
+current_phase: 12
+next_step: 12.1
+next_command: /unit-test llm-adapter-distill-live phase 12
 updated: 2026-09-13
 ---
 
@@ -113,8 +113,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 11.1 pydantic-ai structured task adapter module imports
-- [ ] 11.2 basedpyright clean over the pydantic-ai structured task module
+- [x] 11.1 pydantic-ai structured task adapter module imports
+- [x] 11.2 basedpyright clean over the pydantic-ai structured task module
 
 ### Phase 12: pydantic-ai structured task adapter
 
