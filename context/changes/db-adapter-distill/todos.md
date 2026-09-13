@@ -58,9 +58,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 5.1 basedpyright clean
-- [x] 5.2 ruff check src tests clean
-- [x] 5.3 pytest -m 'not postgres' passes
+- [x] 5.1 basedpyright clean — 3a9539d
+- [x] 5.2 ruff check src tests clean — 3a9539d
+- [x] 5.3 pytest -m 'not postgres' passes — 3a9539d
 
 ### Phase 6: Unit of work, atomic commands and the capture-to-cards relay on Postgres
 
