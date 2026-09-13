@@ -75,8 +75,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 7.1 Distill flow suite passes
-- [x] 7.2 basedpyright clean over src/domain
+- [x] 7.1 Distill flow suite passes — 79a27ed
+- [x] 7.2 basedpyright clean over src/domain — 79a27ed
 
 ### Phase 8: Deterministic structured task adapter
 
