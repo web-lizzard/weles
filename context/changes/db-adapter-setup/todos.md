@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-setup
-current_phase: 2
-next_step: 2.1
-next_command: /implement db-adapter-setup phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test db-adapter-setup phase 3
 updated: 2026-09-13
 ---
 
@@ -22,9 +22,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 2.1 basedpyright clean
-- [ ] 2.2 ruff check clean over src and tests
-- [ ] 2.3 Non-postgres suite passes
+- [x] 2.1 basedpyright clean — a9f7f66
+- [x] 2.2 ruff check clean over src and tests — a9f7f66
+- [x] 2.3 Non-postgres suite passes — a9f7f66
 
 ### Phase 3: Postgres engine, session source and empty-history migration
 
