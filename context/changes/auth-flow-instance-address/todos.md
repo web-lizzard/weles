@@ -6,6 +6,7 @@ next_command: /implement auth-flow-instance-address phase 4
 updated: 2026-09-13
 ---
 
+
 ### Phase 1: Instance address stubs
 
 #### Automated
@@ -59,3 +60,7 @@ updated: 2026-09-13
 - [ ] 4.9 Start the TUI against a running backend and confirm notes and due count load
 - [ ] 4.10 Set a port with no backend and confirm the TUI shows load failures and none of the previous notes
 - [ ] 4.11 Confirm dist/cli.js contains no localhost:8000
+
+#### Triage
+
+- [x] 4.12 R1-F1 Sitting store edits outside Phase 4 Changes Required — 3f4bdcb
