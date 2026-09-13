@@ -70,6 +70,6 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 6.1 pytest tests/integration/postgres/test_capture_persistence.py passes
-- [x] 6.2 pytest passes
-- [x] 6.3 basedpyright and ruff check src tests clean
+- [x] 6.1 pytest tests/integration/postgres/test_capture_persistence.py passes — 8a6a9af
+- [x] 6.2 pytest passes — 8a6a9af
+- [x] 6.3 basedpyright and ruff check src tests clean — 8a6a9af
