@@ -8,7 +8,7 @@ updated: 2026-09-13
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision | db-adapter-setup | pending |
+| S-01 | The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision | db-adapter-setup | in_progress |
 | S-02 | Outbox envelopes persist in Postgres | db-adapter-outbox | pending |
 | S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | pending |
 | S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | pending |
@@ -33,7 +33,7 @@ flowchart LR
 - **Outcome:** The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision
 - **Acceptance criteria:** FR-09
 - **Change ID:** db-adapter-setup
-- **Status:** pending
+- **Status:** in_progress
 - **Research:** sql-alchemy
 
 This slice gives the rest of the effort a place to stand. A Postgres MCP server, configured

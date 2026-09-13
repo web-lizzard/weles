@@ -1,7 +1,7 @@
 ---
 effort_id: db-adapter
 title: Db adapter
-status: new
+status: active
 created: 2026-09-12
 updated: 2026-09-13
 archived_at: null
