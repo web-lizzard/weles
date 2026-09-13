@@ -235,6 +235,7 @@ async def test_regenerating_route_walk_ends_in_merging_via_replacement_review() 
     assert machine.current_state_name is DistillPhase.REVIEWING_REPLACEMENTS
 
     [replacement] = run.of_round(CandidateRound.REPLACEMENT)
+    assert replacement.verdict is None
     await machine.apply(
         CardsReviewed(
             verdicts=[
@@ -244,6 +245,10 @@ async def test_regenerating_route_walk_ends_in_merging_via_replacement_review() 
             ]
         )
     )
+    # R2-F1: replacement review must call record_verdicts for CandidateRound.REPLACEMENT
+    assert replacement.verdict is not None
+    assert replacement.verdict.grade is ReviewGrade.SOUND
+    assert replacement.verdict.reasoning == "fixed"
     assert await machine.advance() is True
     assert machine.current_state_name is DistillPhase.MERGING
 
