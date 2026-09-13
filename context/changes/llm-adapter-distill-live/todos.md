@@ -65,7 +65,7 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 6.1 Distill instructions suite passes — <PENDING_SHA>
+- [x] 6.1 Distill instructions suite passes — 4f80184
 
 ### Phase 7: Distill machine wiring and route
 
