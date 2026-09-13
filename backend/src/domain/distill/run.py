@@ -10,12 +10,16 @@ from domain.distill.note import Note
 from domain.distill.note_document import NoteDocument
 from domain.distill.regeneration import RegenerationPolicy
 from domain.distill.value_objects import (
+    Anchor,
+    AnchorResolution,
     CandidateRef,
     CardProposal,
+    CardSide,
     CardVerdict,
     DistillPhase,
     DuplicateGroup,
 )
+from domain.exceptions import CoreException
 
 
 class CandidateRound(StrEnum):
@@ -45,7 +49,9 @@ class Candidate(BaseModel):
     @property
     def awaits_review(self) -> bool:
         """Minted, not discarded at the gates, and not yet judged."""
-        ...
+        return (
+            self.card is not None and self.card.discard is None and self.verdict is None
+        )
 
     @property
     def accepted(self) -> bool:
@@ -57,7 +63,14 @@ class Candidate(BaseModel):
         """Why this candidate did not survive, as regeneration is told it: the
         review's reasoning, the gate's discard reason, or that the proposal
         could not become a card. `None` for a candidate still standing."""
-        ...
+        if self.card is None:
+            return "could not become a card"
+        discard = self.card.discard
+        if discard is None:
+            return None
+        if discard.detail is not None:
+            return f"{discard.reason}: {discard.detail}"
+        return str(discard.reason)
 
 
 class DistillRun(BaseModel):
@@ -90,8 +103,25 @@ class DistillRun(BaseModel):
         Called once per round — a second call for a round already present is
         a mistake of the flow, which the graph's shape already rules out.
         """
-        _ = round, proposals, card_factory
-        ...
+        for proposal in proposals:
+            ref = CandidateRef(value=f"c{len(self.candidates) + 1}")
+            card: Card | None
+            try:
+                front = CardSide(value=proposal.front)
+                back = CardSide(value=proposal.back)
+                anchor = Anchor(quote=proposal.quote)
+                location = self.document.locate(anchor)
+                resolution = (
+                    AnchorResolution.RESOLVED
+                    if location is not None
+                    else AnchorResolution.UNRESOLVED
+                )
+                card = card_factory.mint(self.note.id, front, back, anchor, resolution)
+            except CoreException:
+                card = None
+            self.candidates.append(
+                Candidate(ref=ref, round=round, proposal=proposal, card=card)
+            )
 
     def record_verdicts(
         self, round: CandidateRound, verdicts: Sequence[CardVerdict]
@@ -114,13 +144,13 @@ class DistillRun(BaseModel):
 
     def of_round(self, round: CandidateRound) -> list[Candidate]:
         """Every candidate of one round, in proposal order."""
-        _ = round
-        raise NotImplementedError
+        return [candidate for candidate in self.candidates if candidate.round is round]
 
     def awaiting_review(self, round: CandidateRound) -> list[Candidate]:
         """The round's candidates a review phase judges."""
-        _ = round
-        raise NotImplementedError
+        return [
+            candidate for candidate in self.of_round(round) if candidate.awaits_review
+        ]
 
     def regeneration_needed(self) -> bool:
         """The first round's accepted share falls below the policy's threshold
@@ -143,7 +173,11 @@ class DistillRun(BaseModel):
     def cards(self) -> list[Card]:
         """Every minted card, surviving or discarded, for the command to
         persist once the run has finished."""
-        ...
+        return [
+            candidate.card
+            for candidate in self.candidates
+            if candidate.card is not None
+        ]
 
 
 class CardsProposed(BaseModel, frozen=True):

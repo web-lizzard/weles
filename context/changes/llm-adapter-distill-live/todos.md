@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test llm-adapter-distill-live phase 3
+current_phase: 4
+next_step: ""
+next_command: /unit-test llm-adapter-distill-live phase 4
 updated: 2026-09-13
 ---
 
@@ -31,17 +31,17 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — bc7352f
 
 #### Automated
 
-- [ ] 3.1 Run minting suite passes
+- [x] 3.1 Run minting suite passes
 
 ### Phase 4: Review verdicts, share, and gaps on the run
 
 #### Tests
 
-- [ ] tests generated
+- [ ] tests generatedxtru
 
 #### Automated
 
