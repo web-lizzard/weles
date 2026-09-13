@@ -17,9 +17,9 @@ updated: 2026-09-13
 
 #### Manual
 
-- [x] 1.5 alembic upgrade head exits 0 on the dev database and current prints the distill revision as head
-- [x] 1.6 postgres MCP lists the three distill tables
-- [x] 1.7 alembic downgrade -1 removes the distill tables while capture tables remain, and upgrade head restores them
+- [x] 1.5 alembic upgrade head exits 0 on the dev database and current prints the distill revision as head — 1f4276f
+- [x] 1.6 postgres MCP lists the three distill tables — 1f4276f
+- [x] 1.7 alembic downgrade -1 removes the distill tables while capture tables remain, and upgrade head restores them — 1f4276f
 
 ### Phase 2: Distill repositories on Postgres
 
