@@ -10,8 +10,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 1.1 .mcp.json parses as JSON
-- [x] 1.2 postgres-mcp launch command resolves with the mcp<2 pin
+- [x] 1.1 .mcp.json parses as JSON — 59e7bcb
+- [x] 1.2 postgres-mcp launch command resolves with the mcp<2 pin — 59e7bcb
 
 #### Manual
 
