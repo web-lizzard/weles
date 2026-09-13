@@ -128,19 +128,21 @@ async def test_commit_persists_notes_topics_and_tags() -> None:
     assert await tag_repo.get(tag.id) == tag
 
 
-async def test_rollback_without_commit_excludes_topics_and_tags_from_candidates() -> (
+async def test_rollback_without_commit_leaves_no_topic_or_tag_to_find_as_nearest() -> (
     None
 ):
     uow, _, topic_repo, tag_repo, _ = _make_unit_of_work()
     topic = _sample_topic()
     tag = _sample_tag()
+    topic_query = topic.embedding
+    tag_query = tag.embedding
 
     async with uow:
         await topic_repo.add(topic)
         await tag_repo.add(tag)
 
-    assert await topic_repo.candidates() == []
-    assert await tag_repo.candidates() == []
+    assert await topic_repo.nearest(topic_query) is None
+    assert await tag_repo.nearest(tag_query) is None
 
 
 async def test_outbox_snapshot_restore_isolates_envelope_mutations_R2_F2() -> None:
