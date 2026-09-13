@@ -12,11 +12,11 @@ from adapters.out.sqlalchemy.capture.types import (
     NoteIdType,
     SessionIdType,
     SessionTopicType,
-    StrEnumType,
     TagIdType,
     TopicIdType,
     VectorType,
 )
+from adapters.out.sqlalchemy.shared.types import StrEnumType
 from domain.capture.value_objects import (
     CapturePhase,
     ConversationRequest,
