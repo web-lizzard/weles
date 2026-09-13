@@ -1,7 +1,5 @@
 # Distill Generates Cards End to End Against a Real Provider — Implementation Plan
 
-> Revision 1 (2026-09-13): `/unit-test` hit a genuine `ModuleNotFoundError` for `DeterministicStructuredTaskAdapter` — discover-contracts-log.md's "Unwritten surfaces" already flagged both structured-task adapters (deterministic and pydantic-ai) as never stubbed, contradicting the "no stubs phase" premise for those two units. Split each into a stubs-and-interfaces phase plus its behavior phase, ahead of hitting the same failure on the pydantic-ai one too. Renumbered: old 8 (deterministic, behavior) → 9, new 8 = its stubs phase; old 9 (command loop) → 10 unchanged; old 10 (pydantic-ai, behavior) → 12, new 11 = its stubs phase; old 11 (live composition) → 13. Prior version: plan-versions/v1-plan.md
-
 Execution state lives in `todos.md` (sibling of this file), per the `/plan` skill's `references/todos-format.md`.
 
 ## Overview
@@ -49,7 +47,7 @@ one parent span per note (session = note id) with one child span per model call.
 
 Verify: `cd backend && uv run pytest` green (unit, contracts, integration, BDD),
 `uv run basedpyright` and `uv run ruff check src tests` clean, and the manual live run in
-Phase 13.
+Phase 11.
 
 ### Key Discoveries:
 - `StructuredStateMachine` docstring (`backend/src/domain/shared/graph/machine.py:158-178`)
@@ -87,10 +85,7 @@ Inside-out along the dependency order the contract already fixes: shared mechani
 builders → machine wiring and route → deterministic port adapter → command loop and seam
 swap (BDD must stay green) → real-provider adapter → live composition and tracing. Every
 phase is a behaviour phase with failing tests first; no stubs phase, because the contract
-is already in the working tree — true for the domain (Phases 1–7), but not for the two
-adapters (Phases 8 and 11): discover-contracts-log.md's "Unwritten surfaces" names both as
-never stubbed, so each gets its own stubs-and-interfaces phase (Revision 1) before its
-behavior phase.
+is already in the working tree.
 
 Rules settled in planning (beyond frame and contract sessions):
 
@@ -106,7 +101,7 @@ Rules settled in planning (beyond frame and contract sessions):
 
 ## Critical Implementation Details
 
-Phase 10 is the only phase that changes a constructor other suites build: `compose.py`,
+Phase 9 is the only phase that changes a constructor other suites build: `compose.py`,
 `tests/integration/support/in_memory_distill.py`, and the two command/handler unit suites
 must move in the same phase, or BDD and `adapters.compose` import break. The persist step
 must run only after the walk ends in a terminal phase — persisting inside the loop would
@@ -323,29 +318,7 @@ The graph becomes walkable, and both routes are proven without a model (FR-04).
 
 ---
 
-## Phase 8: Deterministic structured task adapter — stubs and interfaces
-
-### Overview
-Materialize `DeterministicStructuredTaskAdapter`'s shape so Phase 9's failing tests import a symbol that already resolves, instead of hitting a missing module.
-
-### Changes Required:
-
-#### 1. Adapter shape
-**File**: `backend/src/adapters/out/in_memory/distill/structured_task.py`
-
-**Intent**: Declare the class and its one method with the signature Phase 9's tests call. No behaviour.
-
-**Contract**: `class DeterministicStructuredTaskAdapter:` with `async def complete[OutputT: BaseModel](self, instruction: Instruction, output: type[OutputT]) -> OutputT:` — stub parameters marked `_ = …`, body `raise NotImplementedError`, matching capture's stub convention.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run python -c "import adapters.out.in_memory.distill.structured_task"` exits 0
-- `cd backend && uv run basedpyright src/adapters/out/in_memory/distill/structured_task.py` reports 0 errors
-
----
-
-## Phase 9: Deterministic structured task adapter
+## Phase 8: Deterministic structured task adapter
 
 ### Overview
 The in-memory adapter for `StructuredTaskPort`, thin, driving off the domain's declarations.
@@ -379,7 +352,7 @@ The in-memory adapter for `StructuredTaskPort`, thin, driving off the domain's d
 
 ---
 
-## Phase 10: Command walks the flow; old seam removed
+## Phase 9: Command walks the flow; old seam removed
 
 ### Overview
 `GenerateCardsCommand` runs the loop; composition and test support move to the new port; the single-shot seam goes.
@@ -396,7 +369,7 @@ The in-memory adapter for `StructuredTaskPort`, thin, driving off the domain's d
 #### 2. Seam swap
 **Files**: `backend/src/adapters/compose.py`, `backend/tests/integration/support/in_memory_distill.py`, `backend/src/application/distill/ports.py`, `backend/src/application/distill/value_objects.py`, `backend/src/adapters/out/in_memory/distill/card_generation.py`, `backend/tests/unit/distill/contracts/test_card_generation_contract.py`, `backend/tests/unit/distill/test_flashcard_gen_handler.py`
 
-**Intent**: Wire the deterministic structured task adapter and a `RegenerationPolicy` (tiers ≤1500: 0.5, ≤6000: 0.6, open: 0.7 — compose reads them from settings only in Phase 13, a module constant until then); delete `CardGeneration`, `DeterministicCardGenerationAdapter`, its contract suite, and the `application.distill.value_objects` re-export, moving imports to `domain.distill.value_objects.CardProposal`.
+**Intent**: Wire the deterministic structured task adapter and a `RegenerationPolicy` (tiers ≤1500: 0.5, ≤6000: 0.6, open: 0.7 — compose reads them from settings only in Phase 11, a module constant until then); delete `CardGeneration`, `DeterministicCardGenerationAdapter`, its contract suite, and the `application.distill.value_objects` re-export, moving imports to `domain.distill.value_objects.CardProposal`.
 
 **Contract**: `InMemoryDistillComposition.structured_task: DeterministicStructuredTaskAdapter` replaces `card_generation`; `regeneration_policy` field added. No remaining reference to `CardGeneration` under `backend/`.
 
@@ -415,29 +388,7 @@ The in-memory adapter for `StructuredTaskPort`, thin, driving off the domain's d
 
 ---
 
-## Phase 11: pydantic-ai structured task adapter — stubs and interfaces
-
-### Overview
-Materialize `PydanticAiStructuredTaskAdapter`'s constructor and method shape so Phase 12's failing tests import a symbol that already resolves, instead of hitting a missing module the way Phase 9's did before Phase 8 existed.
-
-### Changes Required:
-
-#### 1. Adapter shape
-**File**: `backend/src/adapters/out/llm/distill/structured_task.py` (plus `__init__.py`)
-
-**Intent**: Declare the class, its constructor, and its one method with the signature Phase 12's tests call. No behaviour.
-
-**Contract**: `class PydanticAiStructuredTaskAdapter:` with `def __init__(self, agent: Agent, model_name: str) -> None:` and `async def complete[OutputT: BaseModel](self, instruction: Instruction, output: type[OutputT]) -> OutputT:` — stub parameters marked `_ = …`, body `raise NotImplementedError`.
-
-### Success Criteria:
-
-#### Automated Verification:
-- `cd backend && uv run python -c "import adapters.out.llm.distill.structured_task"` exits 0
-- `cd backend && uv run basedpyright src/adapters/out/llm/distill/structured_task.py` reports 0 errors
-
----
-
-## Phase 12: pydantic-ai structured task adapter
+## Phase 10: pydantic-ai structured task adapter
 
 ### Overview
 The real-provider adapter, rendering the domain's instruction and output, traced per call.
@@ -463,7 +414,7 @@ The real-provider adapter, rendering the domain's instruction and output, traced
 
 ---
 
-## Phase 13: Live composition and run tracing
+## Phase 11: Live composition and run tracing
 
 ### Overview
 Select the provider by settings, group each run's calls under one Langfuse session, and verify end to end against a real provider (FR-08).
@@ -521,7 +472,7 @@ Select the provider by settings, group each run's calls under one Langfuse sessi
 - Existing `tests/integration` suites over `InMemoryDistillComposition`; BDD `distill-flow` AC-03..AC-06 stay green unchanged.
 
 ### Manual Testing Steps:
-- Phase 13 live run and Langfuse inspection.
+- Phase 11 live run and Langfuse inspection.
 
 ## Performance Considerations
 

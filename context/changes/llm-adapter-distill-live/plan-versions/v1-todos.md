@@ -2,7 +2,7 @@
 change_id: llm-adapter-distill-live
 current_phase: 8
 next_step: 8.1
-next_command: /implement llm-adapter-distill-live phase 8
+next_command: /unit-test llm-adapter-distill-live phase 8
 updated: 2026-09-13
 ---
 
@@ -78,14 +78,7 @@ updated: 2026-09-13
 - [x] 7.1 Distill flow suite passes — 79a27ed
 - [x] 7.2 basedpyright clean over src/domain — 79a27ed
 
-### Phase 8: Deterministic structured task adapter — stubs and interfaces
-
-#### Automated
-
-- [ ] 8.1 Deterministic structured task adapter module imports
-- [ ] 8.2 basedpyright clean over the deterministic structured task module
-
-### Phase 9: Deterministic structured task adapter
+### Phase 8: Deterministic structured task adapter
 
 #### Tests
 
@@ -93,30 +86,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 9.1 Structured task port contract and deterministic adapter suites pass
+- [ ] 8.1 Structured task port contract and deterministic adapter suites pass
 
-### Phase 10: Command walks the flow; old seam removed
-
-#### Tests
-
-- [ ] tests generated
-
-#### Automated
-
-- [ ] 10.1 Distill unit suite passes
-- [ ] 10.2 BDD distill-flow scenarios pass
-- [ ] 10.3 Integration suite passes
-- [ ] 10.4 adapters.compose imports
-- [ ] 10.5 No CardGeneration reference remains under backend
-
-### Phase 11: pydantic-ai structured task adapter — stubs and interfaces
-
-#### Automated
-
-- [ ] 11.1 pydantic-ai structured task adapter module imports
-- [ ] 11.2 basedpyright clean over the pydantic-ai structured task module
-
-### Phase 12: pydantic-ai structured task adapter
+### Phase 9: Command walks the flow; old seam removed
 
 #### Tests
 
@@ -124,10 +96,13 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 12.1 pydantic-ai structured task suite passes
-- [ ] 12.2 basedpyright clean over src/adapters
+- [ ] 9.1 Distill unit suite passes
+- [ ] 9.2 BDD distill-flow scenarios pass
+- [ ] 9.3 Integration suite passes
+- [ ] 9.4 adapters.compose imports
+- [ ] 9.5 No CardGeneration reference remains under backend
 
-### Phase 13: Live composition and run tracing
+### Phase 10: pydantic-ai structured task adapter
 
 #### Tests
 
@@ -135,12 +110,23 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 13.1 Full backend suite passes
-- [ ] 13.2 basedpyright clean
-- [ ] 13.3 ruff check clean over src and tests
+- [ ] 10.1 pydantic-ai structured task suite passes
+- [ ] 10.2 basedpyright clean over src/adapters
+
+### Phase 11: Live composition and run tracing
+
+#### Tests
+
+- [ ] tests generated
+
+#### Automated
+
+- [ ] 11.1 Full backend suite passes
+- [ ] 11.2 basedpyright clean
+- [ ] 11.3 ruff check clean over src and tests
 
 #### Manual
 
-- [ ] 13.4 Live run against OpenRouter persists grounded cards and note ends ready
-- [ ] 13.5 Langfuse shows one distill_run session per note with per-phase child spans
-- [ ] 13.6 One-sentence note ends ready with zero live cards
+- [ ] 11.4 Live run against OpenRouter persists grounded cards and note ends ready
+- [ ] 11.5 Langfuse shows one distill_run session per note with per-phase child spans
+- [ ] 11.6 One-sentence note ends ready with zero live cards
