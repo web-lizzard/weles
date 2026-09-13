@@ -25,7 +25,7 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 2.1 Value object and regeneration policy suites pass
+- [x] 2.1 Value object and regeneration policy suites pass — cbb6b4e
 
 ### Phase 3: Minting a round on the run
 
