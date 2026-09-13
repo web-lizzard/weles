@@ -113,8 +113,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 11.1 pydantic-ai structured task adapter module imports
-- [x] 11.2 basedpyright clean over the pydantic-ai structured task module
+- [x] 11.1 pydantic-ai structured task adapter module imports — fead973
+- [x] 11.2 basedpyright clean over the pydantic-ai structured task module — fead973
 
 ### Phase 12: pydantic-ai structured task adapter
 
