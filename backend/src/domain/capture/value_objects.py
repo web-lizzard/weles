@@ -1,13 +1,15 @@
+import struct
 from enum import StrEnum
-from math import isfinite, sqrt
+from math import isfinite
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, field_validator, model_validator
 
 from domain.capture.exceptions import (
     CoverageOutOfRangeError,
-    EmbeddingDimensionMismatchError,
+    EmbeddingComponentOutOfRangeError,
     EmptyEmbeddingError,
+    EmptyEmbeddingModelError,
     EmptyLabelError,
     EmptyMessageContentError,
     EmptyNoteContentError,
@@ -28,6 +30,7 @@ SIMILARITY_SCORE_MIN = -1.0
 SIMILARITY_SCORE_MAX = 1.0
 COVERAGE_MIN = 0.0
 COVERAGE_MAX = 1.0
+_FLOAT32_MAX = 3.4028234663852886e38
 
 
 class MessageRole(StrEnum):
@@ -237,22 +240,29 @@ class Embedding(BaseModel, frozen=True):
     values: tuple[float, ...]
     model: str
 
-    def cosine_similarity(self, other: "Embedding") -> SimilarityScore:
-        if len(self.values) != len(other.values):
-            raise EmbeddingDimensionMismatchError
-        if self.values == other.values:
-            _ = _scaled_to_largest_component(self.values)
-            return SimilarityScore(value=SIMILARITY_SCORE_MAX)
-        left = _scaled_to_largest_component(self.values)
-        right = _scaled_to_largest_component(other.values)
-        dot = sum(a * b for a, b in zip(left, right, strict=True))
-        magnitudes = _magnitude(left) * _magnitude(right)
-        return SimilarityScore(value=_clamped_to_score_range(dot / magnitudes))
+    @field_validator("model", mode="before")
+    @classmethod
+    def _canonicalize_model(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.strip()
+        return value
 
     @model_validator(mode="after")
     def _validate_values(self) -> "Embedding":
+        if not self.model:
+            raise EmptyEmbeddingModelError
         if not self.values:
             raise EmptyEmbeddingError
+        canonical: list[float] = []
+        for value in self.values:
+            if not isfinite(value):
+                raise EmbeddingComponentOutOfRangeError
+            if abs(value) > _FLOAT32_MAX:
+                raise EmbeddingComponentOutOfRangeError
+            canonical.append(struct.unpack("f", struct.pack("f", value))[0])
+        if all(component == 0.0 for component in canonical):
+            raise ZeroMagnitudeEmbeddingError
+        object.__setattr__(self, "values", tuple(canonical))
         return self
 
 
@@ -297,18 +307,3 @@ class TagId(BaseModel, frozen=True):
     @classmethod
     def new(cls) -> "TagId":
         return cls(value=uuid4())
-
-
-def _scaled_to_largest_component(values: tuple[float, ...]) -> tuple[float, ...]:
-    largest = max(abs(value) for value in values)
-    if largest == 0.0:
-        raise ZeroMagnitudeEmbeddingError
-    return tuple(value / largest for value in values)
-
-
-def _magnitude(values: tuple[float, ...]) -> float:
-    return sqrt(sum(value * value for value in values))
-
-
-def _clamped_to_score_range(value: float) -> float:
-    return min(max(value, SIMILARITY_SCORE_MIN), SIMILARITY_SCORE_MAX)

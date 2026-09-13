@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-capture
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test db-adapter-capture phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement db-adapter-capture phase 3
 updated: 2026-09-13
 ---
 
@@ -18,13 +18,13 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 523c7a5
 
 #### Automated
 
-- [ ] 2.1 pytest tests/unit/capture passes
-- [ ] 2.2 pytest passes
-- [ ] 2.3 basedpyright and ruff check src tests clean
+- [x] 2.1 pytest tests/unit/capture passes
+- [x] 2.2 pytest passes
+- [x] 2.3 basedpyright and ruff check src tests clean
 
 ### Phase 3: Capture schema and Postgres repository stubs
 

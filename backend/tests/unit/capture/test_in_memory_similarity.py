@@ -32,8 +32,8 @@ def test_cosine_similarity_for_unit_direction_pairs(
 
 
 def test_cosine_similarity_survives_extreme_component_magnitudes() -> None:
-    left = Embedding(model=_EMBEDDING_MODEL, values=(1e200, 1e200))
-    right = Embedding(model=_EMBEDDING_MODEL, values=(1e200, -1e200))
+    left = Embedding(model=_EMBEDDING_MODEL, values=(3.0e38, 3.0e38))
+    right = Embedding(model=_EMBEDDING_MODEL, values=(3.0e38, -3.0e38))
 
     score = cosine_similarity(left, right)
 
@@ -49,8 +49,5 @@ def test_cosine_similarity_raises_on_dimension_mismatch() -> None:
 
 
 def test_cosine_similarity_raises_on_zero_magnitude() -> None:
-    left = Embedding(model=_EMBEDDING_MODEL, values=(0.0, 0.0))
-    right = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
-
     with pytest.raises(ZeroMagnitudeEmbeddingError):
-        _ = cosine_similarity(left, right)
+        _ = Embedding(model=_EMBEDDING_MODEL, values=(0.0, 0.0))
