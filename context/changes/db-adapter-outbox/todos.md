@@ -29,10 +29,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 2.1 Outbox contract suite passes for in_memory and postgres
-- [x] 2.2 Postgres suite passes
-- [x] 2.3 Full backend suite passes
-- [x] 2.4 basedpyright and ruff clean
+- [x] 2.1 Outbox contract suite passes for in_memory and postgres — 355428f
+- [x] 2.2 Postgres suite passes — 355428f
+- [x] 2.3 Full backend suite passes — 355428f
+- [x] 2.4 basedpyright and ruff clean — 355428f
 
 ### Phase 3: Postgres envelope query stubs
 
