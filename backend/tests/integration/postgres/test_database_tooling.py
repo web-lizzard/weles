@@ -1,11 +1,12 @@
 from typing import cast
 
 import pytest
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from adapters.out.sqlalchemy.engine import create_session_factory
-from adapters.out.sqlalchemy.migrations import upgrade_to_head
+from adapters.out.sqlalchemy.migrations import alembic_config, upgrade_to_head
 
 pytestmark = pytest.mark.postgres
 
@@ -18,7 +19,7 @@ async def _alembic_version_rows(engine: AsyncEngine) -> list[object]:
         return list(result.fetchall())
 
 
-async def test_upgrading_fresh_database_leaves_alembic_version_with_no_applied_revision(
+async def test_upgrading_fresh_database_stamps_alembic_version_at_head(
     engine: AsyncEngine,
 ) -> None:
     async with engine.connect() as connection:
@@ -29,7 +30,8 @@ async def test_upgrading_fresh_database_leaves_alembic_version_with_no_applied_r
             ),
         )
     assert table == "alembic_version"
-    assert await _alembic_version_rows(engine) == []
+    head = ScriptDirectory.from_config(alembic_config()).get_current_head()
+    assert await _alembic_version_rows(engine) == [(head,)]
 
 
 async def test_upgrading_already_migrated_database_leaves_revision_unchanged(

@@ -7,11 +7,10 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from adapters.out.sqlalchemy.metadata import target_metadata
 from config.settings import Settings
 
 config = context.config
-
-target_metadata = None
 
 
 def run_migrations_offline() -> None:
