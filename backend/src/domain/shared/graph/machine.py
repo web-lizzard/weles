@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from enum import StrEnum
+from typing import override
 
-from domain.shared.graph.model import Graph, State, Tool, ToolResult
+from domain.shared.graph.model import Graph, State, StructuredState, Tool, ToolResult
 from domain.shared.instruction.model import Instruction
 
 
@@ -82,6 +83,30 @@ class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
             available[target] = self.graph.states[target].description
         return available
 
+    async def advance(self) -> bool:
+        """Take the one move the guards select, through `transition`. Returns
+        whether a move happened.
+
+        For a flow whose moves are decided by guards rather than chosen by a
+        caller. Built on `available_transitions`, which stays the answer to
+        "what is permitted now"; this answers "where does the flow go" and
+        goes there in the same act. No separate query for the selected target:
+        its only reader would be this method, and a test pins a route by
+        advancing a context and reading the phase off it.
+
+        Refuses — returns `False` — when no guard passes, when the state is
+        terminal, and when more than one guard passes. The last is a mistake
+        in the declaration, not a runtime condition: a composition that routes
+        by guards pins their mutual exclusivity in its own suite, and the
+        machine refuses rather than guesses, the same refusal-as-answer as
+        `transition`.
+
+        One edge, like every move. A caller loops over `advance` to walk a
+        flow, and each phase entered gets its own step before the next
+        `advance` — so a phase is never crossed without its work.
+        """
+        raise NotImplementedError
+
     async def transition(self, target: NameT) -> bool:
         """Take the edge to target: run its actions, then write the new state
         name onto the context.
@@ -128,3 +153,26 @@ class StateMachine[ContextT, DepsT, EventT, NameT: StrEnum](ABC):
     def enter_state(self, context: ContextT, name: NameT) -> None:
         """Write a new state name onto the aggregate, in memory only."""
         ...
+
+
+class StructuredStateMachine[ContextT, DepsT, EventT, NameT: StrEnum](
+    StateMachine[ContextT, DepsT, EventT, NameT], ABC
+):
+    """A machine every one of whose states is a `StructuredState`.
+
+    Narrows `current_state` only; the graph type is the shared one. That every
+    declared state really is structured is a fact about the composition's
+    graph, pinned by its suite — the same place graph well-formedness is held.
+
+    Walking the flow is the caller's loop, not a method here: the machine holds
+    no model-facing port. Per step the caller takes
+    `current_state.output_without_model(context)` when it is not `None`, and
+    otherwise sends `build_instruction()` and `current_state.output` to the
+    model; it `apply`s the result either way, and stops when `advance`
+    refuses. Every choice of route stays inside `advance`, so the
+    loop is the same for any structured flow and knows none of them.
+    """
+
+    @property
+    @override
+    def current_state(self) -> StructuredState[ContextT, DepsT, EventT]: ...
