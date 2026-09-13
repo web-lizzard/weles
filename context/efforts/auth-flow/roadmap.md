@@ -9,7 +9,7 @@ updated: 2026-09-13
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
 | S-01 | A person can register and sign in, and the instance refuses everyone who is not signed in | auth-flow-sign-in-gate | pending |
-| S-02 | A person can point the TUI at an instance of their choosing | auth-flow-instance-address | in_progress |
+| S-02 | A person can point the TUI at an instance of their choosing | auth-flow-instance-address | done |
 | S-03 | A sign-in survives TUI restarts and expires after its validity period without silently losing work | auth-flow-sign-in-lifetime | pending |
 | S-04 | Each person's captures, notes, and the cards distilled from them belong only to that person | auth-flow-capture-distill-separation | pending |
 | S-05 | Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain | auth-flow-remember-separation | pending |
@@ -50,7 +50,7 @@ registration themselves are exempt. Delivers both adapters for every port it tou
 - **Outcome:** A person can point the TUI at an instance of their choosing
 - **Acceptance criteria:** AC-01, AC-02
 - **Change ID:** auth-flow-instance-address
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-01, S-03, S-04, S-05, S-06, S-07
 
 Independent of identity: the published TUI works against a chosen address without code changes
@@ -123,3 +123,5 @@ Realizes the nice-to-have FR-010. The limit itself is PRD Open Question 2, resol
 change's `/plan`. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
 ## Done
+
+- **S-02: A person can point the TUI at an instance of their choosing** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-auth-flow-instance-address/`. Lesson: —.
