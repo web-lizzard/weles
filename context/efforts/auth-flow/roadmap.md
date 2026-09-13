@@ -38,11 +38,16 @@ flowchart LR
 - **Status:** in_progress
 - **Parallel with:** S-02
 
-Every other slice needs a signed-in person, so identity and the gate come first. They land
-together because a gate without sign-in only breaks the TUI and demonstrates nothing. The same
-rules hold on localhost. This slice also carries FR-009, which has no story: rejecting a caller
+Every other slice needs a signed-in person, so identity and the gate come first. The instance
+gains registration, sign-in, and a gate that refuses everyone who is not signed in, with the
+same rules on localhost. This slice also carries FR-009, which has no story: rejecting a caller
 who is not signed in consumes neither database nor LLM resources, while sign-in and
-registration themselves are exempt. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change. Work on this effort starts only after
+registration themselves are exempt. A sign-in is accepted only by the instance that issued it;
+that is the backend half of the interaction handed over by S-02. The TUI gains commands to
+register and sign in, which confirm that the instance accepted the credentials, but it neither
+keeps the sign-in nor sends it. Until S-03 lands, the instance therefore refuses the TUI's
+capture, notes, and remember requests. That is accepted because S-03 follows directly and no
+instance is deployed. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change. Work on this effort starts only after
 `db-adapter` is complete, so the daemon already runs on Postgres.
 
 ### S-02: A person can point the TUI at an instance of their choosing
@@ -67,7 +72,11 @@ sends the old instance's sign-in to the new one.
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-04, S-05, S-06, S-07
 
-The exact validity period is PRD Open Question 1, resolved in this change's `/plan`. Expiry
+This slice makes the TUI usable again after S-01. The TUI keeps the sign-in across restarts,
+sends it with every request, refuses to be used without one, and never sends one instance's
+sign-in to another after an address switch (the TUI half of the interaction handed over by
+S-02). S-01 already issues sign-ins that expire after a per-instance period, one day by
+default. The final period is PRD Open Question 1, resolved in this change's `/plan`. Expiry
 during a capture conversation or a review sitting tells the person and lets them sign in
 again; the PRD does not commit to the in-progress work surviving. Delivers both adapters for every port it touches: in-memory for tests and SQLAlchemy on Postgres, with its own Alembic revision where tables change.
 
