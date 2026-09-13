@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, ClassVar, Literal
 
@@ -16,8 +17,11 @@ from domain.distill.value_objects import (
     CardProposal,
     CardSide,
     CardVerdict,
+    Discard,
+    DiscardReason,
     DistillPhase,
     DuplicateGroup,
+    ReviewGrade,
 )
 from domain.exceptions import CoreException
 
@@ -56,7 +60,12 @@ class Candidate(BaseModel):
     @property
     def accepted(self) -> bool:
         """Judged, with a grade that passes, and not discarded since."""
-        ...
+        return (
+            self.verdict is not None
+            and self.verdict.grade.passes
+            and self.card is not None
+            and self.card.discard is None
+        )
 
     @property
     def failure(self) -> str | None:
@@ -131,8 +140,21 @@ class DistillRun(BaseModel):
         card whose grade does not pass. First-round verdicts are never
         overwritten by a replacement review, because it passes only its own
         round."""
-        _ = round, verdicts
-        ...
+        verdict_by_ref = {verdict.ref: verdict for verdict in verdicts}
+        for candidate in self.of_round(round):
+            if not candidate.awaits_review:
+                continue
+            assert candidate.card is not None
+            verdict = verdict_by_ref.get(candidate.ref) or CardVerdict(
+                ref=candidate.ref, grade=ReviewGrade.POOR, reasoning="no verdict"
+            )
+            candidate.verdict = verdict
+            if not verdict.grade.passes:
+                candidate.card.discard = Discard(
+                    reason=DiscardReason.LOW_QUALITY,
+                    detail=verdict.reasoning,
+                    discarded_at=datetime.now(UTC),
+                )
 
     def discard_duplicates(self, groups: Sequence[DuplicateGroup]) -> None:
         """In each group keep the member with the better grade — a replacement
@@ -155,16 +177,25 @@ class DistillRun(BaseModel):
     def regeneration_needed(self) -> bool:
         """The first round's accepted share falls below the policy's threshold
         for this note, counted over every first-round candidate."""
-        ...
+        first_round = self.of_round(CandidateRound.FIRST)
+        accepted = sum(1 for candidate in first_round if candidate.accepted)
+        return self.policy.regenerate(self.note.content, accepted, len(first_round))
 
     def gaps(self) -> list[Candidate]:
         """First-round candidates that did not survive — what regeneration
         replaces, each with its `failure`."""
-        ...
+        return [
+            candidate
+            for candidate in self.of_round(CandidateRound.FIRST)
+            if candidate.failure is not None
+        ]
 
     def accepted_example(self) -> Candidate | None:
         """One accepted first-round candidate to show regeneration, if any."""
-        ...
+        for candidate in self.of_round(CandidateRound.FIRST):
+            if candidate.accepted:
+                return candidate
+        return None
 
     def merge_pool(self) -> list[Candidate]:
         """Candidates accepted by either review — what merge judges."""
