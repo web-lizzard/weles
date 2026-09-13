@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-instance-address
-current_phase: 3
-next_step: 3.1
-next_command: /implement auth-flow-instance-address phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test auth-flow-instance-address phase 4
 updated: 2026-09-13
 ---
 
@@ -32,10 +32,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 3.1 Add InstanceNotConfiguredError, setInstanceAddress, instanceAddress and getClient signatures in api/instance.ts
-- [ ] 3.2 Add StartupDecision and the resolveStartup signature in startup.ts
-- [ ] 3.3 Add test/setup.ts configuring http://localhost:8000 and register it in vitest setupFiles
-- [ ] 3.4 Pass pnpm typecheck and pnpm lint
+- [x] 3.1 Add InstanceNotConfiguredError, setInstanceAddress, instanceAddress and getClient signatures in api/instance.ts — b6f268e
+- [x] 3.2 Add StartupDecision and the resolveStartup signature in startup.ts — b6f268e
+- [x] 3.3 Add test/setup.ts configuring http://localhost:8000 and register it in vitest setupFiles — b6f268e
+- [x] 3.4 Pass pnpm typecheck and pnpm lint — b6f268e
 
 ### Phase 4: Startup and API routing behaviour
 
