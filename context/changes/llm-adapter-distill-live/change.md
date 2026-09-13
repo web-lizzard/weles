@@ -1,7 +1,7 @@
 ---
 change_id: llm-adapter-distill-live
 title: Distill generates cards end to end against a real provider
-status: planned
+status: implementing
 created: 2026-09-12
 updated: 2026-09-13
 archived_at: null
