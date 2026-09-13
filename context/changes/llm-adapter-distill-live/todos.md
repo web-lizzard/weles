@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 1
-next_step: 1.1
-next_command: /unit-test llm-adapter-distill-live phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test llm-adapter-distill-live phase 2
 updated: 2026-09-13
 ---
 
@@ -10,12 +10,12 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 7b72d51
 
 #### Automated
 
-- [ ] 1.1 Graph machine suite passes
-- [ ] 1.2 basedpyright clean over src/domain/shared
+- [x] 1.1 Graph machine suite passes
+- [x] 1.2 basedpyright clean over src/domain/shared
 
 ### Phase 2: Review grade and regeneration policy rules
 
