@@ -3,7 +3,7 @@ change_id: db-adapter-remember
 current_phase: 6
 next_step: null
 next_command: /archive db-adapter-remember
-updated: 2026-09-14
+updated: 2026-09-13
 ---
 
 ### Phase 1: Remember schema and Postgres repository stubs
@@ -71,7 +71,7 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 6.1 pytest test_remember_persistence.py and test_remember_relay.py pass
-- [x] 6.2 pytest tests/unit/remember passes
-- [x] 6.3 pytest passes
-- [x] 6.4 basedpyright and ruff check src tests clean
+- [x] 6.1 pytest test_remember_persistence.py and test_remember_relay.py pass — e2d9782
+- [x] 6.2 pytest tests/unit/remember passes — e2d9782
+- [x] 6.3 pytest passes — e2d9782
+- [x] 6.4 basedpyright and ruff check src tests clean — e2d9782
