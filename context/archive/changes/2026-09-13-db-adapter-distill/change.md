@@ -1,10 +1,10 @@
 ---
 change_id: db-adapter-distill
 title: Distill persists in Postgres and a capture approval becomes cards through the outbox
-status: implementing
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
+archived_at: 2026-09-13T20:26:21Z
 effort_id: db-adapter
 slice_ref: S-04
 ---
