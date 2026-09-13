@@ -12,7 +12,7 @@ updated: 2026-09-13
 | S-02 | Outbox envelopes persist in Postgres | db-adapter-outbox | done |
 | S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | done |
 | S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | done |
-| S-05 | Remember persists in Postgres and a card rejection discards the distill card through the outbox | db-adapter-remember | pending |
+| S-05 | Remember persists in Postgres and a card rejection discards the distill card through the outbox | db-adapter-remember | in_progress |
 | S-06 | The daemon runs on Postgres and its state survives a restart | db-adapter-runtime-switch | pending |
 
 ## Dependencies
@@ -96,7 +96,7 @@ capture approval.
 - **Outcome:** Remember persists in Postgres and a card rejection discards the distill card through the outbox
 - **Acceptance criteria:** FR-04, FR-07, FR-08
 - **Change ID:** db-adapter-remember
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-04
 - **Research:** sql-alchemy
 
