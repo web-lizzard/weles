@@ -10,9 +10,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 1.1 basedpyright clean
-- [x] 1.2 ruff check src tests clean
-- [x] 1.3 pytest -m 'not postgres' passes
+- [x] 1.1 basedpyright clean — 130a5da
+- [x] 1.2 ruff check src tests clean — 130a5da
+- [x] 1.3 pytest -m 'not postgres' passes — 130a5da
 
 ### Phase 2: Similarity through the port, in memory
 
