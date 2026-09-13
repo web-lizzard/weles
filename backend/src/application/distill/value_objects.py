@@ -1,7 +1,3 @@
-from pydantic import BaseModel
+from domain.distill.value_objects import CardProposal
 
-
-class CardProposal(BaseModel, frozen=True):
-    front: str
-    back: str
-    quote: str
+__all__ = ["CardProposal"]

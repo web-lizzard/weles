@@ -145,6 +145,48 @@ class State[ContextT, DepsT, EventT](ABC):
         return self.actions
 
 
+class StructuredState[ContextT, DepsT, EventT](State[ContextT, DepsT, EventT], ABC):
+    """A phase whose model answers once, with one typed result, instead of
+    conversing through text and tool calls.
+
+    `output` is the schema the model must answer in, declared on the phase for
+    the same reason `instruction_builder` is: what a phase asks of the model
+    stays inspectable without a context. The result is itself one of the
+    machine's events — it is applied, never handed back to the model, so the
+    tool-result/event split capture keeps has no audience here.
+
+    A subclass, not an optional field on `State`: capture's phases answer in a
+    stream and have no output to declare, and a `None` there would be a
+    question every reader of the base has to ask. The graph is unchanged —
+    a structured state is a `State`, so `Graph.states` holds it as one.
+    """
+
+    @property
+    @abstractmethod
+    def output(self) -> type[EventT]:
+        """The one result type this phase's model answers with. A member of
+        the machine's event union, so `StateMachine.apply` takes it as is."""
+        ...
+
+    @abstractmethod
+    def output_without_model(self, context: ContextT) -> EventT | None:
+        """The result this phase already knows without asking a model, or
+        `None` when the model must be asked.
+
+        For a phase whose context leaves it nothing to judge — a merge over
+        fewer than two cards, a review over none — the answer is determined:
+        no duplicates, no verdicts. The caller applies it exactly as it would
+        a model's, so the phase's actions run, `advance` sees the same
+        context, and entering a phase still means a result was applied in it.
+        The only thing skipped is the call.
+
+        Synchronous and reaching nothing, like `InstructionBuilder.build`: it
+        reads the context as it stands. Abstract rather than defaulted, so a
+        phase that always needs the model says `None` on purpose.
+        """
+        ...
+
+
 class Transition[ContextT, DepsT, EventT](BaseModel, frozen=True):
     """One edge of the graph: what it takes to make a move, and what happens
     when it is made.
