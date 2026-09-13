@@ -11,7 +11,7 @@ updated: 2026-09-13
 | S-01 | The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision | db-adapter-setup | done |
 | S-02 | Outbox envelopes persist in Postgres | db-adapter-outbox | done |
 | S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | done |
-| S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | pending |
+| S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | in_progress |
 | S-05 | Remember persists in Postgres and a card rejection discards the distill card through the outbox | db-adapter-remember | pending |
 | S-06 | The daemon runs on Postgres and its state survives a restart | db-adapter-runtime-switch | pending |
 
@@ -78,7 +78,7 @@ concurrent turns on one session are handled.
 - **Outcome:** Distill persists in Postgres and a capture approval becomes cards through the outbox
 - **Acceptance criteria:** FR-03, FR-07, FR-08
 - **Change ID:** db-adapter-distill
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-03
 - **Research:** sql-alchemy
 
