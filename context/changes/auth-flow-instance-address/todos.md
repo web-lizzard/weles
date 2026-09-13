@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-instance-address
-current_phase: 2
-next_step: 2.1
-next_command: /implement auth-flow-instance-address phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement auth-flow-instance-address phase 3
 updated: 2026-09-13
 ---
 
@@ -23,10 +23,10 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 2.1 Validate scheme, credentials, query and fragment and trim the trailing slash in parseInstanceAddress
-- [ ] 2.2 Read and write instanceAddress in the XDG config file with a home-directory fallback
-- [ ] 2.3 Show the stored address and set a replacement through runInstanceCommand with exit codes 0, 1 and 2
-- [ ] 2.4 Pass pnpm test, pnpm typecheck and pnpm lint
+- [x] 2.1 Validate scheme, credentials, query and fragment and trim the trailing slash in parseInstanceAddress — 6bc1ea9
+- [x] 2.2 Read and write instanceAddress in the XDG config file with a home-directory fallback — 6bc1ea9
+- [x] 2.3 Show the stored address and set a replacement through runInstanceCommand with exit codes 0, 1 and 2 — 6bc1ea9
+- [x] 2.4 Pass pnpm test, pnpm typecheck and pnpm lint — 6bc1ea9
 
 ### Phase 3: Startup and API routing stubs
 

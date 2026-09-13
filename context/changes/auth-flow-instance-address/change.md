@@ -4,7 +4,6 @@ title: A person can point the TUI at an instance of their choosing
 status: implementing
 created: 2026-09-13
 updated: 2026-09-13
-archived_at: null
 effort_id: auth-flow
 slice_ref: S-02
 ---
