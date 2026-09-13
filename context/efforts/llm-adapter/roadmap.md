@@ -128,13 +128,15 @@ pydantic-ai exists.
 - **Parallel with:** S-05
 - **Research:** current-context, pydantic-ai, langfuse
 
-Distill's card generation gets its concrete instructions and tool definitions in
-`domain/distill/`, built on the shared abstractions S-03 and S-04 established, and
-`adapters/out/llm/distill/` renders them against a real provider. Card generation is
-single-shot rather than conversational, so it exercises the instruction and tool
-abstractions without a transition graph — a useful second consumer proving those
-abstractions are not capture-shaped. Verified by the author's own manual use, traced in
-Langfuse.
+Distill's card generation becomes an acyclic phase flow held in `domain/distill/` —
+generate, review, regenerate the gaps at most once and review the replacements, then
+merge duplicates — built on the shared graph and instruction abstractions S-02 and S-03
+established. Unlike capture it is not conversational: every phase answers once with a
+structured result, moves are chosen by guards rather than by the model, and the run lives
+within one invocation. That makes it a second consumer proving the abstractions are not
+capture-shaped. One phase-agnostic structured-task port is rendered against a real
+provider by `adapters/out/llm/distill/`. Verified by the author's own manual use, traced
+in Langfuse.
 
 ## Done
 
