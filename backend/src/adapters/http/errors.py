@@ -16,6 +16,8 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "empty_label": 422,
     "label_too_long": 422,
     "empty_embedding": 422,
+    "empty_embedding_model": 500,
+    "embedding_component_out_of_range": 500,
     "empty_note_content": 422,
     "note_content_too_long": 422,
     "session_note_already_drafted": 409,

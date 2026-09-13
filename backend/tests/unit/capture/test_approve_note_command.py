@@ -34,12 +34,19 @@ from domain.capture.value_objects import (
     SessionStatus,
 )
 
+_EMBEDDING_MODEL = "test"
+
 
 async def test_approve_note_approves_note_closes_session_and_appends_envelope() -> None:
     stack = _make_approve_stack()
     session = CaptureSession.start()
-    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2)))
-    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.3, 0.4)))
+    topic = Topic.mint(
+        Label(value="TCP handshakes"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
+    )
+    tag = Tag.mint(
+        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+    )
     note = session.draft_note(
         topic, NoteContent(value="We discussed handshakes."), [tag]
     )
@@ -79,8 +86,13 @@ async def test_approve_note_raises_not_found_for_unknown_session() -> None:
 async def test_approve_note_rollback_on_missing_note_leaves_zero_envelopes() -> None:
     stack = _make_approve_stack()
     session = CaptureSession.start()
-    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2)))
-    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.3, 0.4)))
+    topic = Topic.mint(
+        Label(value="TCP handshakes"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
+    )
+    tag = Tag.mint(
+        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+    )
     _ = session.draft_note(topic, NoteContent(value="Draft body"), [tag])
     await stack.session_repo.save(session)
 

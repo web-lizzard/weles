@@ -21,6 +21,8 @@ from domain.capture.value_objects import (
     SessionTopic,
 )
 
+_EMBEDDING_MODEL = "test"
+
 
 def test_session_topic_empty_after_strip_raises_empty_session_topic_error() -> None:
     with pytest.raises(EmptySessionTopicError):
@@ -65,7 +67,7 @@ def test_label_empty_after_strip_raises_empty_label_error() -> None:
 
 def test_embedding_empty_values_raises_empty_embedding_error() -> None:
     with pytest.raises(EmptyEmbeddingError):
-        _ = Embedding(values=())
+        _ = Embedding(model=_EMBEDDING_MODEL, values=())
 
 
 def test_coverage_accepts_closed_unit_interval() -> None:

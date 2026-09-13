@@ -31,6 +31,8 @@ from domain.capture.value_objects import (
 )
 from domain.shared.outbox.model import EnvelopeStatus, EnvelopeType, OutboxEnvelope
 
+_EMBEDDING_MODEL = "test"
+
 
 def _make_unit_of_work() -> tuple[
     InMemoryUnitOfWork,
@@ -66,7 +68,7 @@ def _sample_topic() -> Topic:
     return Topic(
         id=TopicId.new(),
         label=Label(value="TCP handshakes"),
-        embedding=Embedding(values=(0.1, 0.2)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
     )
 
@@ -75,7 +77,7 @@ def _sample_tag() -> Tag:
     return Tag(
         id=TagId.new(),
         label=Label(value="networking"),
-        embedding=Embedding(values=(0.3, 0.4)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
     )
 

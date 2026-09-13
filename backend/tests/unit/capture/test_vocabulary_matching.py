@@ -18,6 +18,8 @@ from domain.capture.value_objects import (
 )
 from domain.capture.vocabulary import MatchCriteria, VocabularyMatch
 
+_EMBEDDING_MODEL = "test"
+
 
 def _topic(
     embedding: Embedding,
@@ -69,14 +71,16 @@ def test_cosine_similarity_for_unit_direction_pairs(
     right: tuple[float, ...],
     expected: float,
 ) -> None:
-    score = Embedding(values=left).cosine_similarity(Embedding(values=right))
+    score = Embedding(model=_EMBEDDING_MODEL, values=left).cosine_similarity(
+        Embedding(model=_EMBEDDING_MODEL, values=right)
+    )
 
     assert score.value == pytest.approx(expected)
 
 
 def test_cosine_similarity_survives_extreme_component_magnitudes() -> None:
-    left = Embedding(values=(1e200, 1e200))
-    right = Embedding(values=(1e200, -1e200))
+    left = Embedding(model=_EMBEDDING_MODEL, values=(1e200, 1e200))
+    right = Embedding(model=_EMBEDDING_MODEL, values=(1e200, -1e200))
 
     score = left.cosine_similarity(right)
 
@@ -84,16 +88,16 @@ def test_cosine_similarity_survives_extreme_component_magnitudes() -> None:
 
 
 def test_cosine_similarity_raises_on_dimension_mismatch() -> None:
-    left = Embedding(values=(1.0, 2.0))
-    right = Embedding(values=(1.0,))
+    left = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 2.0))
+    right = Embedding(model=_EMBEDDING_MODEL, values=(1.0,))
 
     with pytest.raises(EmbeddingDimensionMismatchError):
         _ = left.cosine_similarity(right)
 
 
 def test_cosine_similarity_raises_on_zero_magnitude() -> None:
-    left = Embedding(values=(0.0, 0.0))
-    right = Embedding(values=(1.0, 0.0))
+    left = Embedding(model=_EMBEDDING_MODEL, values=(0.0, 0.0))
+    right = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
 
     with pytest.raises(ZeroMagnitudeEmbeddingError):
         _ = left.cosine_similarity(right)
@@ -101,29 +105,32 @@ def test_cosine_similarity_raises_on_zero_magnitude() -> None:
 
 def test_best_match_returns_none_for_empty_candidates() -> None:
     criteria = MatchCriteria(threshold=SimilarityScore(value=0.85))
-    target = Embedding(values=(1.0, 0.0))
+    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
 
     assert criteria.best_match(target, []) is None
 
 
 def test_best_match_returns_none_when_every_candidate_is_below_threshold() -> None:
     criteria = MatchCriteria(threshold=SimilarityScore(value=0.85))
-    target = Embedding(values=(1.0, 0.0))
-    orthogonal = _topic(Embedding(values=(0.0, 1.0)), datetime(2026, 1, 1, tzinfo=UTC))
+    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
+    orthogonal = _topic(
+        Embedding(model=_EMBEDDING_MODEL, values=(0.0, 1.0)),
+        datetime(2026, 1, 1, tzinfo=UTC),
+    )
 
     assert criteria.best_match(target, [orthogonal]) is None
 
 
 def test_best_match_returns_highest_scoring_candidate_above_threshold() -> None:
     criteria = MatchCriteria(threshold=SimilarityScore(value=0.5))
-    target = Embedding(values=(1.0, 0.0))
+    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
     weaker = _topic(
-        Embedding(values=(0.7, 0.7)),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.7, 0.7)),
         datetime(2026, 1, 1, tzinfo=UTC),
         label="weaker",
     )
     stronger = _topic(
-        Embedding(values=(1.0, 0.0)),
+        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
         datetime(2026, 1, 2, tzinfo=UTC),
         label="stronger",
     )
@@ -137,14 +144,14 @@ def test_best_match_returns_highest_scoring_candidate_above_threshold() -> None:
 
 def test_best_match_breaks_score_ties_by_earlier_created_at() -> None:
     criteria = MatchCriteria(threshold=SimilarityScore(value=0.5))
-    target = Embedding(values=(1.0, 0.0))
+    target = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
     older = _tag(
-        Embedding(values=(1.0, 0.0)),
+        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
         datetime(2026, 1, 1, tzinfo=UTC),
         label="older",
     )
     newer = _tag(
-        Embedding(values=(1.0, 0.0)),
+        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
         datetime(2026, 1, 2, tzinfo=UTC),
         label="newer",
     )

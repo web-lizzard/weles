@@ -7,15 +7,15 @@ from domain.capture.ports import EmbeddingPort, TagRepository, TopicRepository
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import Embedding, Label, SimilarityScore
-
-
-class VocabularyMatch[VocabularyEntryT: (Topic, Tag)](BaseModel, frozen=True):
-    entry: VocabularyEntryT
-    score: SimilarityScore
+from domain.capture.vocabulary_match import VocabularyMatch as VocabularyMatch
 
 
 class MatchCriteria(BaseModel, frozen=True):
     threshold: SimilarityScore
+
+    def accepts(self, score: SimilarityScore) -> bool:
+        _ = score
+        raise NotImplementedError
 
     def best_match[VocabularyEntryT: (Topic, Tag)](
         self,

@@ -14,6 +14,8 @@ from domain.capture.value_objects import (
 )
 from domain.shared.outbox.model import EnvelopeStatus
 
+_EMBEDDING_MODEL = "test"
+
 
 def _approved_note(session_id: SessionId, topic: Topic, tags: list[Tag]) -> Note:
     return Note(
@@ -30,8 +32,13 @@ def _approved_note(session_id: SessionId, topic: Topic, tags: list[Tag]) -> Note
 
 def test_of_snapshots_labels_and_to_envelope_builds_a_pending_envelope() -> None:
     session_id = SessionId.new()
-    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2)))
-    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.3, 0.4)))
+    topic = Topic.mint(
+        Label(value="TCP handshakes"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
+    )
+    tag = Tag.mint(
+        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+    )
     note = _approved_note(session_id, topic, [tag])
 
     payload = NoteApprovedPayload.of(note, topic, [tag])

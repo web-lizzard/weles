@@ -67,6 +67,8 @@ from domain.capture.value_objects import (
 from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.shared.graph.model import Tool, ToolResult
 
+_EMBEDDING_MODEL = "test"
+
 
 def _user_message(session: CaptureSession) -> Message:
     return Message.record(
@@ -484,9 +486,17 @@ async def test_first_draft_materialises_note_from_drafting_events() -> None:
 async def test_redraft_reconciles_tags_and_content_on_existing_note() -> None:
     deps = _capture_deps()
     session = CaptureSession.start()
-    old_topic = Topic.mint(Label(value="Old topic"), Embedding(values=(0.1, 0.2, 0.3)))
-    kept_tag = Tag.mint(Label(value="kept"), Embedding(values=(0.4, 0.5, 0.6)))
-    dropped_tag = Tag.mint(Label(value="dropped"), Embedding(values=(0.7, 0.8, 0.9)))
+    old_topic = Topic.mint(
+        Label(value="Old topic"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2, 0.3)),
+    )
+    kept_tag = Tag.mint(
+        Label(value="kept"), Embedding(model=_EMBEDDING_MODEL, values=(0.4, 0.5, 0.6))
+    )
+    dropped_tag = Tag.mint(
+        Label(value="dropped"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.7, 0.8, 0.9)),
+    )
     note = Note.draft(
         session.id,
         old_topic,
@@ -533,8 +543,14 @@ async def test_applying_a_tag_before_a_topic_raises_draft_topic_missing_error() 
 async def test_user_message_hydrates_draft_from_persisted_note() -> None:
     deps = _capture_deps()
     session = CaptureSession.start()
-    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2, 0.3)))
-    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.4, 0.5, 0.6)))
+    topic = Topic.mint(
+        Label(value="TCP handshakes"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2, 0.3)),
+    )
+    tag = Tag.mint(
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.4, 0.5, 0.6)),
+    )
     note = Note.draft(
         session.id,
         topic,
@@ -572,7 +588,10 @@ async def test_user_message_hydrates_draft_from_persisted_note() -> None:
 async def test_user_message_recorded_skips_hydration_when_draft_already_set() -> None:
     deps = _capture_deps()
     session = CaptureSession.start()
-    topic = Topic.mint(Label(value="TCP handshakes"), Embedding(values=(0.1, 0.2, 0.3)))
+    topic = Topic.mint(
+        Label(value="TCP handshakes"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2, 0.3)),
+    )
     note = Note.draft(session.id, topic, NoteContent(value="Persisted body"), [])
     session.note_id = note.id
     session.phase = CapturePhase.DRAFTING

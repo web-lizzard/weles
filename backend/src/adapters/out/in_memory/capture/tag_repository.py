@@ -2,7 +2,8 @@ import copy
 from uuid import UUID
 
 from domain.capture.tag import Tag
-from domain.capture.value_objects import TagId
+from domain.capture.value_objects import Embedding, TagId
+from domain.capture.vocabulary_match import VocabularyMatch
 
 
 class InMemoryTagRepository:
@@ -17,6 +18,10 @@ class InMemoryTagRepository:
 
     async def candidates(self) -> list[Tag]:
         return list(self._tags.values())
+
+    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Tag] | None:
+        _ = embedding
+        raise NotImplementedError
 
     def snapshot(self) -> dict[UUID, Tag]:
         return copy.deepcopy(self._tags)

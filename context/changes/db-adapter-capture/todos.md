@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-capture
-current_phase: 1
-next_step: 1.1
-next_command: /implement db-adapter-capture phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test db-adapter-capture phase 2
 updated: 2026-09-13
 ---
 
@@ -10,9 +10,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 1.1 basedpyright clean
-- [ ] 1.2 ruff check src tests clean
-- [ ] 1.3 pytest -m 'not postgres' passes
+- [x] 1.1 basedpyright clean
+- [x] 1.2 ruff check src tests clean
+- [x] 1.3 pytest -m 'not postgres' passes
 
 ### Phase 2: Similarity through the port, in memory
 

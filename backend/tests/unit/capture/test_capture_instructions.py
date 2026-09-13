@@ -27,6 +27,8 @@ from domain.capture.value_objects import (
 )
 from domain.shared.instruction.model import Instruction, InstructionBlock
 
+_EMBEDDING_MODEL = "test"
+
 
 def _turn(
     *,
@@ -123,8 +125,12 @@ def test_drafting_uses_revising_state_when_note_exists_without_draft() -> None:
 
 
 def test_drafting_instruction_uses_underway_draft_state_when_draft_is_in_hand() -> None:
-    topic = Topic.mint(Label(value="latency"), Embedding(values=(0.1, 0.2)))
-    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.3, 0.4)))
+    topic = Topic.mint(
+        Label(value="latency"), Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2))
+    )
+    tag = Tag.mint(
+        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+    )
     draft = NoteDraft(topic=topic, tags=[tag], content="Some body.")
 
     instruction = DraftingInstructionBuilder().build(_turn(draft=draft))

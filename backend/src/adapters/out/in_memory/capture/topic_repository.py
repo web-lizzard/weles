@@ -2,7 +2,8 @@ import copy
 from uuid import UUID
 
 from domain.capture.topic import Topic
-from domain.capture.value_objects import TopicId
+from domain.capture.value_objects import Embedding, TopicId
+from domain.capture.vocabulary_match import VocabularyMatch
 
 
 class InMemoryTopicRepository:
@@ -17,6 +18,10 @@ class InMemoryTopicRepository:
 
     async def candidates(self) -> list[Topic]:
         return list(self._topics.values())
+
+    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Topic] | None:
+        _ = embedding
+        raise NotImplementedError
 
     def snapshot(self) -> dict[UUID, Topic]:
         return copy.deepcopy(self._topics)
