@@ -15,8 +15,8 @@ updated: 2026-09-13
 
 #### Manual
 
-- [x] 1.3 Rebuild devcontainer and confirm vector extension and TEST_DATABASE_URL
-- [x] 1.4 Query the dev database through the postgres MCP server and see writes refused
+- [x] 1.3 Rebuild devcontainer and confirm vector extension and TEST_DATABASE_URL — ec2ecf1
+- [x] 1.4 Query the dev database through the postgres MCP server and see writes refused — ec2ecf1
 
 ### Phase 2: SQLAlchemy adapter and Alembic environment stubs
 
