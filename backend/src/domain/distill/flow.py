@@ -1,6 +1,6 @@
 from abc import ABC
 from collections.abc import Sequence
-from typing import override
+from typing import cast, override
 
 from domain.distill.deps import DistillDeps
 from domain.distill.instructions import (
@@ -53,16 +53,23 @@ class DistillMachine(
     @override
     def current_state(
         self,
-    ) -> StructuredState[DistillRun, DistillDeps, DistillEvent]: ...
+    ) -> StructuredState[DistillRun, DistillDeps, DistillEvent]:
+        return cast(
+            StructuredState[DistillRun, DistillDeps, DistillEvent],
+            self.graph.states[self.current_state_name],
+        )
 
     @override
-    def state_name_of(self, context: DistillRun) -> DistillPhase: ...
+    def state_name_of(self, context: DistillRun) -> DistillPhase:
+        return context.phase
 
     @override
-    def enter_state(self, context: DistillRun, name: DistillPhase) -> None: ...
+    def enter_state(self, context: DistillRun, name: DistillPhase) -> None:
+        context.phase = name
 
     @override
-    def build_instruction(self) -> Instruction: ...
+    def build_instruction(self) -> Instruction:
+        return self.current_state.instruction_builder.build(self.context)
 
 
 class _DistillState(StructuredState[DistillRun, DistillDeps, DistillEvent], ABC):
@@ -101,7 +108,9 @@ class Generating(_DistillState):
         return (_mint_first_round,)
 
     @override
-    def output_without_model(self, context: DistillRun) -> DistillEvent | None: ...
+    def output_without_model(self, context: DistillRun) -> DistillEvent | None:
+        _ = context
+        return None
 
 
 class Reviewing(_DistillState):
@@ -124,7 +133,10 @@ class Reviewing(_DistillState):
         return (_record_first_review,)
 
     @override
-    def output_without_model(self, context: DistillRun) -> DistillEvent | None: ...
+    def output_without_model(self, context: DistillRun) -> DistillEvent | None:
+        if context.awaiting_review(CandidateRound.FIRST):
+            return None
+        return CardsReviewed(verdicts=[])
 
 
 class Regenerating(_DistillState):
@@ -149,7 +161,9 @@ class Regenerating(_DistillState):
         return (_mint_replacements,)
 
     @override
-    def output_without_model(self, context: DistillRun) -> DistillEvent | None: ...
+    def output_without_model(self, context: DistillRun) -> DistillEvent | None:
+        _ = context
+        return None
 
 
 class ReviewingReplacements(_DistillState):
@@ -172,7 +186,10 @@ class ReviewingReplacements(_DistillState):
         return (_record_replacement_review,)
 
     @override
-    def output_without_model(self, context: DistillRun) -> DistillEvent | None: ...
+    def output_without_model(self, context: DistillRun) -> DistillEvent | None:
+        if context.awaiting_review(CandidateRound.REPLACEMENT):
+            return None
+        return CardsReviewed(verdicts=[])
 
 
 class Merging(_DistillState):
@@ -196,7 +213,10 @@ class Merging(_DistillState):
         return (_discard_duplicates,)
 
     @override
-    def output_without_model(self, context: DistillRun) -> DistillEvent | None: ...
+    def output_without_model(self, context: DistillRun) -> DistillEvent | None:
+        if len(context.merge_pool()) < 2:
+            return DuplicatesFound(groups=[])
+        return None
 
 
 def regeneration_needed(context: DistillRun) -> bool:
