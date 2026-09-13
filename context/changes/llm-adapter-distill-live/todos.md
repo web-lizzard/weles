@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 4
-next_step: "Implement phase 4: verdicts, share, and gaps on the run"
-next_command: /implement llm-adapter-distill-live phase 4
+current_phase: 5
+next_step: "Generate tests for phase 5: merge on the run"
+next_command: /unit-test llm-adapter-distill-live phase 5
 updated: 2026-09-13
 ---
 
@@ -45,7 +45,7 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 4.1 Run review suite passes
+- [x] 4.1 Run review suite passes — 5279f1f
 
 ### Phase 5: Merge on the run
 
