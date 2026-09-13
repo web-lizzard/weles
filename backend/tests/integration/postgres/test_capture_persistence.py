@@ -56,31 +56,14 @@ _CONFIRMATION = "that's all"
 _MATCH = MatchCriteria(threshold=SimilarityScore(value=0.85))
 
 
-class _ShortLivedCaptureSessionRepository:
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
-        self._session_factory: async_sessionmaker[AsyncSession] = session_factory
-
-    async def get(self, session_id: SessionId) -> CaptureSession | None:
-        async with self._session_factory() as db_session:
-            return await SqlAlchemyCaptureSessionRepository(db_session).get(session_id)
-
-    async def save(self, session: CaptureSession) -> None:
-        _ = session
-        raise NotImplementedError
-
-
 def _uow(
     session_factory: async_sessionmaker[AsyncSession],
 ) -> SqlAlchemyCaptureUnitOfWork:
     return SqlAlchemyCaptureUnitOfWork(session_factory)
 
 
-def _reply_command(
-    session_factory: async_sessionmaker[AsyncSession],
-    uow: SqlAlchemyCaptureUnitOfWork,
-) -> GenerateReplyCommand:
+def _reply_command(uow: SqlAlchemyCaptureUnitOfWork) -> GenerateReplyCommand:
     return GenerateReplyCommand(
-        capture_sessions=_ShortLivedCaptureSessionRepository(session_factory),
         uow=uow,  # pyright: ignore[reportArgumentType]
         capture_agent=DeterministicCaptureAgentAdapter(),
         vocabulary=VocabularyResolver(DeterministicEmbeddingAdapter(), _MATCH),
@@ -166,7 +149,7 @@ async def test_drafting_generate_reply_turn_is_readable_through_a_fresh_engine(
         uow  # pyright: ignore[reportArgumentType]
     ).handle()
     session_id = SessionId(value=started.session_id)
-    command = _reply_command(session_factory, uow)
+    command = _reply_command(uow)
     _ = [
         event
         async for event in command.handle(

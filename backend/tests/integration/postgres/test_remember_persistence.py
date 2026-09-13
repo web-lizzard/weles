@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from adapters.out.fsrs.scheduler import FsrsScheduler
 from adapters.out.sqlalchemy.distill.unit_of_work import SqlAlchemyDistillUnitOfWork
 from adapters.out.sqlalchemy.engine import create_engine, create_session_factory
-from adapters.out.sqlalchemy.remember.review_catalog import SqlAlchemyReviewCatalog
-from adapters.out.sqlalchemy.remember.short_session import (
-    ShortSessionReviewEventStore,
-    ShortSessionSchedulingStateRepository,
+from adapters.out.sqlalchemy.remember.query import (
+    QueryReviewEventReader,
+    QuerySchedulingStateReader,
 )
+from adapters.out.sqlalchemy.remember.review_catalog import SqlAlchemyReviewCatalog
 from adapters.out.sqlalchemy.remember.unit_of_work import SqlAlchemyRememberUnitOfWork
 from adapters.out.sqlalchemy.shared.outbox.claimer import SqlAlchemyOutboxClaimer
 from application.remember.commands.grade_card import GradeCardCommand
@@ -160,8 +160,8 @@ async def test_grade_after_open_sitting_persists_event_and_state_on_fresh_engine
     fresh_engine = create_engine(migrated_database_url)
     try:
         factory = create_session_factory(fresh_engine)
-        events = await ShortSessionReviewEventStore(factory).list_by_card(card_id)
-        state = await ShortSessionSchedulingStateRepository(factory).get(card_id)
+        events = await QueryReviewEventReader(factory).list_by_card(card_id)
+        state = await QuerySchedulingStateReader(factory).get(card_id)
         assert len(events) == 1
         assert events[0].payload == Graded(grade=Grade.GOOD)
         assert events[0].reviewed_at == _AS_OF
@@ -191,7 +191,7 @@ async def test_reject_card_commits_rejection_event_and_claimable_card_rejected_e
     fresh_engine = create_engine(migrated_database_url)
     try:
         factory = create_session_factory(fresh_engine)
-        events = await ShortSessionReviewEventStore(factory).list_by_card(card_id)
+        events = await QueryReviewEventReader(factory).list_by_card(card_id)
         claimed = await SqlAlchemyOutboxClaimer(factory).claim(
             CARD_REJECTED, limit=10, worker_id="remember-persistence"
         )
@@ -236,7 +236,7 @@ async def test_exception_after_event_save_and_outbox_append_leaves_neither_persi
     fresh_engine = create_engine(migrated_database_url)
     try:
         factory = create_session_factory(fresh_engine)
-        events = await ShortSessionReviewEventStore(factory).list_by_card(card_id)
+        events = await QueryReviewEventReader(factory).list_by_card(card_id)
         claimed = await SqlAlchemyOutboxClaimer(factory).claim(
             CARD_REJECTED, limit=10, worker_id="remember-persistence"
         )

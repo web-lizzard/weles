@@ -10,9 +10,6 @@ from adapters.out.in_memory.remember.scheduling_state_repository import (
     InMemorySchedulingStateRepository,
 )
 from adapters.out.sqlalchemy.engine import create_session_factory
-from adapters.out.sqlalchemy.remember.short_session import (
-    ShortSessionSchedulingStateRepository,
-)
 from domain.remember.ports import SchedulingStateRepository
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.value_objects import (
@@ -21,6 +18,9 @@ from domain.remember.value_objects import (
     OpaqueSchedulerState,
     SchedulerAlgorithm,
     SchedulerStamp,
+)
+from tests.support.postgres_remember_repositories import (
+    CommittingSchedulingStateRepository,
 )
 
 
@@ -38,7 +38,7 @@ def scheduling_fixture(request: pytest.FixtureRequest) -> _SchedulingFixture:
     engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
     session_factory = create_session_factory(engine)
     return _SchedulingFixture(
-        repository=ShortSessionSchedulingStateRepository(session_factory)
+        repository=CommittingSchedulingStateRepository(session_factory)
     )
 
 

@@ -8,14 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
 from adapters.out.in_memory.remember.sitting_repository import InMemorySittingRepository
 from adapters.out.sqlalchemy.engine import create_session_factory
-from adapters.out.sqlalchemy.remember.short_session import (
-    ShortSessionReviewEventStore,
-    ShortSessionSittingRepository,
-)
 from domain.remember.ports import ReviewEventStore, SittingRepository
 from domain.remember.review_event import ReviewEvent
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, Grade, Graded, ShowingLimit, SittingId
+from tests.support.postgres_remember_repositories import (
+    CommittingReviewEventStore,
+    CommittingSittingRepository,
+)
 
 
 @dataclass
@@ -36,8 +36,8 @@ def review_event_fixture(request: pytest.FixtureRequest) -> _ReviewEventFixture:
     engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
     session_factory = create_session_factory(engine)
     return _ReviewEventFixture(
-        events=ShortSessionReviewEventStore(session_factory),
-        sittings=ShortSessionSittingRepository(session_factory),
+        events=CommittingReviewEventStore(session_factory),
+        sittings=CommittingSittingRepository(session_factory),
     )
 
 

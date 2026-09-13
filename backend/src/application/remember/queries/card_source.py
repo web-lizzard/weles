@@ -6,20 +6,24 @@ from domain.remember.exceptions import (
     SittingNotFoundError,
     SourceNotAvailableError,
 )
-from domain.remember.ports import CardSourceLocator, ReviewEventStore, SittingRepository
+from domain.remember.ports import (
+    CardSourceLocator,
+    ReviewEventReader,
+    SittingReader,
+)
 from domain.remember.value_objects import CardId, Reveal, SittingId
 
 
 class CardSourceQuery:
     def __init__(
         self,
-        sittings: SittingRepository,
-        events: ReviewEventStore,
+        sittings: SittingReader,
+        events: ReviewEventReader,
         locator: CardSourceLocator,
         clock: Clock,
     ) -> None:
-        self._sittings: SittingRepository = sittings
-        self._events: ReviewEventStore = events
+        self._sittings: SittingReader = sittings
+        self._events: ReviewEventReader = events
         self._locator: CardSourceLocator = locator
         self._clock: Clock = clock
 

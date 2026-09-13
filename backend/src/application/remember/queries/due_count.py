@@ -3,27 +3,27 @@ from application.remember.ports import Clock
 from domain.remember.due_partition import partition_due
 from domain.remember.ports import (
     ReviewCatalog,
-    ReviewEventStore,
+    ReviewEventReader,
     Scheduler,
-    SchedulingStateRepository,
-    SittingRepository,
+    SchedulingStateReader,
+    SittingReader,
 )
 
 
 class DueCountQuery:
     def __init__(
         self,
-        sittings: SittingRepository,
-        events: ReviewEventStore,
+        sittings: SittingReader,
+        events: ReviewEventReader,
         catalog: ReviewCatalog,
-        scheduling_states: SchedulingStateRepository,
+        scheduling_states: SchedulingStateReader,
         clock: Clock,
         scheduler: Scheduler,
     ) -> None:
-        self._sittings: SittingRepository = sittings
-        self._events: ReviewEventStore = events
+        self._sittings: SittingReader = sittings
+        self._events: ReviewEventReader = events
         self._catalog: ReviewCatalog = catalog
-        self._scheduling_states: SchedulingStateRepository = scheduling_states
+        self._scheduling_states: SchedulingStateReader = scheduling_states
         self._clock: Clock = clock
         self._scheduler: Scheduler = scheduler
 

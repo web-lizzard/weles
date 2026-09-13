@@ -1,4 +1,3 @@
-import asyncio
 from datetime import timedelta
 from typing import cast
 
@@ -6,60 +5,36 @@ from adapters.out.fsrs.scheduler import FsrsScheduler
 from adapters.out.in_memory.capture.capture_agent import (
     DeterministicCaptureAgentAdapter,
 )
-from adapters.out.in_memory.capture.capture_session_repository import (
-    InMemoryCaptureSessionRepository,
-)
 from adapters.out.in_memory.capture.embedding import DeterministicEmbeddingAdapter
-from adapters.out.in_memory.capture.message_repository import (
-    InMemoryMessageRepository,
-)
-from adapters.out.in_memory.capture.message_store import InMemoryMessageStore
-from adapters.out.in_memory.capture.note_repository import InMemoryNoteRepository
-from adapters.out.in_memory.capture.note_vocabulary_repository import (
-    InMemoryNoteVocabularyRepository,
-)
-from adapters.out.in_memory.capture.tag_repository import InMemoryTagRepository
-from adapters.out.in_memory.capture.topic_repository import InMemoryTopicRepository
-from adapters.out.in_memory.capture.unit_of_work import InMemoryUnitOfWork
-from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
-from adapters.out.in_memory.distill.get_note_query import (
-    InMemoryGetNoteQueryAdapter,
-)
-from adapters.out.in_memory.distill.list_cards_for_note_query import (
-    InMemoryListCardsForNoteQueryAdapter,
-)
-from adapters.out.in_memory.distill.list_notes_query import (
-    InMemoryListNotesQueryAdapter,
-)
-from adapters.out.in_memory.distill.note_repository import (
-    InMemoryNoteRepository as InMemoryDistillNoteRepository,
-)
 from adapters.out.in_memory.distill.structured_task import (
     DeterministicStructuredTaskAdapter,
 )
-from adapters.out.in_memory.distill.unit_of_work import (
-    InMemoryUnitOfWork as InMemoryDistillUnitOfWork,
-)
-from adapters.out.in_memory.remember.card_source_locator import (
-    InMemoryCardSourceLocator,
-)
 from adapters.out.in_memory.remember.clock import SystemClock
-from adapters.out.in_memory.remember.review_catalog import InMemoryReviewCatalog
-from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
-from adapters.out.in_memory.remember.scheduling_state_repository import (
-    InMemorySchedulingStateRepository,
-)
-from adapters.out.in_memory.remember.sitting_repository import InMemorySittingRepository
-from adapters.out.in_memory.remember.unit_of_work import (
-    InMemoryUnitOfWork as InMemoryRememberUnitOfWork,
-)
-from adapters.out.in_memory.shared.outbox.appender import InMemoryOutboxAppender
-from adapters.out.in_memory.shared.outbox.claimer import InMemoryOutboxClaimer
-from adapters.out.in_memory.shared.outbox.envelope_query import (
-    InMemoryOutboxEnvelopeQueryAdapter,
-)
-from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
 from adapters.out.llm.capture.embedding import OpenRouterEmbeddingAdapter
+from adapters.out.sqlalchemy.capture.unit_of_work import SqlAlchemyCaptureUnitOfWork
+from adapters.out.sqlalchemy.distill.get_note_query import SqlAlchemyGetNoteQueryAdapter
+from adapters.out.sqlalchemy.distill.list_cards_for_note_query import (
+    SqlAlchemyListCardsForNoteQueryAdapter,
+)
+from adapters.out.sqlalchemy.distill.list_notes_query import (
+    SqlAlchemyListNotesQueryAdapter,
+)
+from adapters.out.sqlalchemy.distill.unit_of_work import SqlAlchemyDistillUnitOfWork
+from adapters.out.sqlalchemy.engine import create_engine, create_session_factory
+from adapters.out.sqlalchemy.remember.card_source_locator import (
+    SqlAlchemyCardSourceLocator,
+)
+from adapters.out.sqlalchemy.remember.query import (
+    QueryReviewEventReader,
+    QuerySchedulingStateReader,
+    QuerySittingReader,
+)
+from adapters.out.sqlalchemy.remember.review_catalog import SqlAlchemyReviewCatalog
+from adapters.out.sqlalchemy.remember.unit_of_work import SqlAlchemyRememberUnitOfWork
+from adapters.out.sqlalchemy.shared.outbox.claimer import SqlAlchemyOutboxClaimer
+from adapters.out.sqlalchemy.shared.outbox.envelope_query import (
+    SqlAlchemyOutboxEnvelopeQueryAdapter,
+)
 from adapters.out.worker.handlers.card_discard import CardDiscardHandler
 from adapters.out.worker.handlers.flashcard_gen import FlashcardGenHandler
 from adapters.out.worker.handlers.note_save import SaveNoteHandler
@@ -93,11 +68,7 @@ from config.settings import (
     EmbeddingProvider,
     Settings,
 )
-from domain.capture.ports import (
-    CaptureAgentPort,
-    CaptureSessionRepository,
-    EmbeddingPort,
-)
+from domain.capture.ports import CaptureAgentPort, EmbeddingPort
 from domain.capture.value_objects import SimilarityScore
 from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.distill.card_factory import CardFactory
@@ -109,26 +80,13 @@ from domain.remember.value_objects import ResumeHorizon, ShowingLimit
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
 configure_tracing(_settings)
-_store = InMemoryMessageStore()
-_capture_session_repository = InMemoryCaptureSessionRepository()
-_message_repository = InMemoryMessageRepository(_store)
-_note_repository = InMemoryNoteRepository()
-_topic_repository = InMemoryTopicRepository()
-_tag_repository = InMemoryTagRepository()
-_note_vocabulary = InMemoryNoteVocabularyRepository(_topic_repository, _tag_repository)
-_outbox_store = InMemoryOutboxStore()
-_outbox_appender = InMemoryOutboxAppender(_outbox_store)
-_outbox_claimer = InMemoryOutboxClaimer(_outbox_store)
-_outbox_query = InMemoryOutboxEnvelopeQueryAdapter(_outbox_store)
-_distill_note_repository = InMemoryDistillNoteRepository()
-_distill_card_repository = InMemoryCardRepository()
-_list_notes_query = InMemoryListNotesQueryAdapter(
-    _distill_note_repository, _distill_card_repository
-)
-_get_note_query = InMemoryGetNoteQueryAdapter(_distill_note_repository)
-_list_cards_for_note_query = InMemoryListCardsForNoteQueryAdapter(
-    _distill_note_repository, _distill_card_repository
-)
+_engine = create_engine(_settings.database_url)
+_session_factory = create_session_factory(_engine)
+_outbox_claimer = SqlAlchemyOutboxClaimer(_session_factory)
+_outbox_query = SqlAlchemyOutboxEnvelopeQueryAdapter(_session_factory)
+_list_notes_query = SqlAlchemyListNotesQueryAdapter(_session_factory)
+_get_note_query = SqlAlchemyGetNoteQueryAdapter(_session_factory)
+_list_cards_for_note_query = SqlAlchemyListCardsForNoteQueryAdapter(_session_factory)
 _card_factory = CardFactory(
     CardLengthPolicy(
         front_max=_settings.card_front_max, back_max=_settings.card_back_max
@@ -215,16 +173,11 @@ _vocabulary = VocabularyResolver(
         threshold=SimilarityScore(value=_settings.vocabulary_match_threshold)
     ),
 )
-_remember_sittings = InMemorySittingRepository()
-_remember_review_events = InMemoryReviewEventStore()
-_remember_scheduling_states = InMemorySchedulingStateRepository()
-_remember_lock = asyncio.Lock()
-_remember_catalog = InMemoryReviewCatalog(
-    _distill_note_repository, _distill_card_repository
-)
-_remember_card_source_locator = InMemoryCardSourceLocator(
-    _distill_note_repository, _distill_card_repository
-)
+_remember_sittings = QuerySittingReader(_session_factory)
+_remember_review_events = QueryReviewEventReader(_session_factory)
+_remember_scheduling_states = QuerySchedulingStateReader(_session_factory)
+_remember_catalog = SqlAlchemyReviewCatalog(_session_factory)
+_remember_card_source_locator = SqlAlchemyCardSourceLocator(_session_factory)
 _remember_scheduler = FsrsScheduler()
 _remember_clock = SystemClock()
 _remember_showing_limit = ShowingLimit(value=_settings.sitting_max_showings)
@@ -236,35 +189,14 @@ _remember_resume_horizon = ResumeHorizon(
 def _unit_of_work() -> UnitOfWork:
     return cast(
         UnitOfWork,
-        cast(
-            object,
-            InMemoryUnitOfWork(
-                _capture_session_repository,
-                _message_repository,
-                _store,
-                _note_repository,
-                _topic_repository,
-                _tag_repository,
-                _note_vocabulary,
-                _outbox_store,
-                _outbox_appender,
-            ),
-        ),
+        cast(object, SqlAlchemyCaptureUnitOfWork(_session_factory)),
     )
 
 
 def _distill_unit_of_work() -> DistillUnitOfWork:
     return cast(
         DistillUnitOfWork,
-        cast(
-            object,
-            InMemoryDistillUnitOfWork(
-                _distill_note_repository,
-                _distill_card_repository,
-                _outbox_store,
-                _outbox_appender,
-            ),
-        ),
+        cast(object, SqlAlchemyDistillUnitOfWork(_session_factory)),
     )
 
 
@@ -288,17 +220,12 @@ _outbox_worker = OutboxWorker(
 )
 
 
-def get_capture_session_repository() -> CaptureSessionRepository:
-    return _capture_session_repository
-
-
 def get_start_capture_session_command() -> StartCaptureSessionCommand:
     return StartCaptureSessionCommand(uow=_unit_of_work())
 
 
 def get_generate_reply_command() -> GenerateReplyCommand:
     return GenerateReplyCommand(
-        capture_sessions=_capture_session_repository,
         uow=_unit_of_work(),
         capture_agent=_capture_agent,
         vocabulary=_vocabulary,
@@ -332,17 +259,7 @@ def get_outbox_worker() -> OutboxWorker:
 def _remember_unit_of_work() -> RememberUnitOfWork:
     return cast(
         RememberUnitOfWork,
-        cast(
-            object,
-            InMemoryRememberUnitOfWork(
-                _remember_sittings,
-                _remember_review_events,
-                _remember_scheduling_states,
-                _outbox_store,
-                _outbox_appender,
-                _remember_lock,
-            ),
-        ),
+        cast(object, SqlAlchemyRememberUnitOfWork(_session_factory)),
     )
 
 
