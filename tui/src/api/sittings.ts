@@ -1,5 +1,5 @@
-import { client } from "./client.js";
 import { type DuePartition, toDuePartition } from "./due.js";
+import { getClient } from "./instance.js";
 
 export const SITTING_EXPIRED = "sitting_expired";
 
@@ -73,7 +73,7 @@ export class SittingHttpError extends Error {
 export async function openSitting(): Promise<
   OpenedSitting | ResumedSitting | NothingDue
 > {
-  const { data, error, response } = await client.POST("/review-sittings");
+  const { data, error, response } = await getClient().POST("/review-sittings");
   if (error || !data) {
     throwOnClientError(error, response, "openSitting failed");
   }
@@ -112,7 +112,7 @@ export async function fetchCardSource(
   sittingId: string,
   cardId: string,
 ): Promise<CardSource | null> {
-  const { data, error, response } = await client.GET(
+  const { data, error, response } = await getClient().GET(
     "/review-sittings/{sitting_id}/cards/{card_id}/source",
     { params: { path: { sitting_id: sittingId, card_id: cardId } } },
   );
@@ -140,7 +140,7 @@ export async function revealBack(
   sittingId: string,
   cardId: string,
 ): Promise<RevealedCard> {
-  const { data, error, response } = await client.POST(
+  const { data, error, response } = await getClient().POST(
     "/review-sittings/{sitting_id}/cards/{card_id}/back",
     { params: { path: { sitting_id: sittingId, card_id: cardId } } },
   );
@@ -161,7 +161,7 @@ export async function gradeCard(
   cardId: string,
   grade: Grade,
 ): Promise<GradeApplied> {
-  const { data, error, response } = await client.POST(
+  const { data, error, response } = await getClient().POST(
     "/review-sittings/{sitting_id}/cards/{card_id}/grade",
     {
       params: { path: { sitting_id: sittingId, card_id: cardId } },
@@ -186,7 +186,7 @@ export async function rejectCard(
   sittingId: string,
   cardId: string,
 ): Promise<void> {
-  const { data, error, response } = await client.POST(
+  const { data, error, response } = await getClient().POST(
     "/review-sittings/{sitting_id}/cards/{card_id}/rejection",
     {
       params: { path: { sitting_id: sittingId, card_id: cardId } },
@@ -201,7 +201,7 @@ export async function rejectCard(
 }
 
 export async function currentCard(sittingId: string): Promise<PresentedCard> {
-  const { data, error, response } = await client.GET(
+  const { data, error, response } = await getClient().GET(
     "/review-sittings/{sitting_id}/current-card",
     { params: { path: { sitting_id: sittingId } } },
   );

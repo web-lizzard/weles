@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-instance-address
 current_phase: 4
-next_step: 4.1
-next_command: /unit-test auth-flow-instance-address phase 4
+next_step: 4.6
+next_command: /implement auth-flow-instance-address phase 4
 updated: 2026-09-13
 ---
 
@@ -41,15 +41,15 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5922da7
 
 #### Automated
 
-- [ ] 4.1 Hold the process address and memoize the openapi client per address in api/instance.ts
-- [ ] 4.2 Move every API module to getClient and remove both hardcoded addresses
-- [ ] 4.3 Return ready or missing from resolveStartup
-- [ ] 4.4 Dispatch the instance command before the TTY check and refuse to start without an instance in cli.tsx
-- [ ] 4.5 Pass pnpm test, pnpm typecheck and pnpm lint
+- [x] 4.1 Hold the process address and memoize the openapi client per address in api/instance.ts
+- [x] 4.2 Move every API module to getClient and remove both hardcoded addresses
+- [x] 4.3 Return ready or missing from resolveStartup
+- [x] 4.4 Dispatch the instance command before the TTY check and refuse to start without an instance in cli.tsx
+- [x] 4.5 Pass pnpm test, pnpm typecheck and pnpm lint
 
 #### Manual
 

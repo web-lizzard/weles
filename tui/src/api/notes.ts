@@ -1,4 +1,4 @@
-import { client } from "./client.js";
+import { getClient } from "./instance.js";
 
 export type NoteListItem = {
   noteId: string;
@@ -24,7 +24,7 @@ export type NoteDetail = {
 };
 
 export async function getNote(noteId: string): Promise<NoteDetail> {
-  const { data, error, response } = await client.GET("/notes/{note_id}", {
+  const { data, error, response } = await getClient().GET("/notes/{note_id}", {
     params: { path: { note_id: noteId } },
   });
   if (error || !data) {
@@ -49,7 +49,7 @@ export async function getNote(noteId: string): Promise<NoteDetail> {
 }
 
 export async function listNotes(): Promise<NoteListItem[]> {
-  const { data, error } = await client.GET("/notes");
+  const { data, error } = await getClient().GET("/notes");
   if (error || !data) {
     throw new Error("Failed to list notes");
   }

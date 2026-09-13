@@ -1,4 +1,4 @@
-import { client } from "./client.js";
+import { getClient } from "./instance.js";
 
 export type DuePartition = {
   total: number;
@@ -24,7 +24,7 @@ export function toDuePartition(due: DuePartitionRaw): DuePartition {
 }
 
 export async function fetchDueCount(): Promise<DuePartition> {
-  const { data, error } = await client.GET("/due-cards/count");
+  const { data, error } = await getClient().GET("/due-cards/count");
   if (error || !data?.due) {
     throw new Error("Failed to fetch due count");
   }
