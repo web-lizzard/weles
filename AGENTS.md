@@ -29,7 +29,7 @@ Ruff (line length 88, rules `E,F,I,UP,B`) and basedpyright for `backend/`; Biome
 
 ## Testing
 
-Backend tests are flat module-level `test_*` functions, no classes. New Gherkin tags must be registered under `markers` in @backend/pyproject.toml. Property tests use Hypothesis; mutation testing uses mutmut.
+Follow @context/foundation/testing-conventions.md for test layout, naming, runners, and the BDD, property, and mutation lanes.
 
 ## Commits
 
