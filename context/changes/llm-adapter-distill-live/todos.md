@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
-current_phase: 8
-next_step: 8.1
-next_command: /implement llm-adapter-distill-live phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /unit-test llm-adapter-distill-live phase 9
 updated: 2026-09-13
 ---
 
@@ -82,8 +82,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 8.1 Deterministic structured task adapter module imports
-- [ ] 8.2 basedpyright clean over the deterministic structured task module
+- [x] 8.1 Deterministic structured task adapter module imports — 5ff28a0
+- [x] 8.2 basedpyright clean over the deterministic structured task module — 5ff28a0
 
 ### Phase 9: Deterministic structured task adapter
 
