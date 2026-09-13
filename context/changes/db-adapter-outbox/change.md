@@ -1,7 +1,7 @@
 ---
 change_id: db-adapter-outbox
 title: Outbox envelopes persist in Postgres
-status: new
+status: planned
 created: 2026-09-13
 updated: 2026-09-13
 archived_at: null
