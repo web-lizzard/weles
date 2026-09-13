@@ -50,6 +50,6 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 4.1 Outbox persistence integration tests pass
-- [x] 4.2 Full backend suite passes
-- [x] 4.3 basedpyright and ruff clean
+- [x] 4.1 Outbox persistence integration tests pass — 9dda8f8
+- [x] 4.2 Full backend suite passes — 9dda8f8
+- [x] 4.3 basedpyright and ruff clean — 9dda8f8
