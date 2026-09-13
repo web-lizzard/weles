@@ -59,9 +59,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 5.1 basedpyright clean
-- [x] 5.2 ruff check src tests clean
-- [x] 5.3 pytest -m 'not postgres' passes
+- [x] 5.1 basedpyright clean — 370c821
+- [x] 5.2 ruff check src tests clean — 370c821
+- [x] 5.3 pytest -m 'not postgres' passes — 370c821
 
 ### Phase 6: Unit of work with advisory lock, atomic commands and the rejection relay on Postgres
 
