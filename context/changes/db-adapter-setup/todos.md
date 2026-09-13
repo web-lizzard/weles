@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-setup
 current_phase: 3
-next_step: 3.1
-next_command: /unit-test db-adapter-setup phase 3
+next_step: 3.4
+next_command: /implement db-adapter-setup phase 3
 updated: 2026-09-13
 ---
 
@@ -30,13 +30,13 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a717c5f
 
 #### Automated
 
-- [ ] 3.1 Postgres integration suite passes
-- [ ] 3.2 Full backend suite passes
-- [ ] 3.3 basedpyright and ruff clean
+- [x] 3.1 Postgres integration suite passes
+- [x] 3.2 Full backend suite passes
+- [x] 3.3 basedpyright and ruff clean
 
 #### Manual
 
