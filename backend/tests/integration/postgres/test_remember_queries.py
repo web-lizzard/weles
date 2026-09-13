@@ -10,12 +10,12 @@ from adapters.out.sqlalchemy.engine import create_session_factory
 from adapters.out.sqlalchemy.remember.card_source_locator import (
     SqlAlchemyCardSourceLocator,
 )
-from adapters.out.sqlalchemy.remember.review_catalog import SqlAlchemyReviewCatalog
-from adapters.out.sqlalchemy.remember.short_session import (
-    ShortSessionReviewEventStore,
-    ShortSessionSchedulingStateRepository,
-    ShortSessionSittingRepository,
+from adapters.out.sqlalchemy.remember.query import (
+    QueryReviewEventReader,
+    QuerySchedulingStateReader,
+    QuerySittingReader,
 )
+from adapters.out.sqlalchemy.remember.review_catalog import SqlAlchemyReviewCatalog
 from application.distill.commands.discard_card import DiscardCardCommand
 from application.remember.dto import PresentedCardDTO
 from application.remember.ports import Clock
@@ -47,6 +47,11 @@ from domain.remember.value_objects import (
     SchedulerAlgorithm,
     SchedulerStamp,
     ShowingLimit,
+)
+from tests.support.postgres_remember_repositories import (
+    CommittingReviewEventStore,
+    CommittingSchedulingStateRepository,
+    CommittingSittingRepository,
 )
 
 pytestmark = pytest.mark.postgres
@@ -115,9 +120,9 @@ def _remember_queries(
     clock: Clock,
 ) -> tuple[DueCountQuery, CurrentCardQuery, CardSourceQuery, SqlAlchemyReviewCatalog]:
     scheduler = FsrsScheduler()
-    sittings = ShortSessionSittingRepository(session_factory)
-    events = ShortSessionReviewEventStore(session_factory)
-    states = ShortSessionSchedulingStateRepository(session_factory)
+    sittings = QuerySittingReader(session_factory)
+    events = QueryReviewEventReader(session_factory)
+    states = QuerySchedulingStateReader(session_factory)
     catalog = SqlAlchemyReviewCatalog(session_factory)
     locator = SqlAlchemyCardSourceLocator(session_factory)
     due_count = DueCountQuery(sittings, events, catalog, states, clock, scheduler)
@@ -134,7 +139,7 @@ async def test_due_count_counts_unscheduled_cards_and_honors_future_due_at(
     due_count, _, _, _ = _remember_queries(session_factory, clock)
     _card_id, _ = await _seed_live_card(session_factory)
     later_id, _ = await _seed_live_card(session_factory, front="Scheduled later")
-    states = ShortSessionSchedulingStateRepository(session_factory)
+    states = CommittingSchedulingStateRepository(session_factory)
     await states.save(
         SchedulingState(
             card_id=later_id,
@@ -164,7 +169,7 @@ async def test_current_card_presents_the_sitting_s_only_card_while_offered(
         ShowingLimit(value=2),
         resume_horizon=ResumeHorizon(value=timedelta(hours=26)),
     )
-    await ShortSessionSittingRepository(session_factory).save(sitting)
+    await CommittingSittingRepository(session_factory).save(sitting)
 
     result = await current_card.handle(sitting.id)
 
@@ -187,8 +192,8 @@ async def test_card_source_returns_blocks_and_span_after_a_reveal_event(
         ShowingLimit(value=2),
         resume_horizon=ResumeHorizon(value=timedelta(hours=26)),
     )
-    sittings = ShortSessionSittingRepository(session_factory)
-    events = ShortSessionReviewEventStore(session_factory)
+    sittings = CommittingSittingRepository(session_factory)
+    events = CommittingReviewEventStore(session_factory)
     await sittings.save(sitting)
     await events.save(
         ReviewEvent(

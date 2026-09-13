@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from adapters.out.in_memory.remember.sitting_repository import InMemorySittingRepository
 from adapters.out.sqlalchemy.engine import create_session_factory
-from adapters.out.sqlalchemy.remember.short_session import ShortSessionSittingRepository
 from domain.remember.ports import SittingRepository
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, ResumeHorizon, ShowingLimit, SittingId
+from tests.support.postgres_remember_repositories import CommittingSittingRepository
 
 
 @dataclass
@@ -26,7 +26,7 @@ def sitting_fixture(request: pytest.FixtureRequest) -> _SittingFixture:
         return _SittingFixture(sittings=InMemorySittingRepository())
     engine: AsyncEngine = request.getfixturevalue("engine")  # pyright: ignore[reportAny]
     session_factory = create_session_factory(engine)
-    return _SittingFixture(sittings=ShortSessionSittingRepository(session_factory))
+    return _SittingFixture(sittings=CommittingSittingRepository(session_factory))
 
 
 def _card_id() -> CardId:

@@ -1,5 +1,7 @@
 from collections.abc import Sequence
 
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
 from adapters.out.sqlalchemy.remember.review_event_store import (
     SqlAlchemyReviewEventStore,
 )
@@ -13,10 +15,9 @@ from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, SittingId
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
-class ShortSessionSittingRepository:
+class CommittingSittingRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
@@ -34,7 +35,7 @@ class ShortSessionSittingRepository:
             return await SqlAlchemySittingRepository(session).latest()
 
 
-class ShortSessionReviewEventStore:
+class CommittingReviewEventStore:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
@@ -52,7 +53,7 @@ class ShortSessionReviewEventStore:
             return await SqlAlchemyReviewEventStore(session).list_by_sitting(sitting_id)
 
 
-class ShortSessionSchedulingStateRepository:
+class CommittingSchedulingStateRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 

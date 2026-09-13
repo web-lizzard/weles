@@ -53,12 +53,10 @@ class _TurnBuffers:
 class GenerateReplyCommand:
     def __init__(
         self,
-        capture_sessions: CaptureSessionRepository,
         uow: UnitOfWork,
         capture_agent: CaptureAgentPort,
         vocabulary: VocabularyResolver,
     ) -> None:
-        self._capture_sessions: CaptureSessionRepository = capture_sessions
         self._uow: UnitOfWork = uow
         self._capture_agent: CaptureAgentPort = capture_agent
         self._vocabulary: VocabularyResolver = vocabulary
@@ -67,7 +65,8 @@ class GenerateReplyCommand:
         self, session_id: SessionId, raw_content: str
     ) -> MessageContent:
         content = MessageContent(value=raw_content)
-        _ = await self._get_open_session(self._capture_sessions, session_id)
+        async with self._uow as uow:
+            _ = await self._get_open_session(uow.capture_sessions, session_id)
         return content
 
     async def handle(

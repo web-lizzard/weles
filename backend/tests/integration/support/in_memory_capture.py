@@ -4,7 +4,6 @@ from typing import cast
 
 from adapters.compose import (
     get_approve_note_command,
-    get_capture_session_repository,
     get_generate_reply_command,
     get_outbox_envelope_query,
     get_start_capture_session_command,
@@ -106,9 +105,6 @@ class InMemoryCaptureComposition:
     ) -> dict[Callable[..., object], Callable[..., object]]:
         composition = self
 
-        def override_capture_session_repository() -> InMemoryCaptureSessionRepository:
-            return composition.capture_sessions
-
         def override_start_capture_session_command() -> StartCaptureSessionCommand:
             return StartCaptureSessionCommand(
                 uow=cast(UnitOfWork, cast(object, composition.unit_of_work()))
@@ -116,7 +112,6 @@ class InMemoryCaptureComposition:
 
         def override_generate_reply_command() -> GenerateReplyCommand:
             return GenerateReplyCommand(
-                capture_sessions=composition.capture_sessions,
                 uow=cast(UnitOfWork, cast(object, composition.unit_of_work())),
                 capture_agent=composition.capture_agent,
                 vocabulary=composition.vocabulary,
@@ -131,7 +126,6 @@ class InMemoryCaptureComposition:
             return composition.outbox_query
 
         return {
-            get_capture_session_repository: override_capture_session_repository,
             get_start_capture_session_command: override_start_capture_session_command,
             get_generate_reply_command: override_generate_reply_command,
             get_approve_note_command: override_approve_note_command,

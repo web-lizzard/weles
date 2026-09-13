@@ -49,11 +49,7 @@ class CardSourceLocator(Protocol):
     async def locate(self, card_id: CardId) -> CardSource | None: ...
 
 
-class SittingRepository(Protocol):
-    async def save(self, sitting: Sitting) -> None:
-        """Whole aggregate, including showing_limit and resume_horizon. Write-once."""
-        ...
-
+class SittingReader(Protocol):
     async def get(self, sitting_id: SittingId) -> Sitting | None: ...
 
     async def latest(self) -> Sitting | None:
@@ -65,9 +61,13 @@ class SittingRepository(Protocol):
         ...
 
 
-class ReviewEventStore(Protocol):
-    async def save(self, event: ReviewEvent) -> None: ...
+class SittingRepository(SittingReader, Protocol):
+    async def save(self, sitting: Sitting) -> None:
+        """Whole aggregate, including showing_limit and resume_horizon. Write-once."""
+        ...
 
+
+class ReviewEventReader(Protocol):
     async def list_by_card(self, card_id: CardId) -> Sequence[ReviewEvent]:
         """Chronological by reviewed_at. Replay input."""
         ...
@@ -75,14 +75,20 @@ class ReviewEventStore(Protocol):
     async def list_by_sitting(self, sitting_id: SittingId) -> Sequence[ReviewEvent]: ...
 
 
-class SchedulingStateRepository(Protocol):
-    async def save(self, state: SchedulingState) -> None: ...
+class ReviewEventStore(ReviewEventReader, Protocol):
+    async def save(self, event: ReviewEvent) -> None: ...
 
+
+class SchedulingStateReader(Protocol):
     async def get(self, card_id: CardId) -> SchedulingState | None: ...
 
     async def get_many(
         self, card_ids: Sequence[CardId]
     ) -> dict[CardId, SchedulingState]: ...
+
+
+class SchedulingStateRepository(SchedulingStateReader, Protocol):
+    async def save(self, state: SchedulingState) -> None: ...
 
 
 class Scheduler(Protocol):

@@ -1158,7 +1158,6 @@ def _make_command_stack_with_message_add_counter(
     embedding = DeterministicEmbeddingAdapter()
     agent = capture_agent or DeterministicCaptureAgentAdapter()
     command = GenerateReplyCommand(
-        capture_sessions=session_repo,
         uow=uow,  # pyright: ignore[reportArgumentType]
         capture_agent=agent,
         vocabulary=VocabularyResolver(
@@ -1179,7 +1178,6 @@ def _make_agent_command_stack_with_message_add_counter(
     embedding = DeterministicEmbeddingAdapter()
     factory = cast(Callable[..., GenerateReplyCommand], GenerateReplyCommand)
     command = factory(
-        capture_sessions=session_repo,
         uow=uow,
         capture_agent=capture_agent,
         vocabulary=VocabularyResolver(
@@ -1198,7 +1196,6 @@ def _make_agent_command_stack(capture_agent: object) -> _CommandStack:
     embedding = DeterministicEmbeddingAdapter()
     factory = cast(Callable[..., GenerateReplyCommand], GenerateReplyCommand)
     command = factory(
-        capture_sessions=session_repo,
         uow=uow,
         capture_agent=capture_agent,
         vocabulary=VocabularyResolver(
@@ -1218,7 +1215,6 @@ def _make_command_stack(
     embedding = DeterministicEmbeddingAdapter()
     agent = capture_agent or DeterministicCaptureAgentAdapter()
     command = GenerateReplyCommand(
-        capture_sessions=session_repo,
         uow=uow,  # pyright: ignore[reportArgumentType]
         capture_agent=agent,
         vocabulary=VocabularyResolver(
