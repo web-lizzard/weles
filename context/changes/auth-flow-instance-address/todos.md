@@ -2,7 +2,7 @@
 change_id: auth-flow-instance-address
 current_phase: 2
 next_step: 2.1
-next_command: /unit-test auth-flow-instance-address phase 2
+next_command: /implement auth-flow-instance-address phase 2
 updated: 2026-09-13
 ---
 
@@ -19,7 +19,7 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 57be39e
 
 #### Automated
 

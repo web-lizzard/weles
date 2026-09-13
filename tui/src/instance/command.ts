@@ -1,4 +1,13 @@
-import type { ConfigLocation } from "./configStore.js";
+import {
+  type InstanceAddress,
+  InvalidInstanceAddressError,
+  parseInstanceAddress,
+} from "./address.js";
+import {
+  type ConfigLocation,
+  readInstanceAddress,
+  writeInstanceAddress,
+} from "./configStore.js";
 
 export type InstanceCommandDeps = {
   location: ConfigLocation;
@@ -6,9 +15,46 @@ export type InstanceCommandDeps = {
   err: (line: string) => void;
 };
 
+const USAGE = "Usage: weles instance [set <address>]";
+
+const NOT_CONFIGURED =
+  "No Weles instance configured. Run: weles instance set <address>";
+
 export async function runInstanceCommand(
-  _args: string[],
-  _deps: InstanceCommandDeps,
+  args: string[],
+  deps: InstanceCommandDeps,
 ): Promise<number> {
-  throw new Error("Not implemented");
+  const { location, out, err } = deps;
+
+  if (args.length === 0) {
+    const stored = await readInstanceAddress(location);
+    if (stored === null) {
+      err(NOT_CONFIGURED);
+      return 1;
+    }
+    out(stored);
+    return 0;
+  }
+
+  if (args.length === 2 && args[0] === "set") {
+    let address: InstanceAddress;
+    try {
+      address = parseInstanceAddress(args[1] ?? "");
+    } catch (error) {
+      if (error instanceof InvalidInstanceAddressError) {
+        err(error.message);
+        return 2;
+      }
+      throw error;
+    }
+
+    await writeInstanceAddress(location, address);
+    out(
+      `Weles instance set to ${address}. Restart any running Weles TUI to use it.`,
+    );
+    return 0;
+  }
+
+  err(USAGE);
+  return 2;
 }
