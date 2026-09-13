@@ -9,7 +9,7 @@ updated: 2026-09-13
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
 | S-01 | The author can query the local Postgres through an MCP server, with the database tooling ready to take its first revision | db-adapter-setup | done |
-| S-02 | Outbox envelopes persist in Postgres | db-adapter-outbox | pending |
+| S-02 | Outbox envelopes persist in Postgres | db-adapter-outbox | in_progress |
 | S-03 | Capture persists in Postgres and commits atomically with its envelopes | db-adapter-capture | pending |
 | S-04 | Distill persists in Postgres and a capture approval becomes cards through the outbox | db-adapter-distill | pending |
 | S-05 | Remember persists in Postgres and a card rejection discards the distill card through the outbox | db-adapter-remember | pending |
@@ -48,7 +48,7 @@ and an empty migration history upgrades cleanly.
 - **Outcome:** Outbox envelopes persist in Postgres
 - **Acceptance criteria:** FR-01
 - **Change ID:** db-adapter-outbox
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01
 - **Research:** sql-alchemy
 
