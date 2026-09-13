@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-distill
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test db-adapter-distill phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement db-adapter-distill phase 3
 updated: 2026-09-13
 ---
 
@@ -25,14 +25,14 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 941667e
 
 #### Automated
 
-- [ ] 2.1 pytest tests/unit/distill/contracts passes with in_memory and postgres ids
-- [ ] 2.2 pytest -m postgres passes
-- [ ] 2.3 pytest passes
-- [ ] 2.4 basedpyright and ruff check src tests clean
+- [x] 2.1 pytest tests/unit/distill/contracts passes with in_memory and postgres ids — ba0e88b
+- [x] 2.2 pytest -m postgres passes — ba0e88b
+- [x] 2.3 pytest passes — ba0e88b
+- [x] 2.4 basedpyright and ruff check src tests clean — ba0e88b
 
 ### Phase 3: Distill query adapter stubs
 
