@@ -1,7 +1,7 @@
 ---
 change_id: db-adapter-setup
 current_phase: 1
-next_step: 1.1
+next_step: 1.3
 next_command: /implement db-adapter-setup phase 1
 updated: 2026-09-13
 ---
@@ -10,8 +10,8 @@ updated: 2026-09-13
 
 #### Automated
 
-- [ ] 1.1 .mcp.json parses as JSON
-- [ ] 1.2 postgres-mcp launch command resolves with the mcp<2 pin
+- [x] 1.1 .mcp.json parses as JSON
+- [x] 1.2 postgres-mcp launch command resolves with the mcp<2 pin
 
 #### Manual
 

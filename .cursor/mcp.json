@@ -1,5 +1,18 @@
 {
   "mcpServers": {
+    "postgres": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--with",
+        "mcp<2",
+        "postgres-mcp==0.3.0",
+        "--access-mode=restricted"
+      ],
+      "env": {
+        "DATABASE_URI": "postgresql://weles:weles@postgres:5432/weles"
+      }
+    },
     "langfuse": {
       "type": "stdio",
       "command": "bash",
