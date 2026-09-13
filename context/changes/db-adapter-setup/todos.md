@@ -40,5 +40,5 @@ updated: 2026-09-13
 
 #### Manual
 
-- [x] 3.4 Alembic CLI upgrades the dev database through the adapter alembic.ini
-- [x] 3.5 MCP server sees alembic_version on the dev database
+- [x] 3.4 Alembic CLI upgrades the dev database through the adapter alembic.ini — 3293e21
+- [x] 3.5 MCP server sees alembic_version on the dev database — 3293e21
