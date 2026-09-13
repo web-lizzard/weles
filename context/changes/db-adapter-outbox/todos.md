@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-outbox
 current_phase: 4
-next_step: 4.1
-next_command: /unit-test db-adapter-outbox phase 4
+next_step: done
+next_command: /archive db-adapter-outbox
 updated: 2026-09-13
 ---
 
@@ -46,10 +46,10 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 87627d1
 
 #### Automated
 
-- [ ] 4.1 Outbox persistence integration tests pass
-- [ ] 4.2 Full backend suite passes
-- [ ] 4.3 basedpyright and ruff clean
+- [x] 4.1 Outbox persistence integration tests pass
+- [x] 4.2 Full backend suite passes
+- [x] 4.3 basedpyright and ruff clean
