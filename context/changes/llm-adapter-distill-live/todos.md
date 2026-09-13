@@ -35,7 +35,7 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 3.1 Run minting suite passes
+- [x] 3.1 Run minting suite passes — 3cf8cb2
 
 ### Phase 4: Review verdicts, share, and gaps on the run
 
