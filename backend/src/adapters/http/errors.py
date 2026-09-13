@@ -7,6 +7,7 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "not_found": 404,
     "capture_session_not_found": 404,
     "capture_session_closed": 409,
+    "capture_session_conflict": 409,
     "session_topic_already_assigned": 409,
     "empty_session_topic": 422,
     "session_topic_too_long": 422,
