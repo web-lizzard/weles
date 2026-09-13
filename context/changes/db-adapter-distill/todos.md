@@ -50,9 +50,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 4.1 pytest tests/unit/distill/contracts passes with in_memory and postgres ids
-- [x] 4.2 pytest passes
-- [x] 4.3 basedpyright and ruff check src tests clean
+- [x] 4.1 pytest tests/unit/distill/contracts passes with in_memory and postgres ids — c61b7b1
+- [x] 4.2 pytest passes — c61b7b1
+- [x] 4.3 basedpyright and ruff check src tests clean — c61b7b1
 
 ### Phase 5: Distill unit of work stub
 
