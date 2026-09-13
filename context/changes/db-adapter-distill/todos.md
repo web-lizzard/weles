@@ -38,9 +38,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 3.1 basedpyright clean
-- [x] 3.2 ruff check src tests clean
-- [x] 3.3 pytest -m 'not postgres' passes
+- [x] 3.1 basedpyright clean — 728befc
+- [x] 3.2 ruff check src tests clean — 728befc
+- [x] 3.3 pytest -m 'not postgres' passes — 728befc
 
 ### Phase 4: Distill queries on Postgres
 
