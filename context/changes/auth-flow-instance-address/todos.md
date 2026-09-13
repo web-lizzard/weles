@@ -1,11 +1,10 @@
 ---
 change_id: auth-flow-instance-address
 current_phase: 4
-next_step: 4.6
-next_command: /implement auth-flow-instance-address phase 4
+next_step:
+next_command: /archive auth-flow-instance-address
 updated: 2026-09-13
 ---
-
 
 ### Phase 1: Instance address stubs
 
@@ -54,12 +53,12 @@ updated: 2026-09-13
 
 #### Manual
 
-- [ ] 4.6 Run the built TUI with an empty config directory and confirm the refusal message and exit code 1
-- [ ] 4.7 Set an ftp address and confirm the scheme error and exit code 2
-- [ ] 4.8 Set http://localhost:8000/ and confirm weles instance prints it without the trailing slash
-- [ ] 4.9 Start the TUI against a running backend and confirm notes and due count load
-- [ ] 4.10 Set a port with no backend and confirm the TUI shows load failures and none of the previous notes
-- [ ] 4.11 Confirm dist/cli.js contains no localhost:8000
+- [x] 4.6 Run the built TUI with an empty config directory and confirm the refusal message and exit code 1
+- [x] 4.7 Set an ftp address and confirm the scheme error and exit code 2
+- [x] 4.8 Set http://localhost:8000/ and confirm weles instance prints it without the trailing slash
+- [x] 4.9 Start the TUI against a running backend and confirm notes and due count load
+- [x] 4.10 Set a port with no backend and confirm the TUI shows load failures and none of the previous notes
+- [x] 4.11 Confirm dist/cli.js contains no localhost:8000
 
 #### Triage
 
