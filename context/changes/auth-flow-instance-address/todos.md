@@ -45,11 +45,11 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 4.1 Hold the process address and memoize the openapi client per address in api/instance.ts
-- [x] 4.2 Move every API module to getClient and remove both hardcoded addresses
-- [x] 4.3 Return ready or missing from resolveStartup
-- [x] 4.4 Dispatch the instance command before the TTY check and refuse to start without an instance in cli.tsx
-- [x] 4.5 Pass pnpm test, pnpm typecheck and pnpm lint
+- [x] 4.1 Hold the process address and memoize the openapi client per address in api/instance.ts — b2a598e
+- [x] 4.2 Move every API module to getClient and remove both hardcoded addresses — b2a598e
+- [x] 4.3 Return ready or missing from resolveStartup — b2a598e
+- [x] 4.4 Dispatch the instance command before the TTY check and refuse to start without an instance in cli.tsx — b2a598e
+- [x] 4.5 Pass pnpm test, pnpm typecheck and pnpm lint — b2a598e
 
 #### Manual
 
