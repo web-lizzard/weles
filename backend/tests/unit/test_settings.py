@@ -52,3 +52,51 @@ def test_settings_loads_vocabulary_match_threshold_from_environment(
     monkeypatch.setenv("VOCABULARY_MATCH_THRESHOLD", "0.5")
     settings = Settings()  # pyright: ignore[reportCallIssue]
     assert settings.vocabulary_match_threshold == 0.5
+
+
+def test_settings_defaults_distill_task_provider_to_pydantic_ai_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", _DATABASE_URL)
+    monkeypatch.delenv("DISTILL_TASK_PROVIDER", raising=False)
+    settings = Settings()  # pyright: ignore[reportCallIssue]
+    provider = getattr(settings, "distill_task_provider", None)
+    assert provider is not None
+    assert str(provider) == "pydantic_ai"  # pyright: ignore[reportAny]
+
+
+def test_settings_defaults_distill_model_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", _DATABASE_URL)
+    monkeypatch.delenv("DISTILL_MODEL", raising=False)
+    settings = Settings()  # pyright: ignore[reportCallIssue]
+    assert getattr(settings, "distill_model", None) == "openai/gpt-4o-mini"
+
+
+def test_settings_defaults_distill_regeneration_tiers_when_unset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", _DATABASE_URL)
+    monkeypatch.delenv("DISTILL_REGENERATION_TIERS", raising=False)
+    settings = Settings()  # pyright: ignore[reportCallIssue]
+    assert getattr(settings, "distill_regeneration_tiers", None) == [
+        (1500, 0.5),
+        (6000, 0.6),
+        (None, 0.7),
+    ]
+
+
+def test_settings_loads_distill_regeneration_tiers_from_json_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", _DATABASE_URL)
+    monkeypatch.setenv(
+        "DISTILL_REGENERATION_TIERS",
+        "[[100, 0.4], [null, 0.9]]",
+    )
+    settings = Settings()  # pyright: ignore[reportCallIssue]
+    assert getattr(settings, "distill_regeneration_tiers", None) == [
+        (100, 0.4),
+        (None, 0.9),
+    ]
