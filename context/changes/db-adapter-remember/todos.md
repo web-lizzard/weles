@@ -17,9 +17,9 @@ updated: 2026-09-13
 
 #### Manual
 
-- [x] 1.5 alembic upgrade head exits 0 on the dev database and current prints the remember revision as head
-- [x] 1.6 postgres MCP lists the four remember tables
-- [x] 1.7 alembic downgrade -1 removes the remember tables while distill tables remain, and upgrade head restores them
+- [x] 1.5 alembic upgrade head exits 0 on the dev database and current prints the remember revision as head — 06b6ab0
+- [x] 1.6 postgres MCP lists the four remember tables — 06b6ab0
+- [x] 1.7 alembic downgrade -1 removes the remember tables while distill tables remain, and upgrade head restores them — 06b6ab0
 
 ### Phase 2: Remember repositories on Postgres
 
