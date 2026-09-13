@@ -1,8 +1,8 @@
 ---
 change_id: llm-adapter-distill-live
 current_phase: 10
-next_step: 10.0
-next_command: /unit-test llm-adapter-distill-live phase 10
+next_step: 10.1
+next_command: /implement llm-adapter-distill-live phase 10
 updated: 2026-09-13
 ---
 
@@ -99,7 +99,7 @@ updated: 2026-09-13
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 5e5ab8b
 
 #### Automated
 
