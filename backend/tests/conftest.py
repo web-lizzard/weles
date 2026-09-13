@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+pytest_plugins = ["integration.support.postgres"]
+
 _TESTS_ROOT = Path(__file__).resolve().parent
 _FEATURES_LOADER = _TESTS_ROOT / "features" / "test_bdd.py"
 _BDD_SHIM = _TESTS_ROOT / "bdd" / "test_features.py"
