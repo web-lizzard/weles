@@ -1,8 +1,8 @@
 ---
 change_id: db-adapter-remember
-current_phase: 1
-next_step: 1.5
-next_command: /implement db-adapter-remember phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test db-adapter-remember phase 2
 updated: 2026-09-13
 ---
 
@@ -17,9 +17,9 @@ updated: 2026-09-13
 
 #### Manual
 
-- [ ] 1.5 alembic upgrade head exits 0 on the dev database and current prints the remember revision as head
-- [ ] 1.6 postgres MCP lists the four remember tables
-- [ ] 1.7 alembic downgrade -1 removes the remember tables while distill tables remain, and upgrade head restores them
+- [x] 1.5 alembic upgrade head exits 0 on the dev database and current prints the remember revision as head
+- [x] 1.6 postgres MCP lists the four remember tables
+- [x] 1.7 alembic downgrade -1 removes the remember tables while distill tables remain, and upgrade head restores them
 
 ### Phase 2: Remember repositories on Postgres
 
