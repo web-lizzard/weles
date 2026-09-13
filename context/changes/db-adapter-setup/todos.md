@@ -34,9 +34,9 @@ updated: 2026-09-13
 
 #### Automated
 
-- [x] 3.1 Postgres integration suite passes
-- [x] 3.2 Full backend suite passes
-- [x] 3.3 basedpyright and ruff clean
+- [x] 3.1 Postgres integration suite passes — dfac526
+- [x] 3.2 Full backend suite passes — dfac526
+- [x] 3.3 basedpyright and ruff clean — dfac526
 
 #### Manual
 
