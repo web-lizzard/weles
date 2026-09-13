@@ -48,6 +48,8 @@ from domain.shared.graph.model import Tool, ToolResult
 
 models.ALLOW_MODEL_REQUESTS = False
 
+_EMBEDDING_MODEL = "test"
+
 
 def _install_in_memory_tracer() -> InMemorySpanExporter:
     exporter = InMemorySpanExporter()
@@ -78,7 +80,10 @@ def _turn(
 def _drafting_turn_with_topic() -> CaptureTurn:
     turn = _turn(phase=CapturePhase.DRAFTING)
     turn.draft = NoteDraft(
-        topic=Topic.mint(Label(value="TCP"), Embedding(values=(1.0,))),
+        topic=Topic.mint(
+            Label(value="TCP"),
+            Embedding(model=_EMBEDDING_MODEL, values=(1.0,)),
+        ),
         topic_reused=False,
     )
     return turn

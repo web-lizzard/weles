@@ -31,4 +31,4 @@ class OpenRouterEmbeddingAdapter:
             values = tuple(result.embeddings[0])
             recorder.record_output({"dimensions": len(values)})
             recorder.record_usage({"input": result.usage.input_tokens})
-            return Embedding(values=values)
+            return Embedding(values=values, model=self._model_name)

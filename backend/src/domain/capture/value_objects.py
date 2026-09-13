@@ -235,6 +235,7 @@ class SimilarityScore(BaseModel, frozen=True):
 
 class Embedding(BaseModel, frozen=True):
     values: tuple[float, ...]
+    model: str
 
     def cosine_similarity(self, other: "Embedding") -> SimilarityScore:
         if len(self.values) != len(other.values):

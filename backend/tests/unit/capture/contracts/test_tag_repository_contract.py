@@ -9,6 +9,8 @@ from domain.capture.ports import TagRepository
 from domain.capture.tag import Tag
 from domain.capture.value_objects import Embedding, Label, TagId
 
+_EMBEDDING_MODEL = "test"
+
 _IMPLEMENTATIONS: list[Callable[[], TagRepository]] = [
     cast(Callable[[], TagRepository], InMemoryTagRepository),
 ]
@@ -18,7 +20,7 @@ def _sample_tag() -> Tag:
     return Tag(
         id=TagId.new(),
         label=Label(value="networking"),
-        embedding=Embedding(values=(0.3, 0.4)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
     )
 

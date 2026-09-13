@@ -9,6 +9,8 @@ from domain.capture.ports import TopicRepository
 from domain.capture.topic import Topic
 from domain.capture.value_objects import Embedding, Label, TopicId
 
+_EMBEDDING_MODEL = "test"
+
 _IMPLEMENTATIONS: list[Callable[[], TopicRepository]] = [
     cast(Callable[[], TopicRepository], InMemoryTopicRepository),
 ]
@@ -18,7 +20,7 @@ def _sample_topic() -> Topic:
     return Topic(
         id=TopicId.new(),
         label=Label(value="TCP handshakes"),
-        embedding=Embedding(values=(0.1, 0.2)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
     )
 

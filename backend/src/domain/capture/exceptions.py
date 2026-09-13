@@ -41,6 +41,14 @@ class EmptyEmbeddingError(CoreException):
     pass
 
 
+class EmptyEmbeddingModelError(CoreException):
+    pass
+
+
+class EmbeddingComponentOutOfRangeError(CoreException):
+    pass
+
+
 class EmptyNoteContentError(CoreException):
     pass
 

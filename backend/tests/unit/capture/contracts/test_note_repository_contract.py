@@ -24,18 +24,20 @@ _IMPLEMENTATIONS: list[Callable[[], NoteRepository]] = [
     cast(Callable[[], NoteRepository], InMemoryNoteRepository),
 ]
 
+_EMBEDDING_MODEL = "test"
+
 
 def _sample_note() -> Note:
     topic = Topic(
         id=TopicId.new(),
         label=Label(value="TCP handshakes"),
-        embedding=Embedding(values=(0.1, 0.2)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
     )
     tag = Tag(
         id=TagId.new(),
         label=Label(value="networking"),
-        embedding=Embedding(values=(0.3, 0.4)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
     )
     return Note(

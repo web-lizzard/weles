@@ -32,6 +32,8 @@ from domain.capture.value_objects import (
     TopicId,
 )
 
+_EMBEDDING_MODEL = "test"
+
 
 def test_start_creates_open_session_without_topic() -> None:
     session = CaptureSession.start()
@@ -95,7 +97,7 @@ def _minted_topic() -> Topic:
     return Topic(
         id=TopicId.new(),
         label=Label(value="TCP handshakes"),
-        embedding=Embedding(values=(0.1, 0.2)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
     )
 
@@ -104,19 +106,21 @@ def _minted_tag(label: str = "networking") -> Tag:
     return Tag(
         id=TagId.new(),
         label=Label(value=label),
-        embedding=Embedding(values=(0.3, 0.4)),
+        embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
     )
 
 
 def test_aggregate_factories_assign_ids_and_draft_shape() -> None:
     label = Label(value="TCP handshakes")
-    embedding = Embedding(values=(0.1, 0.2))
+    embedding = Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2))
     session_id = SessionId.new()
     content = NoteContent(value="We discussed how connections are established.")
 
     topic = Topic.mint(label, embedding)
-    tag = Tag.mint(Label(value="networking"), Embedding(values=(0.3, 0.4)))
+    tag = Tag.mint(
+        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+    )
     note = Note.draft(session_id, topic, content, [tag])
 
     assert isinstance(topic.id, TopicId)

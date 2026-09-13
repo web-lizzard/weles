@@ -40,18 +40,20 @@ def _make_fixture() -> _VocabularyFixture:
 
 _IMPLEMENTATIONS: list[Callable[[], _VocabularyFixture]] = [_make_fixture]
 
+_EMBEDDING_MODEL = "test"
+
 
 def _sample_topic() -> Topic:
     return Topic.mint(
         Label(value="TCP handshakes"),
-        Embedding(values=(0.1, 0.2)),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
 
 
 def _sample_tag() -> Tag:
     return Tag.mint(
         Label(value="networking"),
-        Embedding(values=(0.3, 0.4)),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
 
 
