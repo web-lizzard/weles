@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DuePartition } from "../src/api/due";
 import {
   currentCard,
+  fetchCardSource,
   gradeCard,
   openSitting,
   rejectCard,
@@ -21,6 +22,7 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
     gradeCard: vi.fn(),
     rejectCard: vi.fn(),
     currentCard: vi.fn(),
+    fetchCardSource: vi.fn(),
   };
 });
 
@@ -53,6 +55,8 @@ describe("useSittingStore", () => {
     vi.mocked(gradeCard).mockReset();
     vi.mocked(rejectCard).mockReset();
     vi.mocked(currentCard).mockReset();
+    vi.mocked(fetchCardSource).mockReset();
+    vi.mocked(fetchCardSource).mockResolvedValue(null);
   });
 
   afterEach(() => {

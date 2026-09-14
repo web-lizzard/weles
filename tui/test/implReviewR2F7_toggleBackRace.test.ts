@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { gradeCard, openSitting, revealBack } from "../src/api/sittings";
+import {
+  fetchCardSource,
+  gradeCard,
+  openSitting,
+  revealBack,
+} from "../src/api/sittings";
 import { useSittingStore } from "../src/store/sitting";
 
 vi.mock("../src/api/sittings", async (importOriginal) => {
@@ -11,6 +16,7 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
     gradeCard: vi.fn(),
     rejectCard: vi.fn(),
     currentCard: vi.fn(),
+    fetchCardSource: vi.fn(),
   };
 });
 
@@ -35,6 +41,8 @@ describe("toggleBack re-entrancy on first reveal", () => {
     vi.mocked(openSitting).mockReset();
     vi.mocked(revealBack).mockReset();
     vi.mocked(gradeCard).mockReset();
+    vi.mocked(fetchCardSource).mockReset();
+    vi.mocked(fetchCardSource).mockResolvedValue(null);
   });
 
   afterEach(() => {

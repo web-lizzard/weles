@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-sign-in-gate
 current_phase: 7
-next_step: 7.1
+next_step: 7.5
 next_command: /implement auth-flow-sign-in-gate phase 7
 updated: 2026-09-14
 ---
@@ -96,10 +96,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 7.1 TUI auth command tests pass
-- [ ] 7.2 Full TUI suite passes
-- [ ] 7.3 Type check passes
-- [ ] 7.4 Lint passes
+- [x] 7.1 TUI auth command tests pass
+- [x] 7.2 Full TUI suite passes
+- [x] 7.3 Type check passes
+- [x] 7.4 Lint passes
 
 #### Manual
 
