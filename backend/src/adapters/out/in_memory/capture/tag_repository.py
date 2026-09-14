@@ -5,6 +5,7 @@ from adapters.out.in_memory.capture.similarity import cosine_similarity
 from domain.capture.tag import Tag
 from domain.capture.value_objects import Embedding, TagId
 from domain.capture.vocabulary_match import VocabularyMatch
+from domain.shared.identity.model import UserId
 
 
 class InMemoryTagRepository:
@@ -17,7 +18,10 @@ class InMemoryTagRepository:
     async def get(self, tag_id: TagId) -> Tag | None:
         return self._tags.get(tag_id.value)
 
-    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Tag] | None:
+    async def nearest(
+        self, owner: UserId, embedding: Embedding
+    ) -> VocabularyMatch[Tag] | None:
+        _ = owner
         matches: list[VocabularyMatch[Tag]] = []
         for tag in self._tags.values():
             if tag.embedding.model != embedding.model:

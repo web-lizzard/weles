@@ -18,12 +18,13 @@ from domain.capture.instructions import (
 from domain.capture.message import Message
 from domain.capture.turn import CaptureTurn
 from domain.capture.value_objects import CapturePhase, MessageContent, MessageRole
+from domain.shared.identity.model import UserId
 
 models.ALLOW_MODEL_REQUESTS = False
 
 
 def _turn(*, phase: CapturePhase = CapturePhase.CONVERSING) -> CaptureTurn:
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
     session.phase = phase
     message = Message.record(
         session_id=session.id,

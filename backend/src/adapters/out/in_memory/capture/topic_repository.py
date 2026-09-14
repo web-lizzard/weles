@@ -5,6 +5,7 @@ from adapters.out.in_memory.capture.similarity import cosine_similarity
 from domain.capture.topic import Topic
 from domain.capture.value_objects import Embedding, TopicId
 from domain.capture.vocabulary_match import VocabularyMatch
+from domain.shared.identity.model import UserId
 
 
 class InMemoryTopicRepository:
@@ -17,7 +18,10 @@ class InMemoryTopicRepository:
     async def get(self, topic_id: TopicId) -> Topic | None:
         return self._topics.get(topic_id.value)
 
-    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Topic] | None:
+    async def nearest(
+        self, owner: UserId, embedding: Embedding
+    ) -> VocabularyMatch[Topic] | None:
+        _ = owner
         matches: list[VocabularyMatch[Topic]] = []
         for topic in self._topics.values():
             if topic.embedding.model != embedding.model:

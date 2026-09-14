@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from adapters.out.sqlalchemy.base import Base
 from adapters.out.sqlalchemy.capture.types import (
@@ -47,6 +48,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 _SESSION_STATUS_VALUES = tuple(status.value for status in SessionStatus)
@@ -63,6 +65,7 @@ class CaptureSessionRow(Base):
     )
 
     id: Mapped[SessionId] = mapped_column(SessionIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     topic: Mapped[SessionTopic | None] = mapped_column(SessionTopicType, nullable=True)
     note_id: Mapped[NoteId | None] = mapped_column(NoteIdType, nullable=True)
     status: Mapped[SessionStatus] = mapped_column(
@@ -108,8 +111,10 @@ class CaptureMessageRow(Base):
 
 class CaptureTopicRow(Base):
     __tablename__: str = "capture_topics"
+    __table_args__: tuple[Index] = (Index("ix_capture_topics_owner_id", "owner_id"),)
 
     id: Mapped[TopicId] = mapped_column(TopicIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     label: Mapped[Label] = mapped_column(LabelType, nullable=False)
     embedding_values: Mapped[tuple[float, ...]] = mapped_column(
         VectorType, nullable=False
@@ -122,8 +127,10 @@ class CaptureTopicRow(Base):
 
 class CaptureTagRow(Base):
     __tablename__: str = "capture_tags"
+    __table_args__: tuple[Index] = (Index("ix_capture_tags_owner_id", "owner_id"),)
 
     id: Mapped[TagId] = mapped_column(TagIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     label: Mapped[Label] = mapped_column(LabelType, nullable=False)
     embedding_values: Mapped[tuple[float, ...]] = mapped_column(
         VectorType, nullable=False
@@ -141,6 +148,7 @@ class CaptureNoteRow(Base):
     )
 
     id: Mapped[NoteId] = mapped_column(NoteIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     session_id: Mapped[SessionId] = mapped_column(
         SessionIdType, ForeignKey("capture_sessions.id"), nullable=False
     )

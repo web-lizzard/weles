@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
 import pytest
@@ -58,8 +58,13 @@ def _remember_routes_registered(application: FastAPI) -> bool:
     )
 
 
-def _bypass_sign_in_gate() -> UserId:
-    return UserId.new()
+def _fixed_sign_in_gate() -> Callable[[], UserId]:
+    owner = UserId.new()
+
+    def _gate() -> UserId:
+        return owner
+
+    return _gate
 
 
 @pytest.fixture
@@ -69,7 +74,7 @@ def capture_client() -> Iterator[TestClient]:
 
     composition = InMemoryCaptureComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
-    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
+    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
@@ -90,7 +95,7 @@ def outbox_client() -> Iterator[OutboxTestContext]:
 
     composition = InMemoryCaptureComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
-    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
+    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
     with TestClient(app) as client:
         yield OutboxTestContext(client=client, outbox_store=composition.outbox_store)
     app.dependency_overrides.clear()
@@ -116,7 +121,7 @@ def notes_client() -> Iterator[NotesTestContext]:
     app.dependency_overrides[get_list_notes_query] = lambda: query
     app.dependency_overrides[get_note_query] = lambda: note_query
     app.dependency_overrides[get_list_cards_for_note_query] = lambda: cards_query
-    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
+    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
     with TestClient(app) as client:
         yield NotesTestContext(client=client, notes=notes, cards=cards)
     app.dependency_overrides.clear()
@@ -137,7 +142,7 @@ def remember_client() -> Iterator[RememberTestContext]:
 
     composition = InMemoryRememberComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
-    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
+    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
     with TestClient(app) as client:
         yield RememberTestContext(
             client=client,

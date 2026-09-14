@@ -47,6 +47,7 @@ from domain.capture.value_objects import (
     TopicId,
 )
 from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import OutboxEnvelope
 
 pytestmark = pytest.mark.postgres
@@ -54,6 +55,7 @@ pytestmark = pytest.mark.postgres
 _EMBEDDING_MODEL = "test"
 _CONFIRMATION = "that's all"
 _MATCH = MatchCriteria(threshold=SimilarityScore(value=0.85))
+_OWNER = UserId.new()
 
 
 def _uow(
@@ -72,6 +74,7 @@ def _reply_command(uow: SqlAlchemyCaptureUnitOfWork) -> GenerateReplyCommand:
 
 def _sample_topic() -> Topic:
     return Topic.mint(
+        _OWNER,
         Label(value="TCP handshakes"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
@@ -79,6 +82,7 @@ def _sample_topic() -> Topic:
 
 def _sample_tag() -> Tag:
     return Tag.mint(
+        _OWNER,
         Label(value="networking"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
@@ -126,7 +130,7 @@ async def test_started_session_reads_back_equal_through_a_fresh_engine(
     command = StartCaptureSessionCommand(
         _uow(create_session_factory(engine))  # pyright: ignore[reportArgumentType]
     )
-    response = await command.handle()
+    response = await command.handle(_OWNER)
     session_id = SessionId(value=response.session_id)
     written = await _load_session(create_session_factory(engine), session_id)
 
@@ -147,12 +151,13 @@ async def test_drafting_generate_reply_turn_is_readable_through_a_fresh_engine(
     uow = _uow(session_factory)
     started = await StartCaptureSessionCommand(
         uow  # pyright: ignore[reportArgumentType]
-    ).handle()
+    ).handle(_OWNER)
     session_id = SessionId(value=started.session_id)
     command = _reply_command(uow)
     _ = [
         event
         async for event in command.handle(
+            _OWNER,
             session_id,
             MessageContent(value="Let's talk through TCP handshakes"),
         )
@@ -160,6 +165,7 @@ async def test_drafting_generate_reply_turn_is_readable_through_a_fresh_engine(
     events = [
         event
         async for event in command.handle(
+            _OWNER,
             session_id,
             MessageContent(value=_CONFIRMATION),
         )
@@ -191,7 +197,7 @@ async def test_approve_note_commits_note_session_and_claimable_envelope_together
     migrated_database_url: str,
 ) -> None:
     uow = _uow(create_session_factory(engine))
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     topic = _sample_topic()
     tag = _sample_tag()
     note = session.draft_note(
@@ -205,7 +211,7 @@ async def test_approve_note_commits_note_session_and_claimable_envelope_together
         await uow.commit()
 
     _ = await ApproveNoteCommand(uow).handle(  # pyright: ignore[reportArgumentType]
-        session.id
+        _OWNER, session.id
     )
 
     await engine.dispose()
@@ -232,7 +238,7 @@ async def test_exception_after_session_note_and_envelope_leaves_none_persisted(
     migrated_database_url: str,
 ) -> None:
     uow = _uow(create_session_factory(engine))
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     topic = _sample_topic()
     tag = _sample_tag()
     note = session.draft_note(
@@ -268,7 +274,7 @@ async def test_stale_session_save_raises_conflict_and_leaves_the_committed_write
     migrated_database_url: str,
 ) -> None:
     factory = create_session_factory(engine)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     async with SqlAlchemyCaptureUnitOfWork(factory) as seed:
         await seed.capture_sessions.save(session)
         await seed.commit()

@@ -31,6 +31,7 @@ from domain.distill.value_objects import (
     DistillationStatus,
     NoteId,
 )
+from domain.shared.identity.model import UserId
 
 pytestmark = pytest.mark.postgres
 
@@ -41,6 +42,7 @@ _CARD_BACK_MAX = 600
 _OUTBOX_BATCH_SIZE = 10
 _OUTBOX_MAX_ATTEMPTS = 3
 _OUTBOX_WORKER_ID = "distill-relay-test"
+_OWNER = UserId.new()
 
 
 def _never_regenerate_policy() -> RegenerationPolicy:
@@ -91,6 +93,7 @@ def _relay_worker(
 
 def _sample_topic() -> Topic:
     return Topic.mint(
+        _OWNER,
         Label(value="TCP handshakes"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
@@ -98,6 +101,7 @@ def _sample_topic() -> Topic:
 
 def _sample_tag() -> Tag:
     return Tag.mint(
+        _OWNER,
         Label(value="networking"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
@@ -123,7 +127,7 @@ async def test_approve_note_and_one_run_once_produces_ready_distill_note_with_ca
 ) -> None:
     session_factory = create_session_factory(engine)
     capture_uow = _capture_uow(session_factory)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     topic = _sample_topic()
     tag = _sample_tag()
     note = session.draft_note(
@@ -144,7 +148,7 @@ async def test_approve_note_and_one_run_once_produces_ready_distill_note_with_ca
         await capture_uow.commit()
 
     approval = await ApproveNoteCommand(capture_uow).handle(  # pyright: ignore[reportArgumentType]
-        session.id
+        _OWNER, session.id
     )
     note_id = NoteId(value=approval.note_id)
 
@@ -183,7 +187,7 @@ async def test_relay_run_once_leaves_no_claimable_note_approved_or_note_saved_en
 ) -> None:
     session_factory = create_session_factory(engine)
     capture_uow = _capture_uow(session_factory)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     topic = _sample_topic()
     tag = _sample_tag()
     note = session.draft_note(
@@ -204,7 +208,7 @@ async def test_relay_run_once_leaves_no_claimable_note_approved_or_note_saved_en
         await capture_uow.commit()
 
     _ = await ApproveNoteCommand(capture_uow).handle(  # pyright: ignore[reportArgumentType]
-        session.id
+        _OWNER, session.id
     )
 
     worker = _relay_worker(session_factory)

@@ -1,6 +1,6 @@
 """Shared fixtures for acceptance tests."""
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
 import pytest
@@ -47,8 +47,13 @@ def _notes_routes_registered(application: FastAPI) -> bool:
     return any(getattr(route, "path", None) == "/notes" for route in application.routes)
 
 
-def _bypass_sign_in_gate() -> UserId:
-    return UserId.new()
+def _fixed_sign_in_gate() -> Callable[[], UserId]:
+    owner = UserId.new()
+
+    def _gate() -> UserId:
+        return owner
+
+    return _gate
 
 
 @dataclass
@@ -71,7 +76,7 @@ def capture_client(
         app.include_router(capture_router)
 
     app.dependency_overrides.update(capture_composition.dependency_overrides())
-    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
+    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
@@ -97,7 +102,7 @@ def notes_client() -> Iterator[NotesTestContext]:
     app.dependency_overrides[get_list_notes_query] = lambda: query
     app.dependency_overrides[get_note_query] = lambda: note_query
     app.dependency_overrides[get_list_cards_for_note_query] = lambda: cards_query
-    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
+    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
     with TestClient(app) as client:
         yield NotesTestContext(client=client, notes=notes, cards=cards)
     app.dependency_overrides.clear()

@@ -26,6 +26,9 @@ from domain.capture.value_objects import (
     MessageRole,
     SessionId,
 )
+from domain.shared.identity.model import UserId
+
+_OWNER = UserId.new()
 
 
 class _CommittingCaptureSessionRepository:
@@ -94,7 +97,7 @@ def message_fixture(request: pytest.FixtureRequest) -> _MessageFixture:
 async def test_added_message_is_in_history_read_through_another_repository_instance(
     message_fixture: _MessageFixture,
 ) -> None:
-    capture_session = CaptureSession.start()
+    capture_session = CaptureSession.start(_OWNER)
     await message_fixture.session_repository.save(capture_session)
     message = Message.record(
         session_id=capture_session.id,
@@ -118,7 +121,7 @@ async def test_added_message_is_in_history_read_through_another_repository_insta
 async def test_history_returns_messages_for_session_in_order(
     message_fixture: _MessageFixture,
 ) -> None:
-    capture_session = CaptureSession.start()
+    capture_session = CaptureSession.start(_OWNER)
     await message_fixture.session_repository.save(capture_session)
     session_id = capture_session.id
     first = Message.record(
@@ -131,7 +134,7 @@ async def test_history_returns_messages_for_session_in_order(
         role=MessageRole.AGENT,
         content=MessageContent(value="Second"),
     )
-    other_session = CaptureSession.start()
+    other_session = CaptureSession.start(_OWNER)
     await message_fixture.session_repository.save(other_session)
     other_session_message = Message.record(
         session_id=other_session.id,
@@ -152,7 +155,7 @@ async def test_history_returns_messages_for_session_in_order(
 async def test_history_orders_by_insertion_when_created_at_is_equal(
     message_fixture: _MessageFixture,
 ) -> None:
-    capture_session = CaptureSession.start()
+    capture_session = CaptureSession.start(_OWNER)
     await message_fixture.session_repository.save(capture_session)
     session_id = capture_session.id
     shared_created_at = datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC)

@@ -45,10 +45,12 @@ from domain.capture.value_objects import (
     SessionTopic,
 )
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.identity.model import UserId
 
 models.ALLOW_MODEL_REQUESTS = False
 
 _EMBEDDING_MODEL = "test"
+_OWNER = UserId.new()
 
 
 def _install_in_memory_tracer() -> InMemorySpanExporter:
@@ -64,7 +66,7 @@ def _turn(
     phase: CapturePhase = CapturePhase.CONVERSING,
     messages: Sequence[Message] | None = None,
 ) -> CaptureTurn:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.phase = phase
     if messages is None:
         messages = (
@@ -81,6 +83,7 @@ def _drafting_turn_with_topic() -> CaptureTurn:
     turn = _turn(phase=CapturePhase.DRAFTING)
     turn.draft = NoteDraft(
         topic=Topic.mint(
+            _OWNER,
             Label(value="TCP"),
             Embedding(model=_EMBEDDING_MODEL, values=(1.0,)),
         ),

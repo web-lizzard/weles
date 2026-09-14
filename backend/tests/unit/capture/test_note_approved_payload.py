@@ -12,14 +12,17 @@ from domain.capture.value_objects import (
     NoteStatus,
     SessionId,
 )
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import EnvelopeStatus
 
 _EMBEDDING_MODEL = "test"
+_OWNER = UserId.new()
 
 
 def _approved_note(session_id: SessionId, topic: Topic, tags: list[Tag]) -> Note:
     return Note(
         id=NoteId.new(),
+        owner_id=_OWNER,
         session_id=session_id,
         topic_id=topic.id,
         content=NoteContent(value="We discussed how connections are established."),
@@ -33,17 +36,21 @@ def _approved_note(session_id: SessionId, topic: Topic, tags: list[Tag]) -> Note
 def test_of_snapshots_labels_and_to_envelope_builds_a_pending_envelope() -> None:
     session_id = SessionId.new()
     topic = Topic.mint(
+        _OWNER,
         Label(value="TCP handshakes"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
     tag = Tag.mint(
-        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+        _OWNER,
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
     note = _approved_note(session_id, topic, [tag])
 
     payload = NoteApprovedPayload.of(note, topic, [tag])
 
     assert payload.note_id == note.id.value
+    assert payload.owner_id == _OWNER.value
     assert payload.session_id == session_id.value
     assert payload.content == note.content.value
     assert payload.approved_at == note.approved_at

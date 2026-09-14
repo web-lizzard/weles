@@ -29,9 +29,11 @@ from domain.capture.value_objects import (
     TagId,
     TopicId,
 )
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import EnvelopeStatus, EnvelopeType, OutboxEnvelope
 
 _EMBEDDING_MODEL = "test"
+_OWNER = UserId.new()
 
 
 def _make_unit_of_work() -> tuple[
@@ -67,6 +69,7 @@ def _make_unit_of_work() -> tuple[
 def _sample_topic() -> Topic:
     return Topic(
         id=TopicId.new(),
+        owner_id=_OWNER,
         label=Label(value="TCP handshakes"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
@@ -76,6 +79,7 @@ def _sample_topic() -> Topic:
 def _sample_tag() -> Tag:
     return Tag(
         id=TagId.new(),
+        owner_id=_OWNER,
         label=Label(value="networking"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
@@ -85,6 +89,7 @@ def _sample_tag() -> Tag:
 def _sample_note(topic: Topic, tag: Tag) -> Note:
     return Note(
         id=NoteId.new(),
+        owner_id=_OWNER,
         session_id=SessionId.new(),
         topic_id=topic.id,
         content=NoteContent(value="We discussed how connections are established."),
@@ -141,8 +146,8 @@ async def test_rollback_without_commit_leaves_no_topic_or_tag_to_find_as_nearest
         await topic_repo.add(topic)
         await tag_repo.add(tag)
 
-    assert await topic_repo.nearest(topic_query) is None
-    assert await tag_repo.nearest(tag_query) is None
+    assert await topic_repo.nearest(_OWNER, topic_query) is None
+    assert await tag_repo.nearest(_OWNER, tag_query) is None
 
 
 async def test_outbox_snapshot_restore_isolates_envelope_mutations_R2_F2() -> None:

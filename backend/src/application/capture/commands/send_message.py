@@ -42,6 +42,7 @@ from domain.capture.value_objects import (
     SessionStatus,
 )
 from domain.capture.vocabulary import VocabularyResolver
+from domain.shared.identity.model import UserId
 
 
 @dataclass
@@ -62,20 +63,23 @@ class GenerateReplyCommand:
         self._vocabulary: VocabularyResolver = vocabulary
 
     async def guard_session(
-        self, session_id: SessionId, raw_content: str
+        self, owner: UserId, session_id: SessionId, raw_content: str
     ) -> MessageContent:
         content = MessageContent(value=raw_content)
         async with self._uow as uow:
-            _ = await self._get_open_session(uow.capture_sessions, session_id)
+            _ = await self._get_open_session(uow.capture_sessions, owner, session_id)
         return content
 
     async def handle(
         self,
+        owner: UserId,
         session_id: SessionId,
         content: MessageContent,
     ) -> AsyncIterator[ReplyStreamEvent]:
         async with self._uow as uow:
-            session = await self._get_open_session(uow.capture_sessions, session_id)
+            session = await self._get_open_session(
+                uow.capture_sessions, owner, session_id
+            )
             prior = await uow.messages.history(session.id)
             user_message = Message.record(session.id, MessageRole.USER, content)
 
@@ -249,8 +253,10 @@ class GenerateReplyCommand:
     async def _get_open_session(
         self,
         capture_sessions: CaptureSessionRepository,
+        owner: UserId,
         session_id: SessionId,
     ) -> CaptureSession:
+        _ = owner
         session = await capture_sessions.get(session_id)
         if session is None:
             raise CaptureSessionNotFoundError

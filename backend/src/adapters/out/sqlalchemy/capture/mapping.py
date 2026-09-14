@@ -12,11 +12,13 @@ from domain.capture.note import Note
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import Embedding
+from domain.shared.identity.model import UserId
 
 
 def capture_session_to_row(session: CaptureSession) -> CaptureSessionRow:
     return CaptureSessionRow(
         id=session.id,
+        owner_id=session.owner_id.value,
         topic=session.topic,
         note_id=session.note_id,
         status=session.status,
@@ -32,6 +34,7 @@ def capture_session_to_row(session: CaptureSession) -> CaptureSessionRow:
 def capture_session_to_domain(row: CaptureSessionRow) -> CaptureSession:
     return CaptureSession(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         topic=row.topic,
         note_id=row.note_id,
         status=row.status,
@@ -66,6 +69,7 @@ def message_to_domain(row: CaptureMessageRow) -> Message:
 def note_to_row(note: Note) -> CaptureNoteRow:
     return CaptureNoteRow(
         id=note.id,
+        owner_id=note.owner_id.value,
         session_id=note.session_id,
         topic_id=note.topic_id,
         content=note.content,
@@ -82,6 +86,7 @@ def note_to_row(note: Note) -> CaptureNoteRow:
 def note_to_domain(row: CaptureNoteRow) -> Note:
     return Note(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         session_id=row.session_id,
         topic_id=row.topic_id,
         content=row.content,
@@ -95,6 +100,7 @@ def note_to_domain(row: CaptureNoteRow) -> Note:
 def topic_to_row(topic: Topic) -> CaptureTopicRow:
     return CaptureTopicRow(
         id=topic.id,
+        owner_id=topic.owner_id.value,
         label=topic.label,
         embedding_values=topic.embedding.values,
         embedding_model=topic.embedding.model,
@@ -105,6 +111,7 @@ def topic_to_row(topic: Topic) -> CaptureTopicRow:
 def topic_to_domain(row: CaptureTopicRow) -> Topic:
     return Topic(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         label=row.label,
         embedding=Embedding(values=row.embedding_values, model=row.embedding_model),
         created_at=row.created_at,
@@ -114,6 +121,7 @@ def topic_to_domain(row: CaptureTopicRow) -> Topic:
 def tag_to_row(tag: Tag) -> CaptureTagRow:
     return CaptureTagRow(
         id=tag.id,
+        owner_id=tag.owner_id.value,
         label=tag.label,
         embedding_values=tag.embedding.values,
         embedding_model=tag.embedding.model,
@@ -124,6 +132,7 @@ def tag_to_row(tag: Tag) -> CaptureTagRow:
 def tag_to_domain(row: CaptureTagRow) -> Tag:
     return Tag(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         label=row.label,
         embedding=Embedding(values=row.embedding_values, model=row.embedding_model),
         created_at=row.created_at,

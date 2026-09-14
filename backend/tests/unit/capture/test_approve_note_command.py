@@ -33,19 +33,24 @@ from domain.capture.value_objects import (
     SessionId,
     SessionStatus,
 )
+from domain.shared.identity.model import UserId
 
 _EMBEDDING_MODEL = "test"
 
 
 async def test_approve_note_approves_note_closes_session_and_appends_envelope() -> None:
     stack = _make_approve_stack()
-    session = CaptureSession.start()
+    owner = UserId.new()
+    session = CaptureSession.start(owner)
     topic = Topic.mint(
+        owner,
         Label(value="TCP handshakes"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
     tag = Tag.mint(
-        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+        owner,
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
     note = session.draft_note(
         topic, NoteContent(value="We discussed handshakes."), [tag]
@@ -55,7 +60,7 @@ async def test_approve_note_approves_note_closes_session_and_appends_envelope() 
     await stack.notes_repo.add(note)
     await stack.session_repo.save(session)
 
-    response = await stack.command.handle(session.id)
+    response = await stack.command.handle(owner, session.id)
 
     assert response.note_id == note.id.value
     assert response.topic == "TCP handshakes"
@@ -80,24 +85,28 @@ async def test_approve_note_raises_not_found_for_unknown_session() -> None:
     stack = _make_approve_stack()
 
     with pytest.raises(CaptureSessionNotFoundError):
-        _ = await stack.command.handle(SessionId.new())
+        _ = await stack.command.handle(UserId.new(), SessionId.new())
 
 
 async def test_approve_note_rollback_on_missing_note_leaves_zero_envelopes() -> None:
     stack = _make_approve_stack()
-    session = CaptureSession.start()
+    owner = UserId.new()
+    session = CaptureSession.start(owner)
     topic = Topic.mint(
+        owner,
         Label(value="TCP handshakes"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
     tag = Tag.mint(
-        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+        owner,
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
     _ = session.draft_note(topic, NoteContent(value="Draft body"), [tag])
     await stack.session_repo.save(session)
 
     with pytest.raises(NoteNotFoundError):
-        _ = await stack.command.handle(session.id)
+        _ = await stack.command.handle(owner, session.id)
 
     assert stack.outbox_store.all() == []
     persisted_session = await stack.session_repo.get(session.id)

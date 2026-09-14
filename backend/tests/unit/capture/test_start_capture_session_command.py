@@ -20,6 +20,7 @@ from application.capture.commands.start_capture_session import (
     StartCaptureSessionCommand,
 )
 from domain.capture.value_objects import SessionId, SessionStatus
+from domain.shared.identity.model import UserId
 
 
 async def test_handle_creates_and_persists_bare_session() -> None:
@@ -42,7 +43,7 @@ async def test_handle_creates_and_persists_bare_session() -> None:
     )
     command = StartCaptureSessionCommand(uow)  # pyright: ignore[reportArgumentType]
 
-    response = await command.handle()
+    response = await command.handle(UserId.new())
 
     assert isinstance(response.session_id, UUID)
     persisted = await session_repo.get(SessionId(value=response.session_id))

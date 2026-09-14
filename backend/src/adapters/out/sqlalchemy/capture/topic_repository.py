@@ -11,6 +11,7 @@ from domain.capture.value_objects import (
     TopicId,
 )
 from domain.capture.vocabulary_match import VocabularyMatch
+from domain.shared.identity.model import UserId
 from sqlalchemy import Double, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,7 +38,10 @@ class SqlAlchemyTopicRepository:
         row = (await self._session.execute(statement)).scalar_one_or_none()
         return topic_to_domain(row) if row is not None else None
 
-    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Topic] | None:
+    async def nearest(
+        self, owner: UserId, embedding: Embedding
+    ) -> VocabularyMatch[Topic] | None:
+        _ = owner
         distance = CaptureTopicRow.embedding_values.op(
             "<=>", return_type=Double[float]()
         )(embedding.values)

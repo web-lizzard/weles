@@ -22,10 +22,12 @@ from domain.capture.value_objects import (
     SessionStatus,
     SessionTopic,
 )
+from domain.shared.identity.model import UserId
 
 
 class CaptureSession(BaseModel):
     id: SessionId
+    owner_id: UserId
     topic: SessionTopic | None
     note_id: NoteId | None = None
     status: SessionStatus
@@ -36,9 +38,10 @@ class CaptureSession(BaseModel):
     created_at: datetime
 
     @classmethod
-    def start(cls) -> "CaptureSession":
+    def start(cls, owner: UserId) -> "CaptureSession":
         return cls(
             id=SessionId.new(),
+            owner_id=owner,
             topic=None,
             note_id=None,
             status=SessionStatus.OPEN,
@@ -94,7 +97,7 @@ class CaptureSession(BaseModel):
             raise CaptureSessionClosedError
         if self.note_id is not None:
             raise SessionNoteAlreadyDraftedError
-        note = Note.draft(self.id, topic, content, tags)
+        note = Note.draft(self.owner_id, self.id, topic, content, tags)
         self.note_id = note.id
         return note
 

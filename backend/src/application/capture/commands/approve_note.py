@@ -7,13 +7,17 @@ from domain.capture.exceptions import (
 )
 from domain.capture.outbox import NoteApprovedPayload
 from domain.capture.value_objects import SessionId
+from domain.shared.identity.model import UserId
 
 
 class ApproveNoteCommand:
     def __init__(self, uow: UnitOfWork) -> None:
         self._uow: UnitOfWork = uow
 
-    async def handle(self, session_id: SessionId) -> ApproveNoteResponseDTO:
+    async def handle(
+        self, owner: UserId, session_id: SessionId
+    ) -> ApproveNoteResponseDTO:
+        _ = owner
         async with self._uow as uow:
             session = await uow.capture_sessions.get(session_id)
             if session is None:

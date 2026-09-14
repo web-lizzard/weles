@@ -17,10 +17,12 @@ from domain.capture.value_objects import (
     TagId,
     TopicId,
 )
+from domain.shared.identity.model import UserId
 
 
 class Note(BaseModel):
     id: NoteId
+    owner_id: UserId
     session_id: SessionId
     topic_id: TopicId
     content: NoteContent
@@ -32,6 +34,7 @@ class Note(BaseModel):
     @classmethod
     def draft(
         cls,
+        owner_id: UserId,
         session_id: SessionId,
         topic: Topic,
         content: NoteContent,
@@ -39,6 +42,7 @@ class Note(BaseModel):
     ) -> "Note":
         return cls(
             id=NoteId.new(),
+            owner_id=owner_id,
             session_id=session_id,
             topic_id=topic.id,
             content=content,

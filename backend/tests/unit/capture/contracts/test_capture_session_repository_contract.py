@@ -17,6 +17,9 @@ from domain.capture.value_objects import (
     DraftingConsent,
     SessionId,
 )
+from domain.shared.identity.model import UserId
+
+_OWNER = UserId.new()
 
 
 class _CommittingCaptureSessionRepository:
@@ -47,7 +50,7 @@ def repository(request: pytest.FixtureRequest) -> CaptureSessionRepository:
 async def test_save_then_get_returns_the_saved_session(
     repository: CaptureSessionRepository,
 ) -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
 
     await repository.save(session)
     result = await repository.get(session.id)
@@ -66,7 +69,7 @@ async def test_get_returns_none_for_unknown_session_id(
 async def test_save_overwrite_reads_back_assessments_phase_consent_and_request(
     repository: CaptureSessionRepository,
 ) -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.record_assessment(Coverage(value=0.4))
     session.enter_phase(CapturePhase.DRAFTING)
     session.record_drafting_consent(DraftingConsent())

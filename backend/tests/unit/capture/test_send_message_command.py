@@ -68,22 +68,25 @@ from domain.capture.value_objects import (
 from domain.capture.vocabulary import MatchCriteria, VocabularyResolver
 from domain.exceptions import CoreException
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction
 
 _CONFIRMATION_PHRASE = "that's all"
+_OWNER = UserId.new()
 
 
 async def test_guard_session_raises_not_found_for_unknown_id() -> None:
     stack = _make_command_stack()
 
     with pytest.raises(CaptureSessionNotFoundError):
-        _ = await stack.command.guard_session(SessionId.new(), "Hello there")
+        _ = await stack.command.guard_session(_OWNER, SessionId.new(), "Hello there")
 
 
 async def test_guard_session_raises_closed_for_closed_session() -> None:
     stack = _make_command_stack()
     closed_session = CaptureSession(
         id=SessionId.new(),
+        owner_id=_OWNER,
         topic=SessionTopic(value="TCP handshakes"),
         status=SessionStatus.CLOSED,
         created_at=datetime.now(UTC),
@@ -92,6 +95,7 @@ async def test_guard_session_raises_closed_for_closed_session() -> None:
 
     with pytest.raises(CaptureSessionClosedError):
         _ = await stack.command.guard_session(
+            _OWNER,
             closed_session.id,
             "Can we continue?",
         )
@@ -99,22 +103,24 @@ async def test_guard_session_raises_closed_for_closed_session() -> None:
 
 async def test_guard_session_raises_for_blank_content() -> None:
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
 
     with pytest.raises(EmptyMessageContentError):
-        _ = await stack.command.guard_session(session.id, "   ")
+        _ = await stack.command.guard_session(_OWNER, session.id, "   ")
 
 
 async def test_generate_reply_assigns_topic_on_first_turn_and_streams_done_event() -> (
     None
 ):
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="I want to talk through TCP handshakes")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     assert any(event.type == "delta" for event in events)
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
@@ -127,12 +133,14 @@ async def test_generate_reply_assigns_topic_on_first_turn_and_streams_done_event
 
 async def test_generate_reply_skips_topic_extraction_on_second_turn() -> None:
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="Existing topic"))
     await stack.session_repo.save(session)
     content = MessageContent(value="Tell me more about the three-way handshake")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
     assert done.topic == "Existing topic"
@@ -144,11 +152,13 @@ async def test_generate_reply_skips_topic_extraction_on_second_turn() -> None:
 
 async def test_generate_reply_commits_once_after_stream_drains() -> None:
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="Walk me through congestion control")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     assert stack.uow.commit_count == 1
     assert any(isinstance(event, ReplyDoneEvent) for event in events)
@@ -158,13 +168,13 @@ async def test_generate_reply_rollback_leaves_nothing_persisted_on_early_close()
     None
 ):
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="What is slow start?")
 
     stream = cast(
         AsyncGenerator[ReplyStreamEvent, None],
-        stack.command.handle(session.id, content),
+        stack.command.handle(_OWNER, session.id, content),
     )
     async with aclosing(stream) as events:
         _ = await anext(events)
@@ -182,7 +192,7 @@ async def test_generate_reply_raises_not_found_if_session_missing_at_handle_time
     content = MessageContent(value="Hello")
 
     with pytest.raises(CaptureSessionNotFoundError):
-        async for _ in stack.command.handle(SessionId.new(), content):
+        async for _ in stack.command.handle(_OWNER, SessionId.new(), content):
             pass
 
 
@@ -190,6 +200,7 @@ async def test_generate_reply_raises_closed_if_session_closed_at_handle_time() -
     stack = _make_command_stack()
     closed = CaptureSession(
         id=SessionId.new(),
+        owner_id=_OWNER,
         topic=None,
         status=SessionStatus.CLOSED,
         created_at=datetime.now(UTC),
@@ -198,17 +209,19 @@ async def test_generate_reply_raises_closed_if_session_closed_at_handle_time() -
     content = MessageContent(value="Hello")
 
     with pytest.raises(CaptureSessionClosedError):
-        async for _ in stack.command.handle(closed.id, content):
+        async for _ in stack.command.handle(_OWNER, closed.id, content):
             pass
 
 
 async def test_done_event_reports_full_coverage_when_assessment_is_all_solid() -> None:
     stack = _make_command_stack(capture_agent=_FullCoverageCaptureAgent())
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="I think we've covered TCP thoroughly")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
     assert done.coverage_confidence == 1.0
@@ -216,11 +229,13 @@ async def test_done_event_reports_full_coverage_when_assessment_is_all_solid() -
 
 async def test_done_event_reports_zero_coverage_with_deterministic_assessment() -> None:
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="Tell me about slow start")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
     assert done.coverage_confidence == 0.0
@@ -241,11 +256,13 @@ async def test_done_coverage_confidence_reflects_last_session_assessment() -> No
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="How does congestion control relate?")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     done = next(event for event in events if isinstance(event, ReplyDoneEvent))
     assert done.coverage_confidence == 0.82
@@ -276,7 +293,7 @@ async def test_drafting_turn_forwards_tag_reused_flag_from_resolver() -> None:
             )
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -335,6 +352,7 @@ async def test_drafting_mid_stream_failure_rolls_back_draft_artifacts() -> None:
 
     with pytest.raises(RuntimeError, match="simulated mid-stream failure"):
         async for _ in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value=_CONFIRMATION_PHRASE),
         ):
@@ -390,7 +408,7 @@ async def test_redraft_content_without_reproposing_topic_keeps_prior_draft_conte
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -402,6 +420,7 @@ async def test_redraft_content_without_reproposing_topic_keeps_prior_draft_conte
     second_events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Add another paragraph"),
         )
@@ -436,7 +455,7 @@ async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id(
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -448,6 +467,7 @@ async def test_redraft_turn_updates_topic_tags_and_content_keeping_same_note_id(
     second_events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Make it about congestion control instead"),
         )
@@ -492,7 +512,7 @@ async def test_redraft_removes_dropped_tags_from_persisted_note_R2_F4() -> None:
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -500,6 +520,7 @@ async def test_redraft_removes_dropped_tags_from_persisted_note_R2_F4() -> None:
     second_events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Make it about congestion control instead"),
         )
@@ -534,7 +555,7 @@ async def test_draft_content_accumulates_across_multiple_chunks() -> None:
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -570,7 +591,7 @@ async def test_redraft_adds_new_tags_to_persisted_note_R2_F5() -> None:
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -578,6 +599,7 @@ async def test_redraft_adds_new_tags_to_persisted_note_R2_F5() -> None:
     second_events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Add a performance tag"),
         )
@@ -599,11 +621,13 @@ async def test_redraft_adds_new_tags_to_persisted_note_R2_F5() -> None:
 
 async def test_conversational_turn_emits_only_delta_and_done_events() -> None:
     stack = _make_command_stack()
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     content = MessageContent(value="Explain TCP handshakes")
 
-    events = [event async for event in stack.command.handle(session.id, content)]
+    events = [
+        event async for event in stack.command.handle(_OWNER, session.id, content)
+    ]
 
     event_types = [event.type for event in events]
     assert event_types.count("delta") >= 1
@@ -618,13 +642,13 @@ async def test_full_coverage_does_not_close_session_or_block_follow_up_message()
     None
 ):
     stack = _make_command_stack(capture_agent=_FullCoverageCaptureAgent())
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     first_content = MessageContent(value="We've covered everything about TCP")
     follow_up_content = MessageContent(value="One more thing about retransmission")
 
     first_events = [
-        event async for event in stack.command.handle(session.id, first_content)
+        event async for event in stack.command.handle(_OWNER, session.id, first_content)
     ]
     first_done = next(
         event for event in first_events if isinstance(event, ReplyDoneEvent)
@@ -636,7 +660,8 @@ async def test_full_coverage_does_not_close_session_or_block_follow_up_message()
     assert persisted.status == SessionStatus.OPEN
 
     follow_up_events = [
-        event async for event in stack.command.handle(session.id, follow_up_content)
+        event
+        async for event in stack.command.handle(_OWNER, session.id, follow_up_content)
     ]
     follow_up_done = next(
         event for event in follow_up_events if isinstance(event, ReplyDoneEvent)
@@ -653,7 +678,7 @@ async def test_draft_done_content_matches_persisted_note_content() -> None:
             )
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -677,12 +702,13 @@ async def test_draft_tag_without_prior_topic_raises_core_exception() -> None:
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
     with pytest.raises(CoreException):
         async for _ in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value=_CONFIRMATION_PHRASE),
         ):
@@ -694,12 +720,13 @@ async def test_ordinary_turn_passes_machine_built_instruction() -> None:
         [[ReplyProduced(text="Let's unpack the handshake.")]]
     )
     stack = _make_agent_command_stack(agent)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
 
     _ = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Explain TCP handshakes"),
         )
@@ -715,12 +742,13 @@ async def test_ordinary_turn_opens_one_converse_segment_and_stays_conversing() -
         ]
     )
     stack = _make_agent_command_stack(agent)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
 
     events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Explain TCP handshakes"),
         )
@@ -751,13 +779,14 @@ async def test_consent_turn_runs_two_segments_streaming_reply_then_draft() -> No
         ]
     )
     stack = _make_agent_command_stack(agent)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
     events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value=_CONFIRMATION_PHRASE),
         )
@@ -776,12 +805,13 @@ async def test_consent_turn_runs_two_segments_streaming_reply_then_draft() -> No
 async def test_no_turn_opens_three_segments_even_when_a_move_remains() -> None:
     agent = _OscillatingCaptureAgent()
     stack = _make_agent_command_stack(agent)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
 
     events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value=_CONFIRMATION_PHRASE),
         )
@@ -794,11 +824,12 @@ async def test_no_turn_opens_three_segments_even_when_a_move_remains() -> None:
 async def test_conversational_turn_adds_each_message_to_the_repository_once() -> None:
     stack, message_repo = _make_command_stack_with_message_add_counter()
 
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     _ = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Explain TCP handshakes"),
         )
@@ -825,7 +856,7 @@ async def test_drafting_consent_turn_adds_each_message_to_the_repository_once() 
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -858,7 +889,7 @@ async def test_redraft_turn_still_updates_note_while_staging_each_message_once()
             ]
         )
     )
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     await stack.session_repo.save(session)
 
@@ -868,6 +899,7 @@ async def test_redraft_turn_still_updates_note_while_staging_each_message_once()
     second_events = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="Make it about congestion control instead"),
         )
@@ -889,11 +921,12 @@ async def test_mid_stream_agent_failure_rolls_back_the_uncommitted_turn() -> Non
         ]
     )
     stack = _make_agent_command_stack(agent)
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
 
     with pytest.raises(RuntimeError, match="simulated mid-stream failure"):
         async for _ in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value="What is slow start?"),
         ):
@@ -985,11 +1018,12 @@ async def _start_session_with_topic(
     stack: "_CommandStack",
     topic: str,
 ) -> CaptureSession:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     await stack.session_repo.save(session)
     _ = [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value=f"Let's talk through {topic}"),
         )
@@ -1004,6 +1038,7 @@ async def _handle_confirmation_turn(
     return [
         event
         async for event in stack.command.handle(
+            _OWNER,
             session.id,
             MessageContent(value=_CONFIRMATION_PHRASE),
         )

@@ -22,9 +22,11 @@ from domain.capture.value_objects import (
     MessageRole,
 )
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction
 
 _CONFIRMATION = "that's all"
+_OWNER = UserId.new()
 
 _ADAPTER_AUTHORED_PROSE = (
     "I'll draft a note summarizing our conversation.",
@@ -40,7 +42,7 @@ def _turn(
     phase: CapturePhase = CapturePhase.CONVERSING,
     messages: Sequence[Message] | None = None,
 ) -> CaptureTurn:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.phase = phase
     if messages is None:
         messages = (
@@ -54,7 +56,7 @@ def _turn(
 
 
 def _drafting_confirmation_turn() -> CaptureTurn:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.phase = CapturePhase.CONVERSING
     messages = (
         Message.record(

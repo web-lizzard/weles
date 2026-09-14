@@ -33,8 +33,10 @@ from domain.capture.value_objects import (
     TagId,
     TopicId,
 )
+from domain.shared.identity.model import UserId
 
 _EMBEDDING_MODEL = "test"
+_OWNER = UserId.new()
 
 
 class _CommittingCaptureSessionRepository:
@@ -103,7 +105,9 @@ class _InMemorySeed:
         self._tags: InMemoryTagRepository = tags
 
     async def persist(self, note: Note, topic: Topic, tags: list[Tag]) -> None:
-        session = CaptureSession.start().model_copy(update={"id": note.session_id})
+        session = CaptureSession.start(_OWNER).model_copy(
+            update={"id": note.session_id}
+        )
         await self._sessions.save(session)
         await self._topics.add(topic)
         for tag in tags:
@@ -121,7 +125,9 @@ class _PostgresSeed:
         self._tags: _CommittingTagRepository = _CommittingTagRepository(session_factory)
 
     async def persist(self, note: Note, topic: Topic, tags: list[Tag]) -> None:
-        session = CaptureSession.start().model_copy(update={"id": note.session_id})
+        session = CaptureSession.start(_OWNER).model_copy(
+            update={"id": note.session_id}
+        )
         await self._sessions.save(session)
         await self._topics.add(topic)
         for tag in tags:
@@ -131,18 +137,21 @@ class _PostgresSeed:
 def _sample_note_parts() -> tuple[Note, Topic, list[Tag]]:
     topic = Topic(
         id=TopicId.new(),
+        owner_id=_OWNER,
         label=Label(value="TCP handshakes"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
     )
     tag = Tag(
         id=TagId.new(),
+        owner_id=_OWNER,
         label=Label(value="networking"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
     )
     note = Note(
         id=NoteId.new(),
+        owner_id=_OWNER,
         session_id=SessionId.new(),
         topic_id=topic.id,
         content=NoteContent(value="We discussed how connections are established."),
@@ -207,24 +216,28 @@ async def test_second_add_with_same_id_overwrites(note_fixture: _NoteFixture) ->
 async def test_second_add_reorders_tag_ids(note_fixture: _NoteFixture) -> None:
     topic = Topic(
         id=TopicId.new(),
+        owner_id=_OWNER,
         label=Label(value="TCP handshakes"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
     )
     first_tag = Tag(
         id=TagId.new(),
+        owner_id=_OWNER,
         label=Label(value="alpha"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
     )
     second_tag = Tag(
         id=TagId.new(),
+        owner_id=_OWNER,
         label=Label(value="beta"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.5, 0.6)),
         created_at=datetime.now(UTC),
     )
     note = Note(
         id=NoteId.new(),
+        owner_id=_OWNER,
         session_id=SessionId.new(),
         topic_id=topic.id,
         content=NoteContent(value="Tagged note."),
