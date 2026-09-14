@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-sign-in-lifetime
 title: A sign-in survives TUI restarts and expires after its validity period without silently losing work
-status: new
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
