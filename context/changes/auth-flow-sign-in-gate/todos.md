@@ -96,10 +96,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 7.1 TUI auth command tests pass
-- [x] 7.2 Full TUI suite passes
-- [x] 7.3 Type check passes
-- [x] 7.4 Lint passes
+- [x] 7.1 TUI auth command tests pass — def054a
+- [x] 7.2 Full TUI suite passes — def054a
+- [x] 7.3 Type check passes — def054a
+- [x] 7.4 Lint passes — def054a
 
 #### Manual
 
