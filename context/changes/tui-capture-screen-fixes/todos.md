@@ -156,10 +156,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 14.1 Panel tests pass
-- [x] 14.2 Full TUI suite passes
-- [x] 14.3 Type check passes
-- [x] 14.4 Lint passes
+- [x] 14.1 Panel tests pass — f818c88
+- [x] 14.2 Full TUI suite passes — f818c88
+- [x] 14.3 Type check passes — f818c88
+- [x] 14.4 Lint passes — f818c88
 
 #### Manual
 
