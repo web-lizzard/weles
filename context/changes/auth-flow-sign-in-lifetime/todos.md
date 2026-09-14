@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-lifetime
 current_phase: 4
-next_step: tests
-next_command: /unit-test auth-flow-sign-in-lifetime phase 4
+next_step: 4.5
+next_command: /implement auth-flow-sign-in-lifetime phase 4
 updated: 2026-09-14
 ---
 
@@ -37,14 +37,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a62f906
 
 #### Automated
 
-- [ ] 4.1 Launch and command tests pass
-- [ ] 4.2 Full TUI suite passes
-- [ ] 4.3 Type check passes
-- [ ] 4.4 Lint passes
+- [x] 4.1 Launch and command tests pass — 4e8c8c7
+- [x] 4.2 Full TUI suite passes — 4e8c8c7
+- [x] 4.3 Type check passes — 4e8c8c7
+- [x] 4.4 Lint passes — 4e8c8c7
 
 #### Manual
 
