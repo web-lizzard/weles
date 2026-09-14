@@ -11,6 +11,12 @@ import { useAppStore } from "../src/store/index";
 
 const COVERAGE_BANNER_TEXT =
   "✓ This topic seems well covered — keep going, or wrap up when you're ready.";
+const UP_ARROW = "\x1B[A";
+const DOWN_ARROW = "\x1B[B";
+
+function paragraphs(prefix: string, count: number): string {
+  return Array.from({ length: count }, (_, i) => `${prefix}-${i}`).join("\n\n");
+}
 
 vi.mock("../src/api/stream", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/api/stream")>();
@@ -394,6 +400,98 @@ describe("CaptureScreen", () => {
     expect(frame).toContain("draft-panel-tag-reused");
     expect(frame).not.toContain("draft-panel-tag-reused (new)");
     expect(frame).toContain("draft-panel-tag-new (new)");
+  });
+
+  it("pins a long draft in a bounded window and shows a more-below marker", () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-scroll-topic",
+        tags: [{ label: "draft-scroll-tag", reused: true }],
+        content: paragraphs("draft-scroll-line", 15),
+        noteId: null,
+      },
+    });
+
+    const { lastFrame } = render(<CaptureScreen />);
+    const frame = lastFrame() ?? "";
+
+    expect(frame).toContain("draft-scroll-line-0");
+    expect(frame).not.toContain("draft-scroll-line-14");
+    expect(frame).toContain("more below");
+    expect(frame).not.toContain("more above");
+  });
+
+  it("scrolls the pinned draft with the arrow keys and returns to the top", async () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-arrow-topic",
+        tags: [{ label: "draft-arrow-tag", reused: true }],
+        content: paragraphs("draft-arrow-line", 15),
+        noteId: null,
+      },
+    });
+
+    const { lastFrame, stdin } = render(<CaptureScreen />);
+
+    for (let i = 0; i < 10; i++) {
+      stdin.write(DOWN_ARROW);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    const scrolledFrame = lastFrame() ?? "";
+    expect(scrolledFrame).toContain("more above");
+    expect(scrolledFrame).toContain("draft-arrow-line-14");
+
+    for (let i = 0; i < 10; i++) {
+      stdin.write(UP_ARROW);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    const topFrame = lastFrame() ?? "";
+    expect(topFrame).not.toContain("more above");
+    expect(topFrame).toContain("draft-arrow-line-0");
+    expect(topFrame).toContain("more below");
+  });
+
+  it("resets the draft's scroll position to the top when a new draft replaces the pinned one", async () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: [{ role: "user", content: "Transcript line" }],
+      draft: {
+        topic: "draft-old-topic",
+        tags: [{ label: "draft-old-tag", reused: true }],
+        content: paragraphs("draft-old-line", 15),
+        noteId: null,
+      },
+    });
+
+    const { lastFrame, stdin, rerender } = render(<CaptureScreen />);
+
+    for (let i = 0; i < 10; i++) {
+      stdin.write(DOWN_ARROW);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    expect(lastFrame() ?? "").toContain("more above");
+
+    useChatStore.setState({
+      draft: {
+        topic: "draft-new-topic",
+        tags: [{ label: "draft-new-tag", reused: true }],
+        content: paragraphs("draft-new-line", 15),
+        noteId: null,
+      },
+    });
+    rerender(<CaptureScreen />);
+
+    const frame = lastFrame() ?? "";
+    expect(frame).not.toContain("more above");
+    expect(frame).toContain("draft-new-line-0");
+    expect(frame).not.toContain("draft-new-line-14");
+    expect(frame).toContain("more below");
   });
 
   it("renders a thick approval receipt and keeps input focused after /approve succeeds", async () => {
