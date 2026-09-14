@@ -1,14 +1,18 @@
 import { Box, Text, useInput, useStdout } from "ink";
 import type { NoteListItem } from "../api/notes.js";
 import { useNotesPolling } from "../hooks/useNotesPolling.js";
+import { listWindow, panelBodyHeight } from "../lib/panelLayout.js";
 import { useAppStore } from "../store/index.js";
 import { useNotesStore } from "../store/notes.js";
 
 const NOTES_POLL_INTERVAL_MS = 3000;
+const DEFAULT_TERMINAL_ROWS = 24;
 const DEFAULT_TERMINAL_COLUMNS = 80;
+const ROWS_PER_ITEM = 3; // topic line + badge/count line + gap
 
 export default function NoteListOverlay() {
   useNotesPolling(NOTES_POLL_INTERVAL_MS);
+  const { stdout } = useStdout();
   const items = useNotesStore((s) => s.items);
   const isLoading = useNotesStore((s) => s.isLoading);
   const error = useNotesStore((s) => s.error);
@@ -18,6 +22,21 @@ export default function NoteListOverlay() {
   const now = new Date();
   const effectiveIndex =
     items.length === 0 ? 0 : Math.min(selectedIndex, items.length - 1);
+
+  const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
+  const windowSize = Math.max(
+    1,
+    Math.floor(panelBodyHeight(rows, 0) / ROWS_PER_ITEM),
+  );
+  const { start: windowStart, size: effectiveWindowSize } = listWindow(
+    effectiveIndex,
+    items.length,
+    windowSize,
+  );
+  const visibleItems = items.slice(
+    windowStart,
+    windowStart + effectiveWindowSize,
+  );
 
   useInput((_input, key) => {
     if (items.length === 0) {
@@ -31,6 +50,16 @@ export default function NoteListOverlay() {
 
     if (key.downArrow) {
       setSelectedIndex(clamp(selectedIndex + 1, 0, items.length - 1));
+      return;
+    }
+
+    if (key.pageUp) {
+      setSelectedIndex(clamp(selectedIndex - windowSize, 0, items.length - 1));
+      return;
+    }
+
+    if (key.pageDown) {
+      setSelectedIndex(clamp(selectedIndex + windowSize, 0, items.length - 1));
       return;
     }
 
@@ -50,12 +79,12 @@ export default function NoteListOverlay() {
         <Text bold>Notes</Text>
         {items.length === 0 && isLoading && <Text>Loading...</Text>}
         <Box flexDirection="column" gap={1}>
-          {items.map((item, index) => (
+          {visibleItems.map((item, index) => (
             <NoteRow
               key={item.noteId}
               item={item}
               now={now}
-              isSelected={index === effectiveIndex}
+              isSelected={windowStart + index === effectiveIndex}
             />
           ))}
         </Box>

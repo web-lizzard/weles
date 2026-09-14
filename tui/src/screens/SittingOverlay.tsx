@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { CardSource, Grade } from "../api/sittings.js";
 import DueOverlayFooter from "../components/DueOverlayFooter.js";
 import SourceViewport from "../components/SourceViewport.js";
+import { panelBodyHeight } from "../lib/panelLayout.js";
 import { useDueStore } from "../store/due.js";
 import { useAppStore } from "../store/index.js";
 import { useSittingStore } from "../store/sitting.js";
@@ -20,8 +21,6 @@ const RESUMED_BANNER = "Resumed — picking up where you left off";
 const INVERSE_ON = "\u001b[7m";
 const INVERSE_OFF = "\u001b[27m";
 const DEFAULT_TERMINAL_ROWS = 24;
-/** Rows reserved for overlay chrome outside the source viewport window. */
-const SOURCE_VIEWPORT_CHROME_ROWS = 19;
 
 type SourceViewState = {
   source: CardSource;
@@ -335,7 +334,7 @@ export default function SittingOverlay(): JSX.Element {
 
 function sourceViewportLineCount(stdoutRows: number): number {
   const rows = stdoutRows > 0 ? stdoutRows : DEFAULT_TERMINAL_ROWS;
-  return Math.max(1, rows - SOURCE_VIEWPORT_CHROME_ROWS);
+  return panelBodyHeight(rows, 0);
 }
 
 function visibleSourceBlocks(
