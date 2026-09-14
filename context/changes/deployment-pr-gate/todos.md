@@ -1,8 +1,8 @@
 ---
 change_id: deployment-pr-gate
-current_phase: 1
-next_step: 1.1
-next_command: /implement deployment-pr-gate phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement deployment-pr-gate phase 2
 updated: 2026-09-14
 ---
 
@@ -10,10 +10,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Unit suite without postgres passes in a fresh worktree with no env
-- [ ] 1.2 BDD suite passes in a fresh worktree with no env
-- [ ] 1.3 Postgres unit cases pass with DATABASE_URL unset
-- [ ] 1.4 Ruff and basedpyright clean
+- [x] 1.1 Unit suite without postgres passes in a fresh worktree with no env
+- [x] 1.2 BDD suite passes in a fresh worktree with no env
+- [x] 1.3 Postgres unit cases pass with DATABASE_URL unset
+- [x] 1.4 Ruff and basedpyright clean
 
 ### Phase 2: Blocking Checks Workflow
 
