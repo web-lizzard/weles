@@ -1,7 +1,7 @@
 ---
 change_id: deployment-manual-deploy
 current_phase: 2
-next_step: 2.1
+next_step: 2.3
 next_command: /implement deployment-manual-deploy phase 2
 updated: 2026-09-14
 ---
@@ -22,8 +22,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 2.1 Actionlint reports no errors on deploy.yml
-- [ ] 2.2 workflow_dispatch is the only trigger key
+- [x] 2.1 Actionlint reports no errors on deploy.yml
+- [x] 2.2 workflow_dispatch is the only trigger key
 
 #### Manual
 

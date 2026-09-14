@@ -1,0 +1,94 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA on main to deploy"
+        required: true
+        type: string
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  checks: read
+  statuses: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      sha: ${{ steps.resolve-sha.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve commit SHA
+        id: resolve-sha
+        run: |
+          sha="$(git rev-parse --verify "${{ inputs.sha }}^{commit}" 2>/dev/null)" || {
+            echo "::error::unknown ref: ${{ inputs.sha }}"
+            exit 1
+          }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Require the SHA is on main
+        run: |
+          sha="${{ steps.resolve-sha.outputs.sha }}"
+          if ! git merge-base --is-ancestor "$sha" origin/main; then
+            echo "::error::$sha is not an ancestor of origin/main"
+            exit 1
+          fi
+
+      - name: Require green required checks and a successful integration run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.resolve-sha.outputs.sha }}
+        run: |
+          failures=()
+
+          required_contexts="$(jq -r '
+            .rules[]
+            | select(.type == "required_status_checks")
+            | .parameters.required_status_checks[].context
+          ' .github/rulesets/main.json)"
+
+          while IFS= read -r context; do
+            [ -z "$context" ] && continue
+            run="$(gh api "repos/${{ github.repository }}/commits/$SHA/check-runs" --paginate --jq "
+              [.check_runs[] | select(.name == \"$context\")] | sort_by(.started_at) | last
+            ")"
+            if [ -z "$run" ] || [ "$run" = "null" ]; then
+              failures+=("missing check run: $context")
+              continue
+            fi
+            status="$(echo "$run" | jq -r '.status')"
+            conclusion="$(echo "$run" | jq -r '.conclusion')"
+            if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
+              failures+=("check run not successful: $context (status=$status, conclusion=$conclusion)")
+            fi
+          done <<<"$required_contexts"
+
+          integration_status="$(gh api "repos/${{ github.repository }}/commits/$SHA/statuses" --paginate --jq '
+            [.[] | select(.context == "integration")] | sort_by(.created_at) | last
+          ')"
+          if [ -z "$integration_status" ] || [ "$integration_status" = "null" ]; then
+            failures+=("missing integration status")
+          else
+            state="$(echo "$integration_status" | jq -r '.state')"
+            if [ "$state" != "success" ]; then
+              failures+=("integration status not successful: state=$state")
+            fi
+          fi
+
+          if [ "${#failures[@]}" -gt 0 ]; then
+            printf '::error::%s\n' "${failures[@]}"
+            exit 1
+          fi
