@@ -3,7 +3,7 @@ effort_id: deployment
 title: Deployment
 status: new
 created: 2026-09-12
-updated: 2026-09-12
+updated: 2026-09-14
 archived_at: null
 ---
 
