@@ -45,7 +45,7 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 4.3 Ruleset imported and active with five GitHub Actions checks
-- [ ] 4.4 Direct push to main is rejected
-- [ ] 4.5 PR with only backend-property red is mergeable
-- [ ] 4.6 Change PR merges through the gate and main commit shows a push run
+- [x] 4.3 Ruleset imported and active with five GitHub Actions checks
+- [x] 4.4 Direct push to main is rejected
+- [x] 4.5 PR with only backend-property red is mergeable
+- [x] 4.6 Change PR merges through the gate and main commit shows a push run
