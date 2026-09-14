@@ -66,8 +66,7 @@ setSignInProvider(
 if (!process.stdin.isTTY || !process.stdout.isTTY) {
   console.error(
     "Weles TUI needs an interactive terminal (TTY).\n" +
-      "Open a new terminal tab in Cursor and run:\n" +
-      "  pnpm --dir tui build && pnpm --dir tui start",
+      "Run weles from an interactive terminal.",
   );
   process.exit(1);
 }

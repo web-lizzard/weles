@@ -1,6 +1,10 @@
 {
-  "name": "tui",
+  "name": "weles",
+  "version": "0.1.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "bin": {
     "weles": "./dist/cli.js"

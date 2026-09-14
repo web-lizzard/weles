@@ -89,6 +89,65 @@ def migrated_database_url() -> str:
     return test_url
 
 
+async def _create_empty_database(
+    maintenance_engine: AsyncEngine, database_name: str
+) -> None:
+    async with maintenance_engine.execution_options(
+        isolation_level="AUTOCOMMIT"
+    ).connect() as connection:
+        _ = await connection.execute(
+            text(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                + "WHERE datname = :name AND pid <> pg_backend_pid()"
+            ),
+            {"name": database_name},
+        )
+        _ = await connection.execute(text(f'DROP DATABASE IF EXISTS "{database_name}"'))
+        _ = await connection.execute(
+            text(f'CREATE DATABASE "{database_name}" TEMPLATE template0')
+        )
+
+
+async def _drop_database(maintenance_engine: AsyncEngine, database_name: str) -> None:
+    async with maintenance_engine.execution_options(
+        isolation_level="AUTOCOMMIT"
+    ).connect() as connection:
+        _ = await connection.execute(
+            text(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
+                + "WHERE datname = :name AND pid <> pg_backend_pid()"
+            ),
+            {"name": database_name},
+        )
+        _ = await connection.execute(text(f'DROP DATABASE IF EXISTS "{database_name}"'))
+
+
+@pytest.fixture
+async def unmigrated_engine(migrated_database_url: str) -> AsyncIterator[AsyncEngine]:
+    base_url = make_url(migrated_database_url)
+    database_name = f"{base_url.database}_unmigrated"
+    maintenance_engine = create_engine(_maintenance_database_url(migrated_database_url))
+    try:
+        await _create_empty_database(maintenance_engine, database_name)
+    finally:
+        await maintenance_engine.dispose()
+
+    db_engine = create_engine(
+        base_url.set(database=database_name).render_as_string(hide_password=False)
+    )
+    try:
+        yield db_engine
+    finally:
+        await db_engine.dispose()
+        maintenance_engine = create_engine(
+            _maintenance_database_url(migrated_database_url)
+        )
+        try:
+            await _drop_database(maintenance_engine, database_name)
+        finally:
+            await maintenance_engine.dispose()
+
+
 @pytest.fixture
 async def engine(migrated_database_url: str) -> AsyncIterator[AsyncEngine]:
     db_engine = create_engine(migrated_database_url)

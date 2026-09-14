@@ -1,10 +1,10 @@
 ---
 change_id: deployment-neon-schema
 title: The author brings an empty or behind Neon database to a commit's schema with one script
-status: new
+status: archived
 created: 2026-09-14
 updated: 2026-09-14
-archived_at: null
+archived_at: 2026-09-14T16:22:47Z
 effort_id: deployment
 slice_ref: S-04
 ---
