@@ -13,6 +13,7 @@ from integration.support.in_memory_distill import (
     InMemoryDistillComposition,
 )
 
+from adapters.auth.router import require_sign_in
 from adapters.compose import (
     get_list_cards_for_note_query,
     get_list_notes_query,
@@ -31,6 +32,7 @@ from adapters.out.in_memory.distill.list_notes_query import (
 from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
+from domain.shared.identity.model import UserId
 from main import app
 
 
@@ -43,6 +45,10 @@ def _capture_routes_registered(application: FastAPI) -> bool:
 
 def _notes_routes_registered(application: FastAPI) -> bool:
     return any(getattr(route, "path", None) == "/notes" for route in application.routes)
+
+
+def _bypass_sign_in_gate() -> UserId:
+    return UserId.new()
 
 
 @dataclass
@@ -65,6 +71,7 @@ def capture_client(
         app.include_router(capture_router)
 
     app.dependency_overrides.update(capture_composition.dependency_overrides())
+    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
@@ -90,6 +97,7 @@ def notes_client() -> Iterator[NotesTestContext]:
     app.dependency_overrides[get_list_notes_query] = lambda: query
     app.dependency_overrides[get_note_query] = lambda: note_query
     app.dependency_overrides[get_list_cards_for_note_query] = lambda: cards_query
+    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
     with TestClient(app) as client:
         yield NotesTestContext(client=client, notes=notes, cards=cards)
     app.dependency_overrides.clear()
