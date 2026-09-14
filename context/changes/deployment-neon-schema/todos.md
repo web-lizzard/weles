@@ -1,8 +1,8 @@
 ---
 change_id: deployment-neon-schema
-current_phase: 1
-next_step: 1.1
-next_command: /implement deployment-neon-schema phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test deployment-neon-schema phase 2
 updated: 2026-09-14
 ---
 
@@ -10,9 +10,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Add schema_upgrade module with stub symbols
-- [ ] 1.2 basedpyright passes
-- [ ] 1.3 Unit suite stays green
+- [x] 1.1 Add schema_upgrade module with stub symbols
+- [x] 1.2 basedpyright passes
+- [x] 1.3 Unit suite stays green
 
 ### Phase 2: Schema Upgrade Behavior
 
