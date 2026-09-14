@@ -67,10 +67,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 6.1 Expiry store tests pass
-- [x] 6.2 Full TUI suite passes
-- [x] 6.3 Type check passes
-- [x] 6.4 Lint passes
+- [x] 6.1 Expiry store tests pass — da8be4d
+- [x] 6.2 Full TUI suite passes — da8be4d
+- [x] 6.3 Type check passes — da8be4d
+- [x] 6.4 Lint passes — da8be4d
 
 #### Manual
 
