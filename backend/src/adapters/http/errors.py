@@ -62,6 +62,8 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "password_minimum_below_floor": 500,
     "non_positive_sign_in_lifetime": 500,
     "signing_secret_too_short": 500,
+    "too_many_attempts": 429,
+    "non_positive_attempt_limit": 500,
 }
 
 

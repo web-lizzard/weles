@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-attempt-limits
-current_phase: 1
-next_step: 1.1
-next_command: /implement auth-flow-attempt-limits phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test auth-flow-attempt-limits phase 2
 updated: 2026-09-14
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Type check passes
-- [ ] 1.2 Existing backend suite still passes
+- [x] 1.1 Type check passes
+- [x] 1.2 Existing backend suite still passes
 
 ### Phase 2: Attempt ledger — behavior
 

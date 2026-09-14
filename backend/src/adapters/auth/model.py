@@ -1,10 +1,12 @@
 from datetime import UTC, datetime, timedelta
+from enum import StrEnum
 from typing import override
 
 from pydantic import BaseModel, EmailStr, SecretStr, ValidationError
 
 from adapters.auth.exceptions import (
     InvalidEmailAddressError,
+    NonPositiveAttemptLimitError,
     NonPositiveSignInLifetimeError,
     PasswordMinimumBelowFloorError,
     PasswordTooShortError,
@@ -123,6 +125,49 @@ class IssuedSignIn(BaseModel, frozen=True):
     token: str
     user_id: UserId
     expires_at: datetime
+
+
+class AttemptAction(StrEnum):
+    """What kind of attempt is being counted."""
+
+    SIGN_IN = "sign_in"
+    REGISTRATION = "registration"
+
+
+class AttemptSource(BaseModel, frozen=True):
+    """Whoever is making the attempt, as resolved by `resolve_attempt_source`."""
+
+    value: str
+
+
+class AttemptLimit(BaseModel, frozen=True):
+    """How many attempts of one action a source may make within a window."""
+
+    max_attempts: int
+    window: timedelta
+
+    @override
+    def model_post_init(self, _context: object) -> None:
+        if self.max_attempts < 1 or self.window <= timedelta(0):
+            raise NonPositiveAttemptLimitError
+
+
+class AttemptLimits(BaseModel, frozen=True):
+    """Per-instance configuration of both limited actions."""
+
+    sign_in: AttemptLimit
+    registration: AttemptLimit
+
+    def for_action(self, action: AttemptAction) -> AttemptLimit:
+        if action is AttemptAction.SIGN_IN:
+            return self.sign_in
+        return self.registration
+
+
+DEFAULT_ATTEMPT_LIMITS = AttemptLimits(
+    sign_in=AttemptLimit(max_attempts=5, window=timedelta(minutes=15)),
+    registration=AttemptLimit(max_attempts=10, window=timedelta(minutes=60)),
+)
 
 
 class _EmailSyntax(BaseModel, frozen=True):

@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-attempt-limits
 title: Repeated sign-in and registration attempts from one source are limited
-status: planned
+status: implementing
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
