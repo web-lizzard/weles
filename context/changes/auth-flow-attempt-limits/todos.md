@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-attempt-limits
 current_phase: 8
-next_step: 8.1
-next_command: /unit-test auth-flow-attempt-limits phase 8
+next_step: 8.5
+next_command: /implement auth-flow-attempt-limits phase 8
 updated: 2026-09-14
 ---
 
@@ -86,14 +86,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — a253d67
 
 #### Automated
 
-- [ ] 8.1 Auth API and command tests pass
-- [ ] 8.2 Full TUI suite passes
-- [ ] 8.3 Type check passes
-- [ ] 8.4 Lint passes
+- [x] 8.1 Auth API and command tests pass
+- [x] 8.2 Full TUI suite passes
+- [x] 8.3 Type check passes
+- [x] 8.4 Lint passes
 
 #### Manual
 
