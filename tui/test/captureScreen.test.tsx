@@ -1,3 +1,4 @@
+import { Box } from "ink";
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -400,6 +401,34 @@ describe("CaptureScreen", () => {
     expect(frame).toContain("draft-panel-tag-reused");
     expect(frame).not.toContain("draft-panel-tag-reused (new)");
     expect(frame).toContain("draft-panel-tag-new (new)");
+  });
+
+  it("keeps the input line visible when a long conversation under a topic fills a terminal-high screen", () => {
+    useChatStore.setState({
+      topic: "Session topic",
+      transcript: Array.from({ length: 40 }, (_, i) => ({
+        role: i % 2 === 0 ? ("user" as const) : ("agent" as const),
+        content: `overflow-line-${i}`,
+      })),
+    });
+
+    const { lastFrame } = render(
+      <Box flexDirection="column" height={24}>
+        <CaptureScreen />
+      </Box>,
+    );
+    const frame = lastFrame() ?? "";
+
+    const frameLines = frame.split("\n");
+    const inputRow = frameLines
+      .map((line) => line.includes("You:"))
+      .lastIndexOf(true);
+
+    expect(frame).toContain("Topic: Session topic");
+    expect(frame).toContain("overflow-line-39");
+    expect(frameLines.length).toBeLessThanOrEqual(24);
+    expect(frameLines[inputRow - 1]).toMatch(/^─+$/);
+    expect(frameLines[inputRow + 1]).toMatch(/^─+$/);
   });
 
   it("pins a long draft in a bounded window and shows a more-below marker", () => {

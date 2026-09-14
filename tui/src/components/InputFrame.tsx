@@ -13,7 +13,7 @@ export default function InputFrame({
   const rule = "─".repeat(columns > 0 ? columns : 1);
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" flexShrink={0}>
       <Text dimColor>{rule}</Text>
       <Box>{children}</Box>
       <Text dimColor>{rule}</Text>
