@@ -1,3 +1,10 @@
+/**
+ * `weles instance` — show or set the backend address in `config.json`.
+ *
+ * Changing the instance address clears any stored sign-in so a token from one
+ * deployment is never sent to another (S-03).
+ */
+
 import {
   type InstanceAddress,
   InvalidInstanceAddressError,

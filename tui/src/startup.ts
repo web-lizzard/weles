@@ -6,6 +6,12 @@ export type StartupDecision =
   | { kind: "ready"; address: InstanceAddress }
   | { kind: "missing"; message: string };
 
+export type LaunchDecision =
+  | { kind: "ready"; address: InstanceAddress }
+  | { kind: "missing"; message: string }
+  | { kind: "signed_out"; message: string }
+  | { kind: "expired"; message: string };
+
 const MISSING_MESSAGE =
   "No Weles instance configured. Run: weles instance set <address>";
 
@@ -17,4 +23,11 @@ export async function resolveStartup(
     return { kind: "missing", message: MISSING_MESSAGE };
   }
   return { kind: "ready", address: stored };
+}
+
+export async function resolveLaunch(
+  _location: ConfigLocation,
+  _now: Date,
+): Promise<LaunchDecision> {
+  throw new Error("not implemented");
 }

@@ -13,8 +13,8 @@ import { resolveStartup } from "../startup.js";
  *   command exits 1 before any request.
  * - Both commands act on the configured instance only (`resolveStartup`); an
  *   unconfigured instance fails before any prompt.
- * - Nothing is written to disk. A successful sign-in prints a confirmation
- *   and exits; the token is gone with the process (S-03 keeps it).
+ * - A successful sign-in is persisted in `credentials.json` next to
+ *   `config.json`, pinned to the configured instance address (S-03).
  *
  * Exit codes follow `runInstanceCommand`: 0 success, 1 refused or no instance
  * configured, 2 usage.
