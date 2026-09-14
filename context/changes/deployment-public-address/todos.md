@@ -1,7 +1,7 @@
 ---
 change_id: deployment-public-address
 current_phase: 1
-next_step: 1.1
+next_step: 1.7
 next_command: /implement deployment-public-address phase 1
 updated: 2026-09-14
 ---
@@ -10,12 +10,12 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Compose cloudflared is pinned, profiled, exec-healthchecked, portless, and fixed on edge
-- [ ] 1.2 Compose api joins default and edge, and cloudflared's env file is optional
-- [ ] 1.3 Shellcheck reports no findings on remote-deploy.sh
-- [ ] 1.4 remote-deploy.sh waits on api alone and starts cloudflared only with its env file
-- [ ] 1.5 Repository contains no tunnel identifier or token value
-- [ ] 1.6 README has a Public address subsection naming no instance
+- [x] 1.1 Compose cloudflared is pinned, profiled, exec-healthchecked, portless, and fixed on edge
+- [x] 1.2 Compose api joins default and edge, and cloudflared's env file is optional
+- [x] 1.3 Shellcheck reports no findings on remote-deploy.sh
+- [x] 1.4 remote-deploy.sh waits on api alone and starts cloudflared only with its env file
+- [x] 1.5 Repository contains no tunnel identifier or token value
+- [x] 1.6 README has a Public address subsection naming no instance
 
 #### Manual
 

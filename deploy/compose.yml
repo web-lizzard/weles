@@ -36,6 +36,9 @@ services:
     env_file: /srv/weles/backend.env
     ports:
       - "127.0.0.1:8000:8000"
+    networks:
+      - default
+      - edge
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,3 +59,34 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.9.1
+    profiles: [tunnel]
+    env_file:
+      - path: /srv/weles/cloudflared.env
+        required: false
+    command: tunnel --no-autoupdate --metrics 127.0.0.1:20241 run
+    networks:
+      edge:
+        ipv4_address: 172.30.238.10
+    healthcheck:
+      test:
+        ["CMD", "cloudflared", "tunnel", "--metrics", "127.0.0.1:20241", "ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    mem_limit: 128m
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: 172.30.238.0/24
