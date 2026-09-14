@@ -70,9 +70,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 7.1 Type check passes
-- [x] 7.2 Lint passes
-- [x] 7.3 Existing suite stays green
+- [x] 7.1 Type check passes — 5c17072
+- [x] 7.2 Lint passes — 5c17072
+- [x] 7.3 Existing suite stays green — 5c17072
 
 ### Phase 8: Activity indicator behavior
 
