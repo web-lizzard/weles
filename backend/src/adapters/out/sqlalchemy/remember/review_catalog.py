@@ -14,13 +14,15 @@ class SqlAlchemyReviewCatalog:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def list_reviewable(self, owner: UserId) -> Sequence[ReviewableCard]:
-        _ = owner
         async with self._session_factory() as session:
             rows = (
                 (
                     await session.execute(
                         select(DistillCardRow)
-                        .where(DistillCardRow.discard_reason.is_(None))
+                        .where(
+                            DistillCardRow.discard_reason.is_(None),
+                            DistillCardRow.owner_id == owner.value,
+                        )
                         .order_by(DistillCardRow.created_at, DistillCardRow.id)
                     )
                 )
@@ -32,13 +34,13 @@ class SqlAlchemyReviewCatalog:
     async def get_reviewable(
         self, owner: UserId, card_id: CardId
     ) -> ReviewableCard | None:
-        _ = owner
         async with self._session_factory() as session:
             row = (
                 await session.execute(
                     select(DistillCardRow).where(
                         DistillCardRow.id == DistillCardId(value=card_id.value),
                         DistillCardRow.discard_reason.is_(None),
+                        DistillCardRow.owner_id == owner.value,
                     )
                 )
             ).scalar_one_or_none()

@@ -14,10 +14,12 @@ class InMemorySittingRepository:
         return self._sittings.get(sitting_id)
 
     async def latest(self, owner: UserId) -> Sitting | None:
-        _ = owner
-        if not self._sittings:
+        owned = [
+            sitting for sitting in self._sittings.values() if sitting.owner_id == owner
+        ]
+        if not owned:
             return None
-        return max(self._sittings.values(), key=lambda sitting: sitting.opened_at)
+        return max(owned, key=lambda sitting: sitting.opened_at)
 
     def snapshot(self) -> dict[SittingId, Sitting]:
         return dict(self._sittings)

@@ -49,9 +49,9 @@ class SqlAlchemySittingRepository:
         return sitting_to_domain(row) if row is not None else None
 
     async def latest(self, owner: UserId) -> Sitting | None:
-        _ = owner
         statement = (
             select(RememberSittingRow)
+            .where(RememberSittingRow.owner_id == owner.value)
             .options(selectinload(RememberSittingRow.cards))
             .order_by(RememberSittingRow.opened_at.desc())
             .limit(1)
