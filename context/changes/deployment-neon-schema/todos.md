@@ -1,8 +1,8 @@
 ---
 change_id: deployment-neon-schema
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test deployment-neon-schema phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement deployment-neon-schema phase 3
 updated: 2026-09-14
 ---
 
@@ -18,16 +18,16 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 7b5a032
 
 #### Automated
 
-- [ ] 2.1 Implement Neon URL normalization and refusals
-- [ ] 2.2 Implement schema state reading and upgrade to head
-- [ ] 2.3 Unit tests for schema_upgrade pass
-- [ ] 2.4 Postgres tests for schema_upgrade pass
-- [ ] 2.5 basedpyright passes
-- [ ] 2.6 ruff passes
+- [x] 2.1 Implement Neon URL normalization and refusals
+- [x] 2.2 Implement schema state reading and upgrade to head
+- [x] 2.3 Unit tests for schema_upgrade pass
+- [x] 2.4 Postgres tests for schema_upgrade pass
+- [x] 2.5 basedpyright passes
+- [x] 2.6 ruff passes
 
 ### Phase 3: Migration Script and Runbook
 
