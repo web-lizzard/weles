@@ -34,8 +34,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Type check passes
-- [x] 3.2 Existing backend suite still passes
+- [x] 3.1 Type check passes — 4c7301c
+- [x] 3.2 Existing backend suite still passes — 4c7301c
 
 ### Phase 4: Limits in the authenticator — behavior
 
