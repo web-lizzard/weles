@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-capture-distill-separation
-current_phase: 2
-next_step: tests
-next_command: /unit-test auth-flow-capture-distill-separation phase 2
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test auth-flow-capture-distill-separation phase 4
 updated: 2026-09-14
 ---
 
@@ -22,19 +22,19 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 87e09f8
 
 #### Automated
 
-- [ ] 2.1 Capture contracts pass in memory
-- [ ] 2.2 Capture contracts pass on Postgres
-- [ ] 2.3 Capture unit and HTTP tests pass
-- [ ] 2.4 Full offline suite passes
-- [ ] 2.5 Type check passes
+- [x] 2.1 Capture contracts pass in memory — edbb1e6
+- [x] 2.2 Capture contracts pass on Postgres — edbb1e6
+- [x] 2.3 Capture unit and HTTP tests pass — edbb1e6
+- [x] 2.4 Full offline suite passes — edbb1e6
+- [x] 2.5 Type check passes — edbb1e6
 
 #### Manual
 
-- [ ] 2.6 Person B gets 404 approving person A's capture session over curl
+- [x] 2.6 Person B gets 404 approving person A's capture session over curl — edbb1e6
 
 ### Phase 3: Distill ownership symbols
 
