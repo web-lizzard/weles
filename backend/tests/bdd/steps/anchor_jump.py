@@ -41,11 +41,11 @@ def anchor_jump_context() -> AnchorJumpContext:
     return AnchorJumpContext()
 
 
-def _ready_note(content: str) -> Note:
+def _ready_note(content: str, owner: UserId) -> Note:
     at = datetime.now(UTC)
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="Anchor jump"),
         content=NoteContent(value=content),
@@ -57,10 +57,12 @@ def _ready_note(content: str) -> Note:
     )
 
 
-def _live_card(note_id: NoteId, quote: str, created_at: datetime) -> Card:
+def _live_card(
+    note_id: NoteId, quote: str, created_at: datetime, owner: UserId
+) -> Card:
     return Card(
         id=CardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner,
         note_id=note_id,
         front=CardSide(value="What does this card ask?"),
         back=CardSide(value="A three-way handshake."),
@@ -85,7 +87,7 @@ def ready_note_containing(
     anchor_jump_context: AnchorJumpContext,
     body: str,
 ) -> None:
-    note = _ready_note(body)
+    note = _ready_note(body, notes_client.caller)
     asyncio.run(notes_client.notes.save(note))
     anchor_jump_context.note_id = str(note.id.value)
     anchor_jump_context.note_content = note.content.value
@@ -97,7 +99,7 @@ def ready_note_headed(
     anchor_jump_context: AnchorJumpContext,
     heading: str,
 ) -> None:
-    note = _ready_note(f"# {heading}")
+    note = _ready_note(f"# {heading}", notes_client.caller)
     asyncio.run(notes_client.notes.save(note))
     anchor_jump_context.note_id = str(note.id.value)
     anchor_jump_context.note_content = note.content.value
@@ -114,6 +116,7 @@ def live_card_quoting(
         NoteId(value=UUID(anchor_jump_context.note_id)),
         quote,
         datetime.now(UTC),
+        notes_client.caller,
     )
     asyncio.run(notes_client.cards.save(card))
     anchor_jump_context.card_id = str(card.id.value)

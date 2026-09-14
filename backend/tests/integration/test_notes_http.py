@@ -25,11 +25,12 @@ from .conftest import NotesTestContext
 def _note(
     status: DistillationStatus,
     updated_at: datetime,
+    caller: UserId,
     content: str = "We discussed how connections are established.",
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=caller,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value=content),
@@ -44,13 +45,14 @@ def _note(
 def _card(
     note_id: NoteId,
     created_at: datetime,
+    caller: UserId,
     discard: Discard | None = None,
     quote: str = "Connections are established via a three-way handshake.",
     front: str = "What establishes a connection?",
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=caller,
         note_id=note_id,
         front=CardSide(value=front),
         back=CardSide(value="A three-way handshake."),
@@ -64,11 +66,12 @@ async def test_get_notes_returns_seeded_notes_shaped_and_ordered_by_recency(
     notes_client: NotesTestContext,
 ) -> None:
     now = datetime.now(UTC)
-    older = _note(DistillationStatus.READY, now)
-    newer = _note(DistillationStatus.GENERATING, now + timedelta(minutes=5))
+    caller = notes_client.caller
+    older = _note(DistillationStatus.READY, now, caller)
+    newer = _note(DistillationStatus.GENERATING, now + timedelta(minutes=5), caller)
     await notes_client.notes.save(older)
     await notes_client.notes.save(newer)
-    await notes_client.cards.save(_card(older.id, now))
+    await notes_client.cards.save(_card(older.id, now, caller))
 
     response = notes_client.client.get("/notes")
 
@@ -96,7 +99,8 @@ async def test_get_note_returns_seeded_note_shaped_for_a_known_id(
     notes_client: NotesTestContext,
 ) -> None:
     now = datetime.now(UTC)
-    note = _note(DistillationStatus.READY, now)
+    caller = notes_client.caller
+    note = _note(DistillationStatus.READY, now, caller)
     await notes_client.notes.save(note)
 
     response = notes_client.client.get(f"/notes/{note.id.value}")
@@ -125,10 +129,11 @@ async def test_get_cards_for_note_returns_live_cards_ordered_by_created_at(
     notes_client: NotesTestContext,
 ) -> None:
     now = datetime.now(UTC)
-    note = _note(DistillationStatus.READY, now)
+    caller = notes_client.caller
+    note = _note(DistillationStatus.READY, now, caller)
     await notes_client.notes.save(note)
-    older = _card(note.id, now)
-    newer = _card(note.id, now + timedelta(minutes=5))
+    older = _card(note.id, now, caller)
+    newer = _card(note.id, now + timedelta(minutes=5), caller)
     await notes_client.cards.save(newer)
     await notes_client.cards.save(older)
 
@@ -149,12 +154,14 @@ async def test_get_cards_for_note_returns_empty_list_when_all_cards_are_discarde
     notes_client: NotesTestContext,
 ) -> None:
     now = datetime.now(UTC)
-    note = _note(DistillationStatus.READY, now)
+    caller = notes_client.caller
+    note = _note(DistillationStatus.READY, now, caller)
     await notes_client.notes.save(note)
     await notes_client.cards.save(
         _card(
             note.id,
             now,
+            caller,
             discard=Discard(
                 reason=DiscardReason.UNGROUNDED, detail=None, discarded_at=now
             ),
@@ -170,7 +177,8 @@ async def test_get_cards_for_note_returns_empty_list_when_all_cards_are_discarde
 async def test_get_cards_for_note_returns_empty_list_for_a_ready_note_with_no_cards(
     notes_client: NotesTestContext,
 ) -> None:
-    note = _note(DistillationStatus.READY, datetime.now(UTC))
+    caller = notes_client.caller
+    note = _note(DistillationStatus.READY, datetime.now(UTC), caller)
     await notes_client.notes.save(note)
 
     response = notes_client.client.get(f"/notes/{note.id.value}/cards")
@@ -193,7 +201,8 @@ async def test_get_note_returns_blocks_in_document_order_with_raw_text(
 ) -> None:
     now = datetime.now(UTC)
     content = "# TCP Handshake\n\nThe client sends SYN.\n\nThe server replies SYN-ACK."
-    note = _note(DistillationStatus.READY, now, content=content)
+    caller = notes_client.caller
+    note = _note(DistillationStatus.READY, now, caller, content=content)
     await notes_client.notes.save(note)
 
     response = notes_client.client.get(f"/notes/{note.id.value}")
@@ -216,15 +225,19 @@ async def test_get_cards_for_note_returns_exact_block_and_unresolved_locations(
     exact_quote = "The client sends SYN and waits."
     heading_quote = "TCP Handshake"
     missing_quote = "a fragment that is no longer in this note"
-    note = _note(DistillationStatus.READY, now, content=content)
+    caller = notes_client.caller
+    note = _note(DistillationStatus.READY, now, caller, content=content)
     await notes_client.notes.save(note)
     await notes_client.cards.save(
-        _card(note.id, now, quote=exact_quote, front="What does the client send?")
+        _card(
+            note.id, now, caller, quote=exact_quote, front="What does the client send?"
+        )
     )
     await notes_client.cards.save(
         _card(
             note.id,
             now + timedelta(seconds=1),
+            caller,
             quote=heading_quote,
             front="What is the heading?",
         )
@@ -233,6 +246,7 @@ async def test_get_cards_for_note_returns_exact_block_and_unresolved_locations(
         _card(
             note.id,
             now + timedelta(seconds=2),
+            caller,
             quote=missing_quote,
             front="What is missing?",
         )

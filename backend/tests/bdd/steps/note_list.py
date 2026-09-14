@@ -45,10 +45,10 @@ def _anchor_quote() -> str:
     return "A quoted fragment from the note body."
 
 
-def _live_card(note_id: NoteId, created_at: datetime) -> Card:
+def _live_card(note_id: NoteId, created_at: datetime, owner: UserId) -> Card:
     return Card(
         id=CardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner,
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -62,10 +62,11 @@ def _note_at(
     topic_label: str,
     status: DistillationStatus,
     at: datetime,
+    owner: UserId,
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=topic_label),
         content=NoteContent(value="Note body for acceptance scenarios."),
@@ -85,7 +86,7 @@ async def _save_note(
     await notes_client.notes.save(note)
     for offset in range(live_card_count):
         card_at = note.updated_at + timedelta(seconds=offset + 1)
-        await notes_client.cards.save(_live_card(note.id, card_at))
+        await notes_client.cards.save(_live_card(note.id, card_at, notes_client.caller))
 
 
 @given("a running notes backend")
@@ -104,7 +105,7 @@ def ready_note_titled_with_live_cards(
     card_count: int,
 ) -> None:
     at = datetime.now(UTC)
-    note = _note_at(topic, DistillationStatus.READY, at)
+    note = _note_at(topic, DistillationStatus.READY, at, notes_client.caller)
     asyncio.run(_save_note(notes_client, note, card_count))
     note_list_context.tracked_topic = topic
     note_list_context.tracked_note_id = str(note.id.value)
@@ -116,7 +117,7 @@ def generating_note_with_topic(
     topic: str,
 ) -> None:
     note = mint_note(
-        owner_id=UserId.new(),
+        owner_id=notes_client.caller,
         note_id=NoteId(value=uuid4()),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=topic),
@@ -132,7 +133,9 @@ def ready_note_with_zero_cards(
     notes_client: NotesTestContext,
     topic: str,
 ) -> None:
-    note = _note_at(topic, DistillationStatus.READY, datetime.now(UTC))
+    note = _note_at(
+        topic, DistillationStatus.READY, datetime.now(UTC), notes_client.caller
+    )
     asyncio.run(_save_note(notes_client, note, 0))
 
 
@@ -141,7 +144,9 @@ def failed_note_with_topic(
     notes_client: NotesTestContext,
     topic: str,
 ) -> None:
-    note = _note_at(topic, DistillationStatus.FAILED, datetime.now(UTC))
+    note = _note_at(
+        topic, DistillationStatus.FAILED, datetime.now(UTC), notes_client.caller
+    )
     asyncio.run(_save_note(notes_client, note, 0))
 
 
@@ -152,7 +157,7 @@ def older_note_with_topic(
     topic: str,
 ) -> None:
     at = datetime.now(UTC) - timedelta(hours=1)
-    note = _note_at(topic, DistillationStatus.READY, at)
+    note = _note_at(topic, DistillationStatus.READY, at, notes_client.caller)
     asyncio.run(_save_note(notes_client, note, 0))
     note_list_context.older_note_id = str(note.id.value)
 
@@ -168,7 +173,7 @@ def newer_note_touched_after_older(
     topic: str,
 ) -> None:
     at = datetime.now(UTC)
-    note = _note_at(topic, DistillationStatus.GENERATING, at)
+    note = _note_at(topic, DistillationStatus.GENERATING, at, notes_client.caller)
     asyncio.run(_save_note(notes_client, note, 0))
     note_list_context.newer_note_id = str(note.id.value)
 

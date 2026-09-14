@@ -18,11 +18,13 @@ class SqlAlchemyListCardsForNoteQueryAdapter:
     async def list_cards_for_note(
         self, owner: UserId, note_id: NoteId
     ) -> list[CardListItemDTO]:
-        _ = owner
         async with self._session_factory() as session:
             note_row = (
                 await session.execute(
-                    select(DistillNoteRow).where(DistillNoteRow.id == note_id)
+                    select(DistillNoteRow).where(
+                        DistillNoteRow.id == note_id,
+                        DistillNoteRow.owner_id == owner.value,
+                    )
                 )
             ).scalar_one_or_none()
             if note_row is None:

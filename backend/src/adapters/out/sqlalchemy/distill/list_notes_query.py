@@ -13,7 +13,6 @@ class SqlAlchemyListNotesQueryAdapter:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def list_notes(self, owner: UserId) -> list[NoteListItemDTO]:
-        _ = owner
         async with self._session_factory() as session:
             last_updated_at = func.greatest(
                 DistillNoteRow.updated_at,
@@ -34,6 +33,7 @@ class SqlAlchemyListNotesQueryAdapter:
                     (DistillCardRow.note_id == DistillNoteRow.id)
                     & (DistillCardRow.discard_reason.is_(None)),
                 )
+                .where(DistillNoteRow.owner_id == owner.value)
                 .group_by(
                     DistillNoteRow.id,
                     DistillNoteRow.topic_label,

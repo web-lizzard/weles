@@ -1,6 +1,6 @@
 """Shared fixtures for acceptance tests."""
 
-from collections.abc import Callable, Iterator
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 import pytest
@@ -47,13 +47,16 @@ def _notes_routes_registered(application: FastAPI) -> bool:
     return any(getattr(route, "path", None) == "/notes" for route in application.routes)
 
 
-def _fixed_sign_in_gate() -> Callable[[], UserId]:
-    owner = UserId.new()
+@dataclass(frozen=True)
+class FixedSignInGate:
+    user_id: UserId
 
-    def _gate() -> UserId:
-        return owner
+    def __call__(self) -> UserId:
+        return self.user_id
 
-    return _gate
+
+def _fixed_sign_in_gate() -> FixedSignInGate:
+    return FixedSignInGate(user_id=UserId.new())
 
 
 @dataclass
@@ -61,6 +64,7 @@ class NotesTestContext:
     client: TestClient
     notes: InMemoryDistillNoteRepository
     cards: InMemoryCardRepository
+    caller: UserId
 
 
 @pytest.fixture
@@ -102,7 +106,10 @@ def notes_client() -> Iterator[NotesTestContext]:
     app.dependency_overrides[get_list_notes_query] = lambda: query
     app.dependency_overrides[get_note_query] = lambda: note_query
     app.dependency_overrides[get_list_cards_for_note_query] = lambda: cards_query
-    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
+    gate = _fixed_sign_in_gate()
+    app.dependency_overrides[require_sign_in] = gate
     with TestClient(app) as client:
-        yield NotesTestContext(client=client, notes=notes, cards=cards)
+        yield NotesTestContext(
+            client=client, notes=notes, cards=cards, caller=gate.user_id
+        )
     app.dependency_overrides.clear()
