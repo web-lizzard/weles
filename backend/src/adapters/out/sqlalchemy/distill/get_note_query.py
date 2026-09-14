@@ -19,11 +19,13 @@ class SqlAlchemyGetNoteQueryAdapter:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def get_note(self, owner: UserId, note_id: NoteId) -> NoteDetailDTO:
-        _ = owner
         async with self._session_factory() as session:
             statement = (
                 select(DistillNoteRow)
-                .where(DistillNoteRow.id == note_id)
+                .where(
+                    DistillNoteRow.id == note_id,
+                    DistillNoteRow.owner_id == owner.value,
+                )
                 .options(selectinload(DistillNoteRow.tags))
             )
             row = (await session.execute(statement)).scalar_one_or_none()

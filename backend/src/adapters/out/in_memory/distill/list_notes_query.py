@@ -11,9 +11,10 @@ class InMemoryListNotesQueryAdapter:
         self._card_repository: CardRepository = card_repository
 
     async def list_notes(self, owner: UserId) -> list[NoteListItemDTO]:
-        _ = owner
         items: list[NoteListItemDTO] = []
         for note in await self._note_repository.list_all():
+            if note.owner_id != owner:
+                continue
             live_cards = [
                 card
                 for card in await self._card_repository.list_by_note(note.id)

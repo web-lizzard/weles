@@ -16,9 +16,8 @@ class InMemoryGetNoteQueryAdapter:
         self._note_repository: NoteRepository = note_repository
 
     async def get_note(self, owner: UserId, note_id: NoteId) -> NoteDetailDTO:
-        _ = owner
         note = await self._note_repository.get(note_id)
-        if note is None:
+        if note is None or note.owner_id != owner:
             raise DistillNoteNotFoundError
         document = NoteDocument.of(note.content)
         return NoteDetailDTO(

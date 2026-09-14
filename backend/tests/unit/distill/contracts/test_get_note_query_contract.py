@@ -25,6 +25,8 @@ from domain.distill.value_objects import (
 )
 from domain.shared.identity.model import UserId
 
+_CALLER = UserId.new()
+
 
 class _CommittingNoteRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
@@ -58,7 +60,7 @@ def _note(
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=owner_id or UserId.new(),
+        owner_id=owner_id or _CALLER,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="We discussed how connections are established."),
@@ -97,7 +99,7 @@ async def test_get_note_maps_full_note_shape_into_the_detail_dto(
     note = _note(DistillationStatus.READY, now)
     await get_note_fixture.notes.save(note)
 
-    result = await get_note_fixture.query.get_note(UserId.new(), note.id)
+    result = await get_note_fixture.query.get_note(_CALLER, note.id)
 
     assert result.note_id == note.id.value
     assert result.topic.id == note.topic.id
@@ -120,7 +122,7 @@ async def test_get_note_returns_tags_in_the_order_they_were_saved(
     beta = TagSnapshot(id=uuid4(), label="beta")
     note = Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=_CALLER,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="Body text."),
@@ -132,7 +134,7 @@ async def test_get_note_returns_tags_in_the_order_they_were_saved(
     )
     await get_note_fixture.notes.save(note)
 
-    result = await get_note_fixture.query.get_note(UserId.new(), note.id)
+    result = await get_note_fixture.query.get_note(_CALLER, note.id)
 
     assert [(tag.id, tag.label) for tag in result.tags] == [
         (alpha.id, alpha.label),
@@ -162,7 +164,7 @@ async def test_get_note_exposes_raw_distillation_status(
     note = _note(status, datetime.now(UTC))
     await get_note_fixture.notes.save(note)
 
-    result = await get_note_fixture.query.get_note(UserId.new(), note.id)
+    result = await get_note_fixture.query.get_note(_CALLER, note.id)
 
     assert result.distillation_status == status.value
 

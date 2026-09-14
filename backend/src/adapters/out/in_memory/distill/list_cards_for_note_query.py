@@ -19,9 +19,8 @@ class InMemoryListCardsForNoteQueryAdapter:
     async def list_cards_for_note(
         self, owner: UserId, note_id: NoteId
     ) -> list[CardListItemDTO]:
-        _ = owner
         note = await self._note_repository.get(note_id)
-        if note is None:
+        if note is None or note.owner_id != owner:
             raise DistillNoteNotFoundError
         live_cards = [
             card

@@ -38,6 +38,8 @@ from domain.distill.value_objects import (
 )
 from domain.shared.identity.model import UserId
 
+_CALLER = UserId.new()
+
 
 class _CommittingNoteRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
@@ -91,7 +93,7 @@ def _note(
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=owner_id or UserId.new(),
+        owner_id=owner_id or _CALLER,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value=content),
@@ -113,7 +115,7 @@ def _card(
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
-        owner_id=owner_id or UserId.new(),
+        owner_id=owner_id or _CALLER,
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -159,7 +161,7 @@ async def test_list_cards_for_note_returns_live_cards_ordered_by_created_at(
     await list_cards_fixture.cards.save(newer)
     await list_cards_fixture.cards.save(older)
 
-    result = await list_cards_fixture.query.list_cards_for_note(UserId.new(), note.id)
+    result = await list_cards_fixture.query.list_cards_for_note(_CALLER, note.id)
 
     assert [item.card_id for item in result] == [
         older.id.value,
@@ -185,7 +187,7 @@ async def test_list_cards_for_note_omits_discarded_cards(
         )
     )
 
-    result = await list_cards_fixture.query.list_cards_for_note(UserId.new(), note.id)
+    result = await list_cards_fixture.query.list_cards_for_note(_CALLER, note.id)
 
     assert len(result) == 1
     assert result[0].card_id == live.id.value
@@ -218,7 +220,7 @@ async def test_list_cards_for_note_reports_exact_block_and_unresolved_anchor_loc
         _card(note.id, now + timedelta(seconds=2), quote=missing_quote)
     )
 
-    detail = await list_cards_fixture.query.list_cards_for_note(UserId.new(), note.id)
+    detail = await list_cards_fixture.query.list_cards_for_note(_CALLER, note.id)
     document = NoteDocument.of(note.content)
     blocks = document.blocks
     by_quote = {item.anchor_quote: item for item in detail}
