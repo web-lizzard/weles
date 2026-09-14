@@ -43,7 +43,7 @@ class GradeCardCommand:
         compose.
         """
         async with self._uow_factory(owner) as uow:
-            sitting = await self._require_sitting(uow, sitting_id)
+            sitting = await self._require_sitting(uow, sitting_id, owner)
             sitting_events = await uow.review_events.list_by_sitting(sitting_id)
             by_id = await self._reviewable_by_id(owner)
             present = sitting.visible(frozenset(by_id))
@@ -86,9 +86,11 @@ class GradeCardCommand:
 
         return result
 
-    async def _require_sitting(self, uow: UnitOfWork, sitting_id: SittingId) -> Sitting:
+    async def _require_sitting(
+        self, uow: UnitOfWork, sitting_id: SittingId, owner: UserId
+    ) -> Sitting:
         sitting = await uow.sittings.get(sitting_id)
-        if sitting is None:
+        if sitting is None or sitting.owner_id != owner:
             raise SittingNotFoundError
         return sitting
 

@@ -41,7 +41,7 @@ class CurrentCardQuery:
         outstanding_count from sitting.outstanding.
         """
         sitting = await self._sittings.get(sitting_id)
-        if sitting is None:
+        if sitting is None or sitting.owner_id != owner:
             raise SittingNotFoundError
         as_of = self._clock.now()
         if not sitting.is_offered(as_of):
