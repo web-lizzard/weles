@@ -64,10 +64,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 6.1 Source and auth HTTP tests pass
-- [x] 6.2 Full backend suite passes
-- [x] 6.3 Type check passes
-- [x] 6.4 Lint passes
+- [x] 6.1 Source and auth HTTP tests pass — 4d2777a
+- [x] 6.2 Full backend suite passes — 4d2777a
+- [x] 6.3 Type check passes — 4d2777a
+- [x] 6.4 Lint passes — 4d2777a
 
 #### Manual
 
