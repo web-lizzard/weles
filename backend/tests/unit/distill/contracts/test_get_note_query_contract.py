@@ -50,10 +50,15 @@ class _GetNoteFixture:
     notes: NoteRepository
 
 
-def _note(status: DistillationStatus, at: datetime) -> Note:
+def _note(
+    status: DistillationStatus,
+    at: datetime,
+    *,
+    owner_id: UserId | None = None,
+) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner_id or UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="We discussed how connections are established."),
@@ -160,3 +165,15 @@ async def test_get_note_exposes_raw_distillation_status(
     result = await get_note_fixture.query.get_note(UserId.new(), note.id)
 
     assert result.distillation_status == status.value
+
+
+async def test_get_note_raises_not_found_when_note_belongs_to_another_owner(
+    get_note_fixture: _GetNoteFixture,
+) -> None:
+    note_owner = UserId.new()
+    caller = UserId.new()
+    note = _note(DistillationStatus.READY, datetime.now(UTC), owner_id=note_owner)
+    await get_note_fixture.notes.save(note)
+
+    with pytest.raises(DistillNoteNotFoundError):
+        _ = await get_note_fixture.query.get_note(caller, note.id)

@@ -83,10 +83,12 @@ def _note(
     status: DistillationStatus,
     updated_at: datetime,
     note_id: NoteId | None = None,
+    *,
+    owner_id: UserId | None = None,
 ) -> Note:
     return Note(
         id=note_id or NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner_id or UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="We discussed how connections are established."),
@@ -210,3 +212,33 @@ async def test_list_notes_orders_by_recency_using_max_of_note_and_card_timestamp
 
     assert result[0].note_id == recent_only_because_of_its_card.id.value
     assert result[1].note_id == stale_by_own_timestamp_alone.id.value
+
+
+async def test_list_notes_returns_empty_when_only_other_owners_have_notes(
+    list_notes_fixture: _ListNotesFixture,
+) -> None:
+    caller = UserId.new()
+    other_owner = UserId.new()
+    note = _note(DistillationStatus.READY, datetime.now(UTC), owner_id=other_owner)
+    await list_notes_fixture.notes.save(note)
+
+    result = await list_notes_fixture.query.list_notes(caller)
+
+    assert result == []
+
+
+async def test_list_notes_returns_only_notes_owned_by_the_caller(
+    list_notes_fixture: _ListNotesFixture,
+) -> None:
+    caller = UserId.new()
+    other_owner = UserId.new()
+    now = datetime.now(UTC)
+    own_note = _note(DistillationStatus.READY, now, owner_id=caller)
+    foreign_note = _note(DistillationStatus.READY, now, owner_id=other_owner)
+    await list_notes_fixture.notes.save(foreign_note)
+    await list_notes_fixture.notes.save(own_note)
+
+    result = await list_notes_fixture.query.list_notes(caller)
+
+    assert len(result) == 1
+    assert result[0].note_id == own_note.id.value
