@@ -9,6 +9,7 @@ from adapters.auth.model import Account, EmailAddress, PasswordHash
 from adapters.auth.ports import AccountStore
 from adapters.auth.sqlalchemy_account_store import SqlAlchemyAccountStore
 from adapters.out.sqlalchemy.engine import create_session_factory
+from domain.shared.identity.model import UserId
 
 
 @dataclass
@@ -71,3 +72,22 @@ async def test_save_raises_email_already_registered_for_duplicate_canonical_emai
 
     with pytest.raises(EmailAlreadyRegisteredError):
         await account_fixture.store.save(second)
+
+
+async def test_exists_returns_true_for_a_saved_accounts_id(
+    account_fixture: _AccountFixture,
+) -> None:
+    account = _account()
+
+    await account_fixture.store.save(account)
+    result = await account_fixture.store.exists(account.id)
+
+    assert result is True
+
+
+async def test_exists_returns_false_for_an_unknown_user_id(
+    account_fixture: _AccountFixture,
+) -> None:
+    result = await account_fixture.store.exists(UserId.new())
+
+    assert result is False

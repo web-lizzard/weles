@@ -34,6 +34,7 @@ def _authenticator(accounts: InMemoryAccountStore | None = None) -> Authenticato
         issuer=SignInTokens(
             secret=SigningSecret(value=SecretStr("a" * 32)),
             lifetime=SignInLifetime(value=timedelta(hours=1)),
+            accounts=InMemoryAccountStore(),
         ),
     )
 
