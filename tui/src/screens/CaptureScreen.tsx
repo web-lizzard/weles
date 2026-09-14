@@ -23,6 +23,8 @@ const NOTES_COMMAND = "/notes";
 const REMEMBER_COMMAND = "/remember";
 const FRAME_ROWS = 3;
 const STATUS_LINE_ROWS = 1;
+// Blank row that keeps the conversation from butting against the input area.
+const INPUT_GAP_ROWS = 1;
 // One row of text plus marginY={1} above and below.
 const MARGINED_ROWS_OVERHEAD = 2;
 const TOPIC_HEADING_ROWS = 1 + MARGINED_ROWS_OVERHEAD;
@@ -112,7 +114,7 @@ export default function CaptureScreen({
     errorRows +
     (panel !== null
       ? PANEL_CHROME_ROWS + panelBodyHeight(rows, 0)
-      : indicatorRows + FRAME_ROWS + STATUS_LINE_ROWS);
+      : INPUT_GAP_ROWS + indicatorRows + FRAME_ROWS + STATUS_LINE_ROWS);
 
   const nextDraftIdentity = draft?.topic ?? null;
   if (nextDraftIdentity !== draftIdentity) {
@@ -235,6 +237,7 @@ export default function CaptureScreen({
       </Box>
       <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
+      {panel === null && <Box height={INPUT_GAP_ROWS} flexShrink={0} />}
       {panel === null && turnStartedAt !== null && (
         <ActivityIndicator startedAt={turnStartedAt} />
       )}
