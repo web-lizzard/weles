@@ -102,10 +102,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 10.1 Capture screen tests pass
-- [x] 10.2 Full TUI suite passes
-- [x] 10.3 Type check passes
-- [x] 10.4 Lint passes
+- [x] 10.1 Capture screen tests pass — 4c91210
+- [x] 10.2 Full TUI suite passes — 4c91210
+- [x] 10.3 Type check passes — 4c91210
+- [x] 10.4 Lint passes — 4c91210
 
 #### Manual
 
