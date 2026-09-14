@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-remember-separation
-current_phase: 1
-next_step: 1.4
-next_command: /implement auth-flow-remember-separation phase 1
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test auth-flow-remember-separation phase 3
 updated: 2026-09-14
 ---
 
@@ -16,24 +16,24 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 1.4 Remember owner revision upgrades, downgrades, and re-upgrades on an emptied dev database
+- [x] 1.4 Remember owner revision upgrades, downgrades, and re-upgrades on an emptied dev database
 
 ### Phase 2: Remember read scoping
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 830db34
 
 #### Automated
 
-- [ ] 2.1 Remember contracts pass in memory
-- [ ] 2.2 Remember contracts pass on Postgres
-- [ ] 2.3 Full offline suite passes
-- [ ] 2.4 Type check passes
+- [x] 2.1 Remember contracts pass in memory — 3275ba4
+- [x] 2.2 Remember contracts pass on Postgres — 3275ba4
+- [x] 2.3 Full offline suite passes — 3275ba4
+- [x] 2.4 Type check passes — 3275ba4
 
 #### Manual
 
-- [ ] 2.5 Person B has nothing due and cannot open a sitting over person A's cards over curl
+- [x] 2.5 Person B has nothing due and cannot open a sitting over person A's cards over curl — 3275ba4
 
 ### Phase 3: Sitting ownership and chain separation
 
