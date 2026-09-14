@@ -1,7 +1,7 @@
 # pyright: reportUnusedParameter=false
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from adapters.auth.authenticator import Authenticator
@@ -17,7 +17,7 @@ from adapters.auth.exceptions import (
     InvalidEmailAddressError,
     SignInRequiredError,
 )
-from adapters.auth.model import EmailAddress, Password
+from adapters.auth.model import AttemptSource, EmailAddress, Password
 from adapters.auth.ports import SignInVerifier
 from domain.shared.identity.model import UserId
 
@@ -45,16 +45,28 @@ async def require_sign_in(
     return await verifier.verify(credentials.credentials)
 
 
+async def attempt_source(request: Request) -> AttemptSource:
+    """Who is making this request, for attempt limiting.
+
+    This phase returns the connection's peer host, or `"unknown"` when
+    `request.client` is `None`. Phase 5 replaces the body with trusted-proxy
+    aware resolution; the signature does not change.
+    """
+    host = request.client.host if request.client is not None else None
+    return AttemptSource(value=host or "unknown")
+
+
 @router.post("/register", status_code=201)
 async def register(
     body: RegisterRequestDTO,
     authenticator: Annotated[Authenticator, Depends(get_authenticator)],
+    source: Annotated[AttemptSource, Depends(attempt_source)],
 ) -> RegisterResponseDTO:
     """EmailAddress.parse(body.email), Password(body.password) ->
     authenticator.register."""
     email = EmailAddress.parse(body.email)
     password = Password(value=body.password)
-    user_id = await authenticator.register(email, password)
+    user_id = await authenticator.register(email, password, source)
     return RegisterResponseDTO(user_id=user_id.value)
 
 
@@ -62,6 +74,7 @@ async def register(
 async def sign_in(
     body: SignInRequestDTO,
     authenticator: Annotated[Authenticator, Depends(get_authenticator)],
+    source: Annotated[AttemptSource, Depends(attempt_source)],
 ) -> SignInResponseDTO:
     """EmailAddress.parse(body.email), Password(body.password) ->
     authenticator.sign_in. An unparseable email is `InvalidCredentialsError`,
@@ -71,7 +84,7 @@ async def sign_in(
     except InvalidEmailAddressError:
         raise InvalidCredentialsError from None
     password = Password(value=body.password)
-    issued = await authenticator.sign_in(email, password)
+    issued = await authenticator.sign_in(email, password, source)
     return SignInResponseDTO(
         access_token=issued.token,
         expires_at=issued.expires_at,

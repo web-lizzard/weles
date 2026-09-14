@@ -1,10 +1,16 @@
 from datetime import timedelta
 
 from adapters.auth.authenticator import Authenticator
-from adapters.auth.model import PasswordPolicy, SigningSecret, SignInLifetime
+from adapters.auth.model import (
+    DEFAULT_ATTEMPT_LIMITS,
+    PasswordPolicy,
+    SigningSecret,
+    SignInLifetime,
+)
 from adapters.auth.passwords import PasswordHasher
 from adapters.auth.ports import SignInVerifier
 from adapters.auth.sqlalchemy_account_store import SqlAlchemyAccountStore
+from adapters.auth.sqlalchemy_attempt_ledger import SqlAlchemyAttemptLedger
 from adapters.auth.tokens import SignInTokens
 from adapters.out.sqlalchemy.engine import create_engine, create_session_factory
 from config.settings import Settings
@@ -15,6 +21,8 @@ _engine = create_engine(_settings.database_url)
 _session_factory = create_session_factory(_engine)
 
 _accounts = SqlAlchemyAccountStore(_session_factory)
+
+_attempt_ledger = SqlAlchemyAttemptLedger(_session_factory, DEFAULT_ATTEMPT_LIMITS)
 
 _sign_in_tokens = SignInTokens(
     secret=SigningSecret(value=_settings.auth_signing_secret),
@@ -29,6 +37,7 @@ _authenticator = Authenticator(
     passwords=PasswordHasher(),
     policy=PasswordPolicy(min_length=_settings.auth_password_min_length),
     issuer=_sign_in_tokens,
+    attempts=_attempt_ledger,
 )
 
 
