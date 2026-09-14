@@ -64,6 +64,22 @@ jobs:
       - run: uv sync --frozen
       - run: uv run --frozen pytest tests/bdd
 
+  backend-property:
+    name: backend-property
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v10
+        with:
+          working-directory: backend
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest tests/property
+
   tui-static:
     name: tui-static
     runs-on: ubuntu-latest
