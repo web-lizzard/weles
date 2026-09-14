@@ -1,0 +1,15 @@
+.env
+.env.*
+.venv
+tests
+mutants
+.mutmut-cache
+__pycache__
+.pytest_cache
+.ruff_cache
+
+
+.claude
+.cursor
+.ordo
+.git
