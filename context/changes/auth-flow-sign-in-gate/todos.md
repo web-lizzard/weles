@@ -14,8 +14,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Auth model and hasher unit tests pass
-- [x] 1.2 Type check passes
+- [x] 1.1 Auth model and hasher unit tests pass — 9a8ac80
+- [x] 1.2 Type check passes — 9a8ac80
 
 ### Phase 2: Sign-in tokens and the token port contract
 
