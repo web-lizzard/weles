@@ -1,6 +1,10 @@
 import { mkdirSync } from "node:fs";
+import { chmod, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { InstanceAddress } from "../instance/address.js";
+import {
+  type InstanceAddress,
+  parseInstanceAddress,
+} from "../instance/address.js";
 import type { ConfigLocation } from "../instance/configStore.js";
 
 export type StoredSignIn = {
@@ -24,20 +28,84 @@ export function credentialsFilePath(location: ConfigLocation): string {
   return path;
 }
 
+function parseStoredSignIn(raw: unknown): StoredSignIn | null {
+  if (typeof raw !== "object" || raw === null) {
+    return null;
+  }
+  const record = raw as Record<string, unknown>;
+  if (
+    typeof record.token !== "string" ||
+    typeof record.expiresAt !== "string" ||
+    typeof record.instanceAddress !== "string"
+  ) {
+    return null;
+  }
+  try {
+    return {
+      instanceAddress: parseInstanceAddress(record.instanceAddress),
+      token: record.token,
+      expiresAt: record.expiresAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function readSignIn(
-  _location: ConfigLocation,
-  _address: InstanceAddress,
+  location: ConfigLocation,
+  address: InstanceAddress,
 ): Promise<StoredSignIn | null> {
-  throw new Error("not implemented");
+  const path = credentialsFilePath(location);
+  let raw: string;
+  try {
+    raw = await readFile(path, "utf8");
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      return null;
+    }
+    throw error;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  const signIn = parseStoredSignIn(parsed);
+  if (signIn === null || signIn.instanceAddress !== address) {
+    return null;
+  }
+  return signIn;
 }
 
 export async function writeSignIn(
-  _location: ConfigLocation,
-  _signIn: StoredSignIn,
+  location: ConfigLocation,
+  signIn: StoredSignIn,
 ): Promise<void> {
-  throw new Error("not implemented");
+  const path = credentialsFilePath(location);
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, `${JSON.stringify(signIn)}\n`, { mode: 0o600 });
+  await chmod(path, 0o600);
 }
 
-export async function clearSignIn(_location: ConfigLocation): Promise<void> {
-  throw new Error("not implemented");
+export async function clearSignIn(location: ConfigLocation): Promise<void> {
+  const path = credentialsFilePath(location);
+  try {
+    await unlink(path);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as NodeJS.ErrnoException).code === "ENOENT"
+    ) {
+      return;
+    }
+    throw error;
+  }
 }

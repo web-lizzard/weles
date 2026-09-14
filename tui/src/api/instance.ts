@@ -23,7 +23,11 @@ export function setSignInProvider(provider: SignInProvider): void {
 }
 
 export async function authorizationHeaders(): Promise<Record<string, string>> {
-  throw new Error("not implemented");
+  const token = _signInProvider ? await _signInProvider() : null;
+  if (token === null) {
+    return {};
+  }
+  return { Authorization: `Bearer ${token}` };
 }
 
 export function setInstanceAddress(address: InstanceAddress): void {
@@ -42,10 +46,22 @@ export function instanceAddress(): InstanceAddress {
 export function getClient(): Client<paths> {
   const address = instanceAddress();
   if (memoizedClient === undefined || memoizedForAddress !== address) {
-    memoizedClient = createClient<paths>({
+    const client = createClient<paths>({
       baseUrl: address,
       fetch: delegatedFetch,
     });
+    client.use({
+      async onRequest({ request }) {
+        const token = _signInProvider ? await _signInProvider() : null;
+        if (token === null) {
+          return undefined;
+        }
+        const headers = new Headers(request.headers);
+        headers.set("Authorization", `Bearer ${token}`);
+        return new Request(request, { headers });
+      },
+    });
+    memoizedClient = client;
     memoizedForAddress = address;
   }
   return memoizedClient;
