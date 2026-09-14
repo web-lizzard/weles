@@ -22,6 +22,7 @@ Weles is a single-user second brain built around a capture → distill → remem
 - `cd backend && uv run basedpyright` — type check (also a pre-commit hook).
 - `cd tui && pnpm test`, `pnpm typecheck`, `pnpm lint`.
 - `cd tui && pnpm generate:api` — regenerate `src/api/generated/schema.d.ts` against a running backend.
+- The integration suite, Postgres lane included, runs only through the `integration` workflow dispatched with a `ref`; a finished run leaves an `integration` commit status on that ref.
 
 ## Coding Style
 
@@ -33,7 +34,7 @@ Follow @context/foundation/testing-conventions.md for test layout, naming, runne
 
 ## Commits
 
-Conventional Commits scoped by change or effort id, with phase suffix during implementation: `feat(db-adapter-capture): ... (p2)`, `test(...)`, `docs(...)`, `chore(archive): close <change-id>`.
+Conventional Commits scoped by change or effort id, with phase suffix during implementation: `feat(db-adapter-capture): ... (p2)`, `test(...)`, `docs(...)`, `chore(archive): close <change-id>`. Work happens on a branch and reaches `main` through a pull request gated by `.github/workflows/pr-gate.yml`.
 
 ## Language Policy
 
