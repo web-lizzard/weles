@@ -144,9 +144,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 13.1 Type check passes
-- [x] 13.2 Lint passes
-- [x] 13.3 Existing suite stays green
+- [x] 13.1 Type check passes — aea9518
+- [x] 13.2 Lint passes — aea9518
+- [x] 13.3 Existing suite stays green — aea9518
 
 ### Phase 14: Bottom panels behavior
 
