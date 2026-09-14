@@ -10,7 +10,7 @@ updated: 2026-09-14
 |----|---------|-----------|--------|
 | S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate | in_progress |
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit | deployment-integration-on-demand | pending |
-| S-03 | Anyone can install the published TUI without credentials | deployment-tui-publish | pending |
+| S-03 | Anyone can install the published TUI without credentials | deployment-tui-publish | in_progress |
 | S-04 | The author brings an empty or behind Neon database to a commit's schema with one script | deployment-neon-schema | pending |
 | S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed | deployment-manual-deploy | pending |
 | S-06 | Unhandled errors reach error tracking without carrying anything people wrote | deployment-error-tracking | pending |
@@ -66,7 +66,7 @@ own. S-05 accepts a commit only when a passing run exists for that same commit.
 - **Outcome:** Anyone can install the published TUI without credentials
 - **Acceptance criteria:** FR-02
 - **Change ID:** deployment-tui-publish
-- **Status:** pending
+- **Status:** in_progress
 - **Parallel with:** S-01, S-02, S-04, S-05, S-06, S-07, S-08
 
 `tui/package.json` is `private` and unscoped, and the GitHub npm registry requires a token
