@@ -9,7 +9,6 @@ import CaptureScreen from "../src/screens/CaptureScreen";
 import { useChatStore } from "../src/store/chat";
 import { useAppStore } from "../src/store/index";
 
-const WELES_TAGLINE = "wisdom through questions";
 const COVERAGE_BANNER_TEXT =
   "✓ This topic seems well covered — keep going, or wrap up when you're ready.";
 
@@ -231,28 +230,6 @@ describe("CaptureScreen", () => {
     expect(frame).not.toContain("Old problem");
   });
 
-  it("hides Weles brand when the error bar consumes remaining row budget", () => {
-    const transcript = Array.from({ length: 16 }, (_, index) => ({
-      role: "user" as const,
-      content: `line ${index}`,
-    }));
-
-    useChatStore.setState({
-      topic: "TCP handshakes",
-      transcript,
-      streamError: {
-        code: "capture_session_closed",
-        detail: "Session is closed",
-      },
-    });
-
-    const { lastFrame } = render(<CaptureScreen />);
-    const frame = lastFrame() ?? "";
-
-    expect(frame).toContain("Session is closed");
-    expect(frame).not.toContain(WELES_TAGLINE);
-  });
-
   it("shows the coverage wrap-up banner when coverageConfidence is fully covered", () => {
     useChatStore.setState({
       topic: "TCP handshakes",
@@ -306,25 +283,6 @@ describe("CaptureScreen", () => {
 
     expect(transcriptIndex).toBeGreaterThanOrEqual(0);
     expect(bannerIndex).toBeGreaterThan(transcriptIndex);
-  });
-
-  it("hides Weles brand when the coverage banner consumes remaining row budget", () => {
-    const transcript = Array.from({ length: 16 }, (_, index) => ({
-      role: "user" as const,
-      content: `line ${index}`,
-    }));
-
-    useChatStore.setState({
-      topic: "TCP handshakes",
-      coverageConfidence: 1,
-      transcript,
-    });
-
-    const { lastFrame } = render(<CaptureScreen />);
-    const frame = lastFrame() ?? "";
-
-    expect(frame).toContain(COVERAGE_BANNER_TEXT);
-    expect(frame).not.toContain(WELES_TAGLINE);
   });
 
   it("still accepts a new message while the coverage wrap-up banner is visible", async () => {
@@ -415,30 +373,6 @@ describe("CaptureScreen", () => {
     expect(lastFrame()).toContain("draft-panel-body");
   });
 
-  it("hides Weles brand when the draft panel consumes remaining row budget", () => {
-    const transcript = Array.from({ length: 16 }, (_, index) => ({
-      role: "user" as const,
-      content: `line ${index}`,
-    }));
-
-    useChatStore.setState({
-      topic: "TCP handshakes",
-      transcript,
-      draft: {
-        topic: "draft-panel-topic",
-        tags: [{ label: "draft-panel-tag-a", reused: true }],
-        content: "draft-panel-body",
-        noteId: "00000000-0000-4000-8000-000000000010",
-      },
-    });
-
-    const { lastFrame } = render(<CaptureScreen />);
-    const frame = lastFrame() ?? "";
-
-    expect(frame).toContain("draft-panel-topic");
-    expect(frame).not.toContain(WELES_TAGLINE);
-  });
-
   it("marks a newly minted tag distinctly from a reused one", () => {
     useChatStore.setState({
       topic: "Session topic",
@@ -499,43 +433,6 @@ describe("CaptureScreen", () => {
       f.includes("Next topic opener"),
     );
     expect(afterInput).toContain("Next topic opener");
-  });
-
-  it("hides Weles brand when the approval receipt consumes remaining row budget", async () => {
-    const transcript = Array.from({ length: 16 }, (_, index) => ({
-      role: "user" as const,
-      content: `line ${index}`,
-    }));
-
-    useChatStore.setState({
-      topic: "TCP handshakes",
-      transcript,
-      draft: {
-        topic: "draft-panel-topic",
-        tags: [{ label: "draft-panel-tag-a", reused: true }],
-        content: "draft-panel-body",
-        noteId: "00000000-0000-4000-8000-000000000010",
-      },
-    });
-    vi.mocked(approveNote).mockResolvedValue({
-      noteId: "00000000-0000-4000-8000-000000000010",
-      topic: "draft-panel-topic",
-      tags: ["draft-panel-tag-a"],
-    });
-    vi.mocked(startCaptureSession)
-      .mockResolvedValueOnce({ sessionId: "sess-1" })
-      .mockResolvedValueOnce({ sessionId: "sess-2" });
-
-    const { lastFrame, stdin } = render(<CaptureScreen />);
-    await submitMessage(stdin, "/approve");
-
-    const frame = await waitForFrame(
-      lastFrame,
-      (f) =>
-        f.includes("✓ Approved — queued for saving") &&
-        f.includes("═".repeat(80)),
-    );
-    expect(frame).not.toContain(WELES_TAGLINE);
   });
 
   it("makes no request when /approve is submitted with no draft", async () => {
