@@ -2,7 +2,7 @@
 change_id: tui-capture-screen-fixes
 current_phase: 4
 next_step: 4.1
-next_command: /unit-test tui-capture-screen-fixes phase 4
+next_command: /implement tui-capture-screen-fixes phase 4
 updated: 2026-09-14
 ---
 
@@ -38,13 +38,13 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 7b4029c
 
 #### Automated
 
-- [ ] 4.1 Capture layout tests pass
-- [ ] 4.2 Type check passes
-- [ ] 4.3 Lint passes
+- [x] 4.1 Capture layout tests pass
+- [x] 4.2 Type check passes
+- [x] 4.3 Lint passes
 
 ### Phase 5: Chat store stubs
 
