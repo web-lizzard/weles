@@ -22,9 +22,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 2.1 Markdown renderer tests pass
-- [x] 2.2 Type check passes
-- [x] 2.3 Lint passes
+- [x] 2.1 Markdown renderer tests pass — c899895
+- [x] 2.2 Type check passes — c899895
+- [x] 2.3 Lint passes — c899895
 
 ### Phase 3: Capture layout stubs
 
