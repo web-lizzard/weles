@@ -2,6 +2,8 @@ import asyncio
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from integration.support.in_memory_remember import InMemoryRememberComposition
+
 from adapters.out.in_memory.remember.review_event_store import InMemoryReviewEventStore
 from adapters.out.in_memory.remember.scheduling_state_repository import (
     InMemorySchedulingStateRepository,
@@ -23,6 +25,8 @@ from domain.remember.value_objects import (
     ShowingLimit,
 )
 from domain.shared.identity.model import UserId
+
+_OWNER = UserId.new()
 
 
 def _make_unit_of_work() -> tuple[
@@ -123,7 +127,7 @@ async def test_a_second_unit_of_work_enters_only_after_the_first_window_closes()
     outbox_store = InMemoryOutboxStore()
     outbox = InMemoryOutboxAppender(outbox_store)
     first = InMemoryUnitOfWork(
-        UserId.new(),
+        _OWNER,
         sittings,
         review_events,
         scheduling_states,
@@ -132,7 +136,7 @@ async def test_a_second_unit_of_work_enters_only_after_the_first_window_closes()
         lock,
     )
     second = InMemoryUnitOfWork(
-        UserId.new(),
+        _OWNER,
         sittings,
         review_events,
         scheduling_states,
@@ -157,3 +161,35 @@ async def test_a_second_unit_of_work_enters_only_after_the_first_window_closes()
     _ = await asyncio.gather(first_window(), second_window())
 
     assert order == ["first entered", "first leaving", "second entered"]
+
+
+async def test_different_owners_enter_remember_units_of_work_concurrently() -> None:
+    composition = InMemoryRememberComposition.create()
+    owner_a = UserId.new()
+    owner_b = UserId.new()
+    first = composition.unit_of_work(owner_a)
+    second = composition.unit_of_work(owner_b)
+    first_inside = asyncio.Event()
+    first_release = asyncio.Event()
+    second_entered = asyncio.Event()
+
+    async def hold_first_window() -> None:
+        async with first:
+            _ = first_inside.set()
+            _ = await first_release.wait()
+            await first.commit()
+
+    async def enter_second_while_first_is_open() -> None:
+        _ = await first_inside.wait()
+        async with second:
+            _ = second_entered.set()
+            await second.commit()
+
+    first_task = asyncio.create_task(hold_first_window())
+    _ = await asyncio.wait_for(first_inside.wait(), timeout=2.0)
+    second_task = asyncio.create_task(enter_second_while_first_is_open())
+    await asyncio.sleep(0.05)
+    assert second_entered.is_set()
+    _ = first_release.set()
+    await first_task
+    await second_task
