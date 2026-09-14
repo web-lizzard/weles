@@ -6,16 +6,20 @@ updated: 2026-09-14
 
 ## At a glance
 
-| ID | Outcome | Change ID | Status |
-|----|---------|-----------|--------|
-| S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate | in_progress |
-| S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit | deployment-integration-on-demand | pending |
-| S-03 | Anyone can install the published TUI without credentials | deployment-tui-publish | in_progress |
-| S-04 | The author brings an empty or behind Neon database to a commit's schema with one script | deployment-neon-schema | in_progress |
-| S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed | deployment-manual-deploy | pending |
-| S-06 | Unhandled errors reach error tracking without carrying anything people wrote | deployment-error-tracking | pending |
-| S-07 | An agent skill diagnoses the hosted instance read-only and recommends next steps | deployment-diagnostics-skill | pending |
-| S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address | deployment-public-address | pending |
+
+| ID   | Outcome                                                                                                                                 | Change ID                        | Status      |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
+| S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate               | in_progress |
+| S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit                                                      | deployment-integration-on-demand | in_progress |
+| S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | in_progress |
+| S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | in_progress |
+| S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | pending     |
+| S-06 | Unhandled errors reach error tracking without carrying anything people wrote                                                            | deployment-error-tracking        | pending     |
+| S-07 | An agent skill diagnoses the hosted instance read-only and recommends next steps                                                        | deployment-diagnostics-skill     | pending     |
+| S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address                                              | deployment-public-address        | pending     |
+
+
+
 
 ## Dependencies
 
@@ -30,7 +34,13 @@ flowchart LR
   S-06["S-06 · error tracking"]
 ```
 
+
+
+
+
 ## Slices
+
+
 
 ### S-01: A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking
 
@@ -53,7 +63,7 @@ reads these checks.
 - **Outcome:** The integration suite, Postgres lane included, runs in CI on demand for any commit
 - **Acceptance criteria:** FR-05
 - **Change ID:** deployment-integration-on-demand
-- **Status:** pending
+- **Status:** in_progress
 - **Parallel with:** S-01, S-03, S-04, S-06
 
 Only the `-m postgres` lane exercises the SQL adapters that production runs on, and it needs
@@ -163,3 +173,4 @@ mechanism happens in planning, within that constraint. It reaches the reviewer o
 the private certification submission. Flooding protection stays deferred.
 
 ## Done
+
