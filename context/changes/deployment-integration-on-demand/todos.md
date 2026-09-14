@@ -1,7 +1,7 @@
 ---
 change_id: deployment-integration-on-demand
 current_phase: 1
-next_step: 1.1
+next_step: 1.3
 next_command: /implement deployment-integration-on-demand phase 1
 updated: 2026-09-14
 ---
@@ -10,8 +10,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Actionlint reports no errors on integration.yml
-- [ ] 1.2 workflow_dispatch is the only trigger key
+- [x] 1.1 Actionlint reports no errors on integration.yml
+- [x] 1.2 workflow_dispatch is the only trigger key
 
 #### Manual
 
