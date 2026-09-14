@@ -72,4 +72,4 @@ if (!process.stdin.isTTY || !process.stdout.isTTY) {
   process.exit(1);
 }
 
-render(<App />);
+render(<App />, { incrementalRendering: true });

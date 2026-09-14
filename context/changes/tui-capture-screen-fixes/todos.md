@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 9
-next_step: 9.1
-next_command: /implement tui-capture-screen-fixes phase 9
+current_phase: 10
+next_step: 10.1
+next_command: /unit-test tui-capture-screen-fixes phase 10
 updated: 2026-09-14
 ---
 
@@ -90,9 +90,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 9.1 Type check passes
-- [ ] 9.2 Lint passes
-- [ ] 9.3 Existing suite stays green
+- [x] 9.1 Type check passes
+- [x] 9.2 Lint passes
+- [x] 9.3 Existing suite stays green
 
 ### Phase 10: Capture shell behavior
 
