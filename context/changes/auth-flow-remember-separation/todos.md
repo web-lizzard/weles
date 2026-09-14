@@ -10,9 +10,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Offline backend suite passes
-- [x] 1.2 Postgres lane passes
-- [x] 1.3 Type check passes
+- [x] 1.1 Offline backend suite passes — bd070fd
+- [x] 1.2 Postgres lane passes — bd070fd
+- [x] 1.3 Type check passes — bd070fd
 
 #### Manual
 
