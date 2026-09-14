@@ -16,7 +16,7 @@ updated: 2026-09-14
 | S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | in_progress |
 | S-06 | Unhandled errors reach error tracking without carrying anything people wrote                                                            | deployment-error-tracking        | pending     |
 | S-07 | An agent skill diagnoses the hosted instance read-only and recommends next steps                                                        | deployment-diagnostics-skill     | pending     |
-| S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address                                              | deployment-public-address        | pending     |
+| S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address                                              | deployment-public-address        | in_progress |
 
 
 
@@ -159,7 +159,7 @@ names no particular instance.
 - **Outcome:** The author and the reviewer reach the hosted instance at a hard-to-discover public address
 - **Acceptance criteria:** frame boundary (inherited from auth-flow FR-01, FR-05)
 - **Change ID:** deployment-public-address
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-05
 - **Parallel with:** S-03, S-06, S-07
 
