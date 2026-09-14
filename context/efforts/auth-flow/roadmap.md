@@ -8,7 +8,7 @@ updated: 2026-09-14
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | A person can register and sign in, and the instance refuses everyone who is not signed in | auth-flow-sign-in-gate | in_progress |
+| S-01 | A person can register and sign in, and the instance refuses everyone who is not signed in | auth-flow-sign-in-gate | done |
 | S-02 | A person can point the TUI at an instance of their choosing | auth-flow-instance-address | done |
 | S-03 | A sign-in survives TUI restarts and expires after its validity period without silently losing work | auth-flow-sign-in-lifetime | pending |
 | S-04 | Each person's captures, notes, and the cards distilled from them belong only to that person | auth-flow-capture-distill-separation | pending |
@@ -35,7 +35,7 @@ flowchart LR
 - **Outcome:** A person can register and sign in, and the instance refuses everyone who is not signed in
 - **Acceptance criteria:** AC-03, AC-04, AC-05, AC-11, AC-12, AC-13
 - **Change ID:** auth-flow-sign-in-gate
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-02
 
 Every other slice needs a signed-in person, so identity and the gate come first. The instance
@@ -134,3 +134,4 @@ change's `/plan`. Delivers both adapters for every port it touches: in-memory fo
 ## Done
 
 - **S-02: A person can point the TUI at an instance of their choosing** — Archived 2026-09-13 → `context/archive/changes/2026-09-13-auth-flow-instance-address/`. Lesson: —.
+- **S-01: A person can register and sign in, and the instance refuses everyone who is not signed in** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-auth-flow-sign-in-gate/`. Lesson: —.
