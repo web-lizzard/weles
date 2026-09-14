@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-remember-separation
 current_phase: 4
-next_step:
-next_command: /unit-test auth-flow-remember-separation phase 4
+next_step: epilogue
+next_command: /archive auth-flow-remember-separation
 updated: 2026-09-14
 ---
 
@@ -57,12 +57,12 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 1a4a6b1
 
 #### Automated
 
-- [ ] 4.1 Unit-of-work tests pass
-- [ ] 4.2 Postgres remember persistence passes
-- [ ] 4.3 Full offline suite passes
-- [ ] 4.4 Postgres lane passes
-- [ ] 4.5 Type check passes
+- [x] 4.1 Unit-of-work tests pass — 5a5da2a
+- [x] 4.2 Postgres remember persistence passes — 5a5da2a
+- [x] 4.3 Full offline suite passes — 5a5da2a
+- [x] 4.4 Postgres lane passes — 5a5da2a
+- [x] 4.5 Type check passes — 5a5da2a
