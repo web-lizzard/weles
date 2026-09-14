@@ -92,3 +92,64 @@ jobs:
             printf '::error::%s\n' "${failures[@]}"
             exit 1
           fi
+
+  deploy:
+    name: deploy
+    needs: verify
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SHA: ${{ needs.verify.outputs.sha }}
+      DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+      DEPLOY_SSH_USER: ${{ secrets.DEPLOY_SSH_USER }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.verify.outputs.sha }}
+
+      - name: Build image
+        run: docker build -t "weles-api:$SHA" backend
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" >~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_SSH_KNOWN_HOSTS" >~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Ship image to the VPS
+        run: |
+          docker save "weles-api:$SHA" | gzip | ssh -i ~/.ssh/deploy_key -p "$DEPLOY_SSH_PORT" \
+            "$DEPLOY_SSH_USER@$DEPLOY_SSH_HOST" 'gunzip | docker load'
+
+      - name: Ship deploy files to the VPS
+        run: |
+          scp -i ~/.ssh/deploy_key -P "$DEPLOY_SSH_PORT" \
+            deploy/compose.yml deploy/remote-deploy.sh \
+            "$DEPLOY_SSH_USER@$DEPLOY_SSH_HOST:/srv/weles/"
+
+      - name: Switch the API to the deployed SHA
+        id: switch
+        run: |
+          if ssh -i ~/.ssh/deploy_key -p "$DEPLOY_SSH_PORT" "$DEPLOY_SSH_USER@$DEPLOY_SSH_HOST" \
+            "bash /srv/weles/remote-deploy.sh $SHA"; then
+            echo "outcome=success" >>"$GITHUB_OUTPUT"
+          else
+            echo "outcome=failure" >>"$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Record the outcome
+        if: always()
+        run: |
+          {
+            echo "### Deploy $SHA"
+            echo "outcome: ${{ steps.switch.outputs.outcome || 'failure' }}"
+          } >>"$GITHUB_STEP_SUMMARY"
