@@ -1,7 +1,7 @@
 ---
 change_id: deployment-pr-gate
 current_phase: 2
-next_step: 2.1
+next_step: 2.2
 next_command: /implement deployment-pr-gate phase 2
 updated: 2026-09-14
 ---
@@ -19,7 +19,7 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 2.1 Actionlint reports no errors on pr-gate.yml
+- [x] 2.1 Actionlint reports no errors on pr-gate.yml
 
 #### Manual
 

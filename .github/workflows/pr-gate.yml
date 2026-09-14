@@ -1,0 +1,102 @@
+name: pr-gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend-static:
+    name: backend-static
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v10
+        with:
+          working-directory: backend
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen basedpyright
+
+  backend-unit:
+    name: backend-unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v10
+        with:
+          working-directory: backend
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest tests/unit -m "not postgres"
+
+  backend-bdd:
+    name: backend-bdd
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v10
+        with:
+          working-directory: backend
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run --frozen pytest tests/bdd
+
+  tui-static:
+    name: tui-static
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tui
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/setup@v2
+        with:
+          working-directory: tui
+          runtime: node@22
+          cache: true
+          cache-dependency-path: tui/pnpm-lock.yaml
+          require-lockfile: true
+      - run: pnpm typecheck
+      - run: pnpm exec biome ci .
+
+  tui-unit:
+    name: tui-unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tui
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/setup@v2
+        with:
+          working-directory: tui
+          runtime: node@22
+          cache: true
+          cache-dependency-path: tui/pnpm-lock.yaml
+          require-lockfile: true
+      - run: pnpm test
