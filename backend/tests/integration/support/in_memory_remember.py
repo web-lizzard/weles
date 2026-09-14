@@ -75,7 +75,7 @@ class InMemoryRememberComposition:
     cards: InMemoryCardRepository
     outbox_store: InMemoryOutboxStore
     outbox: InMemoryOutboxAppender
-    lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+    locks: dict[UserId, asyncio.Lock] = field(default_factory=dict)
 
     @classmethod
     def create(
@@ -106,6 +106,7 @@ class InMemoryRememberComposition:
         )
 
     def unit_of_work(self, owner: UserId) -> UnitOfWork:
+        lock = self.locks.setdefault(owner, asyncio.Lock())
         return cast(
             UnitOfWork,
             cast(
@@ -117,7 +118,7 @@ class InMemoryRememberComposition:
                     self.scheduling_states,
                     self.outbox_store,
                     self.outbox,
-                    self.lock,
+                    lock,
                 ),
             ),
         )

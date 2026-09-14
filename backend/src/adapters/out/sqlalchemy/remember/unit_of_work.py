@@ -14,7 +14,7 @@ from domain.shared.identity.model import UserId
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-REMEMBER_LOCK_KEY: int = 0x57454C45535F5245
+REMEMBER_LOCK_NAMESPACE: int = 0x57454C45
 
 
 class SqlAlchemyRememberUnitOfWork:
@@ -26,7 +26,7 @@ class SqlAlchemyRememberUnitOfWork:
     def __init__(
         self, owner: UserId, session_factory: async_sessionmaker[AsyncSession]
     ) -> None:
-        _ = owner
+        self._owner: UserId = owner
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
         self._committed: bool = False
         self._session: AsyncSession | None = None
@@ -41,8 +41,11 @@ class SqlAlchemyRememberUnitOfWork:
         session = self._session_factory()
         self._session = session
         _ = await session.execute(
-            text("SELECT pg_advisory_xact_lock(:key)"),
-            {"key": REMEMBER_LOCK_KEY},
+            text("SELECT pg_advisory_xact_lock(:namespace, hashtext(:owner))"),
+            {
+                "namespace": REMEMBER_LOCK_NAMESPACE,
+                "owner": str(self._owner.value),
+            },
         )
         self.sittings = SqlAlchemySittingRepository(session)
         self.review_events = SqlAlchemyReviewEventStore(session)
