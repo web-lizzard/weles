@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-lifetime
-current_phase: 6
-next_step: 6.5
-next_command: /implement auth-flow-sign-in-lifetime phase 6
+current_phase: 4
+next_step: 4.5
+next_command: /implement auth-flow-sign-in-lifetime phase 4
 updated: 2026-09-14
 ---
 
@@ -74,5 +74,5 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 6.5 Capture keeps transcript on expiry and replies after sign-in
-- [ ] 6.6 Sitting shows expiry and retry records grade after sign-in
+- [x] 6.5 Capture keeps transcript on expiry and replies after sign-in
+- [x] 6.6 Sitting shows expiry and retry records grade after sign-in
