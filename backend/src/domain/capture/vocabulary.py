@@ -4,6 +4,7 @@ from domain.capture.ports import EmbeddingPort, TagRepository, TopicRepository
 from domain.capture.tag import Tag
 from domain.capture.topic import Topic
 from domain.capture.value_objects import Label, SimilarityScore
+from domain.shared.identity.model import UserId
 
 
 class MatchCriteria(BaseModel, frozen=True):
@@ -29,21 +30,23 @@ class VocabularyResolver:
         self._criteria: MatchCriteria = criteria
 
     async def resolve_topic(
-        self, label: Label, topics: TopicRepository
+        self, owner: UserId, label: Label, topics: TopicRepository
     ) -> ResolvedTopic:
         embedding = await self._embedding.embed(label.value)
-        match = await topics.nearest(embedding)
+        match = await topics.nearest(owner, embedding)
         if match is not None and self._criteria.accepts(match.score):
             return ResolvedTopic(topic=match.entry, reused=True)
-        topic = Topic.mint(label, embedding)
+        topic = Topic.mint(owner, label, embedding)
         await topics.add(topic)
         return ResolvedTopic(topic=topic, reused=False)
 
-    async def resolve_tag(self, label: Label, tags: TagRepository) -> ResolvedTag:
+    async def resolve_tag(
+        self, owner: UserId, label: Label, tags: TagRepository
+    ) -> ResolvedTag:
         embedding = await self._embedding.embed(label.value)
-        match = await tags.nearest(embedding)
+        match = await tags.nearest(owner, embedding)
         if match is not None and self._criteria.accepts(match.score):
             return ResolvedTag(tag=match.entry, reused=True)
-        tag = Tag.mint(label, embedding)
+        tag = Tag.mint(owner, label, embedding)
         await tags.add(tag)
         return ResolvedTag(tag=tag, reused=False)

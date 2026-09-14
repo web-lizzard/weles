@@ -27,6 +27,7 @@ async def test_valid_envelope_persists_note_and_enqueues_note_saved() -> None:
     stack = _make_handler_stack()
     payload = NoteApprovedPayload(
         note_id=uuid4(),
+        owner_id=uuid4(),
         session_id=uuid4(),
         topic=VocabularySnapshot(id=uuid4(), label="TCP handshakes"),
         content="  We discussed handshakes.  ",

@@ -12,6 +12,7 @@ from domain.capture.turn import AgentEvent, CaptureTurn
 from domain.capture.value_objects import Embedding, NoteId, SessionId, TagId, TopicId
 from domain.capture.vocabulary_match import VocabularyMatch
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction
 
 
@@ -72,7 +73,9 @@ class TopicRepository(Protocol):
 
     async def get(self, topic_id: TopicId) -> Topic | None: ...
 
-    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Topic] | None: ...
+    async def nearest(
+        self, owner: UserId, embedding: Embedding
+    ) -> VocabularyMatch[Topic] | None: ...
 
 
 class TagRepository(Protocol):
@@ -80,7 +83,9 @@ class TagRepository(Protocol):
 
     async def get(self, tag_id: TagId) -> Tag | None: ...
 
-    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Tag] | None: ...
+    async def nearest(
+        self, owner: UserId, embedding: Embedding
+    ) -> VocabularyMatch[Tag] | None: ...
 
 
 class NoteVocabularyRepository(Protocol):

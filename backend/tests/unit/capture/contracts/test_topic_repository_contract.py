@@ -9,9 +9,11 @@ from adapters.out.sqlalchemy.engine import create_session_factory
 from domain.capture.ports import TopicRepository
 from domain.capture.topic import Topic
 from domain.capture.value_objects import Embedding, Label, TopicId
+from domain.shared.identity.model import UserId
 
 _EMBEDDING_MODEL = "test"
 _OTHER_MODEL = "other-model"
+_OWNER = UserId.new()
 
 
 class _CommittingTopicRepository:
@@ -27,9 +29,9 @@ class _CommittingTopicRepository:
         async with self._session_factory() as db_session:
             return await SqlAlchemyTopicRepository(db_session).get(topic_id)
 
-    async def nearest(self, embedding: Embedding):
+    async def nearest(self, owner: UserId, embedding: Embedding):
         async with self._session_factory() as db_session:
-            return await SqlAlchemyTopicRepository(db_session).nearest(embedding)
+            return await SqlAlchemyTopicRepository(db_session).nearest(owner, embedding)
 
 
 @pytest.fixture(
@@ -46,6 +48,7 @@ def repository(request: pytest.FixtureRequest) -> TopicRepository:
 def _sample_topic() -> Topic:
     return Topic(
         id=TopicId.new(),
+        owner_id=_OWNER,
         label=Label(value="TCP handshakes"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
@@ -57,9 +60,11 @@ def _topic_with(
     created_at: datetime,
     *,
     label: str = "topic",
+    owner: UserId = _OWNER,
 ) -> Topic:
     return Topic(
         id=TopicId.new(),
+        owner_id=owner,
         label=Label(value=label),
         embedding=embedding,
         created_at=created_at,
@@ -105,7 +110,7 @@ async def test_nearest_returns_none_for_empty_store(
 ) -> None:
     query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
 
-    result = await repository.nearest(query)
+    result = await repository.nearest(_OWNER, query)
 
     assert result is None
 
@@ -127,7 +132,7 @@ async def test_nearest_returns_highest_scoring_entry_with_its_score(
 
     await repository.add(weaker)
     await repository.add(stronger)
-    match = await repository.nearest(query)
+    match = await repository.nearest(_OWNER, query)
 
     assert match is not None
     assert match.entry == stronger
@@ -151,7 +156,7 @@ async def test_nearest_breaks_equal_scores_by_earlier_created_at(
 
     await repository.add(newer)
     await repository.add(older)
-    match = await repository.nearest(query)
+    match = await repository.nearest(_OWNER, query)
 
     assert match is not None
     assert match.entry == older
@@ -174,6 +179,6 @@ async def test_nearest_ignores_other_model_and_dimension(
 
     await repository.add(other_model)
     await repository.add(other_dimension)
-    match = await repository.nearest(query)
+    match = await repository.nearest(_OWNER, query)
 
     assert match is None

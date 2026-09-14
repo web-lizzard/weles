@@ -11,6 +11,7 @@ from domain.capture.value_objects import (
     TagId,
 )
 from domain.capture.vocabulary_match import VocabularyMatch
+from domain.shared.identity.model import UserId
 from sqlalchemy import Double, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,7 +38,10 @@ class SqlAlchemyTagRepository:
         row = (await self._session.execute(statement)).scalar_one_or_none()
         return tag_to_domain(row) if row is not None else None
 
-    async def nearest(self, embedding: Embedding) -> VocabularyMatch[Tag] | None:
+    async def nearest(
+        self, owner: UserId, embedding: Embedding
+    ) -> VocabularyMatch[Tag] | None:
+        _ = owner
         distance = CaptureTagRow.embedding_values.op(
             "<=>", return_type=Double[float]()
         )(embedding.values)

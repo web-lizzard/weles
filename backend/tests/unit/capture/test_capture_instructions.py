@@ -25,9 +25,11 @@ from domain.capture.value_objects import (
     NoteId,
     SessionTopic,
 )
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction, InstructionBlock
 
 _EMBEDDING_MODEL = "test"
+_OWNER = UserId.new()
 
 
 def _turn(
@@ -36,7 +38,7 @@ def _turn(
     draft: NoteDraft | None = None,
 ) -> CaptureTurn:
     return CaptureTurn(
-        session=session or CaptureSession.start(),
+        session=session or CaptureSession.start(_OWNER),
         messages=(),
         draft=draft,
     )
@@ -69,7 +71,7 @@ def test_conversing_instruction_adds_optional_blocks_only_when_context_supports_
     has_assessment: bool,
     expected_tail: tuple[str, ...],
 ) -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     if has_topic:
         session.assign_topic(SessionTopic(value="billing"))
     if has_assessment:
@@ -110,7 +112,7 @@ def test_drafting_first_pass_includes_empty_draft_state_and_handoff() -> None:
 
 
 def test_drafting_uses_revising_state_when_note_exists_without_draft() -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     session.note_id = NoteId(value=uuid4())
 
@@ -126,10 +128,14 @@ def test_drafting_uses_revising_state_when_note_exists_without_draft() -> None:
 
 def test_drafting_instruction_uses_underway_draft_state_when_draft_is_in_hand() -> None:
     topic = Topic.mint(
-        Label(value="latency"), Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2))
+        _OWNER,
+        Label(value="latency"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
     tag = Tag.mint(
-        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+        _OWNER,
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
     draft = NoteDraft(topic=topic, tags=[tag], content="Some body.")
 

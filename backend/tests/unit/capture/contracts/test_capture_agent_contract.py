@@ -28,9 +28,12 @@ from domain.capture.value_objects import (
     SessionTopic,
 )
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction
 
 models.ALLOW_MODEL_REQUESTS = False
+
+_OWNER = UserId.new()
 
 
 def _make_pydantic_capture_agent() -> CaptureAgentPort:
@@ -55,7 +58,7 @@ _IMPLEMENTATIONS: list[Callable[[], CaptureAgentPort]] = [
 
 
 def _conversing_turn() -> CaptureTurn:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.phase = CapturePhase.CONVERSING
     message = Message.record(
         session_id=session.id,
@@ -66,7 +69,7 @@ def _conversing_turn() -> CaptureTurn:
 
 
 def _drafting_turn() -> CaptureTurn:
-    session = CaptureSession.start()
+    session = CaptureSession.start(_OWNER)
     session.phase = CapturePhase.DRAFTING
     session.assign_topic(SessionTopic(value="TCP handshakes"))
     message = Message.record(

@@ -344,7 +344,8 @@ def test_core_exception_during_generation_yields_in_band_error_event() -> None:
         cast(object, _OneChunkThenFailCaptureAgent()),
     )
     app.dependency_overrides.update(composition.dependency_overrides())
-    app.dependency_overrides[require_sign_in] = lambda: UserId.new()
+    fixed_owner = UserId.new()
+    app.dependency_overrides[require_sign_in] = lambda: fixed_owner
     try:
         with TestClient(app, raise_server_exceptions=False) as client:
             session_id = _create_session(client)

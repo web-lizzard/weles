@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from fastapi.sse import EventSourceResponse
 
+from adapters.auth.router import require_sign_in
 from adapters.compose import (
     get_approve_note_command,
     get_generate_reply_command,
@@ -24,6 +25,7 @@ from application.capture.dto import (
 )
 from domain.capture.value_objects import MessageContent, SessionId
 from domain.exceptions import CoreException
+from domain.shared.identity.model import UserId
 
 router = APIRouter()
 
@@ -31,18 +33,22 @@ router = APIRouter()
 async def get_turn_context(
     session_id: UUID,
     body: SendMessageRequestDTO,
+    user_id: Annotated[UserId, Depends(require_sign_in)],
     command: Annotated[GenerateReplyCommand, Depends(get_generate_reply_command)],
 ) -> MessageContent:
-    return await command.guard_session(SessionId(value=session_id), body.content)
+    return await command.guard_session(
+        user_id, SessionId(value=session_id), body.content
+    )
 
 
 @router.post("/capture-sessions")
 async def start_capture_session(
+    user_id: Annotated[UserId, Depends(require_sign_in)],
     command: Annotated[
         StartCaptureSessionCommand, Depends(get_start_capture_session_command)
     ],
 ) -> StartCaptureSessionResponseDTO:
-    return await command.handle()
+    return await command.handle(user_id)
 
 
 @router.post(
@@ -52,10 +58,13 @@ async def start_capture_session(
 async def send_message(
     session_id: UUID,
     content: Annotated[MessageContent, Depends(get_turn_context)],
+    user_id: Annotated[UserId, Depends(require_sign_in)],
     command: Annotated[GenerateReplyCommand, Depends(get_generate_reply_command)],
 ) -> AsyncIterator[ReplyStreamEvent]:
     try:
-        async for event in command.handle(SessionId(value=session_id), content):
+        async for event in command.handle(
+            user_id, SessionId(value=session_id), content
+        ):
             yield event
     except CoreException as exc:
         yield ReplyErrorEvent(code=exc.code(), detail=str(exc))
@@ -65,6 +74,7 @@ async def send_message(
 @router.post("/capture-sessions/{session_id}/approval")
 async def approve_note(
     session_id: UUID,
+    user_id: Annotated[UserId, Depends(require_sign_in)],
     command: Annotated[ApproveNoteCommand, Depends(get_approve_note_command)],
 ) -> ApproveNoteResponseDTO:
-    return await command.handle(SessionId(value=session_id))
+    return await command.handle(user_id, SessionId(value=session_id))

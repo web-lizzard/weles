@@ -31,12 +31,13 @@ from domain.capture.value_objects import (
     TagId,
     TopicId,
 )
+from domain.shared.identity.model import UserId
 
 _EMBEDDING_MODEL = "test"
 
 
 def test_start_creates_open_session_without_topic() -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
 
     assert isinstance(session.id, SessionId)
     assert session.topic is None
@@ -46,13 +47,13 @@ def test_start_creates_open_session_without_topic() -> None:
 
 def test_start_created_at_is_utc() -> None:
     """R1-F1: CaptureSession.start() must stamp created_at in UTC."""
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
 
     assert session.created_at.tzinfo is UTC
 
 
 def test_assign_topic_sets_topic_on_open_session() -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
     topic = SessionTopic(value="TCP handshakes")
 
     session.assign_topic(topic)
@@ -61,7 +62,7 @@ def test_assign_topic_sets_topic_on_open_session() -> None:
 
 
 def test_assign_topic_raises_when_topic_already_set() -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
     session.assign_topic(SessionTopic(value="TCP handshakes"))
 
     with pytest.raises(SessionTopicAlreadyAssignedError):
@@ -96,6 +97,7 @@ def test_record_created_at_is_utc() -> None:
 def _minted_topic() -> Topic:
     return Topic(
         id=TopicId.new(),
+        owner_id=UserId.new(),
         label=Label(value="TCP handshakes"),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
         created_at=datetime.now(UTC),
@@ -105,6 +107,7 @@ def _minted_topic() -> Topic:
 def _minted_tag(label: str = "networking") -> Tag:
     return Tag(
         id=TagId.new(),
+        owner_id=UserId.new(),
         label=Label(value=label),
         embedding=Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
         created_at=datetime.now(UTC),
@@ -112,16 +115,19 @@ def _minted_tag(label: str = "networking") -> Tag:
 
 
 def test_aggregate_factories_assign_ids_and_draft_shape() -> None:
+    owner = UserId.new()
     label = Label(value="TCP handshakes")
     embedding = Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2))
     session_id = SessionId.new()
     content = NoteContent(value="We discussed how connections are established.")
 
-    topic = Topic.mint(label, embedding)
+    topic = Topic.mint(owner, label, embedding)
     tag = Tag.mint(
-        Label(value="networking"), Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4))
+        owner,
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
-    note = Note.draft(session_id, topic, content, [tag])
+    note = Note.draft(owner, session_id, topic, content, [tag])
 
     assert isinstance(topic.id, TopicId)
     assert topic.created_at.tzinfo is UTC
@@ -138,7 +144,7 @@ def test_aggregate_factories_assign_ids_and_draft_shape() -> None:
 
 
 def test_draft_note_assigns_note_id_and_returns_drafted_note() -> None:
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
     topic = _minted_topic()
     tag = _minted_tag()
     content = NoteContent(value="We discussed how connections are established.")
@@ -157,6 +163,7 @@ def test_draft_note_assigns_note_id_and_returns_drafted_note() -> None:
         pytest.param(
             CaptureSession(
                 id=SessionId.new(),
+                owner_id=UserId.new(),
                 topic=None,
                 note_id=None,
                 status=SessionStatus.CLOSED,
@@ -168,6 +175,7 @@ def test_draft_note_assigns_note_id_and_returns_drafted_note() -> None:
         pytest.param(
             CaptureSession(
                 id=SessionId.new(),
+                owner_id=UserId.new(),
                 topic=None,
                 note_id=NoteId.new(),
                 status=SessionStatus.OPEN,
@@ -191,7 +199,7 @@ def test_draft_note_raises_when_session_cannot_accept_note(
 
 
 def _drafted_session_with_note() -> tuple[CaptureSession, Note, Topic, Tag]:
-    session = CaptureSession.start()
+    session = CaptureSession.start(UserId.new())
     topic = _minted_topic()
     tag = _minted_tag()
     note = session.draft_note(
@@ -270,7 +278,7 @@ def test_session_approve_closes_session_and_validates_note() -> None:
     with pytest.raises(CaptureSessionClosedError):
         session.approve(note)
 
-    empty_session = CaptureSession.start()
+    empty_session = CaptureSession.start(UserId.new())
     other_session, other_note, _, _ = _drafted_session_with_note()
     with pytest.raises(SessionNoteMissingError):
         empty_session.approve(other_note)

@@ -26,8 +26,10 @@ from domain.capture.value_objects import (
     SessionId,
     TagId,
 )
+from domain.shared.identity.model import UserId
 
 _EMBEDDING_MODEL = "test"
+_OWNER = UserId.new()
 
 
 class _CommittingTopicRepository:
@@ -95,6 +97,7 @@ def vocabulary_fixture(request: pytest.FixtureRequest) -> _VocabularyFixture:
 
 def _sample_topic() -> Topic:
     return Topic.mint(
+        _OWNER,
         Label(value="TCP handshakes"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
     )
@@ -102,6 +105,7 @@ def _sample_topic() -> Topic:
 
 def _sample_tag() -> Tag:
     return Tag.mint(
+        _OWNER,
         Label(value="networking"),
         Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
     )
@@ -109,6 +113,7 @@ def _sample_tag() -> Tag:
 
 def _note_for(topic: Topic, tags: list[Tag]) -> Note:
     return Note.draft(
+        owner_id=_OWNER,
         session_id=SessionId.new(),
         topic=topic,
         content=NoteContent(value="We discussed how connections are established."),

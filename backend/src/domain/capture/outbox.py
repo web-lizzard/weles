@@ -18,6 +18,7 @@ class VocabularySnapshot(BaseModel, frozen=True):
 
 class NoteApprovedPayload(BaseModel, frozen=True):
     note_id: UUID
+    owner_id: UUID
     session_id: UUID
     topic: VocabularySnapshot
     content: str
@@ -29,6 +30,7 @@ class NoteApprovedPayload(BaseModel, frozen=True):
         assert note.approved_at is not None
         return cls(
             note_id=note.id.value,
+            owner_id=note.owner_id.value,
             session_id=note.session_id.value,
             topic=VocabularySnapshot(id=topic.id.value, label=topic.label.value),
             content=note.content.value,
