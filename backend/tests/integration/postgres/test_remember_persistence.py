@@ -56,6 +56,7 @@ _ANCHOR_QUOTE = "Connections are established via a three-way handshake."
 _NOTE_BODY = f"Lead paragraph.\n\n{_ANCHOR_QUOTE}\n\nTail."
 _SHOWING_LIMIT = ShowingLimit(value=2)
 _OWNER = UserId.new()
+_OTHER_OWNER = UserId.new()
 
 
 class _FixedClock:
@@ -279,3 +280,33 @@ async def test_second_remember_uow_enters_only_after_first_transaction_ends(
     await first_task
     await second_task
     assert second_entered.is_set()
+
+
+async def test_second_owners_remember_uow_enters_while_first_owner_holds_transaction(
+    engine: AsyncEngine,
+) -> None:
+    session_factory = create_session_factory(engine)
+    first_inside = asyncio.Event()
+    first_release = asyncio.Event()
+    second_entered = asyncio.Event()
+
+    async def hold_first_transaction() -> None:
+        async with _remember_uow_factory(_OWNER, session_factory) as uow:
+            _ = first_inside.set()
+            _ = await first_release.wait()
+            await uow.commit()
+
+    async def enter_second_while_first_holds() -> None:
+        _ = await first_inside.wait()
+        async with _remember_uow_factory(_OTHER_OWNER, session_factory) as uow:
+            _ = second_entered.set()
+            await uow.commit()
+
+    first_task = asyncio.create_task(hold_first_transaction())
+    _ = await asyncio.wait_for(first_inside.wait(), timeout=2.0)
+    second_task = asyncio.create_task(enter_second_while_first_holds())
+    await asyncio.sleep(0.05)
+    assert second_entered.is_set()
+    _ = first_release.set()
+    await first_task
+    await second_task
