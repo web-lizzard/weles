@@ -45,9 +45,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 4.1 Authenticator tests pass
-- [x] 4.2 Full backend suite passes
-- [x] 4.3 Type check passes
+- [x] 4.1 Authenticator tests pass — 622b092
+- [x] 4.2 Full backend suite passes — 622b092
+- [x] 4.3 Type check passes — 622b092
 
 ### Phase 5: Source resolution and HTTP refusal — stubs
 
