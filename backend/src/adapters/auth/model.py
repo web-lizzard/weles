@@ -1,12 +1,13 @@
-# pyright: reportUnusedParameter=false
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import override
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, EmailStr, SecretStr, ValidationError
 
 from adapters.auth.exceptions import (
+    InvalidEmailAddressError,
     NonPositiveSignInLifetimeError,
     PasswordMinimumBelowFloorError,
+    PasswordTooShortError,
     SigningSecretTooShortError,
 )
 from domain.shared.identity.model import UserId
@@ -33,7 +34,12 @@ class EmailAddress(BaseModel, frozen=True):
 
         Raises `InvalidEmailAddressError`.
         """
-        ...
+        stripped = raw.strip()
+        try:
+            validated = _EmailSyntax(value=stripped)
+        except ValidationError as error:
+            raise InvalidEmailAddressError from error
+        return cls(value=validated.value.lower())
 
 
 class Password(BaseModel, frozen=True):
@@ -56,7 +62,8 @@ class PasswordPolicy(BaseModel, frozen=True):
     def admit(self, password: Password) -> None:
         """Raises `PasswordTooShortError` when the password is shorter than
         `min_length`."""
-        ...
+        if len(password.value.get_secret_value()) < self.min_length:
+            raise PasswordTooShortError
 
 
 class PasswordHash(BaseModel, frozen=True):
@@ -77,7 +84,12 @@ class Account(BaseModel, frozen=True):
     @classmethod
     def register(cls, email: EmailAddress, password_hash: PasswordHash) -> "Account":
         """A fresh `UserId` and `created_at` of now."""
-        ...
+        return cls(
+            id=UserId.new(),
+            email=email,
+            password_hash=password_hash,
+            created_at=datetime.now(UTC),
+        )
 
 
 class SigningSecret(BaseModel, frozen=True):
@@ -111,3 +123,11 @@ class IssuedSignIn(BaseModel, frozen=True):
     token: str
     user_id: UserId
     expires_at: datetime
+
+
+class _EmailSyntax(BaseModel, frozen=True):
+    """Private helper isolating `EmailStr` syntax validation behind a known
+    field type, so `EmailAddress.parse` never surfaces `EmailStr`'s partially
+    unknown generic to callers."""
+
+    value: EmailStr
