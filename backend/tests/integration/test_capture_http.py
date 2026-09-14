@@ -95,6 +95,50 @@ def test_second_message_keeps_the_session_topic(capture_client: TestClient) -> N
     assert second_done["topic"] == first_topic
 
 
+class _SwitchableSignInGate:
+    _current: UserId
+
+    def __init__(self, initial: UserId) -> None:
+        self._current = initial
+
+    def act_as(self, user_id: UserId) -> None:
+        self._current = user_id
+
+    def __call__(self) -> UserId:
+        return self._current
+
+
+def test_other_person_gets_not_found_on_message_and_approval() -> None:
+    if not _capture_routes_registered(app):
+        app.include_router(capture_router)
+
+    composition = InMemoryCaptureComposition.create()
+    app.dependency_overrides.update(composition.dependency_overrides())
+    person_a = UserId.new()
+    person_b = UserId.new()
+    gate = _SwitchableSignInGate(person_a)
+    app.dependency_overrides[require_sign_in] = gate
+    try:
+        with TestClient(app) as client:
+            session_id = _create_session(client)
+
+            gate.act_as(person_b)
+            message_response = client.post(
+                f"/capture-sessions/{session_id}/messages",
+                json={"content": "Hello from person B"},
+            )
+            assert message_response.status_code == 404
+            assert message_response.json()["code"] == "capture_session_not_found"
+
+            approval_response = client.post(
+                f"/capture-sessions/{session_id}/approval",
+            )
+            assert approval_response.status_code == 404
+            assert approval_response.json()["code"] == "capture_session_not_found"
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_unknown_session_returns_clean_404_before_streaming(
     capture_client: TestClient,
 ) -> None:

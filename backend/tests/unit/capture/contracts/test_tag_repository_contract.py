@@ -152,6 +152,49 @@ async def test_nearest_breaks_equal_scores_by_earlier_created_at(
     assert match.entry == older
 
 
+async def test_nearest_returns_none_when_only_other_owners_have_entries(
+    repository: TagRepository,
+) -> None:
+    query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
+    other_owner = UserId.new()
+    other_person = _tag_with(
+        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
+        datetime(2026, 1, 1, tzinfo=UTC),
+        label="other-owner",
+        owner=other_owner,
+    )
+
+    await repository.add(other_person)
+    match = await repository.nearest(_OWNER, query)
+
+    assert match is None
+
+
+async def test_nearest_ignores_other_owners_even_when_they_are_closest(
+    repository: TagRepository,
+) -> None:
+    query = Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0))
+    other_owner = UserId.new()
+    other_person = _tag_with(
+        Embedding(model=_EMBEDDING_MODEL, values=(1.0, 0.0)),
+        datetime(2026, 1, 1, tzinfo=UTC),
+        label="other-owner",
+        owner=other_owner,
+    )
+    own_weaker = _tag_with(
+        Embedding(model=_EMBEDDING_MODEL, values=(0.7, 0.7)),
+        datetime(2026, 1, 2, tzinfo=UTC),
+        label="own-weaker",
+    )
+
+    await repository.add(other_person)
+    await repository.add(own_weaker)
+    match = await repository.nearest(_OWNER, query)
+
+    assert match is not None
+    assert match.entry == own_weaker
+
+
 async def test_nearest_ignores_other_model_and_dimension(
     repository: TagRepository,
 ) -> None:

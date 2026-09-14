@@ -88,6 +88,33 @@ async def test_approve_note_raises_not_found_for_unknown_session() -> None:
         _ = await stack.command.handle(UserId.new(), SessionId.new())
 
 
+async def test_approve_note_raises_not_found_for_other_owners_session() -> None:
+    stack = _make_approve_stack()
+    owner_a = UserId.new()
+    owner_b = UserId.new()
+    session = CaptureSession.start(owner_a)
+    topic = Topic.mint(
+        owner_a,
+        Label(value="TCP handshakes"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.1, 0.2)),
+    )
+    tag = Tag.mint(
+        owner_a,
+        Label(value="networking"),
+        Embedding(model=_EMBEDDING_MODEL, values=(0.3, 0.4)),
+    )
+    note = session.draft_note(
+        topic, NoteContent(value="We discussed handshakes."), [tag]
+    )
+    await stack.topics_repo.add(topic)
+    await stack.tags_repo.add(tag)
+    await stack.notes_repo.add(note)
+    await stack.session_repo.save(session)
+
+    with pytest.raises(CaptureSessionNotFoundError):
+        _ = await stack.command.handle(owner_b, session.id)
+
+
 async def test_approve_note_rollback_on_missing_note_leaves_zero_envelopes() -> None:
     stack = _make_approve_stack()
     owner = UserId.new()
