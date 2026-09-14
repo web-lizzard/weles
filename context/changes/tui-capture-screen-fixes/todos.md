@@ -50,9 +50,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 5.1 Type check passes
-- [x] 5.2 Lint passes
-- [x] 5.3 Existing suite stays green
+- [x] 5.1 Type check passes — f036027
+- [x] 5.2 Lint passes — f036027
+- [x] 5.3 Existing suite stays green — f036027
 
 ### Phase 6: Chat store behavior
 
