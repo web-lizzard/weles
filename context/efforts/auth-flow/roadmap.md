@@ -11,7 +11,7 @@ updated: 2026-09-14
 | S-01 | A person can register and sign in, and the instance refuses everyone who is not signed in | auth-flow-sign-in-gate | done |
 | S-02 | A person can point the TUI at an instance of their choosing | auth-flow-instance-address | done |
 | S-03 | A sign-in survives TUI restarts and expires after its validity period without silently losing work | auth-flow-sign-in-lifetime | in_progress |
-| S-04 | Each person's captures, notes, and the cards distilled from them belong only to that person | auth-flow-capture-distill-separation | pending |
+| S-04 | Each person's captures, notes, and the cards distilled from them belong only to that person | auth-flow-capture-distill-separation | in_progress |
 | S-05 | Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain | auth-flow-remember-separation | pending |
 | S-06 | A person can sign out and hand the TUI to another account without leaking the previous person's data | auth-flow-sign-out | pending |
 | S-07 | Repeated sign-in and registration attempts from one source are limited | auth-flow-attempt-limits | in_progress |
@@ -85,7 +85,7 @@ again; the PRD does not commit to the in-progress work surviving. Delivers both 
 - **Outcome:** Each person's captures, notes, and the cards distilled from them belong only to that person
 - **Acceptance criteria:** AC-15
 - **Change ID:** auth-flow-capture-distill-separation
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-03, S-07
 
