@@ -33,11 +33,11 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Add scripts/migrate_database.py
-- [x] 3.2 Add README Neon schema runbook section
-- [x] 3.3 basedpyright passes on the script
-- [x] 3.4 ruff passes on scripts
-- [x] 3.5 Non-postgres suite stays green
+- [x] 3.1 Add scripts/migrate_database.py — d511211
+- [x] 3.2 Add README Neon schema runbook section — d511211
+- [x] 3.3 basedpyright passes on the script — d511211
+- [x] 3.4 ruff passes on scripts — d511211
+- [x] 3.5 Non-postgres suite stays green — d511211
 
 #### Manual
 
