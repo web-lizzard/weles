@@ -130,6 +130,18 @@ async def test_drafting_text_deltas_map_to_reply_until_note_topic_exists() -> No
     assert "".join(chunk.text for chunk in reply_chunks).strip() != ""
 
 
+async def test_drafting_streamed_text_stays_reply_after_note_topic_exists() -> None:
+    _ = _install_in_memory_tracer()
+    adapter = _adapter(_StreamingFunctionModel())
+    turn = _drafting_turn_with_topic()
+
+    events = await _collect(adapter, turn, [])
+
+    assert not any(isinstance(event, NoteContentProduced) for event in events)
+    reply_chunks = [event for event in events if isinstance(event, ReplyProduced)]
+    assert "".join(chunk.text for chunk in reply_chunks) == "streamed reply"
+
+
 async def test_propose_session_topic_tool_maps_to_session_topic_proposed() -> None:
     _ = _install_in_memory_tracer()
     adapter = _adapter(TestModel())
