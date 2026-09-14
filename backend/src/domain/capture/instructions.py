@@ -225,7 +225,12 @@ _CONVERSING_TASK = InstructionBlock(
         "On this turn, stay with the session's topic. When the user needs a "
         "concept, explain it plainly; then ask focused questions that surface "
         "what they already understand and where their grasp is still shaky. "
-        "Judge how fully the topic has been covered as you go."
+        "Judge how fully the topic has been covered as you go. When the user "
+        "asks for the note or a draft, call signal_drafting_consent on this "
+        "turn. That turn's chat is at most one short sentence that you are "
+        "starting the note (or nothing) — then drafting continues in a "
+        "separate step that owns the note body. Do not ask questions, offer "
+        "templates, or describe how the note should look."
     ),
 )
 
@@ -234,13 +239,18 @@ _DRAFTING_TASK = InstructionBlock(
     text=(
         "Write the note from what this session captured. It is the user's own "
         "material organised, not a transcript and not a summary of your reading "
-        "of it. Name its topic before writing its body."
+        "of it. Name its topic before writing its body. Put the body only in "
+        "propose_note_content, never in the chat reply."
     ),
 )
 
 _HANDOFF = InstructionBlock(
     name=HANDOFF,
-    text="Open by telling the user you are drafting a note from the conversation.",
+    text=(
+        "Your chat reply on this turn is one brief sentence that you are "
+        "starting the note from the session, in the user's language — then use "
+        "the note tools. Do not ask questions or describe structure in chat."
+    ),
 )
 
 

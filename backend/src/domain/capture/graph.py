@@ -496,7 +496,10 @@ async def _materialise_note(
 
 _ASSESS_COVERAGE = Tool[CaptureTurn, CoverageAssessment](
     name="assess_coverage",
-    description="Judge how fully the user has covered the topic so far.",
+    description=(
+        "Judge how fully the user has covered the topic so far. Pass coverage "
+        "as a number from 0 (not at all) to 1 (fully)."
+    ),
     result=CoverageAssessment,
     handler=_assess_coverage,
 )

@@ -45,7 +45,7 @@ from domain.capture.turn import (
     ReplyProduced,
     SessionTopicProposed,
 )
-from domain.capture.value_objects import CapturePhase, MessageRole, NoteContent
+from domain.capture.value_objects import MessageRole
 from domain.shared.graph.model import Tool, ToolResult
 from domain.shared.instruction.model import Instruction
 
@@ -209,14 +209,7 @@ def _agent_event(
     return None
 
 
-def _text_event(turn: CaptureTurn, text: str) -> AgentEvent | None:
-    if turn.session.phase is CapturePhase.DRAFTING:
-        if not text.strip():
-            return None
-        draft = turn.draft
-        if draft is not None and draft.topic is not None:
-            return NoteContentProduced(content=NoteContent(value=text))
-        return ReplyProduced(text=text)
+def _text_event(_turn: CaptureTurn, text: str) -> AgentEvent | None:
     if not text:
         return None
     return ReplyProduced(text=text)
