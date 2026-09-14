@@ -10,9 +10,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Add schema_upgrade module with stub symbols
-- [x] 1.2 basedpyright passes
-- [x] 1.3 Unit suite stays green
+- [x] 1.1 Add schema_upgrade module with stub symbols — a24ecfe
+- [x] 1.2 basedpyright passes — a24ecfe
+- [x] 1.3 Unit suite stays green — a24ecfe
 
 ### Phase 2: Schema Upgrade Behavior
 
