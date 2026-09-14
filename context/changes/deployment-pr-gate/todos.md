@@ -1,8 +1,8 @@
 ---
 change_id: deployment-pr-gate
-current_phase: 2
-next_step: 2.2
-next_command: /implement deployment-pr-gate phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement deployment-pr-gate phase 3
 updated: 2026-09-14
 ---
 
@@ -23,7 +23,7 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 2.2 Change PR runs and passes the five blocking checks
+- [x] 2.2 Change PR runs and passes the five blocking checks
 
 ### Phase 3: Property Hunt Job
 
