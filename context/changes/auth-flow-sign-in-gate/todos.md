@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
 current_phase: 7
-next_step: tests
-next_command: /unit-test auth-flow-sign-in-gate phase 7
+next_step: 7.1
+next_command: /implement auth-flow-sign-in-gate phase 7
 updated: 2026-09-14
 ---
 
@@ -92,7 +92,7 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — cf1ffe7
 
 #### Automated
 
