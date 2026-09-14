@@ -11,7 +11,7 @@ updated: 2026-09-14
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
 | S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate               | done        |
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit                                                      | deployment-integration-on-demand | in_progress |
-| S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | in_progress |
+| S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | done        |
 | S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | done        |
 | S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | pending     |
 | S-06 | Unhandled errors reach error tracking without carrying anything people wrote                                                            | deployment-error-tracking        | pending     |
@@ -76,7 +76,7 @@ own. S-05 accepts a commit only when a passing run exists for that same commit.
 - **Outcome:** Anyone can install the published TUI without credentials
 - **Acceptance criteria:** FR-02
 - **Change ID:** deployment-tui-publish
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-01, S-02, S-04, S-05, S-06, S-07, S-08
 
 `tui/package.json` is `private` and unscoped, and the GitHub npm registry requires a token
@@ -177,3 +177,5 @@ the private certification submission. Flooding protection stays deferred.
 - **S-01: A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-pr-gate/`. Lesson: —.
 
 - **S-04: The author brings an empty or behind Neon database to a commit's schema with one script** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-neon-schema/`. Lesson: —.
+
+- **S-03: Anyone can install the published TUI without credentials** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-tui-publish/`. Lesson: —.
