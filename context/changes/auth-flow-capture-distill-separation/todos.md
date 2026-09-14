@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-capture-distill-separation
 current_phase: 4
-next_step: 4.7
-next_command: /implement auth-flow-capture-distill-separation phase 4
+next_step: done
+next_command: /archive auth-flow-capture-distill-separation
 updated: 2026-09-14
 ---
 
@@ -56,13 +56,13 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 4.1 Distill query contracts pass in memory
-- [x] 4.2 Distill query contracts pass on Postgres
-- [x] 4.3 Chain separation test passes
-- [x] 4.4 Full offline suite passes
-- [x] 4.5 Postgres lane passes
-- [x] 4.6 Type check passes
+- [x] 4.1 Distill query contracts pass in memory — 68d7cc5
+- [x] 4.2 Distill query contracts pass on Postgres — 68d7cc5
+- [x] 4.3 Chain separation test passes — 68d7cc5
+- [x] 4.4 Full offline suite passes — 68d7cc5
+- [x] 4.5 Postgres lane passes — 68d7cc5
+- [x] 4.6 Type check passes — 68d7cc5
 
 #### Manual
 
-- [x] 4.7 Person B sees no notes or cards of person A after background generation over curl
+- [x] 4.7 Person B sees no notes or cards of person A after background generation over curl — 68d7cc5
