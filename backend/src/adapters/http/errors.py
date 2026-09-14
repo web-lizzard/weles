@@ -58,6 +58,7 @@ EXCEPTION_STATUS_MAP: dict[str, int] = {
     "email_already_registered": 409,
     "invalid_credentials": 401,
     "sign_in_required": 401,
+    "account_no_longer_exists": 401,
     "password_minimum_below_floor": 500,
     "non_positive_sign_in_lifetime": 500,
     "signing_secret_too_short": 500,

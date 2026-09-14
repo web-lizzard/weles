@@ -14,15 +14,18 @@ _settings = Settings()  # pyright: ignore[reportCallIssue]
 _engine = create_engine(_settings.database_url)
 _session_factory = create_session_factory(_engine)
 
+_accounts = SqlAlchemyAccountStore(_session_factory)
+
 _sign_in_tokens = SignInTokens(
     secret=SigningSecret(value=_settings.auth_signing_secret),
     lifetime=SignInLifetime(
         value=timedelta(hours=_settings.auth_sign_in_lifetime_hours)
     ),
+    accounts=_accounts,
 )
 
 _authenticator = Authenticator(
-    accounts=SqlAlchemyAccountStore(_session_factory),
+    accounts=_accounts,
     passwords=PasswordHasher(),
     policy=PasswordPolicy(min_length=_settings.auth_password_min_length),
     issuer=_sign_in_tokens,
