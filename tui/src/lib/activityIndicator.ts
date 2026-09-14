@@ -18,10 +18,12 @@ export const INDICATOR_VERBS: readonly string[] = [
 
 export const VERB_INTERVAL_MS = 3000;
 
-export function indicatorVerb(_elapsedMs: number): string {
-  throw new Error("not implemented");
+export function indicatorVerb(elapsedMs: number): string {
+  const index =
+    Math.floor(elapsedMs / VERB_INTERVAL_MS) % INDICATOR_VERBS.length;
+  return INDICATOR_VERBS[index] as string;
 }
 
-export function formatElapsed(_elapsedMs: number): string {
-  throw new Error("not implemented");
+export function formatElapsed(elapsedMs: number): string {
+  return `${Math.floor(elapsedMs / 1000)}s`;
 }

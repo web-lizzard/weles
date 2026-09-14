@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 8
-next_step: 8.1
-next_command: /unit-test tui-capture-screen-fixes phase 8
+current_phase: 9
+next_step: 9.1
+next_command: /implement tui-capture-screen-fixes phase 9
 updated: 2026-09-14
 ---
 
@@ -78,13 +78,13 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 8cf7dc5
 
 #### Automated
 
-- [ ] 8.1 Activity indicator tests pass
-- [ ] 8.2 Type check passes
-- [ ] 8.3 Lint passes
+- [x] 8.1 Activity indicator tests pass
+- [x] 8.2 Type check passes
+- [x] 8.3 Lint passes
 
 ### Phase 9: Capture shell stubs
 
