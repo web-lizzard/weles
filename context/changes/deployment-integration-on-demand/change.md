@@ -1,7 +1,7 @@
 ---
 change_id: deployment-integration-on-demand
 title: The integration suite, Postgres lane included, runs in CI on demand for any commit
-status: new
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
