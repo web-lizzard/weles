@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 5
-next_step: 5.1
-next_command: /implement tui-capture-screen-fixes phase 5
+current_phase: 6
+next_step: 6.1
+next_command: /unit-test tui-capture-screen-fixes phase 6
 updated: 2026-09-14
 ---
 
@@ -50,9 +50,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 5.1 Type check passes
-- [ ] 5.2 Lint passes
-- [ ] 5.3 Existing suite stays green
+- [x] 5.1 Type check passes
+- [x] 5.2 Lint passes
+- [x] 5.3 Existing suite stays green
 
 ### Phase 6: Chat store behavior
 
