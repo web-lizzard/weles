@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 2
-next_step: 2.1
-next_command: /unit-test tui-capture-screen-fixes phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement tui-capture-screen-fixes phase 3
 updated: 2026-09-14
 ---
 
@@ -18,13 +18,13 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 2c93fa9
 
 #### Automated
 
-- [ ] 2.1 Markdown renderer tests pass
-- [ ] 2.2 Type check passes
-- [ ] 2.3 Lint passes
+- [x] 2.1 Markdown renderer tests pass
+- [x] 2.2 Type check passes
+- [x] 2.3 Lint passes
 
 ### Phase 3: Capture layout stubs
 
