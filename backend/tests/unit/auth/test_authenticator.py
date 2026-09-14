@@ -10,7 +10,10 @@ from adapters.auth.exceptions import (
     PasswordTooShortError,
 )
 from adapters.auth.in_memory_account_store import InMemoryAccountStore
+from adapters.auth.in_memory_attempt_ledger import InMemoryAttemptLedger
 from adapters.auth.model import (
+    DEFAULT_ATTEMPT_LIMITS,
+    AttemptSource,
     EmailAddress,
     Password,
     PasswordPolicy,
@@ -26,6 +29,10 @@ def _sample_password() -> Password:
     return Password(value=SecretStr("long-enough-secret"))
 
 
+def _sample_source() -> AttemptSource:
+    return AttemptSource(value="203.0.113.1")
+
+
 def _authenticator(accounts: InMemoryAccountStore | None = None) -> Authenticator:
     return Authenticator(
         accounts=accounts or InMemoryAccountStore(),
@@ -36,6 +43,7 @@ def _authenticator(accounts: InMemoryAccountStore | None = None) -> Authenticato
             lifetime=SignInLifetime(value=timedelta(hours=1)),
             accounts=InMemoryAccountStore(),
         ),
+        attempts=InMemoryAttemptLedger(DEFAULT_ATTEMPT_LIMITS),
     )
 
 
@@ -44,7 +52,7 @@ async def test_register_returns_user_id_and_persists_account_without_a_token() -
     auth = _authenticator(accounts)
     email = EmailAddress.parse("alice@example.com")
 
-    user_id = await auth.register(email, _sample_password())
+    user_id = await auth.register(email, _sample_password(), _sample_source())
 
     assert isinstance(user_id, UserId)
     saved = await accounts.by_email(email)
@@ -60,7 +68,9 @@ async def test_register_raises_password_too_short_error_before_persisting_accoun
     email = EmailAddress.parse("alice@example.com")
 
     with pytest.raises(PasswordTooShortError):
-        _ = await auth.register(email, Password(value=SecretStr("short")))
+        _ = await auth.register(
+            email, Password(value=SecretStr("short")), _sample_source()
+        )
 
     assert await accounts.by_email(email) is None
 
@@ -69,10 +79,14 @@ async def test_register_raises_email_already_registered_for_canonical_email() ->
     auth = _authenticator()
     password = _sample_password()
 
-    _ = await auth.register(EmailAddress.parse("alice@example.com"), password)
+    _ = await auth.register(
+        EmailAddress.parse("alice@example.com"), password, _sample_source()
+    )
 
     with pytest.raises(EmailAlreadyRegisteredError):
-        _ = await auth.register(EmailAddress.parse("Alice@example.com"), password)
+        _ = await auth.register(
+            EmailAddress.parse("Alice@example.com"), password, _sample_source()
+        )
 
 
 async def test_sign_in_returns_issued_sign_in_for_known_email_and_password() -> None:
@@ -80,8 +94,8 @@ async def test_sign_in_returns_issued_sign_in_for_known_email_and_password() -> 
     email = EmailAddress.parse("alice@example.com")
     password = _sample_password()
 
-    user_id = await auth.register(email, password)
-    issued = await auth.sign_in(email, password)
+    user_id = await auth.register(email, password, _sample_source())
+    issued = await auth.sign_in(email, password, _sample_source())
 
     assert issued.user_id == user_id
     assert issued.token
@@ -94,6 +108,7 @@ async def test_sign_in_raises_invalid_credentials_error_for_unknown_email() -> N
         _ = await auth.sign_in(
             EmailAddress.parse("nobody@example.com"),
             _sample_password(),
+            _sample_source(),
         )
 
 
@@ -101,10 +116,11 @@ async def test_sign_in_raises_invalid_credentials_error_for_wrong_password() -> 
     auth = _authenticator()
     email = EmailAddress.parse("alice@example.com")
 
-    _ = await auth.register(email, _sample_password())
+    _ = await auth.register(email, _sample_password(), _sample_source())
 
     with pytest.raises(InvalidCredentialsError):
         _ = await auth.sign_in(
             email,
             Password(value=SecretStr("different-long-secret")),
+            _sample_source(),
         )

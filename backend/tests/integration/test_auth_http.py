@@ -11,7 +11,13 @@ from pydantic import SecretStr
 from adapters.auth.authenticator import Authenticator
 from adapters.auth.compose import get_authenticator, get_sign_in_verifier
 from adapters.auth.in_memory_account_store import InMemoryAccountStore
-from adapters.auth.model import PasswordPolicy, SigningSecret, SignInLifetime
+from adapters.auth.in_memory_attempt_ledger import InMemoryAttemptLedger
+from adapters.auth.model import (
+    DEFAULT_ATTEMPT_LIMITS,
+    PasswordPolicy,
+    SigningSecret,
+    SignInLifetime,
+)
 from adapters.auth.passwords import PasswordHasher
 from adapters.auth.tokens import SignInTokens
 from adapters.compose import get_list_notes_query
@@ -40,6 +46,7 @@ def _auth_stack() -> tuple[InMemoryAccountStore, SignInTokens, Authenticator]:
         passwords=PasswordHasher(),
         policy=PasswordPolicy(min_length=8),
         issuer=tokens,
+        attempts=InMemoryAttemptLedger(DEFAULT_ATTEMPT_LIMITS),
     )
     return accounts, tokens, authenticator
 
