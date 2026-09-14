@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 3
-next_step: 3.1
-next_command: /implement tui-capture-screen-fixes phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test tui-capture-screen-fixes phase 4
 updated: 2026-09-14
 ---
 
@@ -30,9 +30,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 3.1 Type check passes
-- [ ] 3.2 Lint passes
-- [ ] 3.3 Existing suite stays green
+- [x] 3.1 Type check passes
+- [x] 3.2 Lint passes
+- [x] 3.3 Existing suite stays green
 
 ### Phase 4: Capture layout behavior
 
