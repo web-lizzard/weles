@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 7
-next_step: 7.1
-next_command: /implement tui-capture-screen-fixes phase 7
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test tui-capture-screen-fixes phase 8
 updated: 2026-09-14
 ---
 
@@ -70,9 +70,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 7.1 Type check passes
-- [ ] 7.2 Lint passes
-- [ ] 7.3 Existing suite stays green
+- [x] 7.1 Type check passes
+- [x] 7.2 Lint passes
+- [x] 7.3 Existing suite stays green
 
 ### Phase 8: Activity indicator behavior
 
