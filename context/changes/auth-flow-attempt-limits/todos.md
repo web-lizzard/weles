@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-attempt-limits
-current_phase: 2
-next_step: 2.5
-next_command: /implement auth-flow-attempt-limits phase 2
+current_phase: 6
+next_step: 6.5
+next_command: /implement auth-flow-attempt-limits phase 6
 updated: 2026-09-14
 ---
 
@@ -60,14 +60,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 4dcf44d
 
 #### Automated
 
-- [ ] 6.1 Source and auth HTTP tests pass
-- [ ] 6.2 Full backend suite passes
-- [ ] 6.3 Type check passes
-- [ ] 6.4 Lint passes
+- [x] 6.1 Source and auth HTTP tests pass
+- [x] 6.2 Full backend suite passes
+- [x] 6.3 Type check passes
+- [x] 6.4 Lint passes
 
 #### Manual
 

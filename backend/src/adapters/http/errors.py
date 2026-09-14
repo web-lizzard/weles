@@ -71,4 +71,8 @@ async def core_exception_handler(_request: Request, exc: Exception) -> JSONRespo
     assert isinstance(exc, CoreException)
     status_code = EXCEPTION_STATUS_MAP.get(exc.code(), 500)
     content = {"code": exc.code(), "detail": str(exc)}
-    return JSONResponse(status_code=status_code, content=content)
+    headers: dict[str, str] | None = None
+    retry_after_seconds = getattr(exc, "retry_after_seconds", None)
+    if isinstance(retry_after_seconds, int):
+        headers = {"Retry-After": str(retry_after_seconds)}
+    return JSONResponse(status_code=status_code, content=content, headers=headers)
