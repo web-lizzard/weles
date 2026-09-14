@@ -10,8 +10,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Type check passes
-- [x] 1.2 Existing backend suite still passes
+- [x] 1.1 Type check passes — 9beea26
+- [x] 1.2 Existing backend suite still passes — 9beea26
 
 ### Phase 2: Attempt ledger — behavior
 
