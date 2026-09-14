@@ -1,9 +1,9 @@
 ---
 change_id: auth-flow-sign-in-lifetime
-current_phase: 4
-next_step: 4.5
-next_command: /implement auth-flow-sign-in-lifetime phase 4
-updated: 2026-09-14
+current_phase: 6
+next_step: 6.1
+next_command: /implement auth-flow-sign-in-lifetime phase 6
+updated: 2026-09-15
 ---
 
 ### Phase 1: Credential store and authorized requests — stubs
@@ -56,14 +56,14 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 5.1 Type check passes
-- [ ] 5.2 Lint passes
+- [x] 5.1 Type check passes
+- [x] 5.2 Lint passes
 
 ### Phase 6: Expiry during in-progress work — behavior
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e62b787
 
 #### Automated
 
