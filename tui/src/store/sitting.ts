@@ -10,6 +10,7 @@ import {
   SITTING_EXPIRED,
   SittingHttpError,
 } from "../api/sittings.js";
+import { isSignInRequired, SIGN_IN_EXPIRED_DETAIL } from "../auth/expiry.js";
 import { probeCardSource } from "../lib/cardSourceProbe.js";
 import { useDueStore } from "./due.js";
 
@@ -125,9 +126,12 @@ async function probeCurrentCardSource(
 }
 
 function sittingHttpErrorState(error: SittingHttpError): Partial<SittingState> {
+  const detail = isSignInRequired(error.code)
+    ? SIGN_IN_EXPIRED_DETAIL
+    : error.detail;
   return {
     phase: "error",
-    error: { code: error.code, detail: error.detail },
+    error: { code: error.code, detail },
     isSubmitting: false,
   };
 }

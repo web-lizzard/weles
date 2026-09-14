@@ -5,6 +5,11 @@ import {
   sendMessage,
   startCaptureSession,
 } from "../api/stream.js";
+import {
+  isSignInRequired,
+  SIGN_IN_EXPIRED_DETAIL,
+  SIGN_IN_REQUIRED,
+} from "../auth/expiry.js";
 
 export type TranscriptEntry = {
   role: "user" | "agent";
@@ -39,6 +44,19 @@ type ChatActions = {
   approveDraft: () => Promise<void>;
 };
 
+function signInRequiredStreamError(): StreamError {
+  return { code: SIGN_IN_REQUIRED, detail: SIGN_IN_EXPIRED_DETAIL };
+}
+
+function streamErrorFromSendMessageHttpError(
+  error: SendMessageHttpError,
+): StreamError {
+  if (isSignInRequired(error.code)) {
+    return signInRequiredStreamError();
+  }
+  return { code: error.code, detail: error.detail };
+}
+
 export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   sessionId: null,
   topic: null,
@@ -55,7 +73,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     set({ sessionId });
   },
   sendUserMessage: async (text: string) => {
-    const { sessionId } = get();
+    const { sessionId, draft: draftBeforeSend } = get();
     if (!sessionId) {
       throw new Error("No active session");
     }
@@ -74,10 +92,14 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
             currentReply: state.currentReply + event.text,
           }));
         } else if (event.type === "error") {
-          set({
-            streamError: { code: event.code, detail: event.detail },
-            draft: null,
-          });
+          if (isSignInRequired(event.code)) {
+            set({ streamError: signInRequiredStreamError() });
+          } else {
+            set({
+              streamError: { code: event.code, detail: event.detail },
+              draft: null,
+            });
+          }
           break;
         } else if (event.type === "draft_topic") {
           set({
@@ -142,10 +164,17 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       }
     } catch (error) {
       if (error instanceof SendMessageHttpError) {
-        set({
-          streamError: { code: error.code, detail: error.detail },
-          draft: null,
-        });
+        if (isSignInRequired(error.code)) {
+          set((state) => ({
+            streamError: signInRequiredStreamError(),
+            ...(state.draft === null ? { draft: draftBeforeSend } : {}),
+          }));
+        } else {
+          set({
+            streamError: streamErrorFromSendMessageHttpError(error),
+            draft: null,
+          });
+        }
       } else {
         const message = error instanceof Error ? error.message : String(error);
         set({
@@ -188,7 +217,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       });
     } catch (error) {
       if (error instanceof SendMessageHttpError) {
-        set({ streamError: { code: error.code, detail: error.detail } });
+        set({ streamError: streamErrorFromSendMessageHttpError(error) });
       } else {
         const message = error instanceof Error ? error.message : String(error);
         set({ streamError: { code: "unknown_error", detail: message } });

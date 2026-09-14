@@ -1,9 +1,9 @@
 ---
 change_id: auth-flow-sign-in-lifetime
 current_phase: 6
-next_step: 6.1
+next_step: 6.5
 next_command: /implement auth-flow-sign-in-lifetime phase 6
-updated: 2026-09-15
+updated: 2026-09-14
 ---
 
 ### Phase 1: Credential store and authorized requests — stubs
@@ -67,10 +67,10 @@ updated: 2026-09-15
 
 #### Automated
 
-- [ ] 6.1 Expiry store tests pass
-- [ ] 6.2 Full TUI suite passes
-- [ ] 6.3 Type check passes
-- [ ] 6.4 Lint passes
+- [x] 6.1 Expiry store tests pass
+- [x] 6.2 Full TUI suite passes
+- [x] 6.3 Type check passes
+- [x] 6.4 Lint passes
 
 #### Manual
 
