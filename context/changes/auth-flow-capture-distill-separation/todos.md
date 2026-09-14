@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-capture-distill-separation
-current_phase: 3
-next_step: manual
-next_command: /implement auth-flow-capture-distill-separation phase 3
+current_phase: 2
+next_step: tests
+next_command: /unit-test auth-flow-capture-distill-separation phase 2
 updated: 2026-09-14
 ---
 
@@ -40,13 +40,13 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Offline backend suite passes
-- [x] 3.2 Postgres lane passes
-- [x] 3.3 Type check passes
+- [x] 3.1 Offline backend suite passes — 8272240
+- [x] 3.2 Postgres lane passes — 8272240
+- [x] 3.3 Type check passes — 8272240
 
 #### Manual
 
-- [x] 3.4 Distill owner revision upgrades, downgrades, and re-upgrades on an emptied dev database
+- [x] 3.4 Distill owner revision upgrades, downgrades, and re-upgrades on an emptied dev database — 8272240
 
 ### Phase 4: Distill separation
 
