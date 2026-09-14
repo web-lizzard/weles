@@ -22,6 +22,13 @@ class SignInRequiredError(CoreException):
     alike. The caller learns only that it is not signed in."""
 
 
+class AccountNoLongerExistsError(CoreException):
+    """Raised for a structurally valid, unexpired token whose account is no
+    longer in the store. Kept apart from `SignInRequiredError` for
+    internal/log-level differentiation only; both remain an opaque sign-in
+    refusal to the caller."""
+
+
 class PasswordMinimumBelowFloorError(CoreException):
     pass
 

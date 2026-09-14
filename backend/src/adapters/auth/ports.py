@@ -18,6 +18,10 @@ class AccountStore(Protocol):
 
     async def by_email(self, email: EmailAddress) -> Account | None: ...
 
+    async def exists(self, user_id: UserId) -> bool:
+        """True iff an account with this id is still in the store."""
+        ...
+
 
 class SignInIssuer(Protocol):
     """Issues sign-ins on behalf of this instance. Only `Authenticator.sign_in`
@@ -38,10 +42,14 @@ class SignInVerifier(Protocol):
     one; it cannot issue.
 
     Invariants every implementation holds (one contract suite over all):
-    - Touches no database, account store, LLM, or network (PRD FR-009): an
-      unidentified caller costs the instance nothing but CPU.
+    - Touches no database, account store, LLM, or network (PRD FR-009) for
+      every token this refuses: an unidentified caller costs the instance
+      nothing but CPU. A token that passes signature and expiry is confirmed
+      against `AccountStore` before its `UserId` is returned, and is refused
+      with `AccountNoLongerExistsError` when the account is gone.
     - Yields a `UserId` only for a token this instance issued that has not yet
-      expired; the `UserId` is the one it was issued for.
+      expired and whose account still exists; the `UserId` is the one it was
+      issued for.
     - Nothing issued can be withdrawn before it expires.
     """
 

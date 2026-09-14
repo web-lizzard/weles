@@ -2,6 +2,7 @@ import asyncio
 
 from adapters.auth.exceptions import EmailAlreadyRegisteredError
 from adapters.auth.model import Account, EmailAddress
+from domain.shared.identity.model import UserId
 
 
 class InMemoryAccountStore:
@@ -22,3 +23,7 @@ class InMemoryAccountStore:
     async def by_email(self, email: EmailAddress) -> Account | None:
         async with self._lock:
             return self._accounts.get(email)
+
+    async def exists(self, user_id: UserId) -> bool:
+        async with self._lock:
+            return any(account.id == user_id for account in self._accounts.values())

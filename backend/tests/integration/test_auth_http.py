@@ -33,6 +33,7 @@ def _auth_stack() -> tuple[InMemoryAccountStore, SignInTokens, Authenticator]:
     tokens = SignInTokens(
         secret=SigningSecret(value=SecretStr(_TEST_SIGNING_SECRET)),
         lifetime=SignInLifetime(value=timedelta(hours=24)),
+        accounts=accounts,
     )
     authenticator = Authenticator(
         accounts=accounts,
@@ -167,6 +168,29 @@ def test_gated_route_with_forged_token_returns_sign_in_required_before_notes_que
 
     assert response.status_code == 401
     assert response.json()["code"] == "sign_in_required"
+
+
+def test_gated_route_with_token_for_a_deleted_account_returns_account_no_longer_exists(
+    auth_http_client: TestClient,
+) -> None:
+    email = "vanished@example.com"
+    _register(auth_http_client, email)
+    token = _sign_in(auth_http_client, email)
+
+    stranded = SignInTokens(
+        secret=SigningSecret(value=SecretStr(_TEST_SIGNING_SECRET)),
+        lifetime=SignInLifetime(value=timedelta(hours=24)),
+        accounts=InMemoryAccountStore(),
+    )
+    app.dependency_overrides[get_sign_in_verifier] = lambda: stranded
+
+    response = auth_http_client.get(
+        "/notes",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["code"] == "account_no_longer_exists"
 
 
 def test_health_returns_ok_without_token(auth_http_client: TestClient) -> None:

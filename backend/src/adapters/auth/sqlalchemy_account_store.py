@@ -37,6 +37,14 @@ class SqlAlchemyAccountStore:
                 return None
             return _row_to_account(row)
 
+    async def exists(self, user_id: UserId) -> bool:
+        async with self._session_factory() as session:
+            statement = select(AuthAccountRow.id).where(
+                AuthAccountRow.id == user_id.value
+            )
+            row_id = (await session.execute(statement)).scalar_one_or_none()
+            return row_id is not None
+
 
 def _account_to_row(account: Account) -> AuthAccountRow:
     return AuthAccountRow(

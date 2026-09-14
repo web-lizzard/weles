@@ -3,22 +3,29 @@ from uuid import UUID
 
 import jwt
 
-from adapters.auth.exceptions import SignInRequiredError
+from adapters.auth.exceptions import AccountNoLongerExistsError, SignInRequiredError
 from adapters.auth.model import IssuedSignIn, SigningSecret, SignInLifetime
+from adapters.auth.ports import AccountStore
 from domain.shared.identity.model import UserId
 
 
 class SignInTokens:
     """The one implementation of `SignInIssuer` and `SignInVerifier`.
 
-    Async underneath, but local: neither issuing nor verifying does network or
-    disk I/O. That is what lets it be the implementation the port contract
-    suite runs against on every CI invocation, with no second adapter.
+    Async underneath, but local for every token it refuses: neither issuing
+    nor a refused `verify()` does network or disk I/O. A token that passes
+    signature and expiry is confirmed against `AccountStore` before its
+    `UserId` is returned, so `SignInTokens` is the implementation the port
+    contract suite runs against on every CI invocation, with no second
+    adapter.
     """
 
-    def __init__(self, secret: SigningSecret, lifetime: SignInLifetime) -> None:
+    def __init__(
+        self, secret: SigningSecret, lifetime: SignInLifetime, accounts: AccountStore
+    ) -> None:
         self._secret: str = secret.value.get_secret_value()
         self._lifetime: timedelta = lifetime.value
+        self._accounts: AccountStore = accounts
 
     async def issue(self, user_id: UserId) -> IssuedSignIn:
         now = datetime.now(UTC)
@@ -47,6 +54,10 @@ class SignInTokens:
         if not isinstance(sub, str):
             raise SignInRequiredError
         try:
-            return UserId(value=UUID(sub))
+            user_id = UserId(value=UUID(sub))
         except ValueError:
             raise SignInRequiredError from None
+
+        if not await self._accounts.exists(user_id):
+            raise AccountNoLongerExistsError
+        return user_id
