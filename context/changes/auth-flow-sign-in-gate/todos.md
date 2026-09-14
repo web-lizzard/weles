@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
-current_phase: 6
+current_phase: 7
 next_step: tests
-next_command: /unit-test auth-flow-sign-in-gate phase 6
+next_command: /unit-test auth-flow-sign-in-gate phase 7
 updated: 2026-09-14
 ---
 
@@ -79,14 +79,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 88b4ef2
 
 #### Automated
 
-- [ ] 6.1 Regenerate schema against running backend
-- [ ] 6.2 TUI auth API tests pass
-- [ ] 6.3 Type check passes
-- [ ] 6.4 Lint passes
+- [x] 6.1 Regenerate schema against running backend — 6244d3a
+- [x] 6.2 TUI auth API tests pass — 6244d3a
+- [x] 6.3 Type check passes — 6244d3a
+- [x] 6.4 Lint passes — 6244d3a
 
 ### Phase 7: TUI register and sign-in commands
 
