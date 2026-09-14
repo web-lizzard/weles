@@ -10,9 +10,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Type check passes
-- [x] 1.2 Lint passes
-- [x] 1.3 Existing suite stays green
+- [x] 1.1 Type check passes — e6a9723
+- [x] 1.2 Lint passes — e6a9723
+- [x] 1.3 Existing suite stays green — e6a9723
 
 ### Phase 2: Markdown renderer behavior
 
