@@ -1,3 +1,4 @@
+import { Box, Text } from "ink";
 import type { JSX, ReactNode } from "react";
 
 type InputFrameProps = {
@@ -5,6 +6,17 @@ type InputFrameProps = {
   children: ReactNode;
 };
 
-export default function InputFrame(_props: InputFrameProps): JSX.Element {
-  throw new Error("not implemented");
+export default function InputFrame({
+  columns,
+  children,
+}: InputFrameProps): JSX.Element {
+  const rule = "─".repeat(columns > 0 ? columns : 1);
+
+  return (
+    <Box flexDirection="column">
+      <Text dimColor>{rule}</Text>
+      <Box>{children}</Box>
+      <Text dimColor>{rule}</Text>
+    </Box>
+  );
 }

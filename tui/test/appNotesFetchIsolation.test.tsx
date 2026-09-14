@@ -1,10 +1,6 @@
 import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  approveNote,
-  sendMessage,
-  startCaptureSession,
-} from "../src/api/stream";
+import { startCaptureSession } from "../src/api/stream";
 import App from "../src/app";
 import { useChatStore } from "../src/store/chat";
 import { useAppStore } from "../src/store/index";
