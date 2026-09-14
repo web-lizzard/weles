@@ -1,8 +1,8 @@
 ---
 change_id: deployment-manual-deploy
-current_phase: 1
-next_step: 1.3
-next_command: /implement deployment-manual-deploy phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement deployment-manual-deploy phase 2
 updated: 2026-09-14
 ---
 
@@ -10,13 +10,13 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Dockerignore excludes .env, .venv, tests and mutants
-- [x] 1.2 Dockerfile sets a non-root user and runs uvicorn with one worker
+- [x] 1.1 Dockerignore excludes .env, .venv, tests and mutants — 9d8c236
+- [x] 1.2 Dockerfile sets a non-root user and runs uvicorn with one worker — 9d8c236
 
 #### Manual
 
-- [x] 1.3 Image builds locally and contains no /app/.env
-- [x] 1.4 Container started from env vars alone answers /health
+- [x] 1.3 Image builds locally and contains no /app/.env — 9d8c236
+- [x] 1.4 Container started from env vars alone answers /health — 9d8c236
 
 ### Phase 2: Deploy Gate
 
