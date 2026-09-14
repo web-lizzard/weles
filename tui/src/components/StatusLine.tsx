@@ -26,6 +26,7 @@ export default function StatusLine({
     <Box
       width={columns > 0 ? columns : undefined}
       justifyContent="space-between"
+      flexShrink={0}
     >
       <Text color="yellow" dimColor={isStale}>
         {showDueCount ? formatDueLine(partition.total) : ""}

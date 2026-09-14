@@ -17,7 +17,7 @@ export default function DraftRegion({ window }: DraftRegionProps): JSX.Element {
   const rule = "─".repeat(columns > 0 ? columns : 1);
 
   return (
-    <Box flexDirection="column">
+    <Box flexDirection="column" flexShrink={0}>
       {window.moreAbove && <Text dimColor>{MORE_ABOVE_TEXT}</Text>}
       {window.lines.map((line, index) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: the window has no stable id

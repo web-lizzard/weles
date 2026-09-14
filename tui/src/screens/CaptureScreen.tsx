@@ -23,6 +23,13 @@ const NOTES_COMMAND = "/notes";
 const REMEMBER_COMMAND = "/remember";
 const FRAME_ROWS = 3;
 const STATUS_LINE_ROWS = 1;
+// One row of text plus marginY={1} above and below.
+const MARGINED_ROWS_OVERHEAD = 2;
+const TOPIC_HEADING_ROWS = 1 + MARGINED_ROWS_OVERHEAD;
+// The rule under the draft, plus the more-above/more-below markers when the
+// draft overflows its window.
+const DRAFT_RULE_ROWS = 1;
+const DRAFT_MARKER_ROWS = 2;
 const COVERAGE_BANNER_TEXT =
   "✓ This topic seems well covered — keep going, or wrap up when you're ready.";
 
@@ -80,20 +87,32 @@ export default function CaptureScreen({
     chalk,
   });
 
-  const bannerRows = hasCoverageBanner
-    ? wrappedRowCount(COVERAGE_BANNER_TEXT, columns)
-    : 0;
-  const errorRows = hasStreamError
-    ? wrappedRowCount(streamError.detail, columns)
-    : 0;
-  const indicatorRows = panel === null && isStreaming ? 1 : 0;
-  const chromeRows =
-    panel !== null
-      ? PANEL_CHROME_ROWS + panelBodyHeight(rows, 0)
-      : indicatorRows + bannerRows + errorRows + FRAME_ROWS + STATUS_LINE_ROWS;
-
   const draftLines =
     draft !== null ? renderDraftLines(draft, columns, chalk) : null;
+
+  const bannerRows = hasCoverageBanner
+    ? wrappedRowCount(COVERAGE_BANNER_TEXT, columns) + MARGINED_ROWS_OVERHEAD
+    : 0;
+  const errorRows = hasStreamError
+    ? wrappedRowCount(streamError.detail, columns) + MARGINED_ROWS_OVERHEAD
+    : 0;
+  const topicRows = topic !== null ? TOPIC_HEADING_ROWS : 0;
+  const draftChromeRows =
+    draftLines === null
+      ? 0
+      : DRAFT_RULE_ROWS +
+        (draftLines.length > Math.floor((rows - 1) / 2)
+          ? DRAFT_MARKER_ROWS
+          : 0);
+  const indicatorRows = panel === null && turnStartedAt !== null ? 1 : 0;
+  const chromeRows =
+    topicRows +
+    draftChromeRows +
+    bannerRows +
+    errorRows +
+    (panel !== null
+      ? PANEL_CHROME_ROWS + panelBodyHeight(rows, 0)
+      : indicatorRows + FRAME_ROWS + STATUS_LINE_ROWS);
 
   const nextDraftIdentity = draft?.topic ?? null;
   if (nextDraftIdentity !== draftIdentity) {
@@ -197,7 +216,12 @@ export default function CaptureScreen({
       {layout.draftWindow !== null && (
         <DraftRegion window={layout.draftWindow} />
       )}
-      <Box flexDirection="column" flexGrow={panel === null ? 1 : 0}>
+      <Box
+        flexDirection="column"
+        flexGrow={panel === null ? 1 : 0}
+        flexShrink={1}
+        overflow="hidden"
+      >
         {Array.from({ length: Math.max(0, layout.fillerRows) }).map(
           (_, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: filler rows have no stable id
@@ -250,7 +274,7 @@ function UserLabel() {
 
 function TopicHeading({ topic }: { topic: string }) {
   return (
-    <Box marginY={1}>
+    <Box marginY={1} flexShrink={0}>
       <Text bold>Topic: {topic}</Text>
     </Box>
   );
