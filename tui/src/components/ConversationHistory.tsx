@@ -1,3 +1,4 @@
+import { Static, Text } from "ink";
 import type { JSX } from "react";
 
 type ConversationHistoryProps = {
@@ -5,8 +6,13 @@ type ConversationHistoryProps = {
   lines: string[];
 };
 
-export default function ConversationHistory(
-  _props: ConversationHistoryProps,
-): JSX.Element {
-  throw new Error("not implemented");
+export default function ConversationHistory({
+  epoch,
+  lines,
+}: ConversationHistoryProps): JSX.Element {
+  return (
+    <Static key={epoch} items={lines}>
+      {(line, index) => <Text key={index}>{line}</Text>}
+    </Static>
+  );
 }

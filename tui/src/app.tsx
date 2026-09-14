@@ -1,5 +1,4 @@
 import { Box, useInput, useStdout } from "ink";
-import DueCountHeader from "./components/DueCountHeader.js";
 import { useDuePolling } from "./hooks/useDuePolling.js";
 import CaptureScreen from "./screens/CaptureScreen.js";
 import CardDetailScreen from "./screens/CardDetailScreen.js";
@@ -60,7 +59,7 @@ export default function App() {
             top={0}
             left={0}
             width={columns}
-            height={rows - 1}
+            height={rows - 2}
             flexDirection="column"
             backgroundColor="black"
             padding={1}
@@ -93,7 +92,6 @@ export default function App() {
           </Box>
         )}
       </Box>
-      {!isSittingOverlayOpen && <DueCountHeader />}
     </Box>
   );
 }

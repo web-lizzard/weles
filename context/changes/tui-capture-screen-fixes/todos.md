@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
 current_phase: 10
-next_step: 10.1
-next_command: /unit-test tui-capture-screen-fixes phase 10
+next_step: 10.5
+next_command: /implement tui-capture-screen-fixes phase 10
 updated: 2026-09-14
 ---
 
@@ -98,14 +98,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — fe041f3
 
 #### Automated
 
-- [ ] 10.1 Capture screen tests pass
-- [ ] 10.2 Full TUI suite passes
-- [ ] 10.3 Type check passes
-- [ ] 10.4 Lint passes
+- [x] 10.1 Capture screen tests pass
+- [x] 10.2 Full TUI suite passes
+- [x] 10.3 Type check passes
+- [x] 10.4 Lint passes
 
 #### Manual
 
