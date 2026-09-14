@@ -34,7 +34,7 @@ updated: 2026-09-14
 
 #### Manual
 
-- [x] 3.3 Draft PR with a false property shows backend-property red and blocking checks green
+- [x] 3.3 Draft PR with a false property shows backend-property red and blocking checks green — 3fe0a35
 
 ### Phase 4: Protect Main
 
