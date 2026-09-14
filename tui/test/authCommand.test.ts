@@ -226,3 +226,78 @@ describe("runSignInCommand", () => {
     expect(out).not.toHaveBeenCalled();
   });
 });
+
+describe("attempt-limited auth commands", () => {
+  afterEach(() => {
+    vi.mocked(register).mockReset();
+    vi.mocked(signIn).mockReset();
+    vi.restoreAllMocks();
+  });
+
+  it("sign-in prints the wait in minutes, exits 1, and writes no credential", async () => {
+    const home = await configuredHome();
+    const { out, err, readSecret, location } = depsFor(home);
+    readSecret.mockResolvedValue("wrong-password");
+    vi.mocked(signIn).mockResolvedValue({
+      kind: "too_many_attempts",
+      retryAfterSeconds: 900,
+    });
+
+    expect(
+      await runSignInCommand([EMAIL], { location, readSecret, out, err }),
+    ).toBe(1);
+    expect(err).toHaveBeenCalledWith(
+      "Too many attempts. Try again in about 15 minutes.",
+    );
+    expect(await readSignIn(location, INSTANCE)).toBeNull();
+  });
+
+  it("sign-in rounds a partial minute up to a whole minute", async () => {
+    const home = await configuredHome();
+    const { out, err, readSecret, location } = depsFor(home);
+    readSecret.mockResolvedValue("wrong-password");
+    vi.mocked(signIn).mockResolvedValue({
+      kind: "too_many_attempts",
+      retryAfterSeconds: 61,
+    });
+
+    expect(
+      await runSignInCommand([EMAIL], { location, readSecret, out, err }),
+    ).toBe(1);
+    expect(err).toHaveBeenCalledWith(
+      "Too many attempts. Try again in about 2 minutes.",
+    );
+  });
+
+  it("sign-in falls back to a vague wait when no Retry-After was given", async () => {
+    const home = await configuredHome();
+    const { out, err, readSecret, location } = depsFor(home);
+    readSecret.mockResolvedValue("wrong-password");
+    vi.mocked(signIn).mockResolvedValue({
+      kind: "too_many_attempts",
+      retryAfterSeconds: null,
+    });
+
+    expect(
+      await runSignInCommand([EMAIL], { location, readSecret, out, err }),
+    ).toBe(1);
+    expect(err).toHaveBeenCalledWith("Too many attempts. Try again later.");
+  });
+
+  it("register prints the wait in minutes and exits 1", async () => {
+    const home = await configuredHome();
+    const { out, err, readSecret, location } = depsFor(home);
+    readSecret.mockResolvedValue(PASSWORD);
+    vi.mocked(register).mockResolvedValue({
+      kind: "too_many_attempts",
+      retryAfterSeconds: 900,
+    });
+
+    expect(
+      await runRegisterCommand([EMAIL], { location, readSecret, out, err }),
+    ).toBe(1);
+    expect(err).toHaveBeenCalledWith(
+      "Too many attempts. Try again in about 15 minutes.",
+    );
+  });
+});

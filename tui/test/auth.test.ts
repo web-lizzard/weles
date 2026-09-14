@@ -18,6 +18,27 @@ function mockFetchJson(body: unknown, status = 200) {
   );
 }
 
+function mockFetchRefusal(retryAfter: string | null) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (retryAfter !== null) {
+    headers["Retry-After"] = retryAfter;
+  }
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "too_many_attempts",
+          detail: "Too many attempts",
+        }),
+        { status: 429, headers },
+      ),
+    ),
+  );
+}
+
 describe("auth API", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -93,6 +114,40 @@ describe("auth API", () => {
       kind: "invalid_credentials",
     });
   });
+
+  it("signIn returns too_many_attempts with the seconds from Retry-After", async () => {
+    mockFetchRefusal("900");
+
+    await expect(signIn(EMAIL, PASSWORD)).resolves.toEqual({
+      kind: "too_many_attempts",
+      retryAfterSeconds: 900,
+    });
+  });
+
+  it("register returns too_many_attempts with the seconds from Retry-After", async () => {
+    mockFetchRefusal("120");
+
+    await expect(register(EMAIL, PASSWORD)).resolves.toEqual({
+      kind: "too_many_attempts",
+      retryAfterSeconds: 120,
+    });
+  });
+
+  it.each([
+    ["absent", null],
+    ["unparsable", "soon"],
+    ["not positive", "0"],
+  ] as const)(
+    "signIn returns a null wait when Retry-After is %s",
+    async (_label, header) => {
+      mockFetchRefusal(header);
+
+      await expect(signIn(EMAIL, PASSWORD)).resolves.toEqual({
+        kind: "too_many_attempts",
+        retryAfterSeconds: null,
+      });
+    },
+  );
 
   it("register throws when the response status is unexpected", async () => {
     mockFetchJson({ detail: "boom" }, 500);
