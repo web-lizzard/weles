@@ -1,7 +1,7 @@
 ---
 change_id: deployment-pr-gate
 current_phase: 3
-next_step: 3.1
+next_step: 3.3
 next_command: /implement deployment-pr-gate phase 3
 updated: 2026-09-14
 ---
@@ -29,8 +29,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 3.1 Actionlint reports no errors on pr-gate.yml
-- [ ] 3.2 Property suite passes locally
+- [x] 3.1 Actionlint reports no errors on pr-gate.yml
+- [x] 3.2 Property suite passes locally
 
 #### Manual
 
