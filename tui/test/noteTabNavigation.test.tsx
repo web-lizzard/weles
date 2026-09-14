@@ -70,6 +70,10 @@ vi.mock("../src/hooks/useNotesPolling", () => ({
   useNotesPolling: vi.fn(),
 }));
 
+vi.mock("../src/hooks/useDuePolling", () => ({
+  useDuePolling: vi.fn(),
+}));
+
 vi.mock("../src/api/notes", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/api/notes")>();
   return {

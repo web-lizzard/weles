@@ -2,7 +2,12 @@ import { render } from "ink-testing-library";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NoteDetail } from "../src/api/notes";
 import { getNote } from "../src/api/notes";
-import { fetchCardSource, openSitting, revealBack } from "../src/api/sittings";
+import {
+  fetchCardSource,
+  gradeCard,
+  openSitting,
+  revealBack,
+} from "../src/api/sittings";
 import {
   approveNote,
   sendMessage,
@@ -76,6 +81,8 @@ vi.mock("../src/api/sittings", async (importOriginal) => {
     openSitting: vi.fn(),
     revealBack: vi.fn(),
     fetchCardSource: vi.fn(),
+    gradeCard: vi.fn(),
+    rejectCard: vi.fn(),
   };
 });
 
@@ -155,6 +162,13 @@ describe("App", () => {
     vi.mocked(approveNote).mockReset();
     vi.mocked(getNote).mockReset();
     vi.mocked(openSitting).mockReset();
+    vi.mocked(gradeCard).mockReset().mockResolvedValue({
+      sittingId: "00000000-0000-4000-8000-000000000001",
+      sittingComplete: false,
+      outstandingCount: 0,
+      nextCardId: null,
+      nextFront: null,
+    });
   });
 
   afterEach(() => {
