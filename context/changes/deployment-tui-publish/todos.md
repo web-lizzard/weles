@@ -1,8 +1,8 @@
 ---
 change_id: deployment-tui-publish
 current_phase: 2
-next_step: 2.2
-next_command: /implement deployment-tui-publish phase 2
+next_step:
+next_command: /archive deployment-tui-publish
 updated: 2026-09-14
 ---
 
@@ -25,5 +25,5 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 2.2 Pushing tui-v0.1.0 creates a release with both tarballs
-- [ ] 2.3 Anonymous install from the release URL in a clean node:22 container prints 0.1.0
+- [x] 2.2 Pushing tui-v0.1.0 creates a release with both tarballs — 83c4a13
+- [x] 2.3 Anonymous install from the release URL in a clean node:22 container prints 0.1.0 — 83c4a13
