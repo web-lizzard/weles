@@ -18,6 +18,7 @@ from domain.distill.value_objects import (
     SessionId,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 _CONTENT = "Connections are established via a three-way handshake."
 _QUOTE = "Connections are established via a three-way handshake."
@@ -35,6 +36,7 @@ def _policy() -> RegenerationPolicy:
 
 def _run(content: str) -> DistillRun:
     note = mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),

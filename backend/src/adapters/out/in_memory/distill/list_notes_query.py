@@ -1,5 +1,6 @@
 from application.distill.queries.list_notes import NoteListItemDTO
 from domain.distill.ports import CardRepository, NoteRepository
+from domain.shared.identity.model import UserId
 
 
 class InMemoryListNotesQueryAdapter:
@@ -9,7 +10,8 @@ class InMemoryListNotesQueryAdapter:
         self._note_repository: NoteRepository = note_repository
         self._card_repository: CardRepository = card_repository
 
-    async def list_notes(self) -> list[NoteListItemDTO]:
+    async def list_notes(self, owner: UserId) -> list[NoteListItemDTO]:
+        _ = owner
         items: list[NoteListItemDTO] = []
         for note in await self._note_repository.list_all():
             live_cards = [

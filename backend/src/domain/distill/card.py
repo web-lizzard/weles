@@ -10,10 +10,12 @@ from domain.distill.value_objects import (
     Discard,
     NoteId,
 )
+from domain.shared.identity.model import UserId
 
 
 class Card(BaseModel):
     id: CardId
+    owner_id: UserId
     note_id: NoteId
     front: CardSide
     back: CardSide

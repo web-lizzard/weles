@@ -8,13 +8,15 @@ from domain.distill.exceptions import DistillNoteNotFoundError
 from domain.distill.note_document import NoteDocument
 from domain.distill.ports import NoteRepository
 from domain.distill.value_objects import NoteId
+from domain.shared.identity.model import UserId
 
 
 class InMemoryGetNoteQueryAdapter:
     def __init__(self, note_repository: NoteRepository) -> None:
         self._note_repository: NoteRepository = note_repository
 
-    async def get_note(self, note_id: NoteId) -> NoteDetailDTO:
+    async def get_note(self, owner: UserId, note_id: NoteId) -> NoteDetailDTO:
+        _ = owner
         note = await self._note_repository.get(note_id)
         if note is None:
             raise DistillNoteNotFoundError

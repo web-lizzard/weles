@@ -23,6 +23,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 @dataclass
@@ -44,6 +45,7 @@ def _ready_note(content: str) -> Note:
     at = datetime.now(UTC)
     return Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="Anchor jump"),
         content=NoteContent(value=content),
@@ -58,6 +60,7 @@ def _ready_note(content: str) -> Note:
 def _live_card(note_id: NoteId, quote: str, created_at: datetime) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What does this card ask?"),
         back=CardSide(value="A three-way handshake."),

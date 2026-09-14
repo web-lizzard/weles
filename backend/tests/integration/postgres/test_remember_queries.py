@@ -48,6 +48,7 @@ from domain.remember.value_objects import (
     SchedulerStamp,
     ShowingLimit,
 )
+from domain.shared.identity.model import UserId
 from tests.support.postgres_remember_repositories import (
     CommittingReviewEventStore,
     CommittingSchedulingStateRepository,
@@ -93,6 +94,7 @@ async def _seed_live_card(
     note_id = NoteId(value=uuid4())
     distill_card = Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value=front),
         back=CardSide(value=back),
@@ -102,6 +104,7 @@ async def _seed_live_card(
     )
     async with _distill_uow_factory(session_factory) as uow:
         note = mint_note(
+            UserId.new(),
             note_id,
             SessionId(value=uuid4()),
             TopicSnapshot(id=uuid4(), label="Networking"),

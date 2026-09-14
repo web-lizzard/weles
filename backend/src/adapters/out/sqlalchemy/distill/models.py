@@ -48,6 +48,9 @@ class DistillNoteRow(Base):
     )
 
     id: Mapped[NoteId] = mapped_column(NoteIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), nullable=False, index=True
+    )
     session_id: Mapped[SessionId] = mapped_column(SessionIdType, nullable=False)
     topic_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     topic_label: Mapped[str] = mapped_column(String, nullable=False)
@@ -107,6 +110,7 @@ class DistillCardRow(Base):
     )
 
     id: Mapped[CardId] = mapped_column(CardIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     note_id: Mapped[NoteId] = mapped_column(
         NoteIdType, ForeignKey("distill_notes.id"), nullable=False
     )

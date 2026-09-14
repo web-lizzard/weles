@@ -11,6 +11,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import EnvelopeType, OutboxEnvelope
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ class SaveNoteHandler:
             return
 
         await self._command.handle(
+            owner_id=UserId(value=payload.owner_id),
             note_id=NoteId(value=payload.note_id),
             session_id=SessionId(value=payload.session_id),
             topic=TopicSnapshot(id=payload.topic.id, label=payload.topic.label),

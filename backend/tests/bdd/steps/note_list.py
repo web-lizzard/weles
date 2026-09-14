@@ -23,6 +23,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 @dataclass
@@ -47,6 +48,7 @@ def _anchor_quote() -> str:
 def _live_card(note_id: NoteId, created_at: datetime) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -63,6 +65,7 @@ def _note_at(
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=topic_label),
         content=NoteContent(value="Note body for acceptance scenarios."),
@@ -113,6 +116,7 @@ def generating_note_with_topic(
     topic: str,
 ) -> None:
     note = mint_note(
+        owner_id=UserId.new(),
         note_id=NoteId(value=uuid4()),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=topic),

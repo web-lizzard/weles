@@ -25,6 +25,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 @dataclass
@@ -55,6 +56,7 @@ def a_held_note_single_sentence(
 ) -> None:
     note_id = NoteId(value=uuid4())
     note = mint_note(
+        owner_id=UserId.new(),
         note_id=note_id,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="Single-sentence note"),

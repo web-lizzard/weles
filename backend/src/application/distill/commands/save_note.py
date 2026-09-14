@@ -12,6 +12,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class SaveNoteCommand:
 
     async def handle(
         self,
+        owner_id: UserId,
         note_id: NoteId,
         session_id: SessionId,
         topic: TopicSnapshot,
@@ -35,7 +37,9 @@ class SaveNoteCommand:
                 logger.info("note %s redelivered, skipping as no-op", note_id.value)
                 return
 
-            note = mint_note(note_id, session_id, topic, content, tags, approved_at)
+            note = mint_note(
+                owner_id, note_id, session_id, topic, content, tags, approved_at
+            )
             await uow.notes.save(note)
             payload = NoteSavedPayload(note_id=note_id.value)
             await uow.outbox.append(payload.to_envelope())

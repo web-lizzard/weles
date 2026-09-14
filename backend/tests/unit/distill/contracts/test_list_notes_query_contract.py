@@ -33,6 +33,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -85,6 +86,7 @@ def _note(
 ) -> Note:
     return Note(
         id=note_id or NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="We discussed how connections are established."),
@@ -101,6 +103,7 @@ def _card(
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -130,7 +133,7 @@ def list_notes_fixture(request: pytest.FixtureRequest) -> _ListNotesFixture:
 async def test_list_notes_returns_empty_list_when_no_notes_saved(
     list_notes_fixture: _ListNotesFixture,
 ) -> None:
-    result = await list_notes_fixture.query.list_notes()
+    result = await list_notes_fixture.query.list_notes(UserId.new())
 
     assert result == []
 
@@ -145,7 +148,7 @@ async def test_list_notes_exposes_raw_distillation_status_per_note(
     for note in (generating, ready, failed):
         await list_notes_fixture.notes.save(note)
 
-    result = await list_notes_fixture.query.list_notes()
+    result = await list_notes_fixture.query.list_notes(UserId.new())
 
     statuses = {item.note_id: item.distillation_status for item in result}
     assert statuses[generating.id.value] == "generating"
@@ -171,7 +174,7 @@ async def test_list_notes_card_count_excludes_discarded_cards(
         )
     )
 
-    result = await list_notes_fixture.query.list_notes()
+    result = await list_notes_fixture.query.list_notes(UserId.new())
 
     assert result[0].card_count == 2
 
@@ -183,7 +186,7 @@ async def test_list_notes_reports_zero_cards_and_note_updated_at_when_no_cards(
     note = _note(DistillationStatus.READY, updated_at)
     await list_notes_fixture.notes.save(note)
 
-    result = await list_notes_fixture.query.list_notes()
+    result = await list_notes_fixture.query.list_notes(UserId.new())
 
     assert len(result) == 1
     assert result[0].card_count == 0
@@ -203,7 +206,7 @@ async def test_list_notes_orders_by_recency_using_max_of_note_and_card_timestamp
     await list_notes_fixture.notes.save(recent_only_because_of_its_card)
     await list_notes_fixture.cards.save(_card(recent_only_because_of_its_card.id, t4))
 
-    result = await list_notes_fixture.query.list_notes()
+    result = await list_notes_fixture.query.list_notes(UserId.new())
 
     assert result[0].note_id == recent_only_because_of_its_card.id.value
     assert result[1].note_id == stale_by_own_timestamp_alone.id.value

@@ -49,6 +49,7 @@ from domain.remember.value_objects import (
     SchedulerStamp,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 
 class _FixedClock:
@@ -106,6 +107,7 @@ def _card(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=slug),
         content=NoteContent(value=f"Note content backing the card {slug}."),
@@ -117,6 +119,7 @@ def _card(
     )
     card = Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=note.owner_id,
         note_id=note.id,
         front=CardSide(value=front_text),
         back=CardSide(value=back_text),
@@ -147,6 +150,7 @@ def _card_with_resolvable_source(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=slug),
         content=NoteContent(value=_RESOLVABLE_SOURCE_NOTE),
@@ -158,6 +162,7 @@ def _card_with_resolvable_source(
     )
     card = Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=note.owner_id,
         note_id=note.id,
         front=CardSide(value=f"Front for {slug}"),
         back=CardSide(value=f"Back for {slug}"),

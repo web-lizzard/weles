@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from domain.shared.identity.model import UserId
+
 
 class NoteListItemDTO(BaseModel):
     note_id: UUID
@@ -14,4 +16,4 @@ class NoteListItemDTO(BaseModel):
 
 
 class ListNotesQueryPort(Protocol):
-    async def list_notes(self) -> list[NoteListItemDTO]: ...
+    async def list_notes(self, owner: UserId) -> list[NoteListItemDTO]: ...

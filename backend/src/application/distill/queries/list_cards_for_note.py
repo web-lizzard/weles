@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from domain.distill.value_objects import NoteId
+from domain.shared.identity.model import UserId
 
 
 class AnchorLocationDTO(BaseModel):
@@ -24,4 +25,6 @@ class CardListItemDTO(BaseModel):
 
 
 class ListCardsForNoteQueryPort(Protocol):
-    async def list_cards_for_note(self, note_id: NoteId) -> list[CardListItemDTO]: ...
+    async def list_cards_for_note(
+        self, owner: UserId, note_id: NoteId
+    ) -> list[CardListItemDTO]: ...

@@ -30,6 +30,7 @@ from domain.distill.value_objects import (
     SessionId,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 _TWO_BLOCK_NOTE = (
     "TCP begins the handshake. The client sends a SYN packet first.\n"
@@ -58,6 +59,7 @@ def _policy() -> RegenerationPolicy:
 
 def _run(content: str = _TWO_BLOCK_NOTE) -> DistillRun:
     note = mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),

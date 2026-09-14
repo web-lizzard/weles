@@ -28,6 +28,7 @@ from domain.distill.value_objects import (
 from domain.distill.value_objects import CardId as DistillCardId
 from domain.remember.ports import ReviewableCard, ReviewCatalog
 from domain.remember.value_objects import CardId
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -91,6 +92,7 @@ def catalog_fixture(request: pytest.FixtureRequest) -> _Catalog:
 
 def _sample_note() -> Note:
     return mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="Networking"),
@@ -109,6 +111,7 @@ def _sample_card(
 ) -> Card:
     return Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value=front),
         back=CardSide(value=back),

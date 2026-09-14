@@ -23,6 +23,7 @@ from domain.distill.value_objects import (
     NoteId,
 )
 from domain.remember.outbox import CARD_REJECTED, CardRejectedPayload
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import OutboxEnvelope
 
 
@@ -73,6 +74,7 @@ async def test_malformed_card_rejected_payload_is_logged_without_calling_discard
 def _sample_card(note_id: NoteId) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),

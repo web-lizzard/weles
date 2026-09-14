@@ -19,6 +19,7 @@ from domain.distill.value_objects import (
     NoteId,
     SessionId,
 )
+from domain.shared.identity.model import UserId
 
 pytestmark = pytest.mark.postgres
 
@@ -26,6 +27,7 @@ pytestmark = pytest.mark.postgres
 def _orphan_card() -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=NoteId(value=uuid4()),
         front=CardSide(value="Front"),
         back=CardSide(value="Back"),
@@ -60,6 +62,7 @@ async def test_incomplete_discard_row_is_rejected_by_discard_complete_check(
         db_session.add(
             DistillNoteRow(
                 id=note_id,
+                owner_id=uuid4(),
                 session_id=SessionId(value=uuid4()),
                 topic_id=uuid4(),
                 topic_label="topic",
@@ -74,6 +77,7 @@ async def test_incomplete_discard_row_is_rejected_by_discard_complete_check(
         db_session.add(
             DistillCardRow(
                 id=card_id,
+                owner_id=uuid4(),
                 note_id=note_id,
                 front=CardSide(value="Front"),
                 back=CardSide(value="Back"),

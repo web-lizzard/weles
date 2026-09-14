@@ -11,10 +11,12 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 class Note(BaseModel):
     id: NoteId
+    owner_id: UserId
     session_id: SessionId
     topic: TopicSnapshot
     content: NoteContent
@@ -43,6 +45,7 @@ class Note(BaseModel):
 
 
 def mint_note(
+    owner_id: UserId,
     note_id: NoteId,
     session_id: SessionId,
     topic: TopicSnapshot,
@@ -53,6 +56,7 @@ def mint_note(
     minted_at = datetime.now(UTC)
     return Note(
         id=note_id,
+        owner_id=owner_id,
         session_id=session_id,
         topic=topic,
         content=content,

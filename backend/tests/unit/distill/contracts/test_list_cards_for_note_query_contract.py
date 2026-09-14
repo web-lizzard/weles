@@ -36,6 +36,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -88,6 +89,7 @@ def _note(
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value=content),
@@ -108,6 +110,7 @@ def _card(
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -153,7 +156,7 @@ async def test_list_cards_for_note_returns_live_cards_ordered_by_created_at(
     await list_cards_fixture.cards.save(newer)
     await list_cards_fixture.cards.save(older)
 
-    result = await list_cards_fixture.query.list_cards_for_note(note.id)
+    result = await list_cards_fixture.query.list_cards_for_note(UserId.new(), note.id)
 
     assert [item.card_id for item in result] == [
         older.id.value,
@@ -179,7 +182,7 @@ async def test_list_cards_for_note_omits_discarded_cards(
         )
     )
 
-    result = await list_cards_fixture.query.list_cards_for_note(note.id)
+    result = await list_cards_fixture.query.list_cards_for_note(UserId.new(), note.id)
 
     assert len(result) == 1
     assert result[0].card_id == live.id.value
@@ -189,7 +192,9 @@ async def test_list_cards_for_note_raises_not_found_for_an_unknown_note_id(
     list_cards_fixture: _ListCardsFixture,
 ) -> None:
     with pytest.raises(DistillNoteNotFoundError):
-        _ = await list_cards_fixture.query.list_cards_for_note(NoteId(value=uuid4()))
+        _ = await list_cards_fixture.query.list_cards_for_note(
+            UserId.new(), NoteId(value=uuid4())
+        )
 
 
 async def test_list_cards_for_note_reports_exact_block_and_unresolved_anchor_locations(
@@ -210,7 +215,7 @@ async def test_list_cards_for_note_reports_exact_block_and_unresolved_anchor_loc
         _card(note.id, now + timedelta(seconds=2), quote=missing_quote)
     )
 
-    detail = await list_cards_fixture.query.list_cards_for_note(note.id)
+    detail = await list_cards_fixture.query.list_cards_for_note(UserId.new(), note.id)
     document = NoteDocument.of(note.content)
     blocks = document.blocks
     by_quote = {item.anchor_quote: item for item in detail}

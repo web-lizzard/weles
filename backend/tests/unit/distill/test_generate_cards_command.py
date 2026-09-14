@@ -30,6 +30,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction
 
 _RESOLVING_NOTE = NoteContent(value="A handshake begins the connection.")
@@ -203,6 +204,7 @@ class _Stack:
 
     async def seed_generating_note(self) -> Note:
         note = mint_note(
+            UserId.new(),
             NoteId(value=uuid4()),
             SessionId(value=uuid4()),
             TopicSnapshot(id=uuid4(), label="TCP handshakes"),

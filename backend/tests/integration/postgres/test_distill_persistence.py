@@ -25,6 +25,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 pytestmark = pytest.mark.postgres
 
@@ -52,6 +53,7 @@ async def _load_card(
 def _sample_live_card(note_id: NoteId) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -74,6 +76,7 @@ async def test_save_note_commits_note_and_claimable_note_saved_envelope(
     await SaveNoteCommand(
         lambda: _distill_uow_factory(session_factory)  # pyright: ignore[reportArgumentType]
     ).handle(
+        UserId.new(),
         note_id,
         SessionId(value=uuid4()),
         topic,
@@ -111,6 +114,7 @@ async def test_exception_after_note_save_and_outbox_append_leaves_neither_persis
     with pytest.raises(RuntimeError, match="boom"):
         async with _distill_uow_factory(session_factory) as uow:
             note = mint_note(
+                UserId.new(),
                 note_id,
                 SessionId(value=uuid4()),
                 TopicSnapshot(id=uuid4(), label="TCP handshakes"),
@@ -146,6 +150,7 @@ async def test_discard_from_discard_card_command_survives_a_fresh_engine(
 
     async with _distill_uow_factory(session_factory) as uow:
         note = mint_note(
+            UserId.new(),
             note_id,
             SessionId(value=uuid4()),
             TopicSnapshot(id=uuid4(), label="TCP handshakes"),

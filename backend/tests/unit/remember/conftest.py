@@ -35,6 +35,7 @@ from domain.remember.value_objects import (
     SchedulerStamp,
     ShowingLimit,
 )
+from domain.shared.identity.model import UserId
 
 
 class _Clock:
@@ -87,6 +88,7 @@ async def reviewable(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="remember unit tests"),
         content=NoteContent(value=f"Note content backing {front}."),
@@ -98,6 +100,7 @@ async def reviewable(
     )
     card = Card(
         id=DistillCardId(value=chosen.value),
+        owner_id=note.owner_id,
         note_id=note.id,
         front=CardSide(value=front),
         back=CardSide(value=back),

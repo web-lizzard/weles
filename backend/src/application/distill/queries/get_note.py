@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from domain.distill.value_objects import NoteId
+from domain.shared.identity.model import UserId
 
 
 class NoteDetailTopicDTO(BaseModel):
@@ -35,4 +36,4 @@ class NoteDetailDTO(BaseModel):
 
 
 class GetNoteQueryPort(Protocol):
-    async def get_note(self, note_id: NoteId) -> NoteDetailDTO: ...
+    async def get_note(self, owner: UserId, note_id: NoteId) -> NoteDetailDTO: ...

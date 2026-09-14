@@ -17,6 +17,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -37,10 +38,11 @@ class _CommittingNoteRepository:
             return await SqlAlchemyNoteRepository(db_session).list_all()
 
 
-def _sample_note() -> Note:
+def _sample_note(owner_id: UserId | None = None) -> Note:
     stamped_at = datetime.now(UTC)
     return Note(
         id=NoteId(value=uuid4()),
+        owner_id=owner_id if owner_id is not None else UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="We discussed how connections are established."),
@@ -119,6 +121,7 @@ async def test_second_save_reorders_tags_and_drops_removed_ones(
     gamma = TagSnapshot(id=uuid4(), label="gamma")
     note = Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="Topics"),
         content=NoteContent(value="Tagged note."),

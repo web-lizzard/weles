@@ -11,11 +11,13 @@ from domain.distill.value_objects import (
     CardSide,
     NoteId,
 )
+from domain.shared.identity.model import UserId
 
 
 def _build_card(front: str, back: str) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=NoteId(value=uuid4()),
         front=CardSide(value=front),
         back=CardSide(value=back),

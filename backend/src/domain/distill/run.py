@@ -125,7 +125,9 @@ class DistillRun(BaseModel):
                     if location is not None
                     else AnchorResolution.UNRESOLVED
                 )
-                card = card_factory.mint(self.note.id, front, back, anchor, resolution)
+                card = card_factory.mint(
+                    self.note.owner_id, self.note.id, front, back, anchor, resolution
+                )
             except CoreException:
                 card = None
             self.candidates.append(
