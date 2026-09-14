@@ -10,10 +10,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Unit suite without postgres passes in a fresh worktree with no env
-- [x] 1.2 BDD suite passes in a fresh worktree with no env
-- [x] 1.3 Postgres unit cases pass with DATABASE_URL unset
-- [x] 1.4 Ruff and basedpyright clean
+- [x] 1.1 Unit suite without postgres passes in a fresh worktree with no env — e706cef
+- [x] 1.2 BDD suite passes in a fresh worktree with no env — e706cef
+- [x] 1.3 Postgres unit cases pass with DATABASE_URL unset — e706cef
+- [x] 1.4 Ruff and basedpyright clean — e706cef
 
 ### Phase 2: Blocking Checks Workflow
 
