@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 13
-next_step: 13.1
-next_command: /implement tui-capture-screen-fixes phase 13
+current_phase: 14
+next_step: tests
+next_command: /unit-test tui-capture-screen-fixes phase 14
 updated: 2026-09-14
 ---
 
@@ -144,9 +144,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 13.1 Type check passes
-- [ ] 13.2 Lint passes
-- [ ] 13.3 Existing suite stays green
+- [x] 13.1 Type check passes
+- [x] 13.2 Lint passes
+- [x] 13.3 Existing suite stays green
 
 ### Phase 14: Bottom panels behavior
 
