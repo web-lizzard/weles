@@ -58,9 +58,9 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 4.4 First gated deploy ends green with postgres and api healthy
-- [ ] 4.5 Ports 8000 and 5432 are bound to 127.0.0.1 only
-- [ ] 4.6 After migrating over the tunnel the TUI signs in and captures
-- [ ] 4.7 Memory snapshot on Mikrus 2.1 is recorded
-- [ ] 4.8 A broken deploy ends red with the previous SHA serving
-- [ ] 4.9 Deploying an older gated SHA rolls back and keeps at most two image tags
+- [x] 4.4 First gated deploy ends green with postgres and api healthy
+- [x] 4.5 Ports 8000 and 5432 are bound to 127.0.0.1 only
+- [x] 4.6 After migrating over the tunnel the TUI signs in and captures
+- [x] 4.7 Memory snapshot on Mikrus 2.1 is recorded
+- [x] 4.8 A broken deploy ends red with the previous SHA serving
+- [x] 4.9 Deploying an older gated SHA rolls back and keeps at most two image tags
