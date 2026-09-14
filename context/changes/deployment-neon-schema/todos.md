@@ -1,8 +1,8 @@
 ---
 change_id: deployment-neon-schema
 current_phase: 3
-next_step: 3.6
-next_command: /implement deployment-neon-schema phase 3
+next_step:
+next_command: /archive deployment-neon-schema
 updated: 2026-09-14
 ---
 
@@ -41,7 +41,7 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 3.6 Empty Neon branch reaches head with vector installed
-- [ ] 3.7 Rerun reports already at head without prompting
-- [ ] 3.8 Pooler connection string is refused with exit code 1
-- [ ] 3.9 Unset NEON_DIRECT_URL is reported with exit code 1
+- [x] 3.6 Empty Neon branch reaches head with vector installed
+- [x] 3.7 Rerun reports already at head without prompting
+- [x] 3.8 Pooler connection string is refused with exit code 1
+- [x] 3.9 Unset NEON_DIRECT_URL is reported with exit code 1
