@@ -1,4 +1,5 @@
 import { Box, useInput, useStdout } from "ink";
+import type { ReactNode } from "react";
 import { useDuePolling } from "./hooks/useDuePolling.js";
 import CaptureScreen from "./screens/CaptureScreen.js";
 import CardDetailScreen from "./screens/CardDetailScreen.js";
@@ -29,6 +30,10 @@ export default function App() {
 
   useDuePolling(DUE_POLL_INTERVAL_MS);
 
+  // Notes and sitting still render as absolute overlays until their bodies
+  // move into bounded bottom panels in Phase 14.
+  const panel: ReactNode | null = null;
+
   useInput((_input, key) => {
     if (!key.escape) {
       return;
@@ -52,7 +57,7 @@ export default function App() {
   return (
     <Box flexDirection="column" height={rows}>
       <Box position="relative" flexDirection="column" height={rows - 1}>
-        <CaptureScreen />
+        <CaptureScreen panel={panel} />
         {isNotesOverlayOpen && (
           <Box
             position="absolute"

@@ -1,6 +1,7 @@
 import { Chalk } from "chalk";
 import { Box, Text, useInput, useStdout } from "ink";
 import TextInput from "ink-text-input";
+import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useState } from "react";
 import ActivityIndicator from "../components/ActivityIndicator.js";
 import ConversationHistory from "../components/ConversationHistory.js";
@@ -26,7 +27,13 @@ const COVERAGE_BANNER_TEXT =
 
 const chalk = new Chalk();
 
-export default function CaptureScreen() {
+type CaptureScreenProps = {
+  panel?: ReactNode | null;
+};
+
+export default function CaptureScreen({
+  panel = null,
+}: CaptureScreenProps = {}) {
   const { stdout, write } = useStdout();
   const initSession = useChatStore((state) => state.initSession);
   const sendUserMessage = useChatStore((state) => state.sendUserMessage);
@@ -204,24 +211,32 @@ export default function CaptureScreen() {
       {turnStartedAt !== null && (
         <ActivityIndicator startedAt={turnStartedAt} />
       )}
-      <InputFrame columns={columns}>
-        <UserLabel />
-        <Text
-          color={
-            isApproveCommand || isNotesCommand || isRememberCommand
-              ? "green"
-              : undefined
-          }
-        >
-          <TextInput
-            value={inputValue}
-            onChange={setInputValue}
-            onSubmit={handleSubmit}
-            focus={!isStreaming && !isNotesOverlayOpen && !isSittingOverlayOpen}
-          />
-        </Text>
-      </InputFrame>
-      <StatusLine columns={columns} showApproveHint={draft !== null} />
+      {panel !== null ? (
+        panel
+      ) : (
+        <>
+          <InputFrame columns={columns}>
+            <UserLabel />
+            <Text
+              color={
+                isApproveCommand || isNotesCommand || isRememberCommand
+                  ? "green"
+                  : undefined
+              }
+            >
+              <TextInput
+                value={inputValue}
+                onChange={setInputValue}
+                onSubmit={handleSubmit}
+                focus={
+                  !isStreaming && !isNotesOverlayOpen && !isSittingOverlayOpen
+                }
+              />
+            </Text>
+          </InputFrame>
+          <StatusLine columns={columns} showApproveHint={draft !== null} />
+        </>
+      )}
     </Box>
   );
 }
