@@ -1,7 +1,7 @@
 ---
 change_id: deployment-pr-gate
 title: A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking
-status: new
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
