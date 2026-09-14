@@ -41,13 +41,13 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — fc07b8e
 
 #### Automated
 
-- [ ] 4.1 Authenticator tests pass
-- [ ] 4.2 Full backend suite passes
-- [ ] 4.3 Type check passes
+- [x] 4.1 Authenticator tests pass
+- [x] 4.2 Full backend suite passes
+- [x] 4.3 Type check passes
 
 ### Phase 5: Source resolution and HTTP refusal — stubs
 
