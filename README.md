@@ -1,5 +1,16 @@
 # project-template
 
+## Install the TUI
+
+You need **Node.js 22** or newer.
+
+```sh
+npm i -g https://github.com/web-lizzard/weles/releases/latest/download/weles.tgz
+weles instance set <address>
+```
+
+**Releasing a TUI version:** bump `version` in `tui/package.json`, commit, then push tag `tui-v<version>` (for example `tui-v0.1.0`). The `tui-release` workflow attaches `weles-<version>.tgz` and `weles.tgz` to a GitHub Release.
+
 ## Dev container: Ordo (skills)
 
 On **Rebuild Container**, `postCreateCommand` runs `.devcontainer/post-create.sh`, which executes every `*.sh` script in `post-create.d/` in sorted order. Step **`08-install-ordo.sh`** installs [`@web-lizzard/ordo`](https://github.com/web-lizzard/ordo) globally so `ordo` is available in the integrated terminal.

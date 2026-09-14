@@ -1,7 +1,7 @@
 ---
 change_id: deployment-tui-publish
 current_phase: 2
-next_step: 2.1
+next_step: 2.2
 next_command: /implement deployment-tui-publish phase 2
 updated: 2026-09-14
 ---
@@ -21,7 +21,7 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 2.1 Actionlint reports no errors on tui-release.yml
+- [x] 2.1 Actionlint reports no errors on tui-release.yml
 
 #### Manual
 
