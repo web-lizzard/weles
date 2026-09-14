@@ -1,7 +1,7 @@
 ---
 change_id: deployment-manual-deploy
 title: The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed
-status: new
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
