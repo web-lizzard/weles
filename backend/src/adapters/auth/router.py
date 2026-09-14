@@ -12,6 +12,12 @@ from adapters.auth.dto import (
     SignInRequestDTO,
     SignInResponseDTO,
 )
+from adapters.auth.exceptions import (
+    InvalidCredentialsError,
+    InvalidEmailAddressError,
+    SignInRequiredError,
+)
+from adapters.auth.model import EmailAddress, Password
 from adapters.auth.ports import SignInVerifier
 from domain.shared.identity.model import UserId
 
@@ -34,7 +40,9 @@ async def require_sign_in(
     Reads no store and calls no LLM before refusing (FR-009). Returns the
     `UserId`; S-01 routes drop it, S-04 hands it to handlers.
     """
-    ...
+    if credentials is None:
+        raise SignInRequiredError
+    return await verifier.verify(credentials.credentials)
 
 
 @router.post("/register", status_code=201)
@@ -44,7 +52,10 @@ async def register(
 ) -> RegisterResponseDTO:
     """EmailAddress.parse(body.email), Password(body.password) ->
     authenticator.register."""
-    ...
+    email = EmailAddress.parse(body.email)
+    password = Password(value=body.password)
+    user_id = await authenticator.register(email, password)
+    return RegisterResponseDTO(user_id=user_id.value)
 
 
 @router.post("/sign-in")
@@ -55,4 +66,13 @@ async def sign_in(
     """EmailAddress.parse(body.email), Password(body.password) ->
     authenticator.sign_in. An unparseable email is `InvalidCredentialsError`,
     not `InvalidEmailAddressError`: sign-in never explains a refusal."""
-    ...
+    try:
+        email = EmailAddress.parse(body.email)
+    except InvalidEmailAddressError:
+        raise InvalidCredentialsError from None
+    password = Password(value=body.password)
+    issued = await authenticator.sign_in(email, password)
+    return SignInResponseDTO(
+        access_token=issued.token,
+        expires_at=issued.expires_at,
+    )
