@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-attempt-limits
 current_phase: 2
-next_step: 2.1
-next_command: /unit-test auth-flow-attempt-limits phase 2
+next_step: 2.5
+next_command: /implement auth-flow-attempt-limits phase 2
 updated: 2026-09-14
 ---
 
@@ -17,14 +17,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — 3815998
 
 #### Automated
 
-- [ ] 2.1 Attempt ledger contract passes in memory
-- [ ] 2.2 Attempt ledger contract passes on Postgres
-- [ ] 2.3 Full backend suite passes
-- [ ] 2.4 Type check passes
+- [x] 2.1 Attempt ledger contract passes in memory
+- [x] 2.2 Attempt ledger contract passes on Postgres
+- [x] 2.3 Full backend suite passes
+- [x] 2.4 Type check passes
 
 #### Manual
 
