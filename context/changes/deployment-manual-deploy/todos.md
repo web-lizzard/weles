@@ -22,8 +22,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 2.1 Actionlint reports no errors on deploy.yml
-- [x] 2.2 workflow_dispatch is the only trigger key
+- [x] 2.1 Actionlint reports no errors on deploy.yml — b981576
+- [x] 2.2 workflow_dispatch is the only trigger key — b981576
 
 #### Manual
 
