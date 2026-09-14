@@ -6,11 +6,13 @@ from adapters.out.sqlalchemy.distill.models import (
 from domain.distill.card import Card
 from domain.distill.note import Note
 from domain.distill.value_objects import Discard, TagSnapshot, TopicSnapshot
+from domain.shared.identity.model import UserId
 
 
 def note_to_row(note: Note) -> DistillNoteRow:
     return DistillNoteRow(
         id=note.id,
+        owner_id=note.owner_id.value,
         session_id=note.session_id,
         topic_id=note.topic.id,
         topic_label=note.topic.label,
@@ -34,6 +36,7 @@ def note_to_row(note: Note) -> DistillNoteRow:
 def note_to_domain(row: DistillNoteRow) -> Note:
     return Note(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         session_id=row.session_id,
         topic=TopicSnapshot(id=row.topic_id, label=row.topic_label),
         content=row.content,
@@ -59,6 +62,7 @@ def card_to_row(card: Card) -> DistillCardRow:
     discard = card.discard
     return DistillCardRow(
         id=card.id,
+        owner_id=card.owner_id.value,
         note_id=card.note_id,
         front=card.front,
         back=card.back,
@@ -73,6 +77,7 @@ def card_to_row(card: Card) -> DistillCardRow:
 def card_to_domain(row: DistillCardRow) -> Card:
     return Card(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         note_id=row.note_id,
         front=row.front,
         back=row.back,

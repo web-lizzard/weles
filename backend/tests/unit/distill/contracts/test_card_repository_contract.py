@@ -26,6 +26,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -74,6 +75,7 @@ def _sample_note(note_id: NoteId | None = None) -> Note:
     stamped_at = datetime.now(UTC)
     return Note(
         id=note_id or NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="Connections use a three-way handshake."),
@@ -88,6 +90,7 @@ def _sample_note(note_id: NoteId | None = None) -> Note:
 def _sample_card(note_id: NoteId, discard: Discard | None = None) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),

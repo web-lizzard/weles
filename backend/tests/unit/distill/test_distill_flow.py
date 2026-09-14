@@ -34,6 +34,7 @@ from domain.distill.value_objects import (
     TopicSnapshot,
 )
 from domain.shared.graph.model import StructuredState
+from domain.shared.identity.model import UserId
 
 _CONTENT = "Connections are established via a three-way handshake."
 
@@ -53,6 +54,7 @@ def _policy(threshold: float) -> RegenerationPolicy:
 
 def _run(*, threshold: float = 0.5) -> DistillRun:
     note = mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),

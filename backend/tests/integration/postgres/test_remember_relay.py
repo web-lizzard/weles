@@ -40,6 +40,7 @@ from domain.remember.value_objects import (
     ShowingLimit,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 pytestmark = pytest.mark.postgres
 
@@ -97,6 +98,7 @@ async def _seed_live_card(
     note_id = NoteId(value=uuid4())
     distill_card = Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value=_FRONT),
         back=CardSide(value=_BACK),
@@ -106,6 +108,7 @@ async def _seed_live_card(
     )
     async with _distill_uow_factory(session_factory) as uow:
         note = mint_note(
+            UserId.new(),
             note_id,
             SessionId(value=uuid4()),
             TopicSnapshot(id=uuid4(), label="Networking"),

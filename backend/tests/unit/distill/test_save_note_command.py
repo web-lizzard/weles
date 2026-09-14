@@ -19,6 +19,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 async def test_save_note_persists_generating_note_and_enqueues_note_saved() -> None:
@@ -26,6 +27,7 @@ async def test_save_note_persists_generating_note_and_enqueues_note_saved() -> N
     note_id = NoteId(value=uuid4())
 
     await stack.command.handle(
+        UserId.new(),
         note_id,
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),
@@ -50,6 +52,7 @@ async def test_save_note_redelivery_is_a_logged_no_op(
     stack = _make_save_stack()
     note_id = NoteId(value=uuid4())
     args = (
+        UserId.new(),
         note_id,
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),

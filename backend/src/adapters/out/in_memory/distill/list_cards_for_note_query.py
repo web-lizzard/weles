@@ -6,6 +6,7 @@ from domain.distill.exceptions import DistillNoteNotFoundError
 from domain.distill.note_document import AnchorLocation, NoteDocument
 from domain.distill.ports import CardRepository, NoteRepository
 from domain.distill.value_objects import NoteId
+from domain.shared.identity.model import UserId
 
 
 class InMemoryListCardsForNoteQueryAdapter:
@@ -15,7 +16,10 @@ class InMemoryListCardsForNoteQueryAdapter:
         self._note_repository: NoteRepository = note_repository
         self._card_repository: CardRepository = card_repository
 
-    async def list_cards_for_note(self, note_id: NoteId) -> list[CardListItemDTO]:
+    async def list_cards_for_note(
+        self, owner: UserId, note_id: NoteId
+    ) -> list[CardListItemDTO]:
+        _ = owner
         note = await self._note_repository.get(note_id)
         if note is None:
             raise DistillNoteNotFoundError

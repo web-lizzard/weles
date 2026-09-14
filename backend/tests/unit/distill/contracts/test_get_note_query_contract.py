@@ -23,6 +23,7 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -52,6 +53,7 @@ class _GetNoteFixture:
 def _note(status: DistillationStatus, at: datetime) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="We discussed how connections are established."),
@@ -90,7 +92,7 @@ async def test_get_note_maps_full_note_shape_into_the_detail_dto(
     note = _note(DistillationStatus.READY, now)
     await get_note_fixture.notes.save(note)
 
-    result = await get_note_fixture.query.get_note(note.id)
+    result = await get_note_fixture.query.get_note(UserId.new(), note.id)
 
     assert result.note_id == note.id.value
     assert result.topic.id == note.topic.id
@@ -113,6 +115,7 @@ async def test_get_note_returns_tags_in_the_order_they_were_saved(
     beta = TagSnapshot(id=uuid4(), label="beta")
     note = Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value="Body text."),
@@ -124,7 +127,7 @@ async def test_get_note_returns_tags_in_the_order_they_were_saved(
     )
     await get_note_fixture.notes.save(note)
 
-    result = await get_note_fixture.query.get_note(note.id)
+    result = await get_note_fixture.query.get_note(UserId.new(), note.id)
 
     assert [(tag.id, tag.label) for tag in result.tags] == [
         (alpha.id, alpha.label),
@@ -136,7 +139,7 @@ async def test_get_note_raises_not_found_for_an_unknown_note_id(
     get_note_fixture: _GetNoteFixture,
 ) -> None:
     with pytest.raises(DistillNoteNotFoundError):
-        _ = await get_note_fixture.query.get_note(NoteId(value=uuid4()))
+        _ = await get_note_fixture.query.get_note(UserId.new(), NoteId(value=uuid4()))
 
 
 @pytest.mark.parametrize(
@@ -154,6 +157,6 @@ async def test_get_note_exposes_raw_distillation_status(
     note = _note(status, datetime.now(UTC))
     await get_note_fixture.notes.save(note)
 
-    result = await get_note_fixture.query.get_note(note.id)
+    result = await get_note_fixture.query.get_note(UserId.new(), note.id)
 
     assert result.distillation_status == status.value

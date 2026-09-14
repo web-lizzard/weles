@@ -19,11 +19,13 @@ from domain.distill.value_objects import (
     DiscardReason,
     NoteId,
 )
+from domain.shared.identity.model import UserId
 
 
 def _sample_card(note_id: NoteId, discard: Discard | None = None) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),

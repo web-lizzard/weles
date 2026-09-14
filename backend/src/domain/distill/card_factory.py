@@ -12,6 +12,7 @@ from domain.distill.value_objects import (
     DiscardReason,
     NoteId,
 )
+from domain.shared.identity.model import UserId
 
 
 class CardFactory:
@@ -20,6 +21,7 @@ class CardFactory:
 
     def mint(
         self,
+        owner_id: UserId,
         note_id: NoteId,
         front: CardSide,
         back: CardSide,
@@ -28,6 +30,7 @@ class CardFactory:
     ) -> Card:
         card = Card(
             id=CardId(value=uuid4()),
+            owner_id=owner_id,
             note_id=note_id,
             front=front,
             back=back,

@@ -31,6 +31,7 @@ from domain.remember.exceptions import (
 from domain.remember.ports import ReviewableCard
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import CardId, ResumeHorizon, Reveal, SittingId
+from domain.shared.identity.model import UserId
 
 from .conftest import (
     clock_after_resume_horizon,
@@ -61,6 +62,7 @@ async def _reviewable_with_resolvable_source(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="Networking"),
         content=NoteContent(value=note_body),
@@ -72,6 +74,7 @@ async def _reviewable_with_resolvable_source(
     )
     card = Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=note.owner_id,
         note_id=note.id,
         front=CardSide(value=front),
         back=CardSide(value=back),

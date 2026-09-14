@@ -3,6 +3,7 @@ from typing import cast
 
 from adapters.out.sqlalchemy.distill.models import DistillCardRow, DistillNoteRow
 from application.distill.queries.list_notes import NoteListItemDTO
+from domain.shared.identity.model import UserId
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -11,7 +12,8 @@ class SqlAlchemyListNotesQueryAdapter:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
-    async def list_notes(self) -> list[NoteListItemDTO]:
+    async def list_notes(self, owner: UserId) -> list[NoteListItemDTO]:
+        _ = owner
         async with self._session_factory() as session:
             last_updated_at = func.greatest(
                 DistillNoteRow.updated_at,

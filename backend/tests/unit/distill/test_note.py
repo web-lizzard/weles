@@ -14,9 +14,11 @@ from domain.distill.value_objects import (
     TagSnapshot,
     TopicSnapshot,
 )
+from domain.shared.identity.model import UserId
 
 
 def test_mint_note_maps_every_field_and_starts_generating() -> None:
+    owner_id = UserId.new()
     note_id = NoteId(value=uuid4())
     session_id = SessionId(value=uuid4())
     topic = TopicSnapshot(id=uuid4(), label="TCP handshakes")
@@ -24,9 +26,10 @@ def test_mint_note_maps_every_field_and_starts_generating() -> None:
     tags = [TagSnapshot(id=uuid4(), label="networking")]
     approved_at = datetime.now(UTC)
 
-    note = mint_note(note_id, session_id, topic, content, tags, approved_at)
+    note = mint_note(owner_id, note_id, session_id, topic, content, tags, approved_at)
 
     assert note.id == note_id
+    assert note.owner_id == owner_id
     assert note.session_id == session_id
     assert note.topic == topic
     assert note.content == content
@@ -39,6 +42,7 @@ def test_mint_note_stamps_created_at_in_utc_near_now() -> None:
     before = datetime.now(UTC)
 
     note = mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),
@@ -55,6 +59,7 @@ def test_mint_note_stamps_created_at_in_utc_near_now() -> None:
 
 def _note_in(status: DistillationStatus) -> Note:
     note = mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),
@@ -109,6 +114,7 @@ def test_a_note_that_is_no_longer_generating_refuses_a_transition(
 
 def test_mint_note_sets_updated_at_equal_to_created_at() -> None:
     note = mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="TCP handshakes"),

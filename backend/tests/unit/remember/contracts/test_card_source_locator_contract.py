@@ -32,6 +32,7 @@ from domain.distill.value_objects import (
 from domain.distill.value_objects import CardId as DistillCardId
 from domain.remember.ports import CardSource, CardSourceLocator, SourceBlock, SourceSpan
 from domain.remember.value_objects import CardId
+from domain.shared.identity.model import UserId
 
 
 class _CommittingNoteRepository:
@@ -107,6 +108,7 @@ def _sample_note(content: str | None = None) -> Note:
         else "Connections are established via a three-way handshake."
     )
     return mint_note(
+        UserId.new(),
         NoteId(value=uuid4()),
         SessionId(value=uuid4()),
         TopicSnapshot(id=uuid4(), label="Networking"),
@@ -124,6 +126,7 @@ def _sample_card(
 ) -> Card:
     return Card(
         id=DistillCardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),

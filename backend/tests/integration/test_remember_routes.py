@@ -16,6 +16,7 @@ from domain.distill.value_objects import (
     TopicSnapshot,
 )
 from domain.remember.outbox import CARD_REJECTED
+from domain.shared.identity.model import UserId
 
 from .conftest import RememberTestContext
 
@@ -24,6 +25,7 @@ def _note() -> Note:
     now = datetime.now(UTC)
     return Note(
         id=NoteId(value=uuid4()),
+        owner_id=UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(
@@ -44,6 +46,7 @@ def _card(
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
+        owner_id=UserId.new(),
         note_id=note_id,
         front=CardSide(value=front),
         back=CardSide(value=back),
