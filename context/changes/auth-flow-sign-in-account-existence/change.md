@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-sign-in-account-existence
 title: A valid sign-in token also confirms the account still exists
-status: new
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
