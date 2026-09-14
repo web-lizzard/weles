@@ -37,16 +37,16 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 README has a Hosting on Mikrus section naming no instance
-- [x] 3.2 Both agent guides carry the deploy line and remain identical
+- [x] 3.1 README has a Hosting on Mikrus section naming no instance — 6c430e9
+- [x] 3.2 Both agent guides carry the deploy line and remain identical — 6c430e9
 
 #### Manual
 
-- [x] 3.3 Deploy key logs in on the forwarded SSH port without a password
-- [x] 3.4 Compose plugin v2 is installed and the added disk is mounted at /srv/weles
-- [x] 3.5 Both env files on the VPS are mode 600
-- [x] 3.6 pgvector image pulls on the VPS
-- [x] 3.7 The production environment lists all five DEPLOY_SSH secrets
+- [x] 3.3 Deploy key logs in on the forwarded SSH port without a password — 6c430e9
+- [x] 3.4 Compose plugin v2 is installed and the added disk is mounted at /srv/weles — 6c430e9
+- [x] 3.5 Both env files on the VPS are mode 600 — 6c430e9
+- [x] 3.6 pgvector image pulls on the VPS — 6c430e9
+- [x] 3.7 The production environment lists all five DEPLOY_SSH secrets — 6c430e9
 
 ### Phase 4: Ship to Mikrus
 
