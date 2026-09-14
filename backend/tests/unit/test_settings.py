@@ -67,11 +67,42 @@ def test_settings_defaults_distill_task_provider_to_pydantic_ai_when_unset(
 
 def test_settings_defaults_distill_model_when_unset(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.setenv("DATABASE_URL", _DATABASE_URL)
     monkeypatch.delenv("DISTILL_MODEL", raising=False)
+    env_file = tmp_path / ".env"
+    monkeypatch.setattr(
+        Settings,
+        "model_config",
+        SettingsConfigDict(
+            env_file=str(env_file),
+            env_file_encoding="utf-8",
+            extra="forbid",
+        ),
+    )
     settings = Settings()  # pyright: ignore[reportCallIssue]
-    assert getattr(settings, "distill_model", None) == "openai/gpt-4o-mini"
+    assert settings.distill_model == "openai/gpt-5-nano"
+
+
+def test_settings_raises_when_auth_signing_secret_missing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", _DATABASE_URL)
+    monkeypatch.delenv("AUTH_SIGNING_SECRET", raising=False)
+    env_file = tmp_path / ".env"
+    monkeypatch.setattr(
+        Settings,
+        "model_config",
+        SettingsConfigDict(
+            env_file=str(env_file),
+            env_file_encoding="utf-8",
+            extra="forbid",
+        ),
+    )
+    with pytest.raises(ValidationError):
+        _ = Settings()  # pyright: ignore[reportCallIssue]
 
 
 def test_settings_defaults_distill_regeneration_tiers_when_unset(

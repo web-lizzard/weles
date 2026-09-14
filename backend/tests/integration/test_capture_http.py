@@ -7,11 +7,13 @@ from uuid import UUID
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from adapters.auth.router import require_sign_in
 from adapters.http.capture import router as capture_router
 from domain.capture.exceptions import CaptureSessionClosedError
 from domain.capture.ports import CaptureAgentPort
 from domain.capture.turn import AgentEvent, CaptureTurn, ReplyProduced
 from domain.shared.graph.model import Tool, ToolResult
+from domain.shared.identity.model import UserId
 from domain.shared.instruction.model import Instruction
 from main import app
 
@@ -342,6 +344,7 @@ def test_core_exception_during_generation_yields_in_band_error_event() -> None:
         cast(object, _OneChunkThenFailCaptureAgent()),
     )
     app.dependency_overrides.update(composition.dependency_overrides())
+    app.dependency_overrides[require_sign_in] = lambda: UserId.new()
     try:
         with TestClient(app, raise_server_exceptions=False) as client:
             session_id = _create_session(client)

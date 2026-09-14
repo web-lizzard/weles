@@ -5,6 +5,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from adapters.auth.router import require_sign_in
 from adapters.compose import (
     get_list_cards_for_note_query,
     get_list_notes_query,
@@ -26,6 +27,7 @@ from adapters.out.in_memory.distill.note_repository import (
     InMemoryNoteRepository as InMemoryDistillNoteRepository,
 )
 from adapters.out.in_memory.shared.outbox.store import InMemoryOutboxStore
+from domain.shared.identity.model import UserId
 from main import app
 
 from .support.in_memory_capture import InMemoryCaptureComposition
@@ -56,6 +58,10 @@ def _remember_routes_registered(application: FastAPI) -> bool:
     )
 
 
+def _bypass_sign_in_gate() -> UserId:
+    return UserId.new()
+
+
 @pytest.fixture
 def capture_client() -> Iterator[TestClient]:
     if not _capture_routes_registered(app):
@@ -63,6 +69,7 @@ def capture_client() -> Iterator[TestClient]:
 
     composition = InMemoryCaptureComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
+    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
@@ -83,6 +90,7 @@ def outbox_client() -> Iterator[OutboxTestContext]:
 
     composition = InMemoryCaptureComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
+    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
     with TestClient(app) as client:
         yield OutboxTestContext(client=client, outbox_store=composition.outbox_store)
     app.dependency_overrides.clear()
@@ -108,6 +116,7 @@ def notes_client() -> Iterator[NotesTestContext]:
     app.dependency_overrides[get_list_notes_query] = lambda: query
     app.dependency_overrides[get_note_query] = lambda: note_query
     app.dependency_overrides[get_list_cards_for_note_query] = lambda: cards_query
+    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
     with TestClient(app) as client:
         yield NotesTestContext(client=client, notes=notes, cards=cards)
     app.dependency_overrides.clear()
@@ -128,6 +137,7 @@ def remember_client() -> Iterator[RememberTestContext]:
 
     composition = InMemoryRememberComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
+    app.dependency_overrides[require_sign_in] = _bypass_sign_in_gate
     with TestClient(app) as client:
         yield RememberTestContext(
             client=client,

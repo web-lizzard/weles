@@ -21,6 +21,9 @@ def pytest_configure(config: pytest.Config) -> None:
     _ = os.environ.setdefault("CAPTURE_AGENT_PROVIDER", "deterministic")
     _ = os.environ.setdefault("DISTILL_TASK_PROVIDER", "deterministic")
     _ = os.environ.setdefault("TRACING_ENABLED", "false")
+    _ = os.environ.setdefault(
+        "AUTH_SIGNING_SECRET", "test-only-auth-signing-secret-32b"
+    )
 
 
 def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
