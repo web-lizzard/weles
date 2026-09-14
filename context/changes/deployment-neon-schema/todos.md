@@ -1,7 +1,7 @@
 ---
 change_id: deployment-neon-schema
 current_phase: 3
-next_step: 3.1
+next_step: 3.6
 next_command: /implement deployment-neon-schema phase 3
 updated: 2026-09-14
 ---
@@ -33,11 +33,11 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 3.1 Add scripts/migrate_database.py
-- [ ] 3.2 Add README Neon schema runbook section
-- [ ] 3.3 basedpyright passes on the script
-- [ ] 3.4 ruff passes on scripts
-- [ ] 3.5 Non-postgres suite stays green
+- [x] 3.1 Add scripts/migrate_database.py
+- [x] 3.2 Add README Neon schema runbook section
+- [x] 3.3 basedpyright passes on the script
+- [x] 3.4 ruff passes on scripts
+- [x] 3.5 Non-postgres suite stays green
 
 #### Manual
 
