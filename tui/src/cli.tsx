@@ -2,12 +2,13 @@
 import os from "node:os";
 import { render } from "ink";
 import meow from "meow";
-import { setInstanceAddress } from "./api/instance.js";
+import { setInstanceAddress, setSignInProvider } from "./api/instance.js";
 import App from "./app.js";
 import { runRegisterCommand, runSignInCommand } from "./auth/command.js";
+import { readSignIn } from "./auth/credentialStore.js";
 import { readSecret } from "./auth/readSecret.js";
 import { runInstanceCommand } from "./instance/command.js";
-import { resolveStartup } from "./startup.js";
+import { resolveLaunch } from "./startup.js";
 
 const cli = meow({
   importMeta: import.meta,
@@ -49,14 +50,18 @@ if (cli.command === "sign-in") {
   process.exit(await runSignInCommand(cli.input, authDeps));
 }
 
-const decision = await resolveStartup(location);
+const decision = await resolveLaunch(location, new Date());
 
-if (decision.kind === "missing") {
+if (decision.kind !== "ready") {
   console.error(decision.message);
   process.exit(1);
 }
 
-setInstanceAddress(decision.address);
+const { address } = decision;
+setInstanceAddress(address);
+setSignInProvider(
+  async () => (await readSignIn(location, address))?.token ?? null,
+);
 
 if (!process.stdin.isTTY || !process.stdout.isTTY) {
   console.error(

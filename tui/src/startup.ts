@@ -1,3 +1,4 @@
+import { readSignIn } from "./auth/credentialStore.js";
 import type { InstanceAddress } from "./instance/address.js";
 import type { ConfigLocation } from "./instance/configStore.js";
 import { readInstanceAddress } from "./instance/configStore.js";
@@ -26,8 +27,26 @@ export async function resolveStartup(
 }
 
 export async function resolveLaunch(
-  _location: ConfigLocation,
-  _now: Date,
+  location: ConfigLocation,
+  now: Date,
 ): Promise<LaunchDecision> {
-  throw new Error("not implemented");
+  const startup = await resolveStartup(location);
+  if (startup.kind === "missing") {
+    return { kind: "missing", message: startup.message };
+  }
+  const address = startup.address;
+  const stored = await readSignIn(location, address);
+  if (stored === null) {
+    return {
+      kind: "signed_out",
+      message: `Not signed in to ${address}. Run: weles sign-in <email>`,
+    };
+  }
+  if (Date.parse(stored.expiresAt) <= now.getTime()) {
+    return {
+      kind: "expired",
+      message: `Your sign-in to ${address} has expired. Run: weles sign-in <email>`,
+    };
+  }
+  return { kind: "ready", address };
 }
