@@ -117,9 +117,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 11.1 Type check passes
-- [x] 11.2 Lint passes
-- [x] 11.3 Existing suite stays green
+- [x] 11.1 Type check passes — e96a75b
+- [x] 11.2 Lint passes — e96a75b
+- [x] 11.3 Existing suite stays green — e96a75b
 
 ### Phase 12: Draft region behavior
 
