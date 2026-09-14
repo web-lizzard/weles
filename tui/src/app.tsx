@@ -14,8 +14,6 @@ const DEFAULT_TERMINAL_ROWS = 24;
 export const DUE_POLL_INTERVAL_MS = 15_000;
 
 const LIST_HINTS = "↑↓ select · Enter open · ← ESC to go back";
-const CARD_DETAIL_HINTS = "Enter jump to source · ← back";
-const SITTING_HINTS = "← ESC to go back";
 
 export default function App() {
   const { stdout } = useStdout();
@@ -33,7 +31,7 @@ export default function App() {
   useDuePolling(DUE_POLL_INTERVAL_MS);
 
   const panel: ReactNode | null = isSittingOverlayOpen ? (
-    <BottomPanel hints={SITTING_HINTS}>
+    <BottomPanel hints="">
       <SittingOverlay />
     </BottomPanel>
   ) : isNotesOverlayOpen ? (
@@ -86,14 +84,18 @@ function notesPanelHints(
   activeNoteTab: "note" | "cards",
   selectedCardId: string | null,
 ): string {
+  // NoteListOverlay, NoteDetailScreen, and CardDetailScreen each render their
+  // own bottom hint line, so the panel supplies none for those states — one
+  // hint line per panel, never two. Only CardListScreen has no hint line of
+  // its own, so it still gets the panel's.
   if (!isDetailOpen) {
-    return LIST_HINTS;
+    return "";
   }
   if (selectedCardId !== null) {
-    return CARD_DETAIL_HINTS;
+    return "";
   }
   if (activeNoteTab === "cards") {
     return LIST_HINTS;
   }
-  return "→ cards · ← ESC to go back";
+  return "";
 }

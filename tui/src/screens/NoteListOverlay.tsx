@@ -73,7 +73,7 @@ export default function NoteListOverlay() {
 
   return (
     <Box flexDirection="column" flexGrow={1}>
-      <Text dimColor>← ESC to go back</Text>
+      <Text dimColor>↑↓ select · Enter open · ← ESC to go back</Text>
       <Box marginTop={1} flexDirection="column" gap={1} flexGrow={1}>
         {error !== null && <Text color="red">{error}</Text>}
         <Text bold>Notes</Text>
