@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
-current_phase: 3
-next_step: 3.4
-next_command: /implement auth-flow-sign-in-gate phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /unit-test auth-flow-sign-in-gate phase 4
 updated: 2026-09-14
 ---
 
@@ -36,13 +36,13 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 In-memory contract passes
-- [x] 3.2 Postgres contract passes
-- [x] 3.3 Type check passes
+- [x] 3.1 In-memory contract passes — 1af68a8
+- [x] 3.2 Postgres contract passes — 1af68a8
+- [x] 3.3 Type check passes — 1af68a8
 
 #### Manual
 
-- [x] 3.4 Alembic upgrade, downgrade, upgrade round-trip on dev database
+- [x] 3.4 Alembic upgrade, downgrade, upgrade round-trip on dev database — 1af68a8
 
 ### Phase 4: Authenticator
 
