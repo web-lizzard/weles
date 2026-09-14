@@ -30,9 +30,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Type check passes
-- [x] 3.2 Lint passes
-- [x] 3.3 Existing suite stays green
+- [x] 3.1 Type check passes — ad16d43
+- [x] 3.2 Lint passes — ad16d43
+- [x] 3.3 Existing suite stays green — ad16d43
 
 ### Phase 4: Capture layout behavior
 
