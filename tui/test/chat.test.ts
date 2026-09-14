@@ -59,7 +59,9 @@ describe("useChatStore", () => {
       isStreaming: false,
       streamError: null,
       approved: false,
-    });
+      historyEpoch: 0,
+      turnStartedAt: null,
+    } as Parameters<typeof useChatStore.setState>[0]);
     vi.mocked(sendMessage).mockReset();
     vi.mocked(approveNote).mockReset();
     vi.mocked(startCaptureSession).mockReset();
@@ -335,15 +337,14 @@ describe("useChatStore", () => {
     });
   });
 
-  it("clears draft when starting a new message", async () => {
-    useChatStore.setState({
-      draft: {
-        topic: "Old topic",
-        tags: [{ label: "old", reused: true }],
-        content: "Old body",
-        noteId: "old-note",
-      },
-    });
+  it("keeps the draft visible across the next message until a new draft event arrives", async () => {
+    const previousDraft = {
+      topic: "Old topic",
+      tags: [{ label: "old", reused: true }],
+      content: "Old body",
+      noteId: "00000000-0000-4000-8000-000000000099",
+    };
+    useChatStore.setState({ draft: previousDraft });
 
     let draftWhenSendCalled!: ReturnType<typeof useChatStore.getState>["draft"];
 
@@ -362,8 +363,87 @@ describe("useChatStore", () => {
 
     await useChatStore.getState().sendUserMessage("Next question");
 
-    expect(draftWhenSendCalled).toBeNull();
-    expect(useChatStore.getState().draft).toBeNull();
+    expect(draftWhenSendCalled).toEqual(previousDraft);
+    expect(useChatStore.getState().draft).toEqual(previousDraft);
+  });
+
+  it("starts a fresh draft on the first draft event of a new turn instead of extending the previous one", async () => {
+    useChatStore.setState({
+      draft: {
+        topic: "Old topic",
+        tags: [{ label: "old", reused: true }],
+        content: "Old body",
+        noteId: "00000000-0000-4000-8000-000000000099",
+      },
+    });
+
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      yield { type: "draft_delta", text: "New" };
+      yield {
+        type: "done",
+        messageId: "m1",
+        content: "Reply",
+        topic: "Topic",
+        coverageConfidence: 0,
+      };
+    });
+
+    await useChatStore.getState().sendUserMessage("Continue");
+
+    expect(useChatStore.getState().draft).toEqual({
+      topic: null,
+      tags: [],
+      content: "New",
+      noteId: null,
+    });
+  });
+
+  it("sets turnStartedAt while a turn is in flight and clears it once the turn finishes", async () => {
+    let turnStartedAtDuringStream: number | null = null;
+
+    vi.mocked(sendMessage).mockImplementation(async function* () {
+      turnStartedAtDuringStream = (
+        useChatStore.getState() as { turnStartedAt: number | null }
+      ).turnStartedAt;
+      yield {
+        type: "done",
+        messageId: "m1",
+        content: "Ok",
+        topic: "Topic",
+        coverageConfidence: 0,
+      };
+    });
+
+    await useChatStore.getState().sendUserMessage("Hi");
+
+    expect(turnStartedAtDuringStream).not.toBeNull();
+    expect(
+      (useChatStore.getState() as { turnStartedAt: number | null })
+        .turnStartedAt,
+    ).toBeNull();
+  });
+
+  it("appends a topic entry after the agent reply when the reported topic differs from the current topic", async () => {
+    useChatStore.setState({ topic: "Old topic" });
+    vi.mocked(sendMessage).mockImplementation(() =>
+      streamEvents([
+        {
+          type: "done",
+          messageId: "m1",
+          content: "Reply",
+          topic: "New topic",
+          coverageConfidence: 0,
+        },
+      ]),
+    );
+
+    await useChatStore.getState().sendUserMessage("Continue");
+
+    expect(useChatStore.getState().transcript).toEqual([
+      { role: "user", content: "Continue" },
+      { role: "agent", content: "Reply" },
+      { role: "topic", content: "New topic" },
+    ]);
   });
 
   it("clears draft when an in-band stream error is received", async () => {
@@ -431,6 +511,7 @@ describe("useChatStore", () => {
     expect(state.currentReply).toBe("");
     expect(state.coverageConfidence).toBeNull();
     expect(getStreamError()).toBeNull();
+    expect((state as { historyEpoch: number }).historyEpoch).toBe(1);
   });
 
   it("does not call approveNote and reports no_draft_to_approve when there is no draft", async () => {
@@ -471,5 +552,8 @@ describe("useChatStore", () => {
       code: "capture_session_closed",
       detail: "Session is closed",
     });
+    expect(
+      (useChatStore.getState() as { historyEpoch: number }).historyEpoch,
+    ).toBe(0);
   });
 });
