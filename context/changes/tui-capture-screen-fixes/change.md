@@ -1,7 +1,7 @@
 ---
 change_id: tui-capture-screen-fixes
 title: TUI capture screen fixes
-status: preparing
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
