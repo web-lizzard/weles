@@ -5,6 +5,7 @@
  * deployment is never sent to another (S-03).
  */
 
+import { clearSignIn } from "../auth/credentialStore.js";
 import {
   type InstanceAddress,
   InvalidInstanceAddressError,
@@ -55,7 +56,11 @@ export async function runInstanceCommand(
       throw error;
     }
 
+    const previous = await readInstanceAddress(location);
     await writeInstanceAddress(location, address);
+    if (previous !== null && previous !== address) {
+      await clearSignIn(location);
+    }
     out(
       `Weles instance set to ${address}. Restart any running Weles TUI to use it.`,
     );

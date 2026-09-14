@@ -1,7 +1,8 @@
 import { register, signIn } from "../api/auth.js";
-import { setInstanceAddress } from "../api/instance.js";
+import { instanceAddress, setInstanceAddress } from "../api/instance.js";
 import type { ConfigLocation } from "../instance/configStore.js";
 import { resolveStartup } from "../startup.js";
+import { writeSignIn } from "./credentialStore.js";
 
 /**
  * `weles register <email>` and `weles sign-in <email>`.
@@ -112,6 +113,11 @@ export async function runSignInCommand(
   const outcome = await signIn(args[0], passwordOrExit);
   switch (outcome.kind) {
     case "signed_in":
+      await writeSignIn(deps.location, {
+        instanceAddress: instanceAddress(),
+        token: outcome.token,
+        expiresAt: outcome.expiresAt,
+      });
       deps.out(`Signed in. Session expires at ${outcome.expiresAt}.`);
       return 0;
     case "invalid_credentials":
