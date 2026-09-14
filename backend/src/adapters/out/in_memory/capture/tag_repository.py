@@ -21,9 +21,10 @@ class InMemoryTagRepository:
     async def nearest(
         self, owner: UserId, embedding: Embedding
     ) -> VocabularyMatch[Tag] | None:
-        _ = owner
         matches: list[VocabularyMatch[Tag]] = []
         for tag in self._tags.values():
+            if tag.owner_id != owner:
+                continue
             if tag.embedding.model != embedding.model:
                 continue
             if len(tag.embedding.values) != len(embedding.values):

@@ -256,9 +256,8 @@ class GenerateReplyCommand:
         owner: UserId,
         session_id: SessionId,
     ) -> CaptureSession:
-        _ = owner
         session = await capture_sessions.get(session_id)
-        if session is None:
+        if session is None or session.owner_id != owner:
             raise CaptureSessionNotFoundError
         if session.status != SessionStatus.OPEN:
             raise CaptureSessionClosedError

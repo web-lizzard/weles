@@ -17,10 +17,9 @@ class ApproveNoteCommand:
     async def handle(
         self, owner: UserId, session_id: SessionId
     ) -> ApproveNoteResponseDTO:
-        _ = owner
         async with self._uow as uow:
             session = await uow.capture_sessions.get(session_id)
-            if session is None:
+            if session is None or session.owner_id != owner:
                 raise CaptureSessionNotFoundError
             if session.note_id is None:
                 raise SessionNoteMissingError
