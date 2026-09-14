@@ -350,11 +350,22 @@ describe("App", () => {
 
       const { lastFrame } = render(<App />);
       const frame = lastFrame() ?? "";
-
-      expect(frame).toContain("4 cards due");
-      expect(frame.indexOf("4 cards due")).toBeGreaterThan(
-        frame.indexOf("Weles"),
+      const lines = frame.split("\n");
+      const ruleIndexes = lines.reduce<number[]>((acc, line, index) => {
+        if (/^─+$/.test(line)) {
+          acc.push(index);
+        }
+        return acc;
+      }, []);
+      const dueLineIndex = lines.findIndex((line) =>
+        line.includes("4 cards due"),
       );
+
+      expect(dueLineIndex).toBeGreaterThanOrEqual(0);
+      // The input frame brackets the input row with a rule above and below it
+      // (tui/src/components/InputFrame.tsx); the due line sits below both.
+      expect(ruleIndexes.length).toBeGreaterThanOrEqual(2);
+      expect(dueLineIndex).toBeGreaterThan(ruleIndexes[ruleIndexes.length - 1]);
     });
 
     it("keeps the due-count row visible below the notes overlay", async () => {
