@@ -90,10 +90,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 8.1 Auth API and command tests pass
-- [x] 8.2 Full TUI suite passes
-- [x] 8.3 Type check passes
-- [x] 8.4 Lint passes
+- [x] 8.1 Auth API and command tests pass — 7fd0155
+- [x] 8.2 Full TUI suite passes — 7fd0155
+- [x] 8.3 Type check passes — 7fd0155
+- [x] 8.4 Lint passes — 7fd0155
 
 #### Manual
 
