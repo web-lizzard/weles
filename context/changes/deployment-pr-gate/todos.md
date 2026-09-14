@@ -29,8 +29,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Actionlint reports no errors on pr-gate.yml
-- [x] 3.2 Property suite passes locally
+- [x] 3.1 Actionlint reports no errors on pr-gate.yml — 045d88e
+- [x] 3.2 Property suite passes locally — 045d88e
 
 #### Manual
 
