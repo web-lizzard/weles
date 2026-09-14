@@ -2,6 +2,8 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readSignIn, writeSignIn } from "../src/auth/credentialStore";
+import { parseInstanceAddress } from "../src/instance/address";
 import { runInstanceCommand } from "../src/instance/command";
 import { configFilePath } from "../src/instance/configStore";
 
@@ -86,6 +88,54 @@ describe("runInstanceCommand", () => {
     expect(out).toHaveBeenCalledWith(
       "Weles instance set to https://host.example/weles. Restart any running Weles TUI to use it.",
     );
+  });
+
+  it("clears the stored sign-in when the instance address changes", async () => {
+    const home = await tempConfigHome();
+    const { out, err, location } = depsFor(home);
+    const first = parseInstanceAddress("http://localhost:8000");
+    const second = parseInstanceAddress("http://127.0.0.1:8000");
+
+    await runInstanceCommand(["set", first], { location, out, err });
+    await writeSignIn(location, {
+      instanceAddress: first,
+      token: "token",
+      expiresAt: "2099-01-01T00:00:00Z",
+    });
+    expect(await readSignIn(location, first)).not.toBeNull();
+
+    out.mockClear();
+    expect(
+      await runInstanceCommand(["set", second], { location, out, err }),
+    ).toBe(0);
+
+    expect(await readSignIn(location, first)).toBeNull();
+    expect(await readSignIn(location, second)).toBeNull();
+  });
+
+  it("keeps the stored sign-in when set is run with the same address again", async () => {
+    const home = await tempConfigHome();
+    const { out, err, location } = depsFor(home);
+    const address = parseInstanceAddress("http://localhost:8000");
+    const signIn = {
+      instanceAddress: address,
+      token: "token",
+      expiresAt: "2099-01-01T00:00:00Z",
+    };
+
+    await runInstanceCommand(["set", address], { location, out, err });
+    await writeSignIn(location, signIn);
+
+    out.mockClear();
+    expect(
+      await runInstanceCommand(["set", "http://localhost:8000"], {
+        location,
+        out,
+        err,
+      }),
+    ).toBe(0);
+
+    expect(await readSignIn(location, address)).toEqual(signIn);
   });
 
   it("replaces a previously stored address when set is run again", async () => {

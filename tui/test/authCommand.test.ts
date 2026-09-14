@@ -3,12 +3,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { runRegisterCommand, runSignInCommand } from "../src/auth/command";
+import { readSignIn } from "../src/auth/credentialStore";
 import { parseInstanceAddress } from "../src/instance/address";
 import { writeInstanceAddress } from "../src/instance/configStore";
 
 const EMAIL = "person@example.com";
 const PASSWORD = "long-enough-secret";
 const EXPIRES_AT = "2026-09-14T12:00:00Z";
+const TOKEN = "test-access-token";
+const INSTANCE = parseInstanceAddress("http://localhost:8000");
 
 vi.mock("../src/api/auth", () => ({
   register: vi.fn(),
@@ -166,7 +169,7 @@ describe("runSignInCommand", () => {
     readSecret.mockResolvedValue(PASSWORD);
     vi.mocked(signIn).mockResolvedValue({
       kind: "signed_in",
-      token: "test-token",
+      token: TOKEN,
       expiresAt: EXPIRES_AT,
     });
 
@@ -178,6 +181,33 @@ describe("runSignInCommand", () => {
     expect(signIn).toHaveBeenCalledWith(EMAIL, PASSWORD);
     expect(out.mock.calls.some(([line]) => /sign/i.test(line))).toBe(true);
     expect(err).not.toHaveBeenCalled();
+
+    expect(await readSignIn(location, INSTANCE)).toEqual({
+      instanceAddress: INSTANCE,
+      token: TOKEN,
+      expiresAt: EXPIRES_AT,
+    });
+  });
+
+  it("does not persist a credential when sign-in yields invalid_credentials", async () => {
+    const home = await configuredHome();
+    const { out, err, readSecret, location } = depsFor(home);
+    const preexisting = {
+      instanceAddress: INSTANCE,
+      token: "kept-token",
+      expiresAt: "2099-01-01T00:00:00Z",
+    };
+    const { writeSignIn } = await import("../src/auth/credentialStore");
+    await writeSignIn(location, preexisting);
+
+    readSecret.mockResolvedValue("wrong-password");
+    vi.mocked(signIn).mockResolvedValue({ kind: "invalid_credentials" });
+
+    expect(
+      await runSignInCommand([EMAIL], { location, readSecret, out, err }),
+    ).toBe(1);
+
+    expect(await readSignIn(location, INSTANCE)).toEqual(preexisting);
   });
 
   it("returns 1 without naming email or password when credentials are invalid", async () => {
