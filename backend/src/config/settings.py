@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     auth_signing_secret: SecretStr
     auth_sign_in_lifetime_hours: float = 24.0
     auth_password_min_length: int = 8
+    auth_sign_in_max_failures: int = 5
+    auth_sign_in_failure_window_minutes: float = 15.0
+    auth_registration_max_attempts: int = 10
+    auth_registration_window_minutes: float = 60.0
+    auth_trusted_proxy_addresses: list[str] = []
     notion_api_token: str | None = None
     vocabulary_match_threshold: float = 0.85
     environment_name: Environment = Environment.LOCAL
