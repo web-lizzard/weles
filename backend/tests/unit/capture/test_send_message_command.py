@@ -82,6 +82,36 @@ async def test_guard_session_raises_not_found_for_unknown_id() -> None:
         _ = await stack.command.guard_session(_OWNER, SessionId.new(), "Hello there")
 
 
+async def test_guard_session_raises_not_found_for_other_owners_session() -> None:
+    stack = _make_command_stack()
+    other_owner = UserId.new()
+    session = CaptureSession.start(other_owner)
+    await stack.session_repo.save(session)
+
+    with pytest.raises(CaptureSessionNotFoundError):
+        _ = await stack.command.guard_session(_OWNER, session.id, "Hello there")
+
+
+async def test_guard_session_raises_not_found_for_other_owners_closed_session() -> None:
+    stack = _make_command_stack()
+    other_owner = UserId.new()
+    closed_session = CaptureSession(
+        id=SessionId.new(),
+        owner_id=other_owner,
+        topic=SessionTopic(value="TCP handshakes"),
+        status=SessionStatus.CLOSED,
+        created_at=datetime.now(UTC),
+    )
+    await stack.session_repo.save(closed_session)
+
+    with pytest.raises(CaptureSessionNotFoundError):
+        _ = await stack.command.guard_session(
+            _OWNER,
+            closed_session.id,
+            "Can we continue?",
+        )
+
+
 async def test_guard_session_raises_closed_for_closed_session() -> None:
     stack = _make_command_stack()
     closed_session = CaptureSession(
@@ -193,6 +223,18 @@ async def test_generate_reply_raises_not_found_if_session_missing_at_handle_time
 
     with pytest.raises(CaptureSessionNotFoundError):
         async for _ in stack.command.handle(_OWNER, SessionId.new(), content):
+            pass
+
+
+async def test_generate_reply_raises_not_found_for_other_owners_session() -> None:
+    stack = _make_command_stack()
+    other_owner = UserId.new()
+    session = CaptureSession.start(other_owner)
+    await stack.session_repo.save(session)
+    content = MessageContent(value="Hello")
+
+    with pytest.raises(CaptureSessionNotFoundError):
+        async for _ in stack.command.handle(_OWNER, session.id, content):
             pass
 
 
