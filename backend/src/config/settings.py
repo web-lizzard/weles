@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str | None = None
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimensions: int | None = None
-    capture_model: str = "openai/gpt-5.6-luna"
+    capture_model: str = "openai/gpt-5.6-terra"
     distill_task_provider: DistillTaskProvider = DistillTaskProvider.PYDANTIC_AI
     distill_model: str = "openai/gpt-5.6-luna"
     distill_regeneration_tiers: list[tuple[int | None, float]] = (

@@ -82,7 +82,7 @@ def test_settings_defaults_distill_model_when_unset(
         ),
     )
     settings = Settings()  # pyright: ignore[reportCallIssue]
-    assert settings.distill_model == "openai/gpt-5-nano"
+    assert settings.distill_model == "openai/gpt-5.6-luna"
 
 
 def test_settings_raises_when_auth_signing_secret_missing(
