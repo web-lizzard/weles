@@ -85,6 +85,9 @@ export async function runRegisterCommand(
     case "password_too_short":
       deps.err("Password is too short.");
       return 1;
+    case "too_many_attempts":
+      deps.err("Too many attempts.");
+      return 1;
   }
 }
 
@@ -122,6 +125,9 @@ export async function runSignInCommand(
       return 0;
     case "invalid_credentials":
       deps.err("Invalid credentials.");
+      return 1;
+    case "too_many_attempts":
+      deps.err("Too many attempts.");
       return 1;
   }
 }

@@ -15,11 +15,13 @@ export type RegisterOutcome =
   | { kind: "registered" }
   | { kind: "already_registered" }
   | { kind: "invalid_email" }
-  | { kind: "password_too_short" };
+  | { kind: "password_too_short" }
+  | { kind: "too_many_attempts"; retryAfterSeconds: number | null };
 
 export type SignInOutcome =
   | { kind: "signed_in"; token: string; expiresAt: string }
-  | { kind: "invalid_credentials" };
+  | { kind: "invalid_credentials" }
+  | { kind: "too_many_attempts"; retryAfterSeconds: number | null };
 
 type CodedErrorBody = { code?: string; detail?: string };
 

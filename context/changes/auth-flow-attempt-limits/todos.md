@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-attempt-limits
-current_phase: 6
-next_step: 6.5
-next_command: /implement auth-flow-attempt-limits phase 6
+current_phase: 8
+next_step: 8.1
+next_command: /unit-test auth-flow-attempt-limits phase 8
 updated: 2026-09-14
 ---
 
@@ -78,9 +78,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 7.1 Type check passes
-- [ ] 7.2 Lint passes
-- [ ] 7.3 Existing TUI suite still passes
+- [x] 7.1 Type check passes
+- [x] 7.2 Lint passes
+- [x] 7.3 Existing TUI suite still passes
 
 ### Phase 8: TUI refusal — behavior
 
