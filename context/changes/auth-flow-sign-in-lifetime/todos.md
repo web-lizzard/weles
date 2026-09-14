@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-lifetime
-current_phase: 2
-next_step: 2.1
-next_command: /implement auth-flow-sign-in-lifetime phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement auth-flow-sign-in-lifetime phase 3
 updated: 2026-09-14
 ---
 
@@ -21,9 +21,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 2.1 Credential store and request tests pass
-- [ ] 2.2 Type check passes
-- [ ] 2.3 Lint passes
+- [x] 2.1 Credential store and request tests pass — bc7b477
+- [x] 2.2 Type check passes — bc7b477
+- [x] 2.3 Lint passes — bc7b477
 
 ### Phase 3: Sign-in persistence, instance binding, launch guard — stubs
 
