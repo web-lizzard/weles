@@ -1,8 +1,8 @@
 ---
 change_id: deployment-integration-on-demand
-current_phase: 2
-next_step: 2.3
-next_command: /implement deployment-integration-on-demand phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /implement deployment-integration-on-demand phase 3
 updated: 2026-09-14
 ---
 
@@ -23,8 +23,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 2.1 Actionlint reports no errors on integration.yml
-- [x] 2.2 The final status step is guarded by if always
+- [x] 2.1 Actionlint reports no errors on integration.yml — e2eb4f3
+- [x] 2.2 The final status step is guarded by if always — e2eb4f3
 
 #### Manual
 
