@@ -29,9 +29,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Type check passes
-- [x] 3.2 Lint passes
-- [x] 3.3 Existing TUI suite still passes
+- [x] 3.1 Type check passes — 3d6a95e
+- [x] 3.2 Lint passes — 3d6a95e
+- [x] 3.3 Existing TUI suite still passes — 3d6a95e
 
 ### Phase 4: Sign-in persistence, instance binding, launch guard — behavior
 
