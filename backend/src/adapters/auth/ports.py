@@ -1,6 +1,12 @@
 from typing import Protocol
 
-from adapters.auth.model import Account, EmailAddress, IssuedSignIn
+from adapters.auth.model import (
+    Account,
+    AttemptAction,
+    AttemptSource,
+    EmailAddress,
+    IssuedSignIn,
+)
 from domain.shared.identity.model import UserId
 
 
@@ -56,4 +62,30 @@ class SignInVerifier(Protocol):
     async def verify(self, token: str) -> UserId:
         """Raises `SignInRequiredError` for a malformed, altered, made-up,
         foreign-instance, or expired token, with no distinction between them."""
+        ...
+
+
+class AttemptLedger(Protocol):
+    """Counts attempts of one action from one source within a sliding window.
+    In-memory and Postgres implementations, one contract suite over both.
+
+    Invariants every implementation holds: attempts of one action or source
+    never count toward another, and limits are constructor input.
+    """
+
+    async def ensure_allowed(
+        self, action: AttemptAction, source: AttemptSource
+    ) -> None:
+        """Raises `TooManyAttemptsError` when `source` already has the
+        configured `max_attempts` of `action` within the window.
+        `retry_after_seconds` is the whole seconds, rounded up and at least 1,
+        until the oldest counted attempt leaves the window."""
+        ...
+
+    async def record(self, action: AttemptAction, source: AttemptSource) -> None:
+        """Counts one attempt of `action` from `source` now."""
+        ...
+
+    async def clear(self, action: AttemptAction, source: AttemptSource) -> None:
+        """Forgets `source`'s attempts of `action`."""
         ...

@@ -39,3 +39,16 @@ class NonPositiveSignInLifetimeError(CoreException):
 
 class SigningSecretTooShortError(CoreException):
     pass
+
+
+class TooManyAttemptsError(CoreException):
+    """Raised by `AttemptLedger.ensure_allowed` once a source's attempts of one
+    action reach the configured limit within the window."""
+
+    def __init__(self, retry_after_seconds: int) -> None:
+        super().__init__()
+        self.retry_after_seconds: int = retry_after_seconds
+
+
+class NonPositiveAttemptLimitError(CoreException):
+    pass
