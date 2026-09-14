@@ -86,7 +86,7 @@ export async function runRegisterCommand(
       deps.err("Password is too short.");
       return 1;
     case "too_many_attempts":
-      deps.err("Too many attempts.");
+      deps.err(tooManyAttemptsMessage(outcome.retryAfterSeconds));
       return 1;
   }
 }
@@ -127,7 +127,15 @@ export async function runSignInCommand(
       deps.err("Invalid credentials.");
       return 1;
     case "too_many_attempts":
-      deps.err("Too many attempts.");
+      deps.err(tooManyAttemptsMessage(outcome.retryAfterSeconds));
       return 1;
   }
+}
+
+function tooManyAttemptsMessage(retryAfterSeconds: number | null): string {
+  if (retryAfterSeconds === null) {
+    return "Too many attempts. Try again later.";
+  }
+  const minutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+  return `Too many attempts. Try again in about ${minutes} minutes.`;
 }

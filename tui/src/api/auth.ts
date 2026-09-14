@@ -33,6 +33,20 @@ function errorCode(error: unknown): string | undefined {
   return undefined;
 }
 
+/** Parses the `Retry-After` header as whole seconds. Returns `null` when the
+ * header is absent, unparsable, or not a positive integer. */
+function retryAfterSeconds(response: Response): number | null {
+  const header = response.headers.get("Retry-After");
+  if (header === null) {
+    return null;
+  }
+  const seconds = Number(header);
+  if (!Number.isInteger(seconds) || seconds <= 0) {
+    return null;
+  }
+  return seconds;
+}
+
 /** POST /auth/register. Maps `email_already_registered`,
  * `invalid_email_address` and `password_too_short` to their outcomes. */
 export async function register(
@@ -55,6 +69,12 @@ export async function register(
   if (response.status === 422 && code === "password_too_short") {
     return { kind: "password_too_short" };
   }
+  if (response.status === 429 && code === "too_many_attempts") {
+    return {
+      kind: "too_many_attempts",
+      retryAfterSeconds: retryAfterSeconds(response),
+    };
+  }
   throw new Error(`register failed: ${response.status}`);
 }
 
@@ -76,6 +96,12 @@ export async function signIn(
   const code = errorCode(error);
   if (response.status === 401 && code === "invalid_credentials") {
     return { kind: "invalid_credentials" };
+  }
+  if (response.status === 429 && code === "too_many_attempts") {
+    return {
+      kind: "too_many_attempts",
+      retryAfterSeconds: retryAfterSeconds(response),
+    };
   }
   throw new Error(`signIn failed: ${response.status}`);
 }
