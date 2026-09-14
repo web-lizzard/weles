@@ -14,7 +14,7 @@ updated: 2026-09-14
 | S-04 | Each person's captures, notes, and the cards distilled from them belong only to that person | auth-flow-capture-distill-separation | pending |
 | S-05 | Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain | auth-flow-remember-separation | pending |
 | S-06 | A person can sign out and hand the TUI to another account without leaking the previous person's data | auth-flow-sign-out | pending |
-| S-07 | Repeated sign-in and registration attempts from one source are limited | auth-flow-attempt-limits | pending |
+| S-07 | Repeated sign-in and registration attempts from one source are limited | auth-flow-attempt-limits | in_progress |
 
 ## Dependencies
 
@@ -124,7 +124,7 @@ once data is separated across the whole chain. Delivers both adapters for every 
 - **Outcome:** Repeated sign-in and registration attempts from one source are limited
 - **Acceptance criteria:** AC-18, AC-19, AC-20
 - **Change ID:** auth-flow-attempt-limits
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01
 - **Parallel with:** S-02, S-03, S-04, S-05, S-06
 
