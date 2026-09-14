@@ -82,9 +82,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 8.1 Activity indicator tests pass
-- [x] 8.2 Type check passes
-- [x] 8.3 Lint passes
+- [x] 8.1 Activity indicator tests pass — a078c4f
+- [x] 8.2 Type check passes — a078c4f
+- [x] 8.3 Lint passes — a078c4f
 
 ### Phase 9: Capture shell stubs
 
