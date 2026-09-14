@@ -21,7 +21,7 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 2.1 Actionlint reports no errors on tui-release.yml
+- [x] 2.1 Actionlint reports no errors on tui-release.yml — fca1fa6
 
 #### Manual
 
