@@ -8,12 +8,15 @@ class InMemoryAttemptLedger:
         self._limits: AttemptLimits = limits
 
     async def ensure_allowed(
-        self, _action: AttemptAction, _source: AttemptSource
+        self, action: AttemptAction, source: AttemptSource
     ) -> None:
+        del action, source
         raise NotImplementedError
 
-    async def record(self, _action: AttemptAction, _source: AttemptSource) -> None:
+    async def record(self, action: AttemptAction, source: AttemptSource) -> None:
+        del action, source
         raise NotImplementedError
 
-    async def clear(self, _action: AttemptAction, _source: AttemptSource) -> None:
+    async def clear(self, action: AttemptAction, source: AttemptSource) -> None:
+        del action, source
         raise NotImplementedError
