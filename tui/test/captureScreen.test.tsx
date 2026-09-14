@@ -437,7 +437,12 @@ describe("CaptureScreen", () => {
 
     const { lastFrame, stdin } = render(<CaptureScreen />);
 
-    for (let i = 0; i < 10; i++) {
+    // The draft region caps its height at floor((rows-1)/2); with the default
+    // 24-row terminal that's 11 lines, well under this 15-paragraph fixture's
+    // rendered line count, so pressing well past the true max offset still
+    // lands on it — extra presses clamp rather than overshoot.
+    const DOWN_PRESSES_PAST_MAX_OFFSET = 30;
+    for (let i = 0; i < DOWN_PRESSES_PAST_MAX_OFFSET; i++) {
       stdin.write(DOWN_ARROW);
       await new Promise((resolve) => setTimeout(resolve, 10));
     }
@@ -446,7 +451,7 @@ describe("CaptureScreen", () => {
     expect(scrolledFrame).toContain("more above");
     expect(scrolledFrame).toContain("draft-arrow-line-14");
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < DOWN_PRESSES_PAST_MAX_OFFSET; i++) {
       stdin.write(UP_ARROW);
       await new Promise((resolve) => setTimeout(resolve, 10));
     }
