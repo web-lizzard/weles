@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
 current_phase: 7
-next_step: 7.5
-next_command: /implement auth-flow-sign-in-gate phase 7
+next_step:
+next_command: /archive auth-flow-sign-in-gate
 updated: 2026-09-14
 ---
 
@@ -103,6 +103,6 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 7.5 Register from built TUI without password echo
-- [ ] 7.6 Sign in from built TUI with right and wrong password
-- [ ] 7.7 Piped password is refused without a request
+- [x] 7.5 Register from built TUI without password echo — def054a
+- [x] 7.6 Sign in from built TUI with right and wrong password — def054a
+- [x] 7.7 Piped password is refused without a request — def054a
