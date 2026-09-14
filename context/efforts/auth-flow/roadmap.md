@@ -12,7 +12,7 @@ updated: 2026-09-14
 | S-02 | A person can point the TUI at an instance of their choosing | auth-flow-instance-address | done |
 | S-03 | A sign-in survives TUI restarts and expires after its validity period without silently losing work | auth-flow-sign-in-lifetime | in_progress |
 | S-04 | Each person's captures, notes, and the cards distilled from them belong only to that person | auth-flow-capture-distill-separation | done |
-| S-05 | Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain | auth-flow-remember-separation | pending |
+| S-05 | Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain | auth-flow-remember-separation | in_progress |
 | S-06 | A person can sign out and hand the TUI to another account without leaking the previous person's data | auth-flow-sign-out | pending |
 | S-07 | Repeated sign-in and registration attempts from one source are limited | auth-flow-attempt-limits | in_progress |
 
@@ -99,7 +99,7 @@ the hosted instance stays off public addresses until FR-007 and FR-008 hold. Del
 - **Outcome:** Each person's review sittings and schedule are their own, and no data crosses between people anywhere in the chain
 - **Acceptance criteria:** AC-14, AC-16, AC-17
 - **Change ID:** auth-flow-remember-separation
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-04
 - **Parallel with:** S-02, S-03, S-07
 
