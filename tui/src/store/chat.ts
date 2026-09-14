@@ -11,10 +11,9 @@ import {
   SIGN_IN_REQUIRED,
 } from "../auth/expiry.js";
 
-export type TranscriptEntry = {
-  role: "user" | "agent";
-  content: string;
-};
+export type TranscriptEntry =
+  | { role: "user" | "agent"; content: string }
+  | { role: "topic"; content: string };
 
 export type Draft = {
   topic: string | null;
@@ -36,6 +35,8 @@ type ChatState = {
   streamError: StreamError;
   approved: boolean;
   approvalReceipt: boolean;
+  historyEpoch: number;
+  turnStartedAt: number | null;
 };
 
 type ChatActions = {
@@ -68,6 +69,8 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   streamError: null,
   approved: false,
   approvalReceipt: false,
+  historyEpoch: 0,
+  turnStartedAt: null,
   initSession: async () => {
     const { sessionId } = await startCaptureSession();
     set({ sessionId });
