@@ -11,9 +11,20 @@ export class InstanceNotConfiguredError extends Error {
   }
 }
 
+export type SignInProvider = () => Promise<string | null>;
+
 let configuredAddress: InstanceAddress | undefined;
 let memoizedClient: Client<paths> | undefined;
 let memoizedForAddress: InstanceAddress | undefined;
+let _signInProvider: SignInProvider | undefined;
+
+export function setSignInProvider(provider: SignInProvider): void {
+  _signInProvider = provider;
+}
+
+export async function authorizationHeaders(): Promise<Record<string, string>> {
+  throw new Error("not implemented");
+}
 
 export function setInstanceAddress(address: InstanceAddress): void {
   configuredAddress = address;
