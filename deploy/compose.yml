@@ -1,0 +1,58 @@
+name: weles
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    env_file: /srv/weles/postgres.env
+    command:
+      - -c
+      - shared_buffers=96MB
+      - -c
+      - max_connections=20
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - effective_cache_size=256MB
+    volumes:
+      - /srv/weles/pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    image: weles-api:${WELES_API_TAG:?}
+    env_file: /srv/weles/backend.env
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

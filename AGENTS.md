@@ -23,6 +23,7 @@ Weles is a single-user second brain built around a capture → distill → remem
 - `cd tui && pnpm test`, `pnpm typecheck`, `pnpm lint`.
 - `cd tui && pnpm generate:api` — regenerate `src/api/generated/schema.d.ts` against a running backend.
 - The integration suite, Postgres lane included, runs only through the `integration` workflow dispatched with a `ref`; a finished run leaves an `integration` commit status on that ref.
+- Production deploys happen only through the `deploy` workflow, dispatched with a `main` SHA that already has green required checks and a successful `integration` status — see "Hosting on Mikrus" in `README.md`.
 
 ## Coding Style
 

@@ -11,12 +11,12 @@ weles instance set <address>
 
 **Releasing a TUI version:** bump `version` in `tui/package.json`, commit, then push tag `tui-v<version>` (for example `tui-v0.1.0`). The `tui-release` workflow attaches `weles-<version>.tgz` and `weles.tgz` to a GitHub Release.
 
-## Bringing a Neon database to a commit's schema
+## Bringing a hosted database to a commit's schema
 
 The app does not migrate on startup. Bring the hosted database to the schema a commit expects with one script:
 
 1. Check out the commit you are about to deploy.
-2. In the Neon console, copy the branch's **direct** connection string — not the `-pooler` one. Migrations need the direct host; the script refuses a pooler URL.
+2. Get the database's **direct** connection string — not a `-pooler` one. Migrations need the direct host; the script refuses a pooler URL. In the Neon console, copy the branch's direct connection string. Over an SSH tunnel to a self-hosted Postgres (see "Hosting on Mikrus" below), the form is `postgresql://<user>:<password>@127.0.0.1:5432/<db>`.
 3. Run the script with the connection string set inline:
 
    ```sh
@@ -28,6 +28,45 @@ The app does not migrate on startup. Bring the hosted database to the schema a c
 Run it **before** deploying a commit that adds migration revisions: the deployed app expects the new schema as soon as it starts.
 
 Never put `NEON_DIRECT_URL` in `backend/.env`. `Settings` forbids unknown keys, so the app would fail to start.
+
+## Hosting on Mikrus
+
+The production backend and its Postgres run as a Docker Compose stack on a Mikrus VPS. The stack changes only when the `deploy` workflow is dispatched for a `main` commit whose required checks and `integration` status both passed.
+
+### One-time setup
+
+1. **SSH access.** Log in with a dedicated deploy key on port `10000 + <machine number>` — Mikrus never exposes port 22.
+2. **Docker.** Install Docker Engine with the Compose plugin; `docker compose version` must print a v2 version.
+3. **Disk.** Mount the added data disk at `/srv/weles` and create `/srv/weles/pgdata`.
+4. **Env files**, both `chmod 600`:
+   - `/srv/weles/postgres.env` — `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
+   - `/srv/weles/backend.env` — `DATABASE_URL=postgresql+asyncpg://…@postgres:5432/…`, `AUTH_SIGNING_SECRET`, `ENVIRONMENT_NAME=prod`, `OPENROUTER_API_KEY`, and the Langfuse keys.
+5. **Base image.** `docker pull pgvector/pgvector:pg16`.
+6. **GitHub environment.** Create a `production` environment holding `DEPLOY_SSH_HOST`, `DEPLOY_SSH_PORT`, `DEPLOY_SSH_USER`, `DEPLOY_SSH_KEY`, and `DEPLOY_SSH_KNOWN_HOSTS` (from `ssh-keyscan -p <port> <host>`).
+
+### Deploy
+
+Dispatch `integration` for the target SHA, then dispatch `deploy` with the same SHA.
+
+### Migrate
+
+Open a tunnel — `ssh -L 5432:127.0.0.1:5432 …` — then run the migration script above from a checkout of the deployed SHA, with `NEON_DIRECT_URL=postgresql://…@127.0.0.1:5432/<db>`. On a first deploy, follow it with `docker compose -f /srv/weles/compose.yml restart api` so the API restarts against the now-migrated schema.
+
+### Access
+
+Open a tunnel — `ssh -L 8000:127.0.0.1:8000 …` — then `weles instance set http://localhost:8000`.
+
+### Rollback
+
+Dispatch `deploy` with an older gated SHA.
+
+### Backup
+
+Over SSH: `docker compose -f /srv/weles/compose.yml exec postgres pg_dump -U <user> <db> > backup.sql`.
+
+### Resources
+
+`docker stats --no-stream` and `free -m` on the VPS. Escalate to a larger Mikrus plan when `docker inspect` shows `OOMKilled` or container restart counts climb.
 
 ## Dev container: Ordo (skills)
 

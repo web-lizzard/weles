@@ -11,12 +11,12 @@ updated: 2026-09-14
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
 | S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate               | done        |
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit                                                      | deployment-integration-on-demand | in_progress |
-| S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | in_progress |
+| S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | done        |
 | S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | done        |
-| S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | pending     |
+| S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | in_progress |
 | S-06 | Unhandled errors reach error tracking without carrying anything people wrote                                                            | deployment-error-tracking        | pending     |
 | S-07 | An agent skill diagnoses the hosted instance read-only and recommends next steps                                                        | deployment-diagnostics-skill     | pending     |
-| S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address                                              | deployment-public-address        | pending     |
+| S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address                                              | deployment-public-address        | in_progress |
 
 
 
@@ -76,7 +76,7 @@ own. S-05 accepts a commit only when a passing run exists for that same commit.
 - **Outcome:** Anyone can install the published TUI without credentials
 - **Acceptance criteria:** FR-02
 - **Change ID:** deployment-tui-publish
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-01, S-02, S-04, S-05, S-06, S-07, S-08
 
 `tui/package.json` is `private` and unscoped, and the GitHub npm registry requires a token
@@ -106,7 +106,7 @@ out-of-scope, revisit before the next migration after this effort lands).
 - **Outcome:** The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed
 - **Acceptance criteria:** FR-01, FR-06
 - **Change ID:** deployment-manual-deploy
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01, S-02, S-04
 - **Parallel with:** S-03, S-06
 - **Research:** mikrus-cli
@@ -159,7 +159,7 @@ names no particular instance.
 - **Outcome:** The author and the reviewer reach the hosted instance at a hard-to-discover public address
 - **Acceptance criteria:** frame boundary (inherited from auth-flow FR-01, FR-05)
 - **Change ID:** deployment-public-address
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-05
 - **Parallel with:** S-03, S-06, S-07
 
@@ -177,3 +177,5 @@ the private certification submission. Flooding protection stays deferred.
 - **S-01: A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-pr-gate/`. Lesson: —.
 
 - **S-04: The author brings an empty or behind Neon database to a commit's schema with one script** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-neon-schema/`. Lesson: —.
+
+- **S-03: Anyone can install the published TUI without credentials** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-tui-publish/`. Lesson: —.
