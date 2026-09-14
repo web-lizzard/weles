@@ -53,8 +53,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 5.1 Type check passes
-- [ ] 5.2 Existing backend suite still passes
+- [x] 5.1 Type check passes
+- [x] 5.2 Existing backend suite still passes
 
 ### Phase 6: Source resolution and HTTP refusal — behavior
 

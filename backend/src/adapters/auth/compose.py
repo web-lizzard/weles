@@ -2,7 +2,8 @@ from datetime import timedelta
 
 from adapters.auth.authenticator import Authenticator
 from adapters.auth.model import (
-    DEFAULT_ATTEMPT_LIMITS,
+    AttemptLimit,
+    AttemptLimits,
     PasswordPolicy,
     SigningSecret,
     SignInLifetime,
@@ -22,7 +23,18 @@ _session_factory = create_session_factory(_engine)
 
 _accounts = SqlAlchemyAccountStore(_session_factory)
 
-_attempt_ledger = SqlAlchemyAttemptLedger(_session_factory, DEFAULT_ATTEMPT_LIMITS)
+_attempt_limits = AttemptLimits(
+    sign_in=AttemptLimit(
+        max_attempts=_settings.auth_sign_in_max_failures,
+        window=timedelta(minutes=_settings.auth_sign_in_failure_window_minutes),
+    ),
+    registration=AttemptLimit(
+        max_attempts=_settings.auth_registration_max_attempts,
+        window=timedelta(minutes=_settings.auth_registration_window_minutes),
+    ),
+)
+
+_attempt_ledger = SqlAlchemyAttemptLedger(_session_factory, _attempt_limits)
 
 _sign_in_tokens = SignInTokens(
     secret=SigningSecret(value=_settings.auth_signing_secret),
@@ -53,3 +65,9 @@ def get_sign_in_verifier() -> SignInVerifier:
     """The same `SignInTokens` instance the authenticator issues with, so a
     sign-in is recognised by the process whose secret signed it."""
     return _sign_in_tokens
+
+
+def get_trusted_proxy_addresses() -> frozenset[str]:
+    """Peer addresses allowed to set `X-Forwarded-For`, from `Settings`.
+    Acceptance tests override this to trust `testclient`."""
+    return frozenset(_settings.auth_trusted_proxy_addresses)
