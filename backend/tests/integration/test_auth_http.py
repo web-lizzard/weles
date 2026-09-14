@@ -9,11 +9,17 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from adapters.auth.authenticator import Authenticator
-from adapters.auth.compose import get_authenticator, get_sign_in_verifier
+from adapters.auth.compose import (
+    get_authenticator,
+    get_sign_in_verifier,
+    get_trusted_proxy_addresses,
+)
 from adapters.auth.in_memory_account_store import InMemoryAccountStore
 from adapters.auth.in_memory_attempt_ledger import InMemoryAttemptLedger
 from adapters.auth.model import (
     DEFAULT_ATTEMPT_LIMITS,
+    AttemptLimit,
+    AttemptLimits,
     PasswordPolicy,
     SigningSecret,
     SignInLifetime,
@@ -34,7 +40,14 @@ _TEST_SIGNING_SECRET = "a" * 32
 _VALID_PASSWORD = "long-enough-secret"
 
 
-def _auth_stack() -> tuple[InMemoryAccountStore, SignInTokens, Authenticator]:
+def _small_limits(max_attempts: int = 2) -> AttemptLimits:
+    limit = AttemptLimit(max_attempts=max_attempts, window=timedelta(minutes=15))
+    return AttemptLimits(sign_in=limit, registration=limit)
+
+
+def _auth_stack(
+    limits: AttemptLimits | None = None,
+) -> tuple[InMemoryAccountStore, SignInTokens, Authenticator]:
     accounts = InMemoryAccountStore()
     tokens = SignInTokens(
         secret=SigningSecret(value=SecretStr(_TEST_SIGNING_SECRET)),
@@ -46,7 +59,7 @@ def _auth_stack() -> tuple[InMemoryAccountStore, SignInTokens, Authenticator]:
         passwords=PasswordHasher(),
         policy=PasswordPolicy(min_length=8),
         issuer=tokens,
-        attempts=InMemoryAttemptLedger(DEFAULT_ATTEMPT_LIMITS),
+        attempts=InMemoryAttemptLedger(limits or DEFAULT_ATTEMPT_LIMITS),
     )
     return accounts, tokens, authenticator
 
@@ -63,6 +76,27 @@ def auth_http_client() -> Iterator[TestClient]:
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def limited_auth_client() -> Iterator[TestClient]:
+    _accounts, tokens, authenticator = _auth_stack(limits=_small_limits())
+    app.dependency_overrides[get_authenticator] = lambda: authenticator
+    app.dependency_overrides[get_sign_in_verifier] = lambda: tokens
+    app.dependency_overrides[get_trusted_proxy_addresses] = lambda: frozenset(
+        {"testclient"}
+    )
+    with TestClient(app, raise_server_exceptions=False) as client:
+        yield client
+    app.dependency_overrides.clear()
+
+
+def _wrong_sign_in_status(client: TestClient, email: str, forwarded_for: str) -> int:
+    return client.post(
+        "/auth/sign-in",
+        json={"email": email, "password": "wrong-but-long-enough"},
+        headers={"x-forwarded-for": forwarded_for},
+    ).status_code
 
 
 def _register(client: TestClient, email: str, password: str = _VALID_PASSWORD) -> None:
@@ -205,3 +239,61 @@ def test_health_returns_ok_without_token(auth_http_client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_sign_in_answers_429_with_retry_after_once_failures_reach_the_limit(
+    limited_auth_client: TestClient,
+) -> None:
+    email = "alice@example.com"
+    _register(limited_auth_client, email)
+    for _ in range(2):
+        assert _wrong_sign_in_status(limited_auth_client, email, "198.51.100.1") == 401
+
+    response = limited_auth_client.post(
+        "/auth/sign-in",
+        json={"email": email, "password": "wrong-but-long-enough"},
+        headers={"x-forwarded-for": "198.51.100.1"},
+    )
+
+    assert response.status_code == 429
+    assert cast(dict[str, object], response.json())["code"] == "too_many_attempts"
+    assert int(response.headers["retry-after"]) > 0
+
+
+def test_registration_beyond_the_limit_answers_429(
+    limited_auth_client: TestClient,
+) -> None:
+    headers = {"x-forwarded-for": "198.51.100.1"}
+    for index in range(2):
+        assert (
+            limited_auth_client.post(
+                "/auth/register",
+                json={
+                    "email": f"alice{index}@example.com",
+                    "password": _VALID_PASSWORD,
+                },
+                headers=headers,
+            ).status_code
+            == 201
+        )
+
+    response = limited_auth_client.post(
+        "/auth/register",
+        json={"email": "alice2@example.com", "password": _VALID_PASSWORD},
+        headers=headers,
+    )
+
+    assert response.status_code == 429
+    assert cast(dict[str, object], response.json())["code"] == "too_many_attempts"
+
+
+def test_a_limited_source_does_not_refuse_a_different_forwarded_source(
+    limited_auth_client: TestClient,
+) -> None:
+    email = "alice@example.com"
+    _register(limited_auth_client, email)
+    for _ in range(2):
+        _ = _wrong_sign_in_status(limited_auth_client, email, "198.51.100.1")
+    assert _wrong_sign_in_status(limited_auth_client, email, "198.51.100.1") == 429
+
+    assert _wrong_sign_in_status(limited_auth_client, email, "198.51.100.2") == 401
