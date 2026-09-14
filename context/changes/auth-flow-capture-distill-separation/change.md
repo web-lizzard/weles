@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-capture-distill-separation
 title: Each person's captures, notes, and the cards distilled from them belong only to that person
-status: new
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
