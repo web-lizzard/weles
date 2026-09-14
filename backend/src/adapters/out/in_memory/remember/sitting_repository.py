@@ -1,5 +1,6 @@
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import SittingId
+from domain.shared.identity.model import UserId
 
 
 class InMemorySittingRepository:
@@ -12,7 +13,8 @@ class InMemorySittingRepository:
     async def get(self, sitting_id: SittingId) -> Sitting | None:
         return self._sittings.get(sitting_id)
 
-    async def latest(self) -> Sitting | None:
+    async def latest(self, owner: UserId) -> Sitting | None:
+        _ = owner
         if not self._sittings:
             return None
         return max(self._sittings.values(), key=lambda sitting: sitting.opened_at)

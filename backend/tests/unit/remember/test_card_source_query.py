@@ -34,6 +34,7 @@ from domain.remember.value_objects import CardId, ResumeHorizon, Reveal, Sitting
 from domain.shared.identity.model import UserId
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -111,7 +112,7 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
     card = await reviewable(composition)
 
     with pytest.raises(SittingNotFoundError):
-        _ = await _query(composition).handle(SittingId.new(), card.id)
+        _ = await _query(composition).handle(OWNER, SittingId.new(), card.id)
 
 
 async def test_a_sitting_past_its_horizon_raises_expired_on_source(
@@ -127,7 +128,7 @@ async def test_a_sitting_past_its_horizon_raises_expired_on_source(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        _ = await _query(composition).handle(sitting.id, card.id)
+        _ = await _query(composition).handle(OWNER, sitting.id, card.id)
 
 
 async def test_a_card_outside_the_sitting_raises_card_not_in_sitting(
@@ -139,7 +140,7 @@ async def test_a_card_outside_the_sitting_raises_card_not_in_sitting(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotInSittingError):
-        _ = await _query(composition).handle(sitting.id, outsider.id)
+        _ = await _query(composition).handle(OWNER, sitting.id, outsider.id)
 
 
 async def test_a_card_with_no_reveal_event_raises_source_not_available(
@@ -150,7 +151,7 @@ async def test_a_card_with_no_reveal_event_raises_source_not_available(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SourceNotAvailableError):
-        _ = await _query(composition).handle(sitting.id, card.id)
+        _ = await _query(composition).handle(OWNER, sitting.id, card.id)
 
 
 async def test_revealed_card_with_unresolvable_quote_raises_source_not_available(
@@ -166,7 +167,7 @@ async def test_revealed_card_with_unresolvable_quote_raises_source_not_available
     await _save_reveal(composition, sitting.id, card.id)
 
     with pytest.raises(SourceNotAvailableError):
-        _ = await _query(composition).handle(sitting.id, card.id)
+        _ = await _query(composition).handle(OWNER, sitting.id, card.id)
 
 
 async def test_after_reveal_a_resolvable_card_returns_blocks_and_span(
@@ -177,7 +178,7 @@ async def test_after_reveal_a_resolvable_card_returns_blocks_and_span(
     await composition.sittings.save(sitting)
     await _save_reveal(composition, sitting.id, card.id)
 
-    result = await _query(composition).handle(sitting.id, card.id)
+    result = await _query(composition).handle(OWNER, sitting.id, card.id)
 
     assert isinstance(result, CardSourceDTO)
     assert len(result.blocks) >= 1

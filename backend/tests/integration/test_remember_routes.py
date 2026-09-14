@@ -21,11 +21,11 @@ from domain.shared.identity.model import UserId
 from .conftest import RememberTestContext
 
 
-def _note() -> Note:
+def _note(owner: UserId) -> Note:
     now = datetime.now(UTC)
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(
@@ -40,13 +40,14 @@ def _note() -> Note:
 
 
 def _card(
+    owner: UserId,
     note_id: NoteId,
     front: str = "What establishes a connection?",
     back: str = "A three-way handshake.",
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner,
         note_id=note_id,
         front=CardSide(value=front),
         back=CardSide(value=back),
@@ -59,8 +60,8 @@ def _card(
 async def test_full_review_loop_returns_a_front_reveals_it_and_completes_on_grade(
     remember_client: RememberTestContext,
 ) -> None:
-    note = _note()
-    card = _card(note.id)
+    note = _note(remember_client.user_id)
+    card = _card(remember_client.user_id, note.id)
     await remember_client.notes.save(note)
     await remember_client.cards.save(card)
 
@@ -111,8 +112,8 @@ async def test_open_sitting_returns_nothing_due_when_no_cards_are_reviewable(
 async def test_get_due_cards_count_returns_a_live_partition_for_seeded_cards(
     remember_client: RememberTestContext,
 ) -> None:
-    note = _note()
-    card = _card(note.id)
+    note = _note(remember_client.user_id)
+    card = _card(remember_client.user_id, note.id)
     await remember_client.notes.save(note)
     await remember_client.cards.save(card)
 
@@ -143,9 +144,9 @@ async def test_current_card_returns_404_for_an_unknown_sitting_id(
 async def test_grade_card_returns_409_for_a_card_that_is_not_the_one_in_front(
     remember_client: RememberTestContext,
 ) -> None:
-    note = _note()
-    card_a = _card(note.id, front="Card A front")
-    card_b = _card(note.id, front="Card B front")
+    note = _note(remember_client.user_id)
+    card_a = _card(remember_client.user_id, note.id, front="Card A front")
+    card_b = _card(remember_client.user_id, note.id, front="Card B front")
     await remember_client.notes.save(note)
     await remember_client.cards.save(card_a)
     await remember_client.cards.save(card_b)
@@ -172,8 +173,8 @@ async def test_grade_card_returns_409_for_a_card_that_is_not_the_one_in_front(
 async def test_reject_card_returns_204_and_queues_card_rejected_on_the_remember_outbox(
     remember_client: RememberTestContext,
 ) -> None:
-    note = _note()
-    card = _card(note.id)
+    note = _note(remember_client.user_id)
+    card = _card(remember_client.user_id, note.id)
     await remember_client.notes.save(note)
     await remember_client.cards.save(card)
 
@@ -198,8 +199,8 @@ async def test_reject_card_returns_204_and_queues_card_rejected_on_the_remember_
 async def test_source_route_returns_404_before_the_back_is_revealed(
     remember_client: RememberTestContext,
 ) -> None:
-    note = _note()
-    card = _card(note.id)
+    note = _note(remember_client.user_id)
+    card = _card(remember_client.user_id, note.id)
     await remember_client.notes.save(note)
     await remember_client.cards.save(card)
 
@@ -219,8 +220,8 @@ async def test_source_route_returns_404_before_the_back_is_revealed(
 async def test_source_route_returns_blocks_and_span_after_the_back_is_revealed(
     remember_client: RememberTestContext,
 ) -> None:
-    note = _note()
-    card = _card(note.id)
+    note = _note(remember_client.user_id)
+    card = _card(remember_client.user_id, note.id)
     await remember_client.notes.save(note)
     await remember_client.cards.save(card)
 

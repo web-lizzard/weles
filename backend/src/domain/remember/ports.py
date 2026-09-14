@@ -15,6 +15,7 @@ from domain.remember.value_objects import (
     SchedulerStamp,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 
 class SourceSpan(BaseModel, frozen=True):
@@ -40,20 +41,22 @@ class ReviewableCard(BaseModel, frozen=True):
 
 
 class ReviewCatalog(Protocol):
-    async def list_reviewable(self) -> Sequence[ReviewableCard]: ...
+    async def list_reviewable(self, owner: UserId) -> Sequence[ReviewableCard]: ...
 
-    async def get_reviewable(self, card_id: CardId) -> ReviewableCard | None: ...
+    async def get_reviewable(
+        self, owner: UserId, card_id: CardId
+    ) -> ReviewableCard | None: ...
 
 
 class CardSourceLocator(Protocol):
-    async def locate(self, card_id: CardId) -> CardSource | None: ...
+    async def locate(self, owner: UserId, card_id: CardId) -> CardSource | None: ...
 
 
 class SittingReader(Protocol):
     async def get(self, sitting_id: SittingId) -> Sitting | None: ...
 
-    async def latest(self) -> Sitting | None:
-        """The sitting with the greatest opened_at, or None if none stored.
+    async def latest(self, owner: UserId) -> Sitting | None:
+        """The caller's sitting with the greatest opened_at.
 
         Offer and finish are not this port's filter. Uniqueness at mint
         means this is the only sitting that can still be resumable.

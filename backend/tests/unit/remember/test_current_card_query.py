@@ -10,6 +10,7 @@ from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import Grade, Graded, ResumeHorizon, SittingId
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -39,7 +40,7 @@ async def test_a_sitting_past_its_horizon_raises_expired_on_current_card(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        _ = await composition.current_card().handle(sitting.id)
+        _ = await composition.current_card().handle(OWNER, sitting.id)
 
 
 async def test_the_current_card_is_the_next_draw_from_the_sitting_log(
@@ -56,7 +57,7 @@ async def test_the_current_card_is_the_next_draw_from_the_sitting_log(
     )
     assert expected is not None
 
-    result = await composition.current_card().handle(sitting.id)
+    result = await composition.current_card().handle(OWNER, sitting.id)
 
     assert isinstance(result, PresentedCardDTO)
     assert result.sitting_id == sitting.id.value
@@ -69,7 +70,7 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
     composition: InMemoryRememberComposition,
 ) -> None:
     with pytest.raises(SittingNotFoundError):
-        _ = await composition.current_card().handle(SittingId.new())
+        _ = await composition.current_card().handle(OWNER, SittingId.new())
 
 
 async def test_two_consecutive_reads_return_the_same_card(
@@ -79,8 +80,8 @@ async def test_two_consecutive_reads_return_the_same_card(
     sitting = open_sitting(card)
     await composition.sittings.save(sitting)
 
-    first = await composition.current_card().handle(sitting.id)
-    second = await composition.current_card().handle(sitting.id)
+    first = await composition.current_card().handle(OWNER, sitting.id)
+    second = await composition.current_card().handle(OWNER, sitting.id)
 
     assert first.card_id == second.card_id
     assert first.front == second.front == "Stable pick"
@@ -96,7 +97,7 @@ async def test_a_discarded_member_is_excluded_from_the_draw(
     sitting = open_sitting(kept, dropped)
     await composition.sittings.save(sitting)
 
-    result = await composition.current_card().handle(sitting.id)
+    result = await composition.current_card().handle(OWNER, sitting.id)
 
     assert result.card_id == kept.id.value
     assert result.front == "Still reviewable"
@@ -113,7 +114,7 @@ async def test_a_finished_sitting_reports_completion_through_the_dto(
     await composition.sittings.save(sitting)
     await composition.review_events.save(event)
 
-    result = await composition.current_card().handle(sitting.id)
+    result = await composition.current_card().handle(OWNER, sitting.id)
 
     assert isinstance(result, PresentedCardDTO)
     assert result.sitting_complete is True

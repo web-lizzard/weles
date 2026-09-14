@@ -11,22 +11,25 @@ from domain.remember.exceptions import (
 from domain.remember.ports import ReviewCatalog
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import CardId, Reveal, SittingId
+from domain.shared.identity.model import UserId
 
 
 class RevealBackCommand:
     def __init__(
         self,
-        uow_factory: Callable[[], UnitOfWork],
+        uow_factory: Callable[[UserId], UnitOfWork],
         catalog: ReviewCatalog,
         clock: Clock,
     ) -> None:
-        self._uow_factory: Callable[[], UnitOfWork] = uow_factory
+        self._uow_factory: Callable[[UserId], UnitOfWork] = uow_factory
         self._catalog: ReviewCatalog = catalog
         self._clock: Clock = clock
 
-    async def handle(self, sitting_id: SittingId, card_id: CardId) -> RevealedCardDTO:
+    async def handle(
+        self, owner: UserId, sitting_id: SittingId, card_id: CardId
+    ) -> RevealedCardDTO:
         """Record that the back was revealed and return front and back text."""
-        async with self._uow_factory() as uow:
+        async with self._uow_factory(owner) as uow:
             sitting = await uow.sittings.get(sitting_id)
             if sitting is None:
                 raise SittingNotFoundError
@@ -36,7 +39,7 @@ class RevealBackCommand:
             if not sitting.contains(card_id):
                 raise CardNotInSittingError
 
-            reviewable = await self._catalog.get_reviewable(card_id)
+            reviewable = await self._catalog.get_reviewable(owner, card_id)
             if reviewable is None:
                 raise CardNotReviewableError
 

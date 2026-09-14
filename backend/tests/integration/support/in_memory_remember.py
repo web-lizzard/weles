@@ -53,6 +53,7 @@ from domain.remember.value_objects import (
     ResumeHorizon,
     ShowingLimit,
 )
+from domain.shared.identity.model import UserId
 
 _DEFAULT_SHOWING_LIMIT = 2
 _OUTBOX_BATCH_SIZE = 10
@@ -82,10 +83,13 @@ class InMemoryRememberComposition:
         clock: Clock | None = None,
         showing_limit: ShowingLimit | None = None,
         resume_horizon: ResumeHorizon | None = None,
+        notes: InMemoryDistillNoteRepository | None = None,
+        cards: InMemoryCardRepository | None = None,
+        outbox_store: InMemoryOutboxStore | None = None,
     ) -> "InMemoryRememberComposition":
-        notes = InMemoryDistillNoteRepository()
-        cards = InMemoryCardRepository()
-        outbox_store = InMemoryOutboxStore()
+        notes = notes or InMemoryDistillNoteRepository()
+        cards = cards or InMemoryCardRepository()
+        outbox_store = outbox_store or InMemoryOutboxStore()
         return cls(
             sittings=InMemorySittingRepository(),
             review_events=InMemoryReviewEventStore(),
@@ -101,12 +105,13 @@ class InMemoryRememberComposition:
             outbox=InMemoryOutboxAppender(outbox_store),
         )
 
-    def unit_of_work(self) -> UnitOfWork:
+    def unit_of_work(self, owner: UserId) -> UnitOfWork:
         return cast(
             UnitOfWork,
             cast(
                 object,
                 InMemoryUnitOfWork(
+                    owner,
                     self.sittings,
                     self.review_events,
                     self.scheduling_states,

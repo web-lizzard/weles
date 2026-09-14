@@ -15,11 +15,13 @@ from domain.remember.value_objects import (
     ReviewEventPayload,
     SchedulerStamp,
 )
+from domain.shared.identity.model import UserId
 
 
 def sitting_to_row(sitting: Sitting) -> RememberSittingRow:
     return RememberSittingRow(
         id=sitting.id,
+        owner_id=sitting.owner_id.value,
         opened_at=sitting.opened_at,
         showing_limit=sitting.showing_limit,
         resume_horizon=sitting.resume_horizon,
@@ -33,6 +35,7 @@ def sitting_to_row(sitting: Sitting) -> RememberSittingRow:
 def sitting_to_domain(row: RememberSittingRow) -> Sitting:
     return Sitting(
         id=row.id,
+        owner_id=UserId(value=row.owner_id),
         card_ids=frozenset(card.card_id for card in row.cards),
         opened_at=row.opened_at,
         showing_limit=row.showing_limit,

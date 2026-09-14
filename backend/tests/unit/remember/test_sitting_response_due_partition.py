@@ -14,7 +14,7 @@ from application.remember.dto import (
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import CardId, Grade, Graded, SittingId
 
-from .conftest import open_sitting, reviewable
+from .conftest import OWNER, open_sitting, reviewable
 
 
 def _event(card_id: object, sitting_id: SittingId, grade: Grade) -> ReviewEvent:
@@ -38,7 +38,7 @@ def _assert_partition_matches_oracle(
 async def _due_count_partition(
     composition: InMemoryRememberComposition,
 ) -> DuePartitionDTO:
-    return (await composition.due_count().handle()).due
+    return (await composition.due_count().handle(OWNER)).due
 
 
 async def test_a_fresh_open_carries_the_live_partition_with_no_seen_still_owed(
@@ -47,7 +47,7 @@ async def test_a_fresh_open_carries_the_live_partition_with_no_seen_still_owed(
     _ = await reviewable(composition, front="One")
     _ = await reviewable(composition, front="Two")
 
-    opened = await composition.open_sitting().handle()
+    opened = await composition.open_sitting().handle(OWNER)
     expected = await _due_count_partition(composition)
 
     assert isinstance(opened, SittingOpenedDTO)
@@ -62,8 +62,8 @@ async def test_resuming_an_offered_sitting_carries_the_live_partition(
 ) -> None:
     _ = await reviewable(composition, front="Resume me")
 
-    _ = await composition.open_sitting().handle()
-    resumed = await composition.open_sitting().handle()
+    _ = await composition.open_sitting().handle(OWNER)
+    resumed = await composition.open_sitting().handle(OWNER)
     expected = await _due_count_partition(composition)
 
     assert isinstance(resumed, SittingResumedDTO)
@@ -76,11 +76,12 @@ async def test_a_hard_grade_carries_the_live_partition_including_seen_still_owed
     _ = await reviewable(composition, front="Alpha")
     _ = await reviewable(composition, front="Beta")
 
-    opened = await composition.open_sitting().handle()
+    opened = await composition.open_sitting().handle(OWNER)
     assert isinstance(opened, SittingOpenedDTO)
     assert opened.card_id is not None
 
     graded = await composition.grade_card().handle(
+        OWNER,
         SittingId(value=opened.sitting_id),
         CardId(value=opened.card_id),
         Grade.HARD,
@@ -101,7 +102,7 @@ async def test_current_card_carries_the_live_partition_for_the_sitting_state(
     await composition.sittings.save(sitting)
     await composition.review_events.save(_event(shown.id, sitting.id, Grade.FORGOT))
 
-    presented = await composition.current_card().handle(sitting.id)
+    presented = await composition.current_card().handle(OWNER, sitting.id)
     expected = await _due_count_partition(composition)
 
     assert isinstance(presented, PresentedCardDTO)

@@ -34,6 +34,8 @@ from domain.remember.ports import CardSource, CardSourceLocator, SourceBlock, So
 from domain.remember.value_objects import CardId
 from domain.shared.identity.model import UserId
 
+_OWNER = UserId.new()
+
 
 class _CommittingNoteRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
@@ -158,7 +160,7 @@ async def test_locate_returns_every_block_and_exact_span_when_anchor_matches(
     await notes.save(note)
     await cards.save(card)
 
-    result = await locator.locate(CardId(value=card.id.value))
+    result = await locator.locate(_OWNER, CardId(value=card.id.value))
 
     assert result == CardSource(
         blocks=[
@@ -182,7 +184,7 @@ async def test_locate_returns_none_for_a_card_id_no_repository_holds(
     await notes.save(note)
     await cards.save(card)
 
-    result = await locator.locate(CardId(value=uuid4()))
+    result = await locator.locate(_OWNER, CardId(value=uuid4()))
 
     assert result is None
 
@@ -196,7 +198,7 @@ async def test_locate_returns_none_for_a_discarded_card(
     await notes.save(note)
     await cards.save(card)
 
-    result = await locator.locate(CardId(value=card.id.value))
+    result = await locator.locate(_OWNER, CardId(value=card.id.value))
 
     assert result is None
 
@@ -214,7 +216,7 @@ async def test_locate_returns_none_when_the_note_behind_the_card_is_missing(
     card = _sample_card(note.id)
     await cards.save(card)
 
-    result = await locator.locate(CardId(value=card.id.value))
+    result = await locator.locate(_OWNER, CardId(value=card.id.value))
 
     assert result is None
 
@@ -237,6 +239,6 @@ async def test_locate_returns_none_when_the_note_no_longer_contains_the_card_quo
         )
     )
 
-    result = await locator.locate(CardId(value=card.id.value))
+    result = await locator.locate(_OWNER, CardId(value=card.id.value))
 
     assert result is None

@@ -15,6 +15,9 @@ from domain.remember.value_objects import (
     ShowingLimit,
     SittingId,
 )
+from domain.shared.identity.model import UserId
+
+_OWNER = UserId.new()
 
 
 def _stamp(parameter_version: str = "fsrs-6.3.2-defaults") -> SchedulerStamp:
@@ -41,6 +44,7 @@ def _state(
 
 def _open_sitting(*card_ids: CardId) -> Sitting:
     return Sitting.open(
+        _OWNER,
         frozenset(card_ids),
         datetime.now(UTC),
         ShowingLimit(value=2),

@@ -23,10 +23,12 @@ from domain.remember.value_objects import (
     ShowingLimit,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 
 class Sitting(BaseModel, frozen=True):
     id: SittingId
+    owner_id: UserId
     card_ids: frozenset[CardId]
     opened_at: datetime
     showing_limit: ShowingLimit
@@ -44,6 +46,7 @@ class Sitting(BaseModel, frozen=True):
     @classmethod
     def open(
         cls,
+        owner: UserId,
         card_ids: frozenset[CardId],
         opened_at: datetime,
         showing_limit: ShowingLimit,
@@ -51,6 +54,7 @@ class Sitting(BaseModel, frozen=True):
     ) -> "Sitting":
         return cls(
             id=SittingId.new(),
+            owner_id=owner,
             card_ids=card_ids,
             opened_at=opened_at,
             showing_limit=showing_limit,

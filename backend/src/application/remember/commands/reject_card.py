@@ -7,24 +7,27 @@ from domain.remember.ports import ReviewableCard, ReviewCatalog
 from domain.remember.review_event import ReviewEvent
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, Rejection, SittingId
+from domain.shared.identity.model import UserId
 
 
 class RejectCardCommand:
     def __init__(
         self,
-        uow_factory: Callable[[], UnitOfWork],
+        uow_factory: Callable[[UserId], UnitOfWork],
         catalog: ReviewCatalog,
         clock: Clock,
     ) -> None:
-        self._uow_factory: Callable[[], UnitOfWork] = uow_factory
+        self._uow_factory: Callable[[UserId], UnitOfWork] = uow_factory
         self._catalog: ReviewCatalog = catalog
         self._clock: Clock = clock
 
-    async def handle(self, sitting_id: SittingId, card_id: CardId) -> None:
-        async with self._uow_factory() as uow:
+    async def handle(
+        self, owner: UserId, sitting_id: SittingId, card_id: CardId
+    ) -> None:
+        async with self._uow_factory(owner) as uow:
             sitting = await self._require_sitting(uow, sitting_id)
             sitting_events = await uow.review_events.list_by_sitting(sitting_id)
-            by_id = await self._reviewable_by_id()
+            by_id = await self._reviewable_by_id(owner)
             present = sitting.visible(frozenset(by_id))
             reviewed_at = self._clock.now()
             sitting.guard_outcome(card_id, present, sitting_events, reviewed_at)
@@ -47,6 +50,6 @@ class RejectCardCommand:
             raise SittingNotFoundError
         return sitting
 
-    async def _reviewable_by_id(self) -> dict[CardId, ReviewableCard]:
-        reviewable = await self._catalog.list_reviewable()
+    async def _reviewable_by_id(self, owner: UserId) -> dict[CardId, ReviewableCard]:
+        reviewable = await self._catalog.list_reviewable(owner)
         return {card.id: card for card in reviewable}

@@ -16,19 +16,20 @@ from domain.remember.value_objects import (
     ResumeHorizon,
     ShowingLimit,
 )
+from domain.shared.identity.model import UserId
 
 
 class OpenSittingCommand:
     def __init__(
         self,
-        uow_factory: Callable[[], UnitOfWork],
+        uow_factory: Callable[[UserId], UnitOfWork],
         catalog: ReviewCatalog,
         clock: Clock,
         showing_limit: ShowingLimit,
         scheduler: Scheduler,
         resume_horizon: ResumeHorizon | None = None,
     ) -> None:
-        self._uow_factory: Callable[[], UnitOfWork] = uow_factory
+        self._uow_factory: Callable[[UserId], UnitOfWork] = uow_factory
         self._catalog: ReviewCatalog = catalog
         self._clock: Clock = clock
         self._showing_limit: ShowingLimit = showing_limit
@@ -37,21 +38,23 @@ class OpenSittingCommand:
             value=MIN_RESUME_HORIZON
         )
 
-    async def handle(self) -> SittingOpenedDTO | SittingResumedDTO | NothingDueDTO:
+    async def handle(
+        self, owner: UserId
+    ) -> SittingOpenedDTO | SittingResumedDTO | NothingDueDTO:
         """Open one sitting over every card due at this instant, or write nothing.
 
         If the latest sitting is still offered and unfinished, return it without
         writing. Otherwise mint a new sitting over the due set, or nothing due.
         """
         as_of = self._clock.now()
-        candidates = await self._catalog.list_reviewable()
+        candidates = await self._catalog.list_reviewable(owner)
         live_stamp = self._scheduler.stamp()
         by_id = {card.id: card for card in candidates}
 
-        async with self._uow_factory() as uow:
+        async with self._uow_factory(owner) as uow:
             states = await uow.scheduling_states.get_many(tuple(by_id))
 
-            latest = await uow.sittings.latest()
+            latest = await uow.sittings.latest(owner)
             if latest is not None and latest.is_offered(as_of):
                 present = latest.visible(frozenset(by_id))
                 sitting_events = await uow.review_events.list_by_sitting(latest.id)
@@ -85,7 +88,7 @@ class OpenSittingCommand:
                 return NothingDueDTO()
 
             sitting = Sitting.open(
-                due, as_of, self._showing_limit, self._resume_horizon
+                owner, due, as_of, self._showing_limit, self._resume_horizon
             )
             present = sitting.visible(frozenset(by_id))
             card_id = sitting.next_card(present, events=[])

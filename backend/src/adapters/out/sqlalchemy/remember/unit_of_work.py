@@ -10,6 +10,7 @@ from adapters.out.sqlalchemy.remember.sitting_repository import (
     SqlAlchemySittingRepository,
 )
 from adapters.out.sqlalchemy.shared.outbox.appender import SqlAlchemyOutboxAppender
+from domain.shared.identity.model import UserId
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -22,7 +23,10 @@ class SqlAlchemyRememberUnitOfWork:
     scheduling_states: SqlAlchemySchedulingStateRepository
     outbox: SqlAlchemyOutboxAppender
 
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self, owner: UserId, session_factory: async_sessionmaker[AsyncSession]
+    ) -> None:
+        _ = owner
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
         self._committed: bool = False
         self._session: AsyncSession | None = None

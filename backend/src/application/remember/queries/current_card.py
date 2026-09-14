@@ -14,6 +14,7 @@ from domain.remember.ports import (
     SittingReader,
 )
 from domain.remember.value_objects import SittingId
+from domain.shared.identity.model import UserId
 
 
 class CurrentCardQuery:
@@ -33,7 +34,7 @@ class CurrentCardQuery:
         self._clock: Clock = clock
         self._scheduler: Scheduler = scheduler
 
-    async def handle(self, sitting_id: SittingId) -> PresentedCardDTO:
+    async def handle(self, owner: UserId, sitting_id: SittingId) -> PresentedCardDTO:
         """Load the sitting and return the stable next draw. Read-only.
 
         Refuses sittings past their resume horizon. Also returns
@@ -47,7 +48,7 @@ class CurrentCardQuery:
             raise SittingExpiredError
 
         sitting_events = await self._events.list_by_sitting(sitting_id)
-        reviewable = await self._catalog.list_reviewable()
+        reviewable = await self._catalog.list_reviewable(owner)
         by_id = {card.id: card for card in reviewable}
         live = frozenset(by_id)
         states = await self._scheduling_states.get_many(tuple(by_id))
@@ -75,7 +76,7 @@ class CurrentCardQuery:
                 due=due,
             )
 
-        card = await self._catalog.get_reviewable(card_id)
+        card = await self._catalog.get_reviewable(owner, card_id)
         if card is None:
             raise CardNotReviewableError
 

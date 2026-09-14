@@ -140,6 +140,7 @@ class RememberTestContext:
     notes: InMemoryDistillNoteRepository
     cards: InMemoryCardRepository
     outbox_store: InMemoryOutboxStore
+    user_id: UserId
 
 
 @pytest.fixture
@@ -149,12 +150,14 @@ def remember_client() -> Iterator[RememberTestContext]:
 
     composition = InMemoryRememberComposition.create()
     app.dependency_overrides.update(composition.dependency_overrides())
-    app.dependency_overrides[require_sign_in] = _fixed_sign_in_gate()
+    gate = _fixed_sign_in_gate()
+    app.dependency_overrides[require_sign_in] = gate
     with TestClient(app) as client:
         yield RememberTestContext(
             client=client,
             notes=composition.notes,
             cards=composition.cards,
             outbox_store=composition.outbox_store,
+            user_id=gate.user_id,
         )
     app.dependency_overrides.clear()

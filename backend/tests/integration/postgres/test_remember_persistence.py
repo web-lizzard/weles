@@ -55,6 +55,7 @@ _BACK = "A three-way handshake."
 _ANCHOR_QUOTE = "Connections are established via a three-way handshake."
 _NOTE_BODY = f"Lead paragraph.\n\n{_ANCHOR_QUOTE}\n\nTail."
 _SHOWING_LIMIT = ShowingLimit(value=2)
+_OWNER = UserId.new()
 
 
 class _FixedClock:
@@ -72,9 +73,10 @@ def _distill_uow_factory(
 
 
 def _remember_uow_factory(
+    owner: UserId,
     session_factory: async_sessionmaker[AsyncSession],
 ) -> SqlAlchemyRememberUnitOfWork:
-    return SqlAlchemyRememberUnitOfWork(session_factory)
+    return SqlAlchemyRememberUnitOfWork(owner, session_factory)
 
 
 async def _seed_live_card(
@@ -111,7 +113,7 @@ def _open_sitting_command(
     session_factory: async_sessionmaker[AsyncSession], clock: Clock
 ) -> OpenSittingCommand:
     return OpenSittingCommand(
-        uow_factory=lambda: _remember_uow_factory(session_factory),  # pyright: ignore[reportArgumentType]
+        uow_factory=lambda owner: _remember_uow_factory(owner, session_factory),  # pyright: ignore[reportArgumentType]
         catalog=SqlAlchemyReviewCatalog(session_factory),
         clock=clock,
         showing_limit=_SHOWING_LIMIT,
@@ -124,7 +126,7 @@ def _grade_card_command(
     session_factory: async_sessionmaker[AsyncSession], clock: Clock
 ) -> GradeCardCommand:
     return GradeCardCommand(
-        uow_factory=lambda: _remember_uow_factory(session_factory),  # pyright: ignore[reportArgumentType]
+        uow_factory=lambda owner: _remember_uow_factory(owner, session_factory),  # pyright: ignore[reportArgumentType]
         catalog=SqlAlchemyReviewCatalog(session_factory),
         scheduler=FsrsScheduler(),
         clock=clock,
@@ -135,7 +137,7 @@ def _reject_card_command(
     session_factory: async_sessionmaker[AsyncSession], clock: Clock
 ) -> RejectCardCommand:
     return RejectCardCommand(
-        uow_factory=lambda: _remember_uow_factory(session_factory),  # pyright: ignore[reportArgumentType]
+        uow_factory=lambda owner: _remember_uow_factory(owner, session_factory),  # pyright: ignore[reportArgumentType]
         catalog=SqlAlchemyReviewCatalog(session_factory),
         clock=clock,
     )
@@ -149,14 +151,14 @@ async def test_grade_after_open_sitting_persists_event_and_state_on_fresh_engine
     clock = _FixedClock(_AS_OF)
     _ = await _seed_live_card(session_factory)
 
-    opened = await _open_sitting_command(session_factory, clock).handle()
+    opened = await _open_sitting_command(session_factory, clock).handle(_OWNER)
     assert isinstance(opened, SittingOpenedDTO)
     sitting_id = SittingId(value=opened.sitting_id)
     assert opened.card_id is not None
     card_id = CardId(value=opened.card_id)
 
     _ = await _grade_card_command(session_factory, clock).handle(
-        sitting_id, card_id, Grade.GOOD
+        _OWNER, sitting_id, card_id, Grade.GOOD
     )
 
     await engine.dispose()
@@ -184,10 +186,10 @@ async def test_reject_card_commits_rejection_event_and_claimable_card_rejected_e
     clock = _FixedClock(_AS_OF)
     card_id = await _seed_live_card(session_factory)
 
-    opened = await _open_sitting_command(session_factory, clock).handle()
+    opened = await _open_sitting_command(session_factory, clock).handle(_OWNER)
     assert isinstance(opened, SittingOpenedDTO)
     await _reject_card_command(session_factory, clock).handle(
-        SittingId(value=opened.sitting_id), card_id
+        _OWNER, SittingId(value=opened.sitting_id), card_id
     )
 
     await engine.dispose()
@@ -216,7 +218,7 @@ async def test_exception_after_event_save_and_outbox_append_leaves_neither_persi
     session_factory = create_session_factory(engine)
     clock = _FixedClock(_AS_OF)
     card_id = await _seed_live_card(session_factory)
-    opened = await _open_sitting_command(session_factory, clock).handle()
+    opened = await _open_sitting_command(session_factory, clock).handle(_OWNER)
     assert isinstance(opened, SittingOpenedDTO)
     sitting_id = SittingId(value=opened.sitting_id)
     envelope = CardRejectedPayload(
@@ -224,7 +226,7 @@ async def test_exception_after_event_save_and_outbox_append_leaves_neither_persi
     ).to_envelope()
 
     with pytest.raises(RuntimeError, match="boom"):
-        async with _remember_uow_factory(session_factory) as uow:
+        async with _remember_uow_factory(_OWNER, session_factory) as uow:
             event = ReviewEvent(
                 card_id=card_id,
                 reviewed_at=_AS_OF,
@@ -258,14 +260,14 @@ async def test_second_remember_uow_enters_only_after_first_transaction_ends(
     second_entered = asyncio.Event()
 
     async def hold_first_transaction() -> None:
-        async with _remember_uow_factory(session_factory) as uow:
+        async with _remember_uow_factory(_OWNER, session_factory) as uow:
             _ = first_inside.set()
             _ = await first_release.wait()
             await uow.commit()
 
     async def enter_second_after_first() -> None:
         _ = await first_inside.wait()
-        async with _remember_uow_factory(session_factory):
+        async with _remember_uow_factory(_OWNER, session_factory):
             _ = second_entered.set()
 
     first_task = asyncio.create_task(hold_first_transaction())

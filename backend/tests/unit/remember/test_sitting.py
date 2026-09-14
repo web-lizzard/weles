@@ -18,6 +18,9 @@ from domain.remember.value_objects import (
     ShowingLimit,
     SittingId,
 )
+from domain.shared.identity.model import UserId
+
+_OWNER = UserId.new()
 
 
 def _card_id() -> CardId:
@@ -26,6 +29,7 @@ def _card_id() -> CardId:
 
 def _open_sitting(*card_ids: CardId) -> Sitting:
     return Sitting.open(
+        _OWNER,
         frozenset(card_ids),
         datetime.now(UTC),
         ShowingLimit(value=2),
@@ -65,7 +69,7 @@ def _reveal(card_id: CardId, sitting_id: SittingId) -> ReviewEvent:
 
 def test_a_sitting_with_no_cards_is_refused() -> None:
     with pytest.raises(EmptySittingError):
-        _ = Sitting.open(frozenset(), datetime.now(UTC), ShowingLimit(value=2))
+        _ = Sitting.open(_OWNER, frozenset(), datetime.now(UTC), ShowingLimit(value=2))
 
 
 def test_contains_reports_whether_a_card_is_in_the_stored_set() -> None:
@@ -210,6 +214,7 @@ def _pinned_sitting(
 ) -> Sitting:
     return Sitting(
         id=SittingId(value=UUID(sitting_id)),
+        owner_id=_OWNER,
         card_ids=frozenset(CardId(value=UUID(card_id)) for card_id in card_ids),
         opened_at=datetime(2026, 1, 1, tzinfo=UTC),
         showing_limit=ShowingLimit(value=showing_limit),
@@ -471,6 +476,7 @@ def test_is_offered_is_false_at_opened_at_plus_resume_horizon() -> None:
     opened_at = datetime(2026, 3, 1, 12, 0, tzinfo=UTC)
     horizon = ResumeHorizon(value=timedelta(hours=3))
     sitting = Sitting.open(
+        _OWNER,
         frozenset({_card_id()}),
         opened_at,
         ShowingLimit(value=2),

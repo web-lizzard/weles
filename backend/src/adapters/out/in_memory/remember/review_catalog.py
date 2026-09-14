@@ -4,6 +4,7 @@ from domain.distill.card import Card
 from domain.distill.ports import CardRepository, NoteRepository
 from domain.remember.ports import ReviewableCard
 from domain.remember.value_objects import CardId
+from domain.shared.identity.model import UserId
 
 
 class InMemoryReviewCatalog:
@@ -19,10 +20,14 @@ class InMemoryReviewCatalog:
         self._notes: NoteRepository = note_repository
         self._cards: CardRepository = card_repository
 
-    async def list_reviewable(self) -> Sequence[ReviewableCard]:
+    async def list_reviewable(self, owner: UserId) -> Sequence[ReviewableCard]:
+        _ = owner
         return [_as_reviewable(card) for card in await self._live_cards()]
 
-    async def get_reviewable(self, card_id: CardId) -> ReviewableCard | None:
+    async def get_reviewable(
+        self, owner: UserId, card_id: CardId
+    ) -> ReviewableCard | None:
+        _ = owner
         for card in await self._live_cards():
             if card.id.value == card_id.value:
                 return _as_reviewable(card)

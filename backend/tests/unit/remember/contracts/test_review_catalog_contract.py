@@ -30,6 +30,8 @@ from domain.remember.ports import ReviewableCard, ReviewCatalog
 from domain.remember.value_objects import CardId
 from domain.shared.identity.model import UserId
 
+_OWNER = UserId.new()
+
 
 class _CommittingNoteRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
@@ -138,7 +140,7 @@ async def test_list_reviewable_renders_a_live_card_under_remember_s_own_card_id(
     await notes.save(note)
     await cards.save(card)
 
-    result = await catalog.list_reviewable()
+    result = await catalog.list_reviewable(_OWNER)
 
     assert list(result) == [
         ReviewableCard(
@@ -162,7 +164,7 @@ async def test_list_reviewable_spans_the_cards_of_every_note(
     await cards.save(first_card)
     await cards.save(second_card)
 
-    result = await catalog.list_reviewable()
+    result = await catalog.list_reviewable(_OWNER)
 
     assert {entry.id for entry in result} == {
         CardId(value=first_card.id.value),
@@ -181,7 +183,7 @@ async def test_list_reviewable_omits_a_discarded_card_of_a_note_it_walks(
     await cards.save(live)
     await cards.save(discarded)
 
-    result = await catalog.list_reviewable()
+    result = await catalog.list_reviewable(_OWNER)
 
     assert [entry.id for entry in result] == [CardId(value=live.id.value)]
 
@@ -197,7 +199,7 @@ async def test_get_reviewable_returns_the_card_carrying_that_id(
     await cards.save(wanted)
     await cards.save(other)
 
-    result = await catalog.get_reviewable(CardId(value=wanted.id.value))
+    result = await catalog.get_reviewable(_OWNER, CardId(value=wanted.id.value))
 
     assert result == ReviewableCard(
         id=CardId(value=wanted.id.value),
@@ -217,8 +219,8 @@ async def test_get_reviewable_offers_a_live_card_but_not_a_discarded_sibling(
     await cards.save(live)
     await cards.save(discarded)
 
-    offered = await catalog.get_reviewable(CardId(value=live.id.value))
-    withheld = await catalog.get_reviewable(CardId(value=discarded.id.value))
+    offered = await catalog.get_reviewable(_OWNER, CardId(value=live.id.value))
+    withheld = await catalog.get_reviewable(_OWNER, CardId(value=discarded.id.value))
 
     assert offered is not None
     assert withheld is None
@@ -232,8 +234,8 @@ async def test_get_reviewable_returns_none_for_an_id_no_note_holds(
     await notes.save(note)
     await cards.save(_sample_card(note.id))
 
-    stocked = await catalog.list_reviewable()
-    result = await catalog.get_reviewable(CardId(value=uuid4()))
+    stocked = await catalog.list_reviewable(_OWNER)
+    result = await catalog.get_reviewable(_OWNER, CardId(value=uuid4()))
 
     assert len(stocked) == 1
     assert result is None

@@ -12,6 +12,7 @@ from domain.remember.ports import (
     SittingReader,
 )
 from domain.remember.value_objects import CardId, Reveal, SittingId
+from domain.shared.identity.model import UserId
 
 
 class CardSourceQuery:
@@ -27,7 +28,9 @@ class CardSourceQuery:
         self._locator: CardSourceLocator = locator
         self._clock: Clock = clock
 
-    async def handle(self, sitting_id: SittingId, card_id: CardId) -> CardSourceDTO:
+    async def handle(
+        self, owner: UserId, sitting_id: SittingId, card_id: CardId
+    ) -> CardSourceDTO:
         """Return blocks and span when the back was revealed and source resolves."""
         sitting = await self._sittings.get(sitting_id)
         if sitting is None:
@@ -45,7 +48,7 @@ class CardSourceQuery:
         if not revealed:
             raise SourceNotAvailableError
 
-        located = await self._locator.locate(card_id)
+        located = await self._locator.locate(owner, card_id)
         if located is None:
             raise SourceNotAvailableError
 
