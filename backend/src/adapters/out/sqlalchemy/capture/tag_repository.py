@@ -41,13 +41,13 @@ class SqlAlchemyTagRepository:
     async def nearest(
         self, owner: UserId, embedding: Embedding
     ) -> VocabularyMatch[Tag] | None:
-        _ = owner
         distance = CaptureTagRow.embedding_values.op(
             "<=>", return_type=Double[float]()
         )(embedding.values)
         statement = (
             select(CaptureTagRow, distance.label("distance"))
             .where(
+                CaptureTagRow.owner_id == owner.value,
                 CaptureTagRow.embedding_model == embedding.model,
                 func.vector_dims(CaptureTagRow.embedding_values)
                 == len(embedding.values),

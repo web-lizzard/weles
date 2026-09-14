@@ -41,13 +41,13 @@ class SqlAlchemyTopicRepository:
     async def nearest(
         self, owner: UserId, embedding: Embedding
     ) -> VocabularyMatch[Topic] | None:
-        _ = owner
         distance = CaptureTopicRow.embedding_values.op(
             "<=>", return_type=Double[float]()
         )(embedding.values)
         statement = (
             select(CaptureTopicRow, distance.label("distance"))
             .where(
+                CaptureTopicRow.owner_id == owner.value,
                 CaptureTopicRow.embedding_model == embedding.model,
                 func.vector_dims(CaptureTopicRow.embedding_values)
                 == len(embedding.values),

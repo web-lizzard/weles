@@ -21,9 +21,10 @@ class InMemoryTopicRepository:
     async def nearest(
         self, owner: UserId, embedding: Embedding
     ) -> VocabularyMatch[Topic] | None:
-        _ = owner
         matches: list[VocabularyMatch[Topic]] = []
         for topic in self._topics.values():
+            if topic.owner_id != owner:
+                continue
             if topic.embedding.model != embedding.model:
                 continue
             if len(topic.embedding.values) != len(embedding.values):
