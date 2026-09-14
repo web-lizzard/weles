@@ -129,10 +129,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 12.1 Capture screen tests pass
-- [x] 12.2 Full TUI suite passes
-- [x] 12.3 Type check passes
-- [x] 12.4 Lint passes
+- [x] 12.1 Capture screen tests pass — 2e3995c
+- [x] 12.2 Full TUI suite passes — 2e3995c
+- [x] 12.3 Type check passes — 2e3995c
+- [x] 12.4 Lint passes — 2e3995c
 
 #### Manual
 
