@@ -86,10 +86,12 @@ def _note(
     status: DistillationStatus,
     at: datetime,
     content: str = "We discussed how connections are established.",
+    *,
+    owner_id: UserId | None = None,
 ) -> Note:
     return Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner_id or UserId.new(),
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="TCP handshakes"),
         content=NoteContent(value=content),
@@ -105,12 +107,13 @@ def _card(
     note_id: NoteId,
     created_at: datetime,
     *,
+    owner_id: UserId | None = None,
     quote: str = "Connections are established via a three-way handshake.",
     discard: Discard | None = None,
 ) -> Card:
     return Card(
         id=CardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner_id or UserId.new(),
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -234,3 +237,17 @@ async def test_list_cards_for_note_reports_exact_block_and_unresolved_anchor_loc
     assert block_location.end == len(heading_block)
 
     assert by_quote[missing_quote].anchor_location is None
+
+
+async def test_list_cards_for_note_raises_not_found_when_note_belongs_to_another_owner(
+    list_cards_fixture: _ListCardsFixture,
+) -> None:
+    note_owner = UserId.new()
+    caller = UserId.new()
+    now = datetime.now(UTC)
+    note = _note(DistillationStatus.READY, now, owner_id=note_owner)
+    await list_cards_fixture.notes.save(note)
+    await list_cards_fixture.cards.save(_card(note.id, now, owner_id=note_owner))
+
+    with pytest.raises(DistillNoteNotFoundError):
+        _ = await list_cards_fixture.query.list_cards_for_note(caller, note.id)
