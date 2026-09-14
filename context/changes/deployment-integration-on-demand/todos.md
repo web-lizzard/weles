@@ -1,8 +1,8 @@
 ---
 change_id: deployment-integration-on-demand
-current_phase: 3
-next_step: 3.1
-next_command: /implement deployment-integration-on-demand phase 3
+current_phase: 1
+next_step: 1.3
+next_command: /implement deployment-integration-on-demand phase 1
 updated: 2026-09-14
 ---
 
@@ -38,4 +38,4 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 3.1 Both agent guides carry the integration line and remain identical
+- [x] 3.1 Both agent guides carry the integration line and remain identical — a309fef
