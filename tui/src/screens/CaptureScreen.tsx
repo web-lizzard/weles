@@ -1,15 +1,17 @@
 import { Chalk } from "chalk";
-import { Box, Text, useStdout } from "ink";
+import { Box, Text, useInput, useStdout } from "ink";
 import TextInput from "ink-text-input";
 import { useEffect, useLayoutEffect, useState } from "react";
 import ActivityIndicator from "../components/ActivityIndicator.js";
 import ConversationHistory from "../components/ConversationHistory.js";
+import DraftRegion from "../components/DraftRegion.js";
 import InputFrame from "../components/InputFrame.js";
 import StatusLine from "../components/StatusLine.js";
-import { layoutCapture } from "../lib/captureLayout.js";
+import { clampDraftOffset, layoutCapture } from "../lib/captureLayout.js";
 import { renderConversationLines } from "../lib/conversationLines.js";
+import { renderDraftLines } from "../lib/draftLines.js";
 import { CLEAR_SCREEN_AND_SCROLLBACK } from "../lib/terminal.js";
-import { type Draft, useChatStore } from "../store/chat.js";
+import { useChatStore } from "../store/chat.js";
 import { useAppStore } from "../store/index.js";
 
 const DEFAULT_TERMINAL_ROWS = 24;
@@ -46,6 +48,10 @@ export default function CaptureScreen() {
 
   const [inputValue, setInputValue] = useState("");
   const [committedLineCount, setCommittedLineCount] = useState(0);
+  const [draftOffset, setDraftOffset] = useState(0);
+  const [draftIdentity, setDraftIdentity] = useState<string | null>(
+    draft?.topic ?? null,
+  );
 
   const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
   const columns =
@@ -76,15 +82,55 @@ export default function CaptureScreen() {
   const chromeRows =
     indicatorRows + bannerRows + errorRows + FRAME_ROWS + STATUS_LINE_ROWS;
 
+  const draftLines =
+    draft !== null ? renderDraftLines(draft, columns, chalk) : null;
+
+  const nextDraftIdentity = draft?.topic ?? null;
+  if (nextDraftIdentity !== draftIdentity) {
+    setDraftIdentity(nextDraftIdentity);
+    setDraftOffset(0);
+  }
+  const effectiveDraftOffset =
+    nextDraftIdentity !== draftIdentity ? 0 : draftOffset;
+
   const layout = layoutCapture({
     rows,
     chromeRows,
-    draftLines: null,
-    draftOffset: 0,
+    draftLines,
+    draftOffset: effectiveDraftOffset,
     conversationLines: lines,
     stableLineCount,
     committedLineCount,
   });
+
+  const canScrollDraft =
+    draft !== null && !isNotesOverlayOpen && !isSittingOverlayOpen;
+
+  useInput(
+    (_input, key) => {
+      if (!canScrollDraft || layout.draftWindow === null) {
+        return;
+      }
+      if (key.upArrow) {
+        setDraftOffset(
+          clampDraftOffset(
+            effectiveDraftOffset - 1,
+            draftLines?.length ?? 0,
+            layout.draftWindow.height,
+          ),
+        );
+      } else if (key.downArrow) {
+        setDraftOffset(
+          clampDraftOffset(
+            effectiveDraftOffset + 1,
+            draftLines?.length ?? 0,
+            layout.draftWindow.height,
+          ),
+        );
+      }
+    },
+    { isActive: canScrollDraft },
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset the commit cursor whenever a new epoch starts
   useEffect(() => {
@@ -138,8 +184,16 @@ export default function CaptureScreen() {
         lines={lines.slice(0, committedLineCount)}
       />
       {topic !== null && <TopicHeading topic={topic} />}
-      <DraftNotePanel draft={draft} columns={columns} />
+      {layout.draftWindow !== null && (
+        <DraftRegion window={layout.draftWindow} />
+      )}
       <Box flexDirection="column" flexGrow={1}>
+        {Array.from({ length: Math.max(0, layout.fillerRows) }).map(
+          (_, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: filler rows have no stable id
+            <Text key={index}> </Text>
+          ),
+        )}
         {layout.conversationTail.map((line, index) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: the tail window has no stable id
           <Text key={index}>{line}</Text>
@@ -180,57 +234,6 @@ function TopicHeading({ topic }: { topic: string }) {
   return (
     <Box marginY={1}>
       <Text bold>Topic: {topic}</Text>
-    </Box>
-  );
-}
-
-function DraftNotePanel({
-  draft,
-  columns,
-}: {
-  draft: Draft | null;
-  columns: number;
-}) {
-  if (draft === null) {
-    return null;
-  }
-
-  const hasBody = draft.content.length > 0;
-  const separator = "─".repeat(columns > 0 ? columns : 1);
-
-  return (
-    <Box flexDirection="column" marginY={1}>
-      {draft.topic !== null && (
-        <Text>
-          <Text color="yellow">Topic: </Text>
-          <Text bold>{draft.topic}</Text>
-        </Text>
-      )}
-      {draft.tags.length > 0 && <DraftTags tags={draft.tags} />}
-      {hasBody && (
-        <Box flexDirection="column" marginTop={1}>
-          <Text dimColor>{separator}</Text>
-          <Text>{draft.content}</Text>
-        </Box>
-      )}
-    </Box>
-  );
-}
-
-function DraftTags({ tags }: { tags: { label: string; reused: boolean }[] }) {
-  return (
-    <Box marginTop={1}>
-      <Text>
-        <Text dimColor>Tags: </Text>
-        {tags.map((tag, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: tags have no stable id
-          <Text key={index}>
-            {index > 0 && <Text dimColor> · </Text>}
-            <Text color="cyan">{tag.label}</Text>
-            {!tag.reused && <Text dimColor> (new)</Text>}
-          </Text>
-        ))}
-      </Text>
     </Box>
   );
 }
