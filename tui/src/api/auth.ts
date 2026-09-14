@@ -1,9 +1,9 @@
 /**
  * Register and sign-in calls against the configured instance.
  *
- * Until S-03 the TUI neither keeps a sign-in nor sends one: `signIn` confirms
- * that the instance accepted the credentials and deliberately does not hand the
- * token back to its caller. S-03 widens this return type when it persists it.
+ * `signIn` confirms that the instance accepted the credentials and returns the
+ * access token so the sign-in command can store it in `credentials.json`
+ * (S-03). Authorized requests read that file per call via the sign-in provider.
  *
  * A refusal the backend states by code comes back as an outcome, never thrown.
  * Only transport failures and unexpected statuses throw.
@@ -18,7 +18,7 @@ export type RegisterOutcome =
   | { kind: "password_too_short" };
 
 export type SignInOutcome =
-  | { kind: "signed_in"; expiresAt: string }
+  | { kind: "signed_in"; token: string; expiresAt: string }
   | { kind: "invalid_credentials" };
 
 type CodedErrorBody = { code?: string; detail?: string };
@@ -56,8 +56,7 @@ export async function register(
   throw new Error(`register failed: ${response.status}`);
 }
 
-/** POST /auth/sign-in. Maps `invalid_credentials` to its outcome; the
- * response's `access_token` is dropped here. */
+/** POST /auth/sign-in. Maps `invalid_credentials` to its outcome. */
 export async function signIn(
   email: string,
   password: string,
@@ -66,7 +65,11 @@ export async function signIn(
     body: { email, password },
   });
   if (response.status === 200 && data) {
-    return { kind: "signed_in", expiresAt: data.expires_at };
+    return {
+      kind: "signed_in",
+      token: data.access_token,
+      expiresAt: data.expires_at,
+    };
   }
   const code = errorCode(error);
   if (response.status === 401 && code === "invalid_credentials") {

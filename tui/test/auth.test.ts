@@ -66,7 +66,7 @@ describe("auth API", () => {
     },
   );
 
-  it("signIn returns signed_in with expiresAt and omits the access token", async () => {
+  it("signIn returns signed_in with token and expiresAt", async () => {
     mockFetchJson(
       {
         access_token: "secret-token-must-not-leak",
@@ -78,6 +78,7 @@ describe("auth API", () => {
 
     await expect(signIn(EMAIL, PASSWORD)).resolves.toEqual({
       kind: "signed_in",
+      token: "secret-token-must-not-leak",
       expiresAt: EXPIRES_AT,
     });
   });

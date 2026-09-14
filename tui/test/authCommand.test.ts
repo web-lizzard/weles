@@ -166,6 +166,7 @@ describe("runSignInCommand", () => {
     readSecret.mockResolvedValue(PASSWORD);
     vi.mocked(signIn).mockResolvedValue({
       kind: "signed_in",
+      token: "test-token",
       expiresAt: EXPIRES_AT,
     });
 

@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-lifetime
-current_phase: 3
-next_step: 3.1
-next_command: /implement auth-flow-sign-in-lifetime phase 3
+current_phase: 4
+next_step: tests
+next_command: /unit-test auth-flow-sign-in-lifetime phase 4
 updated: 2026-09-14
 ---
 
@@ -29,9 +29,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 3.1 Type check passes
-- [ ] 3.2 Lint passes
-- [ ] 3.3 Existing TUI suite still passes
+- [x] 3.1 Type check passes
+- [x] 3.2 Lint passes
+- [x] 3.3 Existing TUI suite still passes
 
 ### Phase 4: Sign-in persistence, instance binding, launch guard — behavior
 
