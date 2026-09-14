@@ -21,6 +21,66 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/register": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Register
+     * @description EmailAddress.parse(body.email), Password(body.password) ->
+     *     authenticator.register.
+     */
+    post: operations["register_auth_register_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign In
+     * @description EmailAddress.parse(body.email), Password(body.password) ->
+     *     authenticator.sign_in. An unparseable email is `InvalidCredentialsError`,
+     *     not `InvalidEmailAddressError`: sign-in never explains a refusal.
+     */
+    post: operations["sign_in_auth_sign_in_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/_outbox": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List Outbox Envelopes */
+    get: operations["list_outbox_envelopes__outbox_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/capture-sessions": {
     parameters: {
       query?: never;
@@ -236,23 +296,6 @@ export interface paths {
     put?: never;
     /** Reject Card */
     post: operations["reject_card_review_sittings__sitting_id__cards__card_id__rejection_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/_outbox": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List Outbox Envelopes */
-    get: operations["list_outbox_envelopes__outbox_get"];
-    put?: never;
-    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -561,6 +604,24 @@ export interface components {
       outstanding_count: number;
       due?: components["schemas"]["DuePartitionDTO"];
     };
+    /** RegisterRequestDTO */
+    RegisterRequestDTO: {
+      /** Email */
+      email: string;
+      /**
+       * Password
+       * Format: password
+       */
+      password: string;
+    };
+    /** RegisterResponseDTO */
+    RegisterResponseDTO: {
+      /**
+       * User Id
+       * Format: uuid
+       */
+      user_id: string;
+    };
     /** ReplyDeltaEvent */
     ReplyDeltaEvent: {
       /**
@@ -623,6 +684,32 @@ export interface components {
     SendMessageRequestDTO: {
       /** Content */
       content: string;
+    };
+    /** SignInRequestDTO */
+    SignInRequestDTO: {
+      /** Email */
+      email: string;
+      /**
+       * Password
+       * Format: password
+       */
+      password: string;
+    };
+    /** SignInResponseDTO */
+    SignInResponseDTO: {
+      /** Access Token */
+      access_token: string;
+      /**
+       * Token Type
+       * @default bearer
+       * @constant
+       */
+      token_type: "bearer";
+      /**
+       * Expires At
+       * Format: date-time
+       */
+      expires_at: string;
     };
     /** SittingOpenedDTO */
     SittingOpenedDTO: {
@@ -740,6 +827,92 @@ export interface operations {
           "application/json": {
             [key: string]: string;
           };
+        };
+      };
+    };
+  };
+  register_auth_register_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterRequestDTO"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RegisterResponseDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  sign_in_auth_sign_in_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignInRequestDTO"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SignInResponseDTO"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  list_outbox_envelopes__outbox_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OutboxEnvelopeDTO"][];
         };
       };
     };
@@ -1112,26 +1285,6 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  list_outbox_envelopes__outbox_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["OutboxEnvelopeDTO"][];
         };
       };
     };
