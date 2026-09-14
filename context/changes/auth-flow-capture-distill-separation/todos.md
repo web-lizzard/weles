@@ -10,13 +10,13 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 Offline backend suite passes
-- [x] 1.2 Postgres lane passes
-- [x] 1.3 Type check passes
+- [x] 1.1 Offline backend suite passes — 09fa310
+- [x] 1.2 Postgres lane passes — 09fa310
+- [x] 1.3 Type check passes — 09fa310
 
 #### Manual
 
-- [x] 1.4 Capture owner revision upgrades, downgrades, and re-upgrades on an emptied dev database
+- [x] 1.4 Capture owner revision upgrades, downgrades, and re-upgrades on an emptied dev database — 09fa310
 
 ### Phase 2: Capture separation
 
