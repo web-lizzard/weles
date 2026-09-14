@@ -76,7 +76,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     set({ sessionId });
   },
   sendUserMessage: async (text: string) => {
-    const { sessionId, draft: draftBeforeSend } = get();
+    const { sessionId } = get();
     if (!sessionId) {
       throw new Error("No active session");
     }
@@ -85,8 +85,10 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       transcript: [...state.transcript, { role: "user", content: text }],
       isStreaming: true,
       streamError: null,
-      draft: null,
+      turnStartedAt: Date.now(),
     }));
+
+    let freshDraftPending = true;
 
     try {
       for await (const event of sendMessage(sessionId, text)) {
@@ -113,33 +115,32 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
               noteId: null,
             },
           });
+          freshDraftPending = false;
         } else if (event.type === "draft_tag") {
           const tag = { label: event.label, reused: event.reused };
-          set((state) => ({
-            draft: state.draft
-              ? { ...state.draft, tags: [...state.draft.tags, tag] }
-              : {
-                  topic: null,
-                  tags: [tag],
-                  content: "",
-                  noteId: null,
-                },
-          }));
+          set((state) => {
+            const base =
+              freshDraftPending || !state.draft
+                ? { topic: null, tags: [], content: "", noteId: null }
+                : state.draft;
+            return { draft: { ...base, tags: [...base.tags, tag] } };
+          });
+          freshDraftPending = false;
         } else if (event.type === "draft_delta") {
-          set((state) => ({
-            draft: state.draft
-              ? { ...state.draft, content: state.draft.content + event.text }
-              : {
-                  topic: null,
-                  tags: [],
-                  content: event.text,
-                  noteId: null,
-                },
-          }));
+          set((state) => {
+            const base =
+              freshDraftPending || !state.draft
+                ? { topic: null, tags: [], content: "", noteId: null }
+                : state.draft;
+            return { draft: { ...base, content: base.content + event.text } };
+          });
+          freshDraftPending = false;
         } else if (event.type === "draft_done") {
           set((state) => {
             const seen = new Map(
-              (state.draft?.tags ?? []).map((tag) => [tag.label, tag.reused]),
+              (freshDraftPending ? [] : (state.draft?.tags ?? [])).map(
+                (tag) => [tag.label, tag.reused],
+              ),
             );
             return {
               draft: {
@@ -153,25 +154,32 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
               },
             };
           });
+          freshDraftPending = false;
         } else if (event.type === "done") {
-          set((state) => ({
-            transcript: [
-              ...state.transcript,
-              { role: "agent", content: event.content },
-            ],
-            currentReply: "",
-            topic: event.topic,
-            coverageConfidence: event.coverageConfidence,
-          }));
+          set((state) => {
+            const topicEntry: TranscriptEntry[] =
+              event.topic !== null &&
+              state.topic !== null &&
+              event.topic !== state.topic
+                ? [{ role: "topic", content: event.topic }]
+                : [];
+            return {
+              transcript: [
+                ...state.transcript,
+                { role: "agent", content: event.content },
+                ...topicEntry,
+              ],
+              currentReply: "",
+              topic: event.topic,
+              coverageConfidence: event.coverageConfidence,
+            };
+          });
         }
       }
     } catch (error) {
       if (error instanceof SendMessageHttpError) {
         if (isSignInRequired(error.code)) {
-          set((state) => ({
-            streamError: signInRequiredStreamError(),
-            ...(state.draft === null ? { draft: draftBeforeSend } : {}),
-          }));
+          set({ streamError: signInRequiredStreamError() });
         } else {
           set({
             streamError: streamErrorFromSendMessageHttpError(error),
@@ -186,7 +194,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
         });
       }
     } finally {
-      set({ isStreaming: false });
+      set({ isStreaming: false, turnStartedAt: null });
     }
   },
   approveDraft: async () => {
@@ -207,7 +215,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     try {
       await approveNote(sessionId);
       const { sessionId: newSessionId } = await startCaptureSession();
-      set({
+      set((state) => ({
         approvalReceipt: true,
         approved: false,
         topic: null,
@@ -217,7 +225,8 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
         coverageConfidence: null,
         streamError: null,
         sessionId: newSessionId,
-      });
+        historyEpoch: state.historyEpoch + 1,
+      }));
     } catch (error) {
       if (error instanceof SendMessageHttpError) {
         set({ streamError: streamErrorFromSendMessageHttpError(error) });

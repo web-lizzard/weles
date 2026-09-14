@@ -59,9 +59,10 @@ describe("useChatStore", () => {
       isStreaming: false,
       streamError: null,
       approved: false,
+      approvalReceipt: false,
       historyEpoch: 0,
       turnStartedAt: null,
-    } as Parameters<typeof useChatStore.setState>[0]);
+    });
     vi.mocked(sendMessage).mockReset();
     vi.mocked(approveNote).mockReset();
     vi.mocked(startCaptureSession).mockReset();
