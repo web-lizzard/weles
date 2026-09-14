@@ -168,29 +168,43 @@ describe("NoteDetailScreen", () => {
     expect(frame).not.toContain(" · ");
   });
 
-  it("marks the quoted run of an exact location and hides blocks above it", () => {
+  it("marks the quoted run of an exact location and scrolls it to the first visible line", () => {
     useNoteDetailStore.setState({ note: BLOCKS_NOTE, isLoading: false });
     useAppStore.setState({
       highlightedAnchor: { cardId: CARD_ID, location: EXACT_LOCATION },
     });
 
     const frame = render(<NoteDetailScreen />).lastFrame() ?? "";
+    const lines = frame.split("\n");
+    // Phase 14 Contract: "An anchor opens NoteDetailScreen scrolled so that
+    // the anchored block is the first visible line" — the note body renders
+    // inside a SourceViewport, so a non-zero offset surfaces a "more above"
+    // marker immediately before the anchored block's line.
+    const moreAboveIndex = lines.findIndex((line) => /more above/i.test(line));
 
     expect(frame).not.toContain(HIDDEN_INTRO);
-    expect(frame).toContain(`The ${INVERSE}${QUOTED_RUN}${INVERSE_OFF} here.`);
+    expect(moreAboveIndex).toBeGreaterThanOrEqual(0);
+    expect(lines[moreAboveIndex + 1]).toContain(
+      `The ${INVERSE}${QUOTED_RUN}${INVERSE_OFF} here.`,
+    );
     expect(frame).not.toContain(`${INVERSE}${ANCHORED_BLOCK}${INVERSE_OFF}`);
   });
 
-  it("marks the whole anchored block when precision is block", () => {
+  it("marks the whole anchored block when precision is block and scrolls it to the first visible line", () => {
     useNoteDetailStore.setState({ note: BLOCKS_NOTE, isLoading: false });
     useAppStore.setState({
       highlightedAnchor: { cardId: CARD_ID, location: BLOCK_LOCATION },
     });
 
     const frame = render(<NoteDetailScreen />).lastFrame() ?? "";
+    const lines = frame.split("\n");
+    const moreAboveIndex = lines.findIndex((line) => /more above/i.test(line));
 
     expect(frame).not.toContain(HIDDEN_INTRO);
-    expect(frame).toContain(`${INVERSE}${ANCHORED_BLOCK}${INVERSE_OFF}`);
+    expect(moreAboveIndex).toBeGreaterThanOrEqual(0);
+    expect(lines[moreAboveIndex + 1]).toContain(
+      `${INVERSE}${ANCHORED_BLOCK}${INVERSE_OFF}`,
+    );
   });
 
   it("renders from the top with a notice when the highlighted location is missing", () => {

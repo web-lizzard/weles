@@ -42,13 +42,21 @@ const SOURCE_WITH_DISTANT_BLOCKS: CardSource = {
   span: { blockIndex: 2, start: 12, end: 19 },
 };
 
+// The source view window height is `panelBodyHeight(rows, reservedRows)`
+// (Phase 14 Contract: "Its height uses panelBodyHeight in place of
+// SOURCE_VIEWPORT_CHROME_ROWS"). The sitting panel reserves nothing above the
+// source viewport beyond BottomPanel's own chrome (top rule + hint line), so
+// reservedRows is 0: panelBodyHeight(24, 0) = max(1, 24 - 1 - 2 - 0) = 21.
+const SOURCE_VIEWPORT_HEIGHT = 21;
+
 const SOURCE_WITH_MANY_LINES: CardSource = {
   blocks: [
     {
       index: 0,
-      text: Array.from({ length: 12 }, (_, i) => `scroll-line-${i + 1}`).join(
-        "\n",
-      ),
+      text: Array.from(
+        { length: SOURCE_VIEWPORT_HEIGHT + 9 },
+        (_, i) => `scroll-line-${i + 1}`,
+      ).join("\n"),
     },
   ],
   span: { blockIndex: 0, start: 0, end: 12 },
@@ -857,8 +865,10 @@ describe("SittingOverlay", () => {
     await pressKey(stdin, "e");
     await vi.advanceTimersByTimeAsync(0);
 
+    const lastLine = `scroll-line-${SOURCE_VIEWPORT_HEIGHT + 9}`;
+
     expect(lastFrame()).toMatch(/more below/i);
-    expect(lastFrame()).not.toContain("scroll-line-12");
+    expect(lastFrame()).not.toContain(lastLine);
 
     for (let i = 0; i < 4; i += 1) {
       await pressKey(stdin, DOWN_ARROW);
@@ -867,7 +877,7 @@ describe("SittingOverlay", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     const atBottom = lastFrame() ?? "";
-    expect(atBottom).toContain("scroll-line-12");
+    expect(atBottom).toContain(lastLine);
     expect(atBottom).not.toMatch(/more below/i);
   });
 

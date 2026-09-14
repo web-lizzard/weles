@@ -368,7 +368,7 @@ describe("App", () => {
       expect(dueLineIndex).toBeGreaterThan(ruleIndexes[ruleIndexes.length - 1]);
     });
 
-    it("keeps the due-count row visible below the notes overlay", async () => {
+    it("hides the due-count status line while the notes panel is open", async () => {
       useDueStore.setState({ partition: DUE_PARTITION, isStale: false });
 
       const { stdin, lastFrame } = render(<App />);
@@ -377,11 +377,11 @@ describe("App", () => {
       await waitFor(() => useAppStore.getState().isNotesOverlayOpen);
 
       const frame = lastFrame() ?? "";
-      const dueIndex = frame.indexOf("4 cards due");
-      const escIndex = frame.indexOf("← ESC to go back");
 
-      expect(dueIndex).toBeGreaterThanOrEqual(0);
-      expect(dueIndex).toBeGreaterThan(escIndex);
+      // The status line (and its due count) is replaced by the notes panel's
+      // own bottom hint line while the panel is open (Phase 14 Contract #1).
+      expect(frame).not.toContain("4 cards due");
+      expect(frame).toContain("↑↓ select · Enter open · ← ESC to go back");
     });
 
     it("shows the due count in the sitting overlay footer instead of the shell row", async () => {
