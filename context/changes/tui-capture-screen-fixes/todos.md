@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
-current_phase: 1
-next_step: 1.1
-next_command: /implement tui-capture-screen-fixes phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test tui-capture-screen-fixes phase 2
 updated: 2026-09-14
 ---
 
@@ -10,9 +10,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Type check passes
-- [ ] 1.2 Lint passes
-- [ ] 1.3 Existing suite stays green
+- [x] 1.1 Type check passes
+- [x] 1.2 Lint passes
+- [x] 1.3 Existing suite stays green
 
 ### Phase 2: Markdown renderer behavior
 
