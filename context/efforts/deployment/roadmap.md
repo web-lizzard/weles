@@ -8,7 +8,7 @@ updated: 2026-09-14
 
 | ID | Outcome | Change ID | Status |
 |----|---------|-----------|--------|
-| S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate | pending |
+| S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate | in_progress |
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit | deployment-integration-on-demand | pending |
 | S-03 | Anyone can install the published TUI without credentials | deployment-tui-publish | pending |
 | S-04 | The author brings an empty or behind Neon database to a commit's schema with one script | deployment-neon-schema | pending |
@@ -37,7 +37,7 @@ flowchart LR
 - **Outcome:** A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking
 - **Acceptance criteria:** FR-03, FR-04
 - **Change ID:** deployment-pr-gate
-- **Status:** pending
+- **Status:** in_progress
 - **Parallel with:** S-02, S-03, S-04, S-06
 
 The repository has no `.github/` and commits land directly on `main`, so today a check can
