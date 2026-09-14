@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-lifetime
-current_phase: 1
-next_step: 1.1
-next_command: /implement auth-flow-sign-in-lifetime phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /unit-test auth-flow-sign-in-lifetime phase 2
 updated: 2026-09-14
 ---
 
@@ -10,8 +10,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Type check passes
-- [ ] 1.2 Lint passes
+- [x] 1.1 Type check passes — d614f8e
+- [x] 1.2 Lint passes — d614f8e
 
 ### Phase 2: Credential store and authorized requests — behavior
 
