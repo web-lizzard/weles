@@ -12,7 +12,7 @@ updated: 2026-09-14
 | S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate               | done        |
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit                                                      | deployment-integration-on-demand | in_progress |
 | S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | in_progress |
-| S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | in_progress |
+| S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | done        |
 | S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | pending     |
 | S-06 | Unhandled errors reach error tracking without carrying anything people wrote                                                            | deployment-error-tracking        | pending     |
 | S-07 | An agent skill diagnoses the hosted instance read-only and recommends next steps                                                        | deployment-diagnostics-skill     | pending     |
@@ -90,7 +90,7 @@ hosted instance with no rebuild.
 - **Outcome:** The author brings an empty or behind Neon database to a commit's schema with one script
 - **Acceptance criteria:** FR-08
 - **Change ID:** deployment-neon-schema
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-01, S-02, S-03, S-06
 - **Research:** pg-vector-support
 
@@ -176,3 +176,4 @@ the private certification submission. Flooding protection stays deferred.
 
 - **S-01: A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-pr-gate/`. Lesson: —.
 
+- **S-04: The author brings an empty or behind Neon database to a commit's schema with one script** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-neon-schema/`. Lesson: —.
