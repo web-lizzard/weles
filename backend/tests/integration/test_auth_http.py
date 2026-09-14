@@ -15,6 +15,13 @@ from adapters.auth.model import PasswordPolicy, SigningSecret, SignInLifetime
 from adapters.auth.passwords import PasswordHasher
 from adapters.auth.tokens import SignInTokens
 from adapters.compose import get_list_notes_query
+from adapters.out.in_memory.distill.card_repository import InMemoryCardRepository
+from adapters.out.in_memory.distill.list_notes_query import (
+    InMemoryListNotesQueryAdapter,
+)
+from adapters.out.in_memory.distill.note_repository import (
+    InMemoryNoteRepository as InMemoryDistillNoteRepository,
+)
 from main import app
 
 _TEST_SIGNING_SECRET = "a" * 32
@@ -39,8 +46,12 @@ def _auth_stack() -> tuple[InMemoryAccountStore, SignInTokens, Authenticator]:
 @pytest.fixture
 def auth_http_client() -> Iterator[TestClient]:
     _accounts, tokens, authenticator = _auth_stack()
+    notes = InMemoryDistillNoteRepository()
+    cards = InMemoryCardRepository()
+    list_notes = InMemoryListNotesQueryAdapter(notes, cards)
     app.dependency_overrides[get_authenticator] = lambda: authenticator
     app.dependency_overrides[get_sign_in_verifier] = lambda: tokens
+    app.dependency_overrides[get_list_notes_query] = lambda: list_notes
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client
     app.dependency_overrides.clear()

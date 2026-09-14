@@ -2,7 +2,7 @@ import json
 from enum import StrEnum
 from typing import ClassVar, cast
 
-from pydantic import field_validator
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     )
 
     database_url: str
+    auth_signing_secret: SecretStr
+    auth_sign_in_lifetime_hours: float = 24.0
+    auth_password_min_length: int = 8
     notion_api_token: str | None = None
     vocabulary_match_threshold: float = 0.85
     environment_name: Environment = Environment.LOCAL
@@ -58,9 +61,9 @@ class Settings(BaseSettings):
     openrouter_api_key: str | None = None
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimensions: int | None = None
-    capture_model: str = "openai/gpt-4o-mini"
+    capture_model: str = "openai/gpt-5-nano"
     distill_task_provider: DistillTaskProvider = DistillTaskProvider.PYDANTIC_AI
-    distill_model: str = "openai/gpt-4o-mini"
+    distill_model: str = "openai/gpt-5-nano"
     distill_regeneration_tiers: list[tuple[int | None, float]] = (
         _DEFAULT_DISTILL_REGENERATION_TIERS
     )
