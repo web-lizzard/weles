@@ -428,6 +428,7 @@ describe("CaptureScreen", () => {
     expect(frame).toContain("overflow-line-39");
     expect(frameLines.length).toBeLessThanOrEqual(24);
     expect(frameLines[inputRow - 1]).toMatch(/^─+$/);
+    expect(frameLines[inputRow - 2]).toBe("");
     expect(frameLines[inputRow + 1]).toMatch(/^─+$/);
   });
 
