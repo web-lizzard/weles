@@ -1,7 +1,7 @@
 ---
 change_id: deployment-tui-publish
 current_phase: 1
-next_step: 1.1
+next_step: 1.3
 next_command: /implement deployment-tui-publish phase 1
 updated: 2026-09-14
 ---
@@ -10,8 +10,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 TUI typecheck, tests and lint pass
-- [ ] 1.2 Build and pack produce a tarball containing dist/cli.js
+- [x] 1.1 TUI typecheck, tests and lint pass
+- [x] 1.2 Build and pack produce a tarball containing dist/cli.js
 
 #### Manual
 
