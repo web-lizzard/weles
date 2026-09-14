@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from integration.support.in_memory_remember import InMemoryRememberComposition
 
-from domain.remember.exceptions import SittingExpiredError
+from domain.remember.exceptions import SittingExpiredError, SittingNotFoundError
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import (
     Grade,
@@ -12,11 +12,13 @@ from domain.remember.value_objects import (
     ResumeHorizon,
     Reveal,
 )
+from domain.shared.identity.model import UserId
 
 from .conftest import (
     OWNER,
     clock_after_resume_horizon,
     open_sitting,
+    open_sitting_for,
     reviewable,
     sitting_past_resume_horizon,
 )
@@ -110,6 +112,20 @@ async def test_an_expired_sitting_leaves_no_review_event_on_reveal(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
+        _ = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
+
+    assert await composition.review_events.list_by_card(card.id) == []
+
+
+async def test_another_persons_sitting_raises_sitting_not_found_without_a_reveal_write(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition, front="Front", back="Back text")
+    foreign_owner = UserId.new()
+    sitting = open_sitting_for(foreign_owner, card)
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingNotFoundError):
         _ = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
     assert await composition.review_events.list_by_card(card.id) == []

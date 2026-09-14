@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-remember-separation
-current_phase: 3
-next_step: 3.1
-next_command: /unit-test auth-flow-remember-separation phase 3
+current_phase: 4
+next_step: 4.0
+next_command: /unit-test auth-flow-remember-separation phase 4
 updated: 2026-09-14
 ---
 
@@ -39,19 +39,19 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated
 
 #### Automated
 
-- [ ] 3.1 Remember handler tests pass
-- [ ] 3.2 Chain separation test passes
-- [ ] 3.3 Full offline suite passes
-- [ ] 3.4 Postgres lane passes
-- [ ] 3.5 Type check passes
+- [x] 3.1 Remember handler tests pass
+- [x] 3.2 Chain separation test passes
+- [x] 3.3 Full offline suite passes
+- [x] 3.4 Postgres lane passes
+- [x] 3.5 Type check passes
 
 #### Manual
 
-- [ ] 3.6 Person B gets 404 on person A's sitting for current card and grade over curl
+- [x] 3.6 Person B gets 404 on person A's sitting for current card and grade over curl
 
 ### Phase 4: Per-person remember lock
 

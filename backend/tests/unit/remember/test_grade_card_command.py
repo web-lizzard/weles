@@ -25,11 +25,13 @@ from domain.remember.value_objects import (
     SchedulerStamp,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 from .conftest import (
     OWNER,
     clock_after_resume_horizon,
     open_sitting,
+    open_sitting_for,
     reviewable,
     sitting_past_resume_horizon,
     stamp,
@@ -115,6 +117,23 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
     with pytest.raises(SittingNotFoundError):
         _ = await composition.grade_card().handle(
             OWNER, SittingId.new(), card.id, Grade.GOOD
+        )
+
+    assert await composition.review_events.list_by_card(card.id) == []
+    assert await composition.scheduling_states.get(card.id) is None
+
+
+async def test_another_persons_sitting_raises_sitting_not_found_without_a_grade_write(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition)
+    foreign_owner = UserId.new()
+    sitting = open_sitting_for(foreign_owner, card)
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingNotFoundError):
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, card.id, Grade.GOOD
         )
 
     assert await composition.review_events.list_by_card(card.id) == []

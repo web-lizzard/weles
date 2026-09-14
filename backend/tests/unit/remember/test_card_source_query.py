@@ -31,11 +31,13 @@ from domain.remember.exceptions import (
 from domain.remember.ports import ReviewableCard
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import CardId, ResumeHorizon, Reveal, SittingId
+from domain.shared.identity.model import UserId
 
 from .conftest import (
     OWNER,
     clock_after_resume_horizon,
     open_sitting,
+    open_sitting_for,
     reviewable,
     sitting_past_resume_horizon,
 )
@@ -112,6 +114,19 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
 
     with pytest.raises(SittingNotFoundError):
         _ = await _query(composition).handle(OWNER, SittingId.new(), card.id)
+
+
+async def test_another_persons_sitting_raises_sitting_not_found_on_source(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await _reviewable_with_resolvable_source(composition)
+    foreign_owner = UserId.new()
+    sitting = open_sitting_for(foreign_owner, card)
+    await composition.sittings.save(sitting)
+    await _save_reveal(composition, sitting.id, card.id)
+
+    with pytest.raises(SittingNotFoundError):
+        _ = await _query(composition).handle(OWNER, sitting.id, card.id)
 
 
 async def test_a_sitting_past_its_horizon_raises_expired_on_source(

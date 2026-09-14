@@ -10,6 +10,7 @@ from domain.remember.exceptions import (
     CardNotPresentableError,
     SittingAlreadyCompleteError,
     SittingExpiredError,
+    SittingNotFoundError,
 )
 from domain.remember.outbox import CARD_REJECTED, CardRejectedPayload
 from domain.remember.review_event import ReviewEvent
@@ -20,12 +21,14 @@ from domain.remember.value_objects import (
     ResumeHorizon,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import OutboxEnvelope
 
 from .conftest import (
     OWNER,
     clock_after_resume_horizon,
     open_sitting,
+    open_sitting_for,
     reviewable,
     sitting_past_resume_horizon,
     stamp,
@@ -87,6 +90,20 @@ async def test_a_card_outside_the_sitting_refuses_rejection(
         await composition.reject_card().handle(OWNER, sitting.id, outsider.id)
 
     await _assert_no_rejection_side_effects(composition, outsider.id)
+
+
+async def test_foreign_sitting_raises_not_found_without_rejection_write(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition)
+    foreign_owner = UserId.new()
+    sitting = open_sitting_for(foreign_owner, card)
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingNotFoundError):
+        await composition.reject_card().handle(OWNER, sitting.id, card.id)
+
+    await _assert_no_rejection_side_effects(composition, card.id)
 
 
 async def test_a_finished_sitting_refuses_rejection_before_presentable(

@@ -120,8 +120,16 @@ async def reviewable(
 def open_sitting(
     *cards: ReviewableCard, showing_limit: ShowingLimit | None = None
 ) -> Sitting:
+    return open_sitting_for(OWNER, *cards, showing_limit=showing_limit)
+
+
+def open_sitting_for(
+    owner: UserId,
+    *cards: ReviewableCard,
+    showing_limit: ShowingLimit | None = None,
+) -> Sitting:
     return Sitting.open(
-        OWNER,
+        owner,
         frozenset(card.id for card in cards),
         datetime.now(UTC),
         showing_limit or ShowingLimit(value=2),

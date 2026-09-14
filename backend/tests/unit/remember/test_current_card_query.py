@@ -8,11 +8,13 @@ from application.remember.dto import PresentedCardDTO
 from domain.remember.exceptions import SittingExpiredError, SittingNotFoundError
 from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import Grade, Graded, ResumeHorizon, SittingId
+from domain.shared.identity.model import UserId
 
 from .conftest import (
     OWNER,
     clock_after_resume_horizon,
     open_sitting,
+    open_sitting_for,
     reviewable,
     sitting_past_resume_horizon,
 )
@@ -71,6 +73,18 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
 ) -> None:
     with pytest.raises(SittingNotFoundError):
         _ = await composition.current_card().handle(OWNER, SittingId.new())
+
+
+async def test_another_persons_sitting_raises_sitting_not_found_on_current_card(
+    composition: InMemoryRememberComposition,
+) -> None:
+    card = await reviewable(composition, front="Foreign sitting")
+    foreign_owner = UserId.new()
+    sitting = open_sitting_for(foreign_owner, card)
+    await composition.sittings.save(sitting)
+
+    with pytest.raises(SittingNotFoundError):
+        _ = await composition.current_card().handle(OWNER, sitting.id)
 
 
 async def test_two_consecutive_reads_return_the_same_card(

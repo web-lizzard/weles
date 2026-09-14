@@ -31,7 +31,7 @@ class RevealBackCommand:
         """Record that the back was revealed and return front and back text."""
         async with self._uow_factory(owner) as uow:
             sitting = await uow.sittings.get(sitting_id)
-            if sitting is None:
+            if sitting is None or sitting.owner_id != owner:
                 raise SittingNotFoundError
             if not sitting.is_offered(self._clock.now()):
                 raise SittingExpiredError
