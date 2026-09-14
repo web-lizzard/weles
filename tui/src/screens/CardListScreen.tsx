@@ -1,14 +1,18 @@
-import { Box, Text, useInput } from "ink";
+import { Box, Text, useInput, useStdout } from "ink";
 import { useEffect, useState } from "react";
 import type { Card } from "../api/cards.js";
 import { NoteTabStrip } from "../components/NoteTabStrip.js";
+import { listWindow, panelBodyHeight } from "../lib/panelLayout.js";
 import { useCardsStore } from "../store/cards.js";
 import { useAppStore } from "../store/index.js";
 import { useNotesStore } from "../store/notes.js";
 
 const BACK_PREVIEW_LENGTH = 80;
+const DEFAULT_TERMINAL_ROWS = 24;
+const ROWS_PER_CARD = 4; // front + preview + anchor + gap
 
 export default function CardListScreen() {
+  const { stdout } = useStdout();
   const selectedNoteId = useAppStore((s) => s.selectedNoteId);
   const setActiveNoteTab = useAppStore((s) => s.setActiveNoteTab);
   const openCard = useAppStore((s) => s.openCard);
@@ -22,6 +26,21 @@ export default function CardListScreen() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const maxIndex = Math.max(0, cards.length - 1);
   const effectiveIndex = Math.min(selectedIndex, maxIndex);
+
+  const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
+  const windowSize = Math.max(
+    1,
+    Math.floor(panelBodyHeight(rows, 0) / ROWS_PER_CARD),
+  );
+  const { start: windowStart, size: effectiveWindowSize } = listWindow(
+    effectiveIndex,
+    cards.length,
+    windowSize,
+  );
+  const visibleCards = cards.slice(
+    windowStart,
+    windowStart + effectiveWindowSize,
+  );
 
   useEffect(() => {
     if (selectedNoteId === null) {
@@ -55,6 +74,16 @@ export default function CardListScreen() {
       return;
     }
 
+    if (key.pageUp) {
+      setSelectedIndex(clamp(effectiveIndex - windowSize, 0, maxIndex));
+      return;
+    }
+
+    if (key.pageDown) {
+      setSelectedIndex(clamp(effectiveIndex + windowSize, 0, maxIndex));
+      return;
+    }
+
     if (key.return) {
       openCard(cards[effectiveIndex].cardId);
     }
@@ -66,11 +95,11 @@ export default function CardListScreen() {
       {isLoading && cards.length === 0 && <Text>Loading...</Text>}
       {cards.length === 0 && <Text>No cards for this note</Text>}
       <Box flexDirection="column" flexGrow={1}>
-        {cards.map((card, index) => (
+        {visibleCards.map((card, index) => (
           <CardRow
             key={card.cardId}
             card={card}
-            isSelected={index === effectiveIndex}
+            isSelected={windowStart + index === effectiveIndex}
           />
         ))}
       </Box>

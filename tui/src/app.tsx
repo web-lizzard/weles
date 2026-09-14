@@ -1,5 +1,6 @@
 import { Box, useInput, useStdout } from "ink";
 import type { ReactNode } from "react";
+import BottomPanel from "./components/BottomPanel.js";
 import { useDuePolling } from "./hooks/useDuePolling.js";
 import CaptureScreen from "./screens/CaptureScreen.js";
 import CardDetailScreen from "./screens/CardDetailScreen.js";
@@ -10,8 +11,11 @@ import SittingOverlay from "./screens/SittingOverlay.js";
 import { useAppStore } from "./store/index.js";
 
 const DEFAULT_TERMINAL_ROWS = 24;
-const DEFAULT_TERMINAL_COLUMNS = 80;
 export const DUE_POLL_INTERVAL_MS = 15_000;
+
+const LIST_HINTS = "↑↓ select · Enter open · ← ESC to go back";
+const CARD_DETAIL_HINTS = "Enter jump to source · ← back";
+const SITTING_HINTS = "← ESC to go back";
 
 export default function App() {
   const { stdout } = useStdout();
@@ -25,14 +29,30 @@ export default function App() {
   const closeNotes = useAppStore((state) => state.closeNotes);
   const closeDetail = useAppStore((state) => state.closeDetail);
   const rows = stdout.rows > 0 ? stdout.rows : DEFAULT_TERMINAL_ROWS;
-  const columns =
-    stdout.columns > 0 ? stdout.columns : DEFAULT_TERMINAL_COLUMNS;
 
   useDuePolling(DUE_POLL_INTERVAL_MS);
 
-  // Notes and sitting still render as absolute overlays until their bodies
-  // move into bounded bottom panels in Phase 14.
-  const panel: ReactNode | null = null;
+  const panel: ReactNode | null = isSittingOverlayOpen ? (
+    <BottomPanel hints={SITTING_HINTS}>
+      <SittingOverlay />
+    </BottomPanel>
+  ) : isNotesOverlayOpen ? (
+    <BottomPanel
+      hints={notesPanelHints(isDetailOpen, activeNoteTab, selectedCardId)}
+    >
+      {isDetailOpen ? (
+        selectedCardId !== null ? (
+          <CardDetailScreen />
+        ) : activeNoteTab === "cards" ? (
+          <CardListScreen />
+        ) : (
+          <NoteDetailScreen />
+        )
+      ) : (
+        <NoteListOverlay />
+      )}
+    </BottomPanel>
+  ) : null;
 
   useInput((_input, key) => {
     if (!key.escape) {
@@ -56,47 +76,24 @@ export default function App() {
 
   return (
     <Box flexDirection="column" height={rows}>
-      <Box position="relative" flexDirection="column" height={rows - 1}>
-        <CaptureScreen panel={panel} />
-        {isNotesOverlayOpen && (
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            width={columns}
-            height={rows - 2}
-            flexDirection="column"
-            backgroundColor="black"
-            padding={1}
-          >
-            {isDetailOpen ? (
-              selectedCardId !== null ? (
-                <CardDetailScreen />
-              ) : activeNoteTab === "cards" ? (
-                <CardListScreen />
-              ) : (
-                <NoteDetailScreen />
-              )
-            ) : (
-              <NoteListOverlay />
-            )}
-          </Box>
-        )}
-        {isSittingOverlayOpen && (
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            width={columns}
-            height={rows - 1}
-            flexDirection="column"
-            backgroundColor="black"
-            padding={1}
-          >
-            <SittingOverlay />
-          </Box>
-        )}
-      </Box>
+      <CaptureScreen panel={panel} />
     </Box>
   );
+}
+
+function notesPanelHints(
+  isDetailOpen: boolean,
+  activeNoteTab: "note" | "cards",
+  selectedCardId: string | null,
+): string {
+  if (!isDetailOpen) {
+    return LIST_HINTS;
+  }
+  if (selectedCardId !== null) {
+    return CARD_DETAIL_HINTS;
+  }
+  if (activeNoteTab === "cards") {
+    return LIST_HINTS;
+  }
+  return "→ cards · ← ESC to go back";
 }

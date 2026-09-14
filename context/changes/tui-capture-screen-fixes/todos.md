@@ -1,8 +1,8 @@
 ---
 change_id: tui-capture-screen-fixes
 current_phase: 14
-next_step: tests
-next_command: /unit-test tui-capture-screen-fixes phase 14
+next_step: 14.5
+next_command: /implement tui-capture-screen-fixes phase 14
 updated: 2026-09-14
 ---
 
@@ -152,14 +152,14 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — f6e1d11
 
 #### Automated
 
-- [ ] 14.1 Panel tests pass
-- [ ] 14.2 Full TUI suite passes
-- [ ] 14.3 Type check passes
-- [ ] 14.4 Lint passes
+- [x] 14.1 Panel tests pass
+- [x] 14.2 Full TUI suite passes
+- [x] 14.3 Type check passes
+- [x] 14.4 Lint passes
 
 #### Manual
 

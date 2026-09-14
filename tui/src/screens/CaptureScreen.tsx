@@ -11,6 +11,7 @@ import StatusLine from "../components/StatusLine.js";
 import { clampDraftOffset, layoutCapture } from "../lib/captureLayout.js";
 import { renderConversationLines } from "../lib/conversationLines.js";
 import { renderDraftLines } from "../lib/draftLines.js";
+import { PANEL_CHROME_ROWS, panelBodyHeight } from "../lib/panelLayout.js";
 import { CLEAR_SCREEN_AND_SCROLLBACK } from "../lib/terminal.js";
 import { useChatStore } from "../store/chat.js";
 import { useAppStore } from "../store/index.js";
@@ -85,9 +86,11 @@ export default function CaptureScreen({
   const errorRows = hasStreamError
     ? wrappedRowCount(streamError.detail, columns)
     : 0;
-  const indicatorRows = isStreaming ? 1 : 0;
+  const indicatorRows = panel === null && isStreaming ? 1 : 0;
   const chromeRows =
-    indicatorRows + bannerRows + errorRows + FRAME_ROWS + STATUS_LINE_ROWS;
+    panel !== null
+      ? PANEL_CHROME_ROWS + panelBodyHeight(rows, 0)
+      : indicatorRows + bannerRows + errorRows + FRAME_ROWS + STATUS_LINE_ROWS;
 
   const draftLines =
     draft !== null ? renderDraftLines(draft, columns, chalk) : null;
@@ -194,7 +197,7 @@ export default function CaptureScreen({
       {layout.draftWindow !== null && (
         <DraftRegion window={layout.draftWindow} />
       )}
-      <Box flexDirection="column" flexGrow={1}>
+      <Box flexDirection="column" flexGrow={panel === null ? 1 : 0}>
         {Array.from({ length: Math.max(0, layout.fillerRows) }).map(
           (_, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: filler rows have no stable id
@@ -208,7 +211,7 @@ export default function CaptureScreen({
       </Box>
       <CoverageBanner coverageConfidence={coverageConfidence} />
       {streamError !== null && <StatusBar error={streamError} />}
-      {turnStartedAt !== null && (
+      {panel === null && turnStartedAt !== null && (
         <ActivityIndicator startedAt={turnStartedAt} />
       )}
       {panel !== null ? (
