@@ -38,4 +38,4 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 3.1 Both agent guides carry the integration line and remain identical
+- [x] 3.1 Both agent guides carry the integration line and remain identical
