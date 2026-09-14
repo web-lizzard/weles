@@ -1,8 +1,8 @@
 ---
 change_id: deployment-pr-gate
-current_phase: 3
-next_step: 3.3
-next_command: /implement deployment-pr-gate phase 3
+current_phase: 4
+next_step: 4.1
+next_command: /implement deployment-pr-gate phase 4
 updated: 2026-09-14
 ---
 
@@ -34,7 +34,7 @@ updated: 2026-09-14
 
 #### Manual
 
-- [ ] 3.3 Draft PR with a false property shows backend-property red and blocking checks green
+- [x] 3.3 Draft PR with a false property shows backend-property red and blocking checks green
 
 ### Phase 4: Protect Main
 
