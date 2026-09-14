@@ -14,7 +14,6 @@ class SqlAlchemyCardSourceLocator:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
     async def locate(self, owner: UserId, card_id: CardId) -> CardSource | None:
-        _ = owner
         async with self._session_factory() as session:
             matched = (
                 (
@@ -26,6 +25,7 @@ class SqlAlchemyCardSourceLocator:
                         .where(
                             DistillCardRow.id == DistillCardId(value=card_id.value),
                             DistillCardRow.discard_reason.is_(None),
+                            DistillCardRow.owner_id == owner.value,
                         )
                     )
                 )

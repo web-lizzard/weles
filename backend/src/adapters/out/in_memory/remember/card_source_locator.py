@@ -20,9 +20,8 @@ class InMemoryCardSourceLocator:
         self._cards: CardRepository = card_repository
 
     async def locate(self, owner: UserId, card_id: CardId) -> CardSource | None:
-        _ = owner
         card = await self._cards.get(DistillCardId(value=card_id.value))
-        if card is None or card.discard is not None:
+        if card is None or card.discard is not None or card.owner_id != owner:
             return None
         note = await self._notes.get(card.note_id)
         if note is None:

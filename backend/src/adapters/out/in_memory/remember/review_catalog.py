@@ -21,25 +21,23 @@ class InMemoryReviewCatalog:
         self._cards: CardRepository = card_repository
 
     async def list_reviewable(self, owner: UserId) -> Sequence[ReviewableCard]:
-        _ = owner
-        return [_as_reviewable(card) for card in await self._live_cards()]
+        return [_as_reviewable(card) for card in await self._live_cards(owner)]
 
     async def get_reviewable(
         self, owner: UserId, card_id: CardId
     ) -> ReviewableCard | None:
-        _ = owner
-        for card in await self._live_cards():
+        for card in await self._live_cards(owner):
             if card.id.value == card_id.value:
                 return _as_reviewable(card)
         return None
 
-    async def _live_cards(self) -> list[Card]:
+    async def _live_cards(self, owner: UserId) -> list[Card]:
         live: list[Card] = []
         for note in await self._notes.list_all():
             live.extend(
                 card
                 for card in await self._cards.list_by_note(note.id)
-                if card.discard is None
+                if card.discard is None and card.owner_id == owner
             )
         return live
 
