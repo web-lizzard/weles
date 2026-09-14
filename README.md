@@ -36,7 +36,7 @@ The production backend and its Postgres run as a Docker Compose stack on a Mikru
 ### One-time setup
 
 1. **SSH access.** Log in with a dedicated deploy key on port `10000 + <machine number>` — Mikrus never exposes port 22.
-2. **Docker.** Install Docker Engine with the Compose plugin; `docker compose version` must print a v2 version.
+2. **Docker.** Install Docker Engine with the Compose plugin; `docker compose version` must print 2.24 or newer (the stack uses optional `env_file` entries).
 3. **Disk.** Mount the added data disk at `/srv/weles` and create `/srv/weles/pgdata`.
 4. **Env files**, both `chmod 600`:
    - `/srv/weles/postgres.env` — `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
@@ -44,9 +44,29 @@ The production backend and its Postgres run as a Docker Compose stack on a Mikru
 5. **Base image.** `docker pull pgvector/pgvector:pg16`.
 6. **GitHub environment.** Create a `production` environment holding `DEPLOY_SSH_HOST`, `DEPLOY_SSH_PORT`, `DEPLOY_SSH_USER`, `DEPLOY_SSH_KEY`, and `DEPLOY_SSH_KNOWN_HOSTS` (from `ssh-keyscan -p <port> <host>`).
 
+### Public address
+
+The instance goes public through a Cloudflare Tunnel: a `cloudflared` container dials out to Cloudflare, so the VPS opens no port. The address must stay hard to discover — it cannot be guessed from a shared-domain pattern and must not appear in public certificate logs. Never commit the domain, the label, or the token anywhere in this repository.
+
+Until `/srv/weles/cloudflared.env` exists, deploys skip the tunnel and the instance is reachable only over SSH.
+
+1. **Domain.** Register a new, neutral domain — nothing hinting at Weles or its owner — with WHOIS privacy. Cloudflare Registrar does both.
+2. **Zone.** Use the domain on the Cloudflare Free plan as a full (nameserver) setup, never a CNAME setup. Enable DNSSEC under DNS → Settings.
+3. **Certificate.** Under SSL/TLS → Edge Certificates, confirm every certificate lists only `<domain>` and `*.<domain>`, and that Total TLS is off. Never add Advanced Certificate Manager to this zone: it issues certificates naming each host.
+4. **Label.** Generate it with `openssl rand -hex 12`. Use it as a first-level name only (`<label>.<domain>`, never `a.b.<domain>`), so the wildcard certificate covers it.
+5. **Tunnel.** In Zero Trust → Networks → Tunnels, create a Cloudflared tunnel and copy its token. Add a public hostname `<label>.<domain>` with service `HTTP` → `api:8000`.
+6. **VPS.**
+   - Confirm no Docker network already uses `172.30.238.0/24`: `docker network inspect $(docker network ls -q) --format '{{.Name}} {{range .IPAM.Config}}{{.Subnet}}{{end}}'`.
+   - Write `/srv/weles/cloudflared.env` containing `TUNNEL_TOKEN=<token>`, then `chmod 600` it.
+   - Add `AUTH_TRUSTED_PROXY_ADDRESSES=["172.30.238.10"]` to `/srv/weles/backend.env`, so attempt limits see each client's own address.
+7. **Start.** Dispatch `deploy` for the current gated SHA; the tunnel starts after the API is healthy.
+8. **Share.** Hand the address to the certification reviewer only through the private submission.
+
+If the tunnel keeps reconnecting, add `TUNNEL_TRANSPORT_PROTOCOL=http2` to `cloudflared.env` and run `docker compose -f /srv/weles/compose.yml --profile tunnel up -d --force-recreate cloudflared`, prefixed with `WELES_API_TAG=$(cat /srv/weles/deployed_sha)`. The same command applies a rotated token. If the address leaks, change the tunnel's public hostname to a new label; no redeploy is needed.
+
 ### Deploy
 
-Dispatch `integration` for the target SHA, then dispatch `deploy` with the same SHA.
+Dispatch `integration` for the target SHA, then dispatch `deploy` with the same SHA. A failed tunnel start only adds a warning; it never fails or rolls back a deploy.
 
 ### Migrate
 
@@ -54,7 +74,9 @@ Open a tunnel — `ssh -L 5432:127.0.0.1:5432 …` — then run the migration sc
 
 ### Access
 
-Open a tunnel — `ssh -L 8000:127.0.0.1:8000 …` — then `weles instance set http://localhost:8000`.
+Once the public address is set up: `weles instance set https://<label>.<domain>`.
+
+Fallback, and the only path before then: open a tunnel — `ssh -L 8000:127.0.0.1:8000 …` — then `weles instance set http://localhost:8000`.
 
 ### Rollback
 
@@ -66,7 +88,7 @@ Over SSH: `docker compose -f /srv/weles/compose.yml exec postgres pg_dump -U <us
 
 ### Resources
 
-`docker stats --no-stream` and `free -m` on the VPS. Escalate to a larger Mikrus plan when `docker inspect` shows `OOMKilled` or container restart counts climb.
+`docker stats --no-stream` and `free -m` on the VPS; `cloudflared` is capped at 128 MB. Escalate to a larger Mikrus plan when `docker inspect` shows `OOMKilled` or container restart counts climb.
 
 ## Dev container: Ordo (skills)
 

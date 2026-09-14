@@ -1,7 +1,7 @@
 ---
 change_id: deployment-public-address
 title: The author and the reviewer reach the hosted instance at a hard-to-discover public address
-status: planned
+status: implementing
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
