@@ -22,12 +22,12 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 2.1 Implement Neon URL normalization and refusals
-- [x] 2.2 Implement schema state reading and upgrade to head
-- [x] 2.3 Unit tests for schema_upgrade pass
-- [x] 2.4 Postgres tests for schema_upgrade pass
-- [x] 2.5 basedpyright passes
-- [x] 2.6 ruff passes
+- [x] 2.1 Implement Neon URL normalization and refusals — 01c37f9
+- [x] 2.2 Implement schema state reading and upgrade to head — 01c37f9
+- [x] 2.3 Unit tests for schema_upgrade pass — 01c37f9
+- [x] 2.4 Postgres tests for schema_upgrade pass — 01c37f9
+- [x] 2.5 basedpyright passes — 01c37f9
+- [x] 2.6 ruff passes — 01c37f9
 
 ### Phase 3: Migration Script and Runbook
 
