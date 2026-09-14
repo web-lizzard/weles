@@ -11,6 +11,53 @@ weles instance set <address>
 
 **Releasing a TUI version:** bump `version` in `tui/package.json`, commit, then push tag `tui-v<version>` (for example `tui-v0.1.0`). The `tui-release` workflow attaches `weles-<version>.tgz` and `weles.tgz` to a GitHub Release.
 
+## Using Weles
+
+Weles is a terminal second brain: you talk through an idea, it drafts a note, you approve it, and it turns the note into cards you review later. The TUI talks to a Weles backend instance — your own, or one whose owner gave you its address.
+
+### 1. Point the TUI at an instance
+
+```sh
+weles instance set https://<address>
+weles instance            # prints the configured address
+```
+
+The address must be `http://` or `https://`, optionally with a path prefix. Changing it signs you out, so a sign-in for one instance is never sent to another. Both the address and your sign-in live in `$XDG_CONFIG_HOME/weles/` (`~/.config/weles/` by default).
+
+### 2. Create an account and sign in
+
+```sh
+weles register <email>    # first time only
+weles sign-in <email>
+```
+
+Both commands prompt for the password without echoing it; it is never accepted as an argument. By default the instance requires at least 8 characters, keeps you signed in for 24 hours, and temporarily refuses sign-in after 5 failed attempts in 15 minutes. When the sign-in expires, `weles` tells you to run `weles sign-in` again.
+
+### 3. Capture
+
+Run `weles` in an interactive terminal.
+
+- Type a thought and press **Enter**; the reply streams in as it is written.
+- As the conversation settles, a draft note appears above the input. Scroll it with **↑ ↓**.
+- Type `/approve` to save the draft as a note. Cards are generated from it in the background.
+
+### 4. Browse notes and cards
+
+Type `/notes`.
+
+- **↑ ↓** select, **Enter** open, **Esc** back.
+- In a note, **→** switches to its cards and **←** returns. In the card list, **r** refreshes.
+- In a card, **Enter** jumps to the passage of the note it came from.
+
+### 5. Review
+
+Type `/remember` to start a review sitting; the footer shows how many cards are due. A sitting you leave resumes where you left off.
+
+- **t** shows or hides the answer.
+- Grade the card with **1** Forgot, **2** Hard, **3** Good, or **4** Easy, or pick with **↑ ↓** and press **Enter**.
+- With the answer shown, **s** opens the source passage (**e** expands it, **↑ ↓** scroll, **Esc** closes), and **x** turns down a card you do not want (**y** confirms, **n** cancels).
+- **Esc** leaves the sitting.
+
 ## Bringing a hosted database to a commit's schema
 
 The app does not migrate on startup. Bring the hosted database to the schema a commit expects with one script:
