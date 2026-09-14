@@ -23,6 +23,7 @@ from domain.remember.value_objects import (
 from domain.shared.outbox.model import OutboxEnvelope
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -69,7 +70,7 @@ async def test_a_sitting_past_its_horizon_refuses_rejection_before_any_write(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        await composition.reject_card().handle(sitting.id, card.id)
+        await composition.reject_card().handle(OWNER, sitting.id, card.id)
 
     await _assert_no_rejection_side_effects(composition, card.id)
 
@@ -83,7 +84,7 @@ async def test_a_card_outside_the_sitting_refuses_rejection(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotInSittingError):
-        await composition.reject_card().handle(sitting.id, outsider.id)
+        await composition.reject_card().handle(OWNER, sitting.id, outsider.id)
 
     await _assert_no_rejection_side_effects(composition, outsider.id)
 
@@ -98,7 +99,7 @@ async def test_a_finished_sitting_refuses_rejection_before_presentable(
     await composition.review_events.save(prior)
 
     with pytest.raises(SittingAlreadyCompleteError):
-        await composition.reject_card().handle(sitting.id, card.id)
+        await composition.reject_card().handle(OWNER, sitting.id, card.id)
 
     assert await composition.review_events.list_by_card(card.id) == [prior]
     assert composition.outbox_store.all() == []
@@ -118,7 +119,7 @@ async def test_a_member_that_is_not_the_seeded_pick_refuses_rejection(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotPresentableError):
-        await composition.reject_card().handle(sitting.id, other.id)
+        await composition.reject_card().handle(OWNER, sitting.id, other.id)
 
     await _assert_no_rejection_side_effects(composition, other.id)
 
@@ -132,7 +133,7 @@ async def test_rejection_persists_a_rejected_event_and_card_rejected_envelope_to
     sitting = open_sitting(card)
     await composition.sittings.save(sitting)
 
-    await composition.reject_card().handle(sitting.id, card.id)
+    await composition.reject_card().handle(OWNER, sitting.id, card.id)
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
@@ -162,7 +163,7 @@ async def test_rejection_leaves_scheduling_state_untouched_when_one_already_exis
     await composition.sittings.save(sitting)
     await composition.scheduling_states.save(memoized)
 
-    await composition.reject_card().handle(sitting.id, card.id)
+    await composition.reject_card().handle(OWNER, sitting.id, card.id)
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
@@ -186,8 +187,8 @@ async def test_a_failing_outbox_append_leaves_no_review_event_or_envelope(
     await composition.sittings.save(sitting)
     original_uow_factory = composition.unit_of_work
 
-    def uow_with_raising_outbox() -> object:
-        uow = original_uow_factory()
+    def uow_with_raising_outbox(owner: object) -> object:
+        uow = original_uow_factory(owner)  # pyright: ignore[reportArgumentType]
         uow.outbox = _RaisingOutboxAppender()
         return uow
 
@@ -198,7 +199,7 @@ async def test_a_failing_outbox_append_leaves_no_review_event_or_envelope(
     )
 
     with pytest.raises(RuntimeError):
-        await command.handle(sitting.id, card.id)
+        await command.handle(OWNER, sitting.id, card.id)
 
     await _assert_no_rejection_side_effects(composition, card.id)
     assert await composition.sittings.get(sitting.id) == sitting

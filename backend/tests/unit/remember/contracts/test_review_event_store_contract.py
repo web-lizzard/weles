@@ -12,6 +12,7 @@ from domain.remember.ports import ReviewEventStore, SittingRepository
 from domain.remember.review_event import ReviewEvent
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, Grade, Graded, ShowingLimit, SittingId
+from domain.shared.identity.model import UserId
 from tests.support.postgres_remember_repositories import (
     CommittingReviewEventStore,
     CommittingSittingRepository,
@@ -41,12 +42,16 @@ def review_event_fixture(request: pytest.FixtureRequest) -> _ReviewEventFixture:
     )
 
 
+_OWNER = UserId.new()
+
+
 def _card_id() -> CardId:
     return CardId(value=uuid4())
 
 
 def _open_sitting() -> Sitting:
     return Sitting.open(
+        _OWNER,
         frozenset({_card_id()}),
         datetime.now(UTC),
         ShowingLimit(value=2),

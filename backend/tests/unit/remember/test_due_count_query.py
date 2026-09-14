@@ -7,6 +7,7 @@ from domain.remember.review_event import ReviewEvent
 from domain.remember.value_objects import Grade, Graded, ResumeHorizon, SittingId
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -31,7 +32,7 @@ async def test_without_a_sitting_due_reviewable_cards_land_entirely_in_not_yet_s
     _ = await reviewable(composition, front="Due now")
     _ = await reviewable(composition, front="Also due")
 
-    result = await composition.due_count().handle()
+    result = await composition.due_count().handle(OWNER)
 
     assert result.due.total == 2
     assert result.due.not_yet_seen == 2
@@ -50,7 +51,7 @@ async def test_a_future_due_at_excludes_the_card_from_the_total(
         state(later.id, due_at=as_of + timedelta(days=30), stamp=live)
     )
 
-    result = await composition.due_count().handle()
+    result = await composition.due_count().handle(OWNER)
 
     assert result.due.total == 1
     assert result.due.not_yet_seen == 1
@@ -63,7 +64,7 @@ async def test_reading_the_due_count_writes_no_sitting(
     before_sittings = composition.sittings.snapshot()
     before_events = composition.review_events.snapshot()
 
-    _ = await composition.due_count().handle()
+    _ = await composition.due_count().handle(OWNER)
 
     assert composition.sittings.snapshot() == before_sittings
     assert composition.review_events.snapshot() == before_events
@@ -82,7 +83,7 @@ async def test_a_sitting_past_its_horizon_is_absent_from_the_partition_readings(
     )
     await composition.sittings.save(sitting)
 
-    result = await composition.due_count().handle()
+    result = await composition.due_count().handle(OWNER)
 
     assert result.due.total == 2
     assert result.due.not_yet_seen == 2
@@ -99,7 +100,7 @@ async def test_an_offered_sitting_buckets_shown_outstanding_into_seen_still_owed
     await composition.sittings.save(sitting)
     await composition.review_events.save(_event(shown.id, sitting.id, Grade.FORGOT))
 
-    result = await composition.due_count().handle()
+    result = await composition.due_count().handle(OWNER)
 
     assert result.due.total == 2
     assert result.due.not_yet_seen == 1

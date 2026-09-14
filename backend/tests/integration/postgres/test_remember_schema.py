@@ -27,6 +27,7 @@ async def test_graded_event_row_with_null_grade_is_rejected_by_grade_iff_graded_
         db_session.add(
             RememberSittingRow(
                 id=sitting_id,
+                owner_id=uuid4(),
                 opened_at=opened_at,
                 showing_limit=ShowingLimit(value=2),
                 resume_horizon=ResumeHorizon(value=timedelta(days=1)),

@@ -20,12 +20,14 @@ from domain.remember.value_objects import (
     ShowingLimit,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 _STAMP = SchedulerStamp(
     algorithm=SchedulerAlgorithm.FSRS,
     parameter_version="due-partition-hunt",
 )
 _AS_OF = datetime(2026, 6, 1, 12, 0, tzinfo=UTC)
+_OWNER = UserId.new()
 
 _GRADES = st.sampled_from(list(Grade))
 
@@ -79,6 +81,7 @@ def _event(
 
 def _sitting(card_ids: frozenset[CardId], *, limit: int = 2) -> Sitting:
     return Sitting.open(
+        _OWNER,
         card_ids,
         datetime(2026, 5, 1, tzinfo=UTC),
         ShowingLimit(value=limit),

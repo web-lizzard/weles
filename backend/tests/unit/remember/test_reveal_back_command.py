@@ -14,6 +14,7 @@ from domain.remember.value_objects import (
 )
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -45,7 +46,7 @@ async def test_reveal_persists_a_revealed_payload_review_event_at_the_clock_inst
     sitting = open_sitting(card)
     await composition.sittings.save(sitting)
 
-    result = await composition.reveal_back().handle(sitting.id, card.id)
+    result = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
@@ -64,8 +65,8 @@ async def test_a_second_reveal_for_the_same_card_appends_no_second_event(
     await composition.sittings.save(sitting)
     command = composition.reveal_back()
 
-    first = await command.handle(sitting.id, card.id)
-    second = await command.handle(sitting.id, card.id)
+    first = await command.handle(OWNER, sitting.id, card.id)
+    second = await command.handle(OWNER, sitting.id, card.id)
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 1
@@ -87,7 +88,7 @@ async def test_a_finished_sitting_still_accepts_reveal_without_guard_outcome(
     await composition.sittings.save(sitting)
     await composition.review_events.save(prior)
 
-    result = await composition.reveal_back().handle(sitting.id, card.id)
+    result = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
     events = await composition.review_events.list_by_card(card.id)
     assert len(events) == 2
@@ -109,6 +110,6 @@ async def test_an_expired_sitting_leaves_no_review_event_on_reveal(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        _ = await composition.reveal_back().handle(sitting.id, card.id)
+        _ = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
     assert await composition.review_events.list_by_card(card.id) == []

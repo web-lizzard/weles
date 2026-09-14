@@ -37,6 +37,8 @@ from domain.remember.value_objects import (
 )
 from domain.shared.identity.model import UserId
 
+OWNER: UserId = UserId.new()
+
 
 class _Clock:
     def __init__(self, instant: datetime) -> None:
@@ -88,7 +90,7 @@ async def reviewable(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=OWNER,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label="remember unit tests"),
         content=NoteContent(value=f"Note content backing {front}."),
@@ -119,6 +121,7 @@ def open_sitting(
     *cards: ReviewableCard, showing_limit: ShowingLimit | None = None
 ) -> Sitting:
     return Sitting.open(
+        OWNER,
         frozenset(card.id for card in cards),
         datetime.now(UTC),
         showing_limit or ShowingLimit(value=2),
@@ -133,6 +136,7 @@ def sitting_past_resume_horizon(
 ) -> Sitting:
     """Sitting past horizon when the clock is at opened_at + 2h."""
     return Sitting.open(
+        OWNER,
         frozenset(card.id for card in cards),
         opened_at,
         showing_limit or ShowingLimit(value=2),

@@ -27,6 +27,7 @@ from domain.remember.value_objects import (
 )
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -77,7 +78,9 @@ async def test_a_sitting_past_its_horizon_raises_expired_before_any_write(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        _ = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, card.id, Grade.GOOD
+        )
 
     assert await composition.review_events.list_by_card(card.id) == []
     assert await composition.scheduling_states.get(card.id) is None
@@ -97,7 +100,9 @@ async def test_expiry_on_grade_is_checked_before_membership(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        _ = await composition.grade_card().handle(sitting.id, outsider.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, outsider.id, Grade.GOOD
+        )
 
 
 async def test_an_unknown_sitting_raises_sitting_not_found(
@@ -108,7 +113,9 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingNotFoundError):
-        _ = await composition.grade_card().handle(SittingId.new(), card.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(
+            OWNER, SittingId.new(), card.id, Grade.GOOD
+        )
 
     assert await composition.review_events.list_by_card(card.id) == []
     assert await composition.scheduling_states.get(card.id) is None
@@ -123,7 +130,9 @@ async def test_a_card_outside_the_sitting_raises_card_not_in_sitting(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotInSittingError):
-        _ = await composition.grade_card().handle(sitting.id, outsider.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, outsider.id, Grade.GOOD
+        )
 
     assert await composition.review_events.list_by_card(outsider.id) == []
     assert await composition.scheduling_states.get(outsider.id) is None
@@ -139,7 +148,9 @@ async def test_a_finished_sitting_raises_already_complete_before_presentable(
     await composition.review_events.save(prior)
 
     with pytest.raises(SittingAlreadyCompleteError):
-        _ = await composition.grade_card().handle(sitting.id, card.id, Grade.EASY)
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, card.id, Grade.EASY
+        )
 
     assert await composition.review_events.list_by_card(card.id) == [prior]
     assert await composition.scheduling_states.get(card.id) is None
@@ -158,7 +169,9 @@ async def test_a_member_that_is_not_the_seeded_pick_raises_not_presentable(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotPresentableError):
-        _ = await composition.grade_card().handle(sitting.id, other.id, Grade.FORGOT)
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, other.id, Grade.FORGOT
+        )
 
     assert await composition.review_events.list_by_card(other.id) == []
     assert await composition.scheduling_states.get(other.id) is None
@@ -187,7 +200,9 @@ async def test_a_stale_stamp_rebuilds_previous_from_the_card_log(
     )
     assert expected_previous is not None
 
-    result = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+    result = await composition.grade_card().handle(
+        OWNER, sitting.id, card.id, Grade.GOOD
+    )
 
     # fsrs.Card() stamps a fresh internal card_id on every from-scratch replay, so
     # full-state equality is compared on the meaningful fields, not the raw payload.
@@ -223,7 +238,7 @@ async def test_a_raising_scheduler_leaves_no_partial_write(
     )
 
     with pytest.raises(RuntimeError):
-        _ = await command.handle(sitting.id, card.id, Grade.GOOD)
+        _ = await command.handle(OWNER, sitting.id, card.id, Grade.GOOD)
 
     assert await composition.review_events.list_by_card(card.id) == []
     assert await composition.scheduling_states.get(card.id) is None
@@ -237,7 +252,9 @@ async def test_grading_persists_exactly_the_one_submitted_write(
     sitting = open_sitting(card)
     await composition.sittings.save(sitting)
 
-    result = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+    result = await composition.grade_card().handle(
+        OWNER, sitting.id, card.id, Grade.GOOD
+    )
 
     assert isinstance(result, GradeAppliedDTO)
     events = await composition.review_events.list_by_card(card.id)
@@ -257,7 +274,7 @@ async def test_grading_persists_the_scheduler_review_output_as_memoized_state(
     reviewed_at = composition.clock.now()
     expected = composition.scheduler.review(None, card.id, Grade.GOOD, reviewed_at)
 
-    _ = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+    _ = await composition.grade_card().handle(OWNER, sitting.id, card.id, Grade.GOOD)
 
     saved = await composition.scheduling_states.get(card.id)
     assert saved is not None
@@ -295,7 +312,9 @@ async def test_grading_passes_the_live_scheduler_stamp_to_partition_due(
         "application.remember.commands.grade_card.partition_due",
         side_effect=_capture_partition_due,
     ):
-        _ = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+        _ = await composition.grade_card().handle(
+            OWNER, sitting.id, card.id, Grade.GOOD
+        )
 
     assert captured == [live_stamp]
 
@@ -312,7 +331,9 @@ async def test_a_completing_grade_applied_dto_includes_outstanding_count(
         "application.remember.commands.grade_card.GradeAppliedDTO",
         wraps=GradeAppliedDTO,
     ) as mocked:
-        result = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+        result = await composition.grade_card().handle(
+            OWNER, sitting.id, card.id, Grade.GOOD
+        )
 
     complete_calls = [
         call.kwargs
@@ -337,7 +358,9 @@ async def test_a_completing_grade_applied_dto_includes_due_partition(
         "application.remember.commands.grade_card.GradeAppliedDTO",
         wraps=GradeAppliedDTO,
     ) as mocked:
-        result = await composition.grade_card().handle(sitting.id, card.id, Grade.GOOD)
+        result = await composition.grade_card().handle(
+            OWNER, sitting.id, card.id, Grade.GOOD
+        )
 
     complete_calls = [
         call.kwargs
@@ -346,7 +369,7 @@ async def test_a_completing_grade_applied_dto_includes_due_partition(
     ]
     assert len(complete_calls) == 1
     assert "due" in complete_calls[0]
-    expected = (await composition.due_count().handle()).due
+    expected = (await composition.due_count().handle(OWNER)).due
     _assert_partition_matches(result.due, expected)
 
 
@@ -363,7 +386,9 @@ async def test_an_incomplete_grade_carries_the_next_card_front(
     other = second if in_front == first.id else first
     await composition.sittings.save(sitting)
 
-    result = await composition.grade_card().handle(sitting.id, in_front, Grade.HARD)
+    result = await composition.grade_card().handle(
+        OWNER, sitting.id, in_front, Grade.HARD
+    )
 
     assert result.sitting_complete is False
     assert result.next_front == other.front
@@ -385,7 +410,9 @@ async def test_an_incomplete_grade_includes_outstanding_count(
         "application.remember.commands.grade_card.GradeAppliedDTO",
         wraps=GradeAppliedDTO,
     ) as mocked:
-        result = await composition.grade_card().handle(sitting.id, in_front, Grade.HARD)
+        result = await composition.grade_card().handle(
+            OWNER, sitting.id, in_front, Grade.HARD
+        )
 
     incomplete_calls = [
         call.kwargs

@@ -3,6 +3,7 @@ from domain.distill.ports import CardRepository, NoteRepository
 from domain.distill.value_objects import CardId as DistillCardId
 from domain.remember.ports import CardSource, SourceBlock, SourceSpan
 from domain.remember.value_objects import CardId
+from domain.shared.identity.model import UserId
 
 
 class InMemoryCardSourceLocator:
@@ -18,7 +19,8 @@ class InMemoryCardSourceLocator:
         self._notes: NoteRepository = note_repository
         self._cards: CardRepository = card_repository
 
-    async def locate(self, card_id: CardId) -> CardSource | None:
+    async def locate(self, owner: UserId, card_id: CardId) -> CardSource | None:
+        _ = owner
         card = await self._cards.get(DistillCardId(value=card_id.value))
         if card is None or card.discard is not None:
             return None

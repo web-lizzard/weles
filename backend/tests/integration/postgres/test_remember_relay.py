@@ -52,6 +52,7 @@ _NOTE_BODY = f"Lead paragraph.\n\n{_ANCHOR_QUOTE}\n\nTail."
 _OUTBOX_BATCH_SIZE = 10
 _OUTBOX_MAX_ATTEMPTS = 3
 _OUTBOX_WORKER_ID = "remember-test-worker"
+_OWNER = UserId.new()
 
 
 class _FixedClock:
@@ -69,9 +70,10 @@ def _distill_uow_factory(
 
 
 def _remember_uow_factory(
+    owner: UserId,
     session_factory: async_sessionmaker[AsyncSession],
 ) -> SqlAlchemyRememberUnitOfWork:
-    return SqlAlchemyRememberUnitOfWork(session_factory)
+    return SqlAlchemyRememberUnitOfWork(owner, session_factory)
 
 
 def _relay_worker(
@@ -139,20 +141,20 @@ async def test_reject_and_run_once_discards_distill_card_and_acks_envelope(
     catalog = SqlAlchemyReviewCatalog(session_factory)
 
     opened = await OpenSittingCommand(
-        uow_factory=lambda: _remember_uow_factory(session_factory),  # pyright: ignore[reportArgumentType]
+        uow_factory=lambda owner: _remember_uow_factory(owner, session_factory),  # pyright: ignore[reportArgumentType]
         catalog=catalog,
         clock=clock,
         showing_limit=ShowingLimit(value=2),
         scheduler=FsrsScheduler(),
         resume_horizon=ResumeHorizon(value=MIN_RESUME_HORIZON),
-    ).handle()
+    ).handle(_OWNER)
     assert isinstance(opened, SittingOpenedDTO)
 
     await RejectCardCommand(
-        uow_factory=lambda: _remember_uow_factory(session_factory),  # pyright: ignore[reportArgumentType]
+        uow_factory=lambda owner: _remember_uow_factory(owner, session_factory),  # pyright: ignore[reportArgumentType]
         catalog=catalog,
         clock=clock,
-    ).handle(SittingId(value=opened.sitting_id), card_id)
+    ).handle(_OWNER, SittingId(value=opened.sitting_id), card_id)
 
     acked = await _relay_worker(session_factory).run_once()
     assert acked == 1
@@ -167,7 +169,7 @@ async def test_reject_and_run_once_discards_distill_card_and_acks_envelope(
         assert persisted.discard.reason == DiscardReason.USER_AUDIT
         assert persisted.discard.discarded_at == _AS_OF
 
-        reviewable = await SqlAlchemyReviewCatalog(factory).list_reviewable()
+        reviewable = await SqlAlchemyReviewCatalog(factory).list_reviewable(_OWNER)
         assert reviewable == []
 
         claimed = await SqlAlchemyOutboxClaimer(factory).claim(

@@ -62,6 +62,7 @@ _FRONT = "What establishes a connection?"
 _BACK = "A three-way handshake."
 _ANCHOR_QUOTE = "Connections are established via a three-way handshake."
 _NOTE_BODY = f"Lead paragraph.\n\n{_ANCHOR_QUOTE}\n\nTail."
+_OWNER = UserId.new()
 
 
 class _FixedClock:
@@ -152,7 +153,7 @@ async def test_due_count_counts_unscheduled_cards_and_honors_future_due_at(
         )
     )
 
-    result = await due_count.handle()
+    result = await due_count.handle(_OWNER)
 
     assert result.due.total == 1
     assert result.due.not_yet_seen == 1
@@ -167,6 +168,7 @@ async def test_current_card_presents_the_sitting_s_only_card_while_offered(
     _, current_card, _, _ = _remember_queries(session_factory, clock)
     card_id, _ = await _seed_live_card(session_factory)
     sitting = Sitting.open(
+        _OWNER,
         frozenset({card_id}),
         _AS_OF,
         ShowingLimit(value=2),
@@ -174,7 +176,7 @@ async def test_current_card_presents_the_sitting_s_only_card_while_offered(
     )
     await CommittingSittingRepository(session_factory).save(sitting)
 
-    result = await current_card.handle(sitting.id)
+    result = await current_card.handle(_OWNER, sitting.id)
 
     assert isinstance(result, PresentedCardDTO)
     assert result.card_id == card_id.value
@@ -190,6 +192,7 @@ async def test_card_source_returns_blocks_and_span_after_a_reveal_event(
     _, _, card_source, _ = _remember_queries(session_factory, clock)
     card_id, _ = await _seed_live_card(session_factory)
     sitting = Sitting.open(
+        _OWNER,
         frozenset({card_id}),
         _AS_OF,
         ShowingLimit(value=2),
@@ -207,7 +210,7 @@ async def test_card_source_returns_blocks_and_span_after_a_reveal_event(
         )
     )
 
-    result = await card_source.handle(sitting.id, card_id)
+    result = await card_source.handle(_OWNER, sitting.id, card_id)
 
     assert len(result.blocks) == 3
     assert result.blocks[1].text == _ANCHOR_QUOTE
@@ -222,7 +225,7 @@ async def test_catalog_stops_offering_a_card_after_distill_discards_it(
     _, _, _, catalog = _remember_queries(session_factory, clock)
     card_id, distill_card = await _seed_live_card(session_factory)
 
-    before = await catalog.list_reviewable()
+    before = await catalog.list_reviewable(_OWNER)
     assert {entry.id for entry in before} == {card_id}
 
     await DiscardCardCommand(
@@ -234,5 +237,5 @@ async def test_catalog_stops_offering_a_card_after_distill_discards_it(
         _AS_OF,
     )
 
-    after = await catalog.list_reviewable()
+    after = await catalog.list_reviewable(_OWNER)
     assert after == []

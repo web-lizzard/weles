@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-remember-separation
 current_phase: 1
-next_step: 1.1
+next_step: 1.4
 next_command: /implement auth-flow-remember-separation phase 1
 updated: 2026-09-14
 ---
@@ -10,9 +10,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 1.1 Offline backend suite passes
-- [ ] 1.2 Postgres lane passes
-- [ ] 1.3 Type check passes
+- [x] 1.1 Offline backend suite passes
+- [x] 1.2 Postgres lane passes
+- [x] 1.3 Type check passes
 
 #### Manual
 

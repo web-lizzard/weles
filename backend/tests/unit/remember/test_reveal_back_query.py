@@ -13,6 +13,7 @@ from domain.remember.exceptions import (
 from domain.remember.value_objects import ResumeHorizon, SittingId
 
 from .conftest import (
+    OWNER,
     clock_after_resume_horizon,
     open_sitting,
     reviewable,
@@ -33,7 +34,7 @@ async def test_a_sitting_past_its_horizon_raises_expired_on_reveal_back(
     await composition.sittings.save(sitting)
 
     with pytest.raises(SittingExpiredError):
-        _ = await composition.reveal_back().handle(sitting.id, card.id)
+        _ = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
 
 async def test_a_sitting_member_returns_its_front_and_back(
@@ -45,7 +46,7 @@ async def test_a_sitting_member_returns_its_front_and_back(
     sitting = open_sitting(card)
     await composition.sittings.save(sitting)
 
-    result = await composition.reveal_back().handle(sitting.id, card.id)
+    result = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
     assert result.sitting_id == sitting.id.value
     assert result.card_id == card.id.value
@@ -59,7 +60,7 @@ async def test_an_unknown_sitting_raises_sitting_not_found(
     card = await reviewable(composition)
 
     with pytest.raises(SittingNotFoundError):
-        _ = await composition.reveal_back().handle(SittingId.new(), card.id)
+        _ = await composition.reveal_back().handle(OWNER, SittingId.new(), card.id)
 
 
 async def test_a_card_outside_the_sitting_raises_card_not_in_sitting(
@@ -71,7 +72,7 @@ async def test_a_card_outside_the_sitting_raises_card_not_in_sitting(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotInSittingError):
-        _ = await composition.reveal_back().handle(sitting.id, outsider.id)
+        _ = await composition.reveal_back().handle(OWNER, sitting.id, outsider.id)
 
 
 async def test_a_discarded_card_raises_card_not_reviewable(
@@ -82,7 +83,7 @@ async def test_a_discarded_card_raises_card_not_reviewable(
     await composition.sittings.save(sitting)
 
     with pytest.raises(CardNotReviewableError):
-        _ = await composition.reveal_back().handle(sitting.id, card.id)
+        _ = await composition.reveal_back().handle(OWNER, sitting.id, card.id)
 
 
 async def test_reveal_does_not_require_the_card_to_be_in_front(
@@ -96,7 +97,7 @@ async def test_reveal_does_not_require_the_card_to_be_in_front(
     assert in_front is not None
     other = second if in_front == first.id else first
 
-    result = await composition.reveal_back().handle(sitting.id, other.id)
+    result = await composition.reveal_back().handle(OWNER, sitting.id, other.id)
 
     assert result.card_id == other.id.value
     assert result.front == other.front

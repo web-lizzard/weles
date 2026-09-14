@@ -69,6 +69,7 @@ class _FixedClock:
 class RememberFlowContext:
     clock: _FixedClock
     composition: InMemoryRememberComposition
+    owner: UserId = field(default_factory=UserId.new)
     cards_by_label: dict[str, ReviewableCard] = field(default_factory=dict)
     distill_cards_by_label: dict[str, Card] = field(default_factory=dict)
     last_open_result: SittingOpenedDTO | SittingResumedDTO | NothingDueDTO | None = None
@@ -107,7 +108,7 @@ def _card(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=context.owner,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=slug),
         content=NoteContent(value=f"Note content backing the card {slug}."),
@@ -150,7 +151,7 @@ def _card_with_resolvable_source(
     now = datetime.now(UTC)
     note = Note(
         id=NoteId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=context.owner,
         session_id=SessionId(value=uuid4()),
         topic=TopicSnapshot(id=uuid4(), label=slug),
         content=NoteContent(value=_RESOLVABLE_SOURCE_NOTE),
@@ -375,7 +376,11 @@ def card_has_two_prior_good_grades(remember_flow_context: RememberFlowContext) -
 
 @given("the user has started a review")
 def user_has_started_review(remember_flow_context: RememberFlowContext) -> None:
-    result = asyncio.run(remember_flow_context.composition.open_sitting().handle())
+    result = asyncio.run(
+        remember_flow_context.composition.open_sitting().handle(
+            remember_flow_context.owner
+        )
+    )
     assert isinstance(result, SittingOpenedDTO)
     remember_flow_context.last_open_result = result
     remember_flow_context.sitting_id = SittingId(value=result.sitting_id)
@@ -391,6 +396,7 @@ def user_has_revealed_current_back(remember_flow_context: RememberFlowContext) -
     assert remember_flow_context.current_card_id is not None
     result = asyncio.run(
         remember_flow_context.composition.reveal_back().handle(
+            remember_flow_context.owner,
             remember_flow_context.sitting_id,
             remember_flow_context.current_card_id,
         )
@@ -422,7 +428,11 @@ def card_is_the_one_in_front(
 def user_starts_review(remember_flow_context: RememberFlowContext) -> None:
     if remember_flow_context.sitting_id is not None:
         remember_flow_context.prior_sitting_id = remember_flow_context.sitting_id
-    result = asyncio.run(remember_flow_context.composition.open_sitting().handle())
+    result = asyncio.run(
+        remember_flow_context.composition.open_sitting().handle(
+            remember_flow_context.owner
+        )
+    )
     remember_flow_context.last_open_result = result
     if isinstance(result, (SittingOpenedDTO, SittingResumedDTO)):
         remember_flow_context.sitting_id = SittingId(value=result.sitting_id)
@@ -446,6 +456,7 @@ def _read_current_card_source(remember_flow_context: RememberFlowContext) -> Non
     try:
         result = asyncio.run(
             remember_flow_context.composition.card_source().handle(
+                remember_flow_context.owner,
                 remember_flow_context.sitting_id,
                 remember_flow_context.current_card_id,
             )
@@ -467,6 +478,7 @@ def user_reveals_current_back(remember_flow_context: RememberFlowContext) -> Non
     assert remember_flow_context.current_card_id is not None
     result = asyncio.run(
         remember_flow_context.composition.reveal_back().handle(
+            remember_flow_context.owner,
             remember_flow_context.sitting_id,
             remember_flow_context.current_card_id,
         )
@@ -485,6 +497,7 @@ def user_grades_current_card(
     grade = Grade(grade_name.lower())
     result = asyncio.run(
         remember_flow_context.composition.grade_card().handle(
+            remember_flow_context.owner,
             remember_flow_context.sitting_id,
             remember_flow_context.current_card_id,
             grade,
@@ -531,7 +544,9 @@ def sitting_live_membership_is_read(
     live_ids = frozenset(
         card.id
         for card in asyncio.run(
-            remember_flow_context.composition.catalog.list_reviewable()
+            remember_flow_context.composition.catalog.list_reviewable(
+                remember_flow_context.owner
+            )
         )
     )
     remember_flow_context.live_membership = sitting.visible(live_ids)
@@ -543,7 +558,7 @@ def user_reads_current_card(remember_flow_context: RememberFlowContext) -> None:
     assert remember_flow_context.sitting_id is not None
     result = asyncio.run(
         remember_flow_context.composition.current_card().handle(
-            remember_flow_context.sitting_id
+            remember_flow_context.owner, remember_flow_context.sitting_id
         )
     )
     remember_flow_context.current_card_reads.append(result)
@@ -583,7 +598,9 @@ def opened_sitting_contains_every_due_card(
     due_ids = {
         card.id
         for card in asyncio.run(
-            remember_flow_context.composition.catalog.list_reviewable()
+            remember_flow_context.composition.catalog.list_reviewable(
+                remember_flow_context.owner
+            )
         )
         if card_is_due(
             asyncio.run(
@@ -610,7 +627,9 @@ def opened_sitting_excludes_not_due_cards(
     not_due_ids = {
         card.id
         for card in asyncio.run(
-            remember_flow_context.composition.catalog.list_reviewable()
+            remember_flow_context.composition.catalog.list_reviewable(
+                remember_flow_context.owner
+            )
         )
         if not card_is_due(
             asyncio.run(
@@ -740,7 +759,11 @@ def catalog_has_card_not_yet_due(
 
 @when("the user reads the due count")
 def user_reads_due_count(remember_flow_context: RememberFlowContext) -> None:
-    result = asyncio.run(remember_flow_context.composition.due_count().handle())
+    result = asyncio.run(
+        remember_flow_context.composition.due_count().handle(
+            remember_flow_context.owner
+        )
+    )
     remember_flow_context.last_due_count = result
 
 
@@ -840,7 +863,9 @@ def card_still_shows_same_content(
 ) -> None:
     card = next(iter(remember_flow_context.cards_by_label.values()))
     reviewable = asyncio.run(
-        remember_flow_context.composition.catalog.get_reviewable(card.id)
+        remember_flow_context.composition.catalog.get_reviewable(
+            remember_flow_context.owner, card.id
+        )
     )
     assert reviewable is not None
     assert reviewable.front == front
@@ -957,6 +982,7 @@ def user_rejects_the_current_card(
     assert remember_flow_context.current_card_id is not None
     asyncio.run(
         remember_flow_context.composition.reject_card().handle(
+            remember_flow_context.owner,
             remember_flow_context.sitting_id,
             remember_flow_context.current_card_id,
         )

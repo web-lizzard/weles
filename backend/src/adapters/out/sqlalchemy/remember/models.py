@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from adapters.out.sqlalchemy.base import Base
 from adapters.out.sqlalchemy.remember.types import (
@@ -28,6 +29,7 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     String,
 )
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 _REVIEW_EVENT_KIND_SQL = "('graded', 'rejected', 'revealed')"
@@ -39,15 +41,21 @@ _SCHEDULER_ALGORITHM_SQL = (
 
 class RememberSittingRow(Base):
     __tablename__: str = "remember_sittings"
-    __table_args__: tuple[CheckConstraint, CheckConstraint] = (
+    __table_args__: tuple[CheckConstraint, CheckConstraint, Index] = (
         CheckConstraint("showing_limit >= 1", name="showing_limit_positive"),
         CheckConstraint(
             "resume_horizon > interval '0'",
             name="resume_horizon_positive",
         ),
+        Index(
+            "ix_remember_sittings_owner_id_opened_at",
+            "owner_id",
+            "opened_at",
+        ),
     )
 
     id: Mapped[SittingId] = mapped_column(SittingIdType, primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
     opened_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )

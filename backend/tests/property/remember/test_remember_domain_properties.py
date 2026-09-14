@@ -22,12 +22,14 @@ from domain.remember.value_objects import (
     ShowingLimit,
     SittingId,
 )
+from domain.shared.identity.model import UserId
 
 _GRADES = st.sampled_from(list(Grade))
 _STAMP = SchedulerStamp(
     algorithm=SchedulerAlgorithm.FSRS,
     parameter_version="property-hunt",
 )
+_OWNER = UserId.new()
 
 
 def _card_ids(
@@ -43,7 +45,7 @@ def _card_ids(
 
 def _sitting(card_ids: frozenset[CardId], limit: int = 2) -> Sitting:
     return Sitting.open(
-        card_ids, datetime(2026, 1, 1, tzinfo=UTC), ShowingLimit(value=limit)
+        _OWNER, card_ids, datetime(2026, 1, 1, tzinfo=UTC), ShowingLimit(value=limit)
     )
 
 
@@ -189,6 +191,7 @@ def test_foreign_sitting_events_must_not_change_the_drawn_next_card() -> None:
     )
     sitting = Sitting(
         id=SittingId(value=UUID("5ab7c383-a883-4fdf-ab28-0d827faaea53")),
+        owner_id=_OWNER,
         card_ids=card_ids,
         opened_at=datetime(2026, 1, 1, tzinfo=UTC),
         showing_limit=ShowingLimit(value=2),
@@ -271,6 +274,7 @@ def test_next_card_never_returns_a_finished_card(
     limit: int,
 ) -> None:
     sitting = Sitting.open(
+        _OWNER,
         card_ids,
         datetime(2026, 5, 1, tzinfo=UTC),
         ShowingLimit(value=limit),

@@ -4,6 +4,7 @@ from domain.distill.value_objects import CardId as DistillCardId
 from domain.distill.value_objects import NoteContent
 from domain.remember.ports import CardSource, SourceBlock, SourceSpan
 from domain.remember.value_objects import CardId
+from domain.shared.identity.model import UserId
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -12,7 +13,8 @@ class SqlAlchemyCardSourceLocator:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._session_factory: async_sessionmaker[AsyncSession] = session_factory
 
-    async def locate(self, card_id: CardId) -> CardSource | None:
+    async def locate(self, owner: UserId, card_id: CardId) -> CardSource | None:
+        _ = owner
         async with self._session_factory() as session:
             matched = (
                 (

@@ -77,6 +77,7 @@ from domain.distill.regeneration import RegenerationPolicy, ThresholdTier
 from domain.distill.value_objects import CardLengthPolicy
 from domain.remember.ports import CardSourceLocator
 from domain.remember.value_objects import ResumeHorizon, ShowingLimit
+from domain.shared.identity.model import UserId
 
 _settings = Settings()  # pyright: ignore[reportCallIssue]
 configure_tracing(_settings)
@@ -256,10 +257,10 @@ def get_outbox_worker() -> OutboxWorker:
     return _outbox_worker
 
 
-def _remember_unit_of_work() -> RememberUnitOfWork:
+def _remember_unit_of_work(owner: UserId) -> RememberUnitOfWork:
     return cast(
         RememberUnitOfWork,
-        cast(object, SqlAlchemyRememberUnitOfWork(_session_factory)),
+        cast(object, SqlAlchemyRememberUnitOfWork(owner, _session_factory)),
     )
 
 

@@ -22,6 +22,7 @@ from domain.remember.value_objects import (
     SchedulerStamp,
     ShowingLimit,
 )
+from domain.shared.identity.model import UserId
 
 
 def _make_unit_of_work() -> tuple[
@@ -35,6 +36,7 @@ def _make_unit_of_work() -> tuple[
     scheduling_states = InMemorySchedulingStateRepository()
     outbox_store = InMemoryOutboxStore()
     uow = InMemoryUnitOfWork(
+        UserId.new(),
         sittings,
         review_events,
         scheduling_states,
@@ -47,6 +49,7 @@ def _make_unit_of_work() -> tuple[
 
 def _sitting() -> Sitting:
     return Sitting.open(
+        UserId.new(),
         frozenset({CardId(value=uuid4())}),
         datetime.now(UTC),
         ShowingLimit(value=2),
@@ -120,6 +123,7 @@ async def test_a_second_unit_of_work_enters_only_after_the_first_window_closes()
     outbox_store = InMemoryOutboxStore()
     outbox = InMemoryOutboxAppender(outbox_store)
     first = InMemoryUnitOfWork(
+        UserId.new(),
         sittings,
         review_events,
         scheduling_states,
@@ -128,6 +132,7 @@ async def test_a_second_unit_of_work_enters_only_after_the_first_window_closes()
         lock,
     )
     second = InMemoryUnitOfWork(
+        UserId.new(),
         sittings,
         review_events,
         scheduling_states,

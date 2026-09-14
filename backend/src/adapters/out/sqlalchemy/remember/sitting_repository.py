@@ -5,6 +5,7 @@ from adapters.out.sqlalchemy.remember.models import (
 )
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import SittingId
+from domain.shared.identity.model import UserId
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -47,7 +48,8 @@ class SqlAlchemySittingRepository:
         row = (await self._session.execute(statement)).scalar_one_or_none()
         return sitting_to_domain(row) if row is not None else None
 
-    async def latest(self) -> Sitting | None:
+    async def latest(self, owner: UserId) -> Sitting | None:
+        _ = owner
         statement = (
             select(RememberSittingRow)
             .options(selectinload(RememberSittingRow.cards))

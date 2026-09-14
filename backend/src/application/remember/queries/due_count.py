@@ -8,6 +8,7 @@ from domain.remember.ports import (
     SchedulingStateReader,
     SittingReader,
 )
+from domain.shared.identity.model import UserId
 
 
 class DueCountQuery:
@@ -27,15 +28,15 @@ class DueCountQuery:
         self._clock: Clock = clock
         self._scheduler: Scheduler = scheduler
 
-    async def handle(self) -> DueCountDTO:
+    async def handle(self, owner: UserId) -> DueCountDTO:
         """Return how many cards are due and why. Read-only; never writes."""
         as_of = self._clock.now()
-        reviewable = await self._catalog.list_reviewable()
+        reviewable = await self._catalog.list_reviewable(owner)
         by_id = {card.id: card for card in reviewable}
         live_ids = frozenset(by_id)
         states = await self._scheduling_states.get_many(tuple(by_id))
 
-        latest = await self._sittings.latest()
+        latest = await self._sittings.latest(owner)
         sitting = latest if latest is not None and latest.is_offered(as_of) else None
         sitting_events = (
             await self._events.list_by_sitting(sitting.id)

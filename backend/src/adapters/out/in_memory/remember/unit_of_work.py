@@ -12,6 +12,7 @@ from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, SittingId
+from domain.shared.identity.model import UserId
 from domain.shared.outbox.model import OutboxEnvelope
 
 
@@ -23,6 +24,7 @@ class InMemoryUnitOfWork:
 
     def __init__(
         self,
+        owner: UserId,
         sittings: InMemorySittingRepository,
         review_events: InMemoryReviewEventStore,
         scheduling_states: InMemorySchedulingStateRepository,
@@ -30,6 +32,7 @@ class InMemoryUnitOfWork:
         outbox: InMemoryOutboxAppender,
         lock: asyncio.Lock,
     ) -> None:
+        _ = owner
         self.sittings = sittings
         self.review_events = review_events
         self.scheduling_states = scheduling_states

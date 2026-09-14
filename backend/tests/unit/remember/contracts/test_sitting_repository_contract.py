@@ -10,7 +10,10 @@ from adapters.out.sqlalchemy.engine import create_session_factory
 from domain.remember.ports import SittingRepository
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, ResumeHorizon, ShowingLimit, SittingId
+from domain.shared.identity.model import UserId
 from tests.support.postgres_remember_repositories import CommittingSittingRepository
+
+_OWNER = UserId.new()
 
 
 @dataclass
@@ -35,6 +38,7 @@ def _card_id() -> CardId:
 
 def _sitting(showing_limit: int = 2) -> Sitting:
     return Sitting.open(
+        _OWNER,
         frozenset({_card_id()}),
         datetime.now(UTC),
         ShowingLimit(value=showing_limit),
@@ -85,16 +89,19 @@ async def test_latest_returns_the_sitting_with_the_greatest_opened_at(
     repository = sitting_fixture.sittings
     base = datetime.now(UTC)
     oldest = Sitting.open(
+        _OWNER,
         frozenset({_card_id()}),
         base - timedelta(hours=2),
         ShowingLimit(value=2),
     )
     middle = Sitting.open(
+        _OWNER,
         frozenset({_card_id()}),
         base - timedelta(hours=1),
         ShowingLimit(value=2),
     )
     newest = Sitting.open(
+        _OWNER,
         frozenset({_card_id()}),
         base,
         ShowingLimit(value=2),
@@ -103,7 +110,7 @@ async def test_latest_returns_the_sitting_with_the_greatest_opened_at(
     await repository.save(oldest)
     await repository.save(newest)
     await repository.save(middle)
-    result = await repository.latest()
+    result = await repository.latest(_OWNER)
 
     assert result == newest
 
@@ -117,6 +124,7 @@ async def test_second_save_replacing_card_ids_and_resume_horizon_reads_back_equa
     horizon = ResumeHorizon(value=timedelta(days=3))
     replacement_horizon = ResumeHorizon(value=timedelta(days=5))
     sitting = Sitting.open(
+        _OWNER,
         original_cards,
         datetime.now(UTC),
         ShowingLimit(value=2),

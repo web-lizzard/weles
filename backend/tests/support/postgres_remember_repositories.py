@@ -15,6 +15,7 @@ from domain.remember.review_event import ReviewEvent
 from domain.remember.scheduling_state import SchedulingState
 from domain.remember.sitting import Sitting
 from domain.remember.value_objects import CardId, SittingId
+from domain.shared.identity.model import UserId
 
 
 class CommittingSittingRepository:
@@ -30,9 +31,9 @@ class CommittingSittingRepository:
         async with self._session_factory() as session:
             return await SqlAlchemySittingRepository(session).get(sitting_id)
 
-    async def latest(self) -> Sitting | None:
+    async def latest(self, owner: UserId) -> Sitting | None:
         async with self._session_factory() as session:
-            return await SqlAlchemySittingRepository(session).latest()
+            return await SqlAlchemySittingRepository(session).latest(owner)
 
 
 class CommittingReviewEventStore:
