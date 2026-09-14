@@ -73,8 +73,20 @@ export class SendMessageHttpError extends Error {
 }
 
 export async function startCaptureSession(): Promise<{ sessionId: string }> {
-  const { data, error } = await getClient().POST("/capture-sessions");
+  const { data, error, response } = await getClient().POST("/capture-sessions");
   if (error || !data) {
+    const body = error as { code?: string; detail?: string } | undefined;
+    if (
+      body &&
+      typeof body.code === "string" &&
+      typeof body.detail === "string"
+    ) {
+      throw new SendMessageHttpError(
+        body.code,
+        body.detail,
+        (response as Response).status,
+      );
+    }
     throw new Error("Failed to start capture session");
   }
   return { sessionId: data.session_id };
@@ -94,7 +106,11 @@ export async function approveNote(
       typeof body.code === "string" &&
       typeof body.detail === "string"
     ) {
-      throw new SendMessageHttpError(body.code, body.detail, response.status);
+      throw new SendMessageHttpError(
+        body.code,
+        body.detail,
+        (response as Response).status,
+      );
     }
     throw new Error(`approveNote failed: ${response.status}`);
   }
