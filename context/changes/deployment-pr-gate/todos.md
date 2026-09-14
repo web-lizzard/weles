@@ -1,7 +1,7 @@
 ---
 change_id: deployment-pr-gate
 current_phase: 4
-next_step: 4.1
+next_step: 4.3
 next_command: /implement deployment-pr-gate phase 4
 updated: 2026-09-14
 ---
@@ -40,8 +40,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 4.1 Ruleset JSON parses
-- [ ] 4.2 Ruleset contexts equal workflow job names minus backend-property
+- [x] 4.1 Ruleset JSON parses
+- [x] 4.2 Ruleset contexts equal workflow job names minus backend-property
 
 #### Manual
 
