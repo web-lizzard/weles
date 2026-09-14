@@ -33,7 +33,7 @@ Follow @context/foundation/testing-conventions.md for test layout, naming, runne
 
 ## Commits
 
-Conventional Commits scoped by change or effort id, with phase suffix during implementation: `feat(db-adapter-capture): ... (p2)`, `test(...)`, `docs(...)`, `chore(archive): close <change-id>`.
+Conventional Commits scoped by change or effort id, with phase suffix during implementation: `feat(db-adapter-capture): ... (p2)`, `test(...)`, `docs(...)`, `chore(archive): close <change-id>`. Work happens on a branch and reaches `main` through a pull request gated by `.github/workflows/pr-gate.yml`.
 
 ## Language Policy
 
