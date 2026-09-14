@@ -90,9 +90,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 9.1 Type check passes
-- [x] 9.2 Lint passes
-- [x] 9.3 Existing suite stays green
+- [x] 9.1 Type check passes — 902e158
+- [x] 9.2 Lint passes — 902e158
+- [x] 9.3 Existing suite stays green — 902e158
 
 ### Phase 10: Capture shell behavior
 
