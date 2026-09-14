@@ -11,6 +11,24 @@ weles instance set <address>
 
 **Releasing a TUI version:** bump `version` in `tui/package.json`, commit, then push tag `tui-v<version>` (for example `tui-v0.1.0`). The `tui-release` workflow attaches `weles-<version>.tgz` and `weles.tgz` to a GitHub Release.
 
+## Bringing a Neon database to a commit's schema
+
+The app does not migrate on startup. Bring the hosted database to the schema a commit expects with one script:
+
+1. Check out the commit you are about to deploy.
+2. In the Neon console, copy the branch's **direct** connection string — not the `-pooler` one. Migrations need the direct host; the script refuses a pooler URL.
+3. Run the script with the connection string set inline:
+
+   ```sh
+   cd backend && NEON_DIRECT_URL='<direct connection string>' uv run python scripts/migrate_database.py
+   ```
+
+   It prints the target (password hidden) and `current → head`, asks you to type the database name, and applies every pending revision in one transaction. An up-to-date database exits without prompting. Pass `--yes` to skip the prompt.
+
+Run it **before** deploying a commit that adds migration revisions: the deployed app expects the new schema as soon as it starts.
+
+Never put `NEON_DIRECT_URL` in `backend/.env`. `Settings` forbids unknown keys, so the app would fail to start.
+
 ## Dev container: Ordo (skills)
 
 On **Rebuild Container**, `postCreateCommand` runs `.devcontainer/post-create.sh`, which executes every `*.sh` script in `post-create.d/` in sorted order. Step **`08-install-ordo.sh`** installs [`@web-lizzard/ordo`](https://github.com/web-lizzard/ordo) globally so `ordo` is available in the integrated terminal.
