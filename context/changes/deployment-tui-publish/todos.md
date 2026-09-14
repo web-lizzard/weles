@@ -1,8 +1,8 @@
 ---
 change_id: deployment-tui-publish
-current_phase: 1
-next_step: 1.3
-next_command: /implement deployment-tui-publish phase 1
+current_phase: 2
+next_step: 2.1
+next_command: /implement deployment-tui-publish phase 2
 updated: 2026-09-14
 ---
 
@@ -10,12 +10,12 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 1.1 TUI typecheck, tests and lint pass
-- [x] 1.2 Build and pack produce a tarball containing dist/cli.js
+- [x] 1.1 TUI typecheck, tests and lint pass — d996d95
+- [x] 1.2 Build and pack produce a tarball containing dist/cli.js — d996d95
 
 #### Manual
 
-- [ ] 1.3 Tarball installs into a temp prefix and weles prints version and help
+- [x] 1.3 Tarball installs into a temp prefix and weles prints version and help — d996d95
 
 ### Phase 2: Release Workflow and Install Docs
 
