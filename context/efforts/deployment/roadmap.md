@@ -13,7 +13,7 @@ updated: 2026-09-14
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit                                                      | deployment-integration-on-demand | in_progress |
 | S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | done        |
 | S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | done        |
-| S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | pending     |
+| S-05 | The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed               | deployment-manual-deploy         | in_progress |
 | S-06 | Unhandled errors reach error tracking without carrying anything people wrote                                                            | deployment-error-tracking        | pending     |
 | S-07 | An agent skill diagnoses the hosted instance read-only and recommends next steps                                                        | deployment-diagnostics-skill     | pending     |
 | S-08 | The author and the reviewer reach the hosted instance at a hard-to-discover public address                                              | deployment-public-address        | pending     |
@@ -106,7 +106,7 @@ out-of-scope, revisit before the next migration after this effort lands).
 - **Outcome:** The author deploys a chosen main commit to the Mikrus instance, and only a commit whose checks and integration run passed
 - **Acceptance criteria:** FR-01, FR-06
 - **Change ID:** deployment-manual-deploy
-- **Status:** pending
+- **Status:** in_progress
 - **Prerequisites:** S-01, S-02, S-04
 - **Parallel with:** S-03, S-06
 - **Research:** mikrus-cli
