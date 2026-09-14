@@ -78,9 +78,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 7.1 Type check passes
-- [x] 7.2 Lint passes
-- [x] 7.3 Existing TUI suite still passes
+- [x] 7.1 Type check passes — 6931aa0
+- [x] 7.2 Lint passes — 6931aa0
+- [x] 7.3 Existing TUI suite still passes — 6931aa0
 
 ### Phase 8: TUI refusal — behavior
 
