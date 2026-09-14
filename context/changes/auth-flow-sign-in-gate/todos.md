@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
-current_phase: 2
-next_step: 2.1
-next_command: /implement auth-flow-sign-in-gate phase 2
+current_phase: 3
+next_step: 3.1
+next_command: /unit-test auth-flow-sign-in-gate phase 3
 updated: 2026-09-14
 ---
 
@@ -25,8 +25,8 @@ updated: 2026-09-14
 
 #### Automated
 
-- [ ] 2.1 Token contract passes
-- [ ] 2.2 Type check passes
+- [x] 2.1 Token contract passes — 1e3a801
+- [x] 2.2 Type check passes — 1e3a801
 
 ### Phase 3: Account stores and the auth_accounts migration
 
