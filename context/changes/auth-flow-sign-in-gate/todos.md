@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
-current_phase: 4
-next_step: 4.1
-next_command: /unit-test auth-flow-sign-in-gate phase 4
+current_phase: 5
+next_step: 5.1
+next_command: /unit-test auth-flow-sign-in-gate phase 5
 updated: 2026-09-14
 ---
 
@@ -48,12 +48,12 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — e0f9060
 
 #### Automated
 
-- [ ] 4.1 Authenticator unit tests pass
-- [ ] 4.2 Type check passes
+- [x] 4.1 Authenticator unit tests pass — ba45627
+- [x] 4.2 Type check passes — ba45627
 
 ### Phase 5: HTTP endpoints, sign-in gate, and wiring
 
