@@ -1,8 +1,8 @@
 ---
 change_id: auth-flow-sign-in-gate
-current_phase: 5
-next_step: 5.1
-next_command: /unit-test auth-flow-sign-in-gate phase 5
+current_phase: 6
+next_step: tests
+next_command: /unit-test auth-flow-sign-in-gate phase 6
 updated: 2026-09-14
 ---
 
@@ -59,21 +59,21 @@ updated: 2026-09-14
 
 #### Tests
 
-- [ ] tests generated
+- [x] tests generated — c467b1a
 
 #### Automated
 
-- [ ] 5.1 Full backend suite passes
-- [ ] 5.2 Postgres lane passes
-- [ ] 5.3 Type check passes
+- [x] 5.1 Full backend suite passes — b9800e8
+- [x] 5.2 Postgres lane passes — b9800e8
+- [x] 5.3 Type check passes — b9800e8
 
 #### Manual
 
-- [ ] 5.4 Curl gated route refused without token
-- [ ] 5.5 Curl register returns 201
-- [ ] 5.6 Curl sign-in returns a token
-- [ ] 5.7 Curl gated route accepted with token
-- [ ] 5.8 Backend refuses to start without signing secret
+- [x] 5.4 Curl gated route refused without token — b9800e8
+- [x] 5.5 Curl register returns 201 — b9800e8
+- [x] 5.6 Curl sign-in returns a token — b9800e8
+- [x] 5.7 Curl gated route accepted with token — b9800e8
+- [x] 5.8 Backend refuses to start without signing secret — b9800e8
 
 ### Phase 6: TUI auth API module
 
