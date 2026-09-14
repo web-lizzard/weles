@@ -4,30 +4,49 @@ import { render } from "ink";
 import meow from "meow";
 import { setInstanceAddress } from "./api/instance.js";
 import App from "./app.js";
+import { runRegisterCommand, runSignInCommand } from "./auth/command.js";
+import { readSecret } from "./auth/readSecret.js";
 import { runInstanceCommand } from "./instance/command.js";
 import { resolveStartup } from "./startup.js";
 
 const cli = meow({
   importMeta: import.meta,
   flags: {},
-  commands: ["instance"],
+  commands: ["instance", "register", "sign-in"],
   help: `
     Usage
       $ weles
       $ weles instance
       $ weles instance set <address>
+      $ weles register <email>
+      $ weles sign-in <email>
   `,
 });
 
 const location = { env: process.env, homeDir: os.homedir() };
 
+const authDeps = {
+  location,
+  readSecret,
+  out: (line: string) => console.log(line),
+  err: (line: string) => console.error(line),
+};
+
 if (cli.command === "instance") {
   const code = await runInstanceCommand(cli.input, {
     location,
-    out: (line) => console.log(line),
-    err: (line) => console.error(line),
+    out: authDeps.out,
+    err: authDeps.err,
   });
   process.exit(code);
+}
+
+if (cli.command === "register") {
+  process.exit(await runRegisterCommand(cli.input, authDeps));
+}
+
+if (cli.command === "sign-in") {
+  process.exit(await runSignInCommand(cli.input, authDeps));
 }
 
 const decision = await resolveStartup(location);
