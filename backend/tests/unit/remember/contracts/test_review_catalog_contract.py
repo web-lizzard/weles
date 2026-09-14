@@ -110,10 +110,11 @@ def _sample_card(
     front: str = "What establishes a connection?",
     back: str = "A three-way handshake.",
     discard: Discard | None = None,
+    owner_id: UserId | None = None,
 ) -> Card:
     return Card(
         id=DistillCardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner_id if owner_id is not None else _OWNER,
         note_id=note_id,
         front=CardSide(value=front),
         back=CardSide(value=back),
@@ -224,6 +225,40 @@ async def test_get_reviewable_offers_a_live_card_but_not_a_discarded_sibling(
 
     assert offered is not None
     assert withheld is None
+
+
+async def test_list_reviewable_omits_a_live_card_owned_by_another_person(
+    catalog_fixture: _Catalog,
+) -> None:
+    catalog, notes, cards = catalog_fixture
+    note = _sample_note()
+    own = _sample_card(note.id, front="What is a port?")
+    foreign = _sample_card(
+        note.id,
+        front="What is a socket?",
+        owner_id=UserId.new(),
+    )
+    await notes.save(note)
+    await cards.save(own)
+    await cards.save(foreign)
+
+    result = await catalog.list_reviewable(_OWNER)
+
+    assert [entry.id for entry in result] == [CardId(value=own.id.value)]
+
+
+async def test_get_reviewable_returns_none_for_a_live_card_owned_by_another_person(
+    catalog_fixture: _Catalog,
+) -> None:
+    catalog, notes, cards = catalog_fixture
+    note = _sample_note()
+    foreign = _sample_card(note.id, owner_id=UserId.new())
+    await notes.save(note)
+    await cards.save(foreign)
+
+    result = await catalog.get_reviewable(_OWNER, CardId(value=foreign.id.value))
+
+    assert result is None
 
 
 async def test_get_reviewable_returns_none_for_an_id_no_note_holds(

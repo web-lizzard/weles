@@ -125,10 +125,11 @@ def _sample_card(
     *,
     quote: str = "Connections are established via a three-way handshake.",
     discard: Discard | None = None,
+    owner_id: UserId | None = None,
 ) -> Card:
     return Card(
         id=DistillCardId(value=uuid4()),
-        owner_id=UserId.new(),
+        owner_id=owner_id if owner_id is not None else _OWNER,
         note_id=note_id,
         front=CardSide(value="What establishes a connection?"),
         back=CardSide(value="A three-way handshake."),
@@ -185,6 +186,20 @@ async def test_locate_returns_none_for_a_card_id_no_repository_holds(
     await cards.save(card)
 
     result = await locator.locate(_OWNER, CardId(value=uuid4()))
+
+    assert result is None
+
+
+async def test_locate_returns_none_for_a_live_card_owned_by_another_person(
+    locator_fixture: tuple[_Locator, str],
+) -> None:
+    locator, notes, cards = locator_fixture[0]
+    note = _sample_note()
+    foreign = _sample_card(note.id, owner_id=UserId.new())
+    await notes.save(note)
+    await cards.save(foreign)
+
+    result = await locator.locate(_OWNER, CardId(value=foreign.id.value))
 
     assert result is None
 

@@ -83,6 +83,32 @@ async def test_second_save_with_the_same_id_overwrites(
     assert result == updated
 
 
+async def test_latest_ignores_a_newer_sitting_owned_by_another_person(
+    sitting_fixture: _SittingFixture,
+) -> None:
+    repository = sitting_fixture.sittings
+    other_owner = UserId.new()
+    base = datetime.now(UTC)
+    own = Sitting.open(
+        _OWNER,
+        frozenset({_card_id()}),
+        base - timedelta(hours=1),
+        ShowingLimit(value=2),
+    )
+    foreign_newer = Sitting.open(
+        other_owner,
+        frozenset({_card_id()}),
+        base,
+        ShowingLimit(value=2),
+    )
+
+    await repository.save(foreign_newer)
+    await repository.save(own)
+    result = await repository.latest(_OWNER)
+
+    assert result == own
+
+
 async def test_latest_returns_the_sitting_with_the_greatest_opened_at(
     sitting_fixture: _SittingFixture,
 ) -> None:
