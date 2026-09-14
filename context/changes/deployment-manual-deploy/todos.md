@@ -52,9 +52,9 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 4.1 Actionlint reports no errors on deploy.yml
-- [x] 4.2 Shellcheck reports no findings on remote-deploy.sh
-- [x] 4.3 Deploy job needs verify and uses the production environment
+- [x] 4.1 Actionlint reports no errors on deploy.yml — d877cdb
+- [x] 4.2 Shellcheck reports no findings on remote-deploy.sh — d877cdb
+- [x] 4.3 Deploy job needs verify and uses the production environment — d877cdb
 
 #### Manual
 
