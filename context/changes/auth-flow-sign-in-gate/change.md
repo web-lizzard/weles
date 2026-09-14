@@ -1,7 +1,7 @@
 ---
 change_id: auth-flow-sign-in-gate
 title: A person can register and sign in, and the instance refuses everyone who is not signed in
-status: preparing
+status: planned
 created: 2026-09-14
 updated: 2026-09-14
 archived_at: null
