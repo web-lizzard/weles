@@ -3,7 +3,11 @@
 // (openapi-typescript 7.x does not surface FastAPI's itemSchema union) — see
 // context/changes/capture-flow-socratic-conversation/plan.md Phase 10.
 
-import { getClient, instanceAddress } from "./instance.js";
+import {
+  authorizationHeaders,
+  getClient,
+  instanceAddress,
+} from "./instance.js";
 
 export type ReplyDeltaEvent = {
   type: "delta";
@@ -101,11 +105,12 @@ export async function* sendMessage(
   sessionId: string,
   content: string,
 ): AsyncGenerator<ReplyStreamEvent> {
+  const authHeaders = await authorizationHeaders();
   const response = await fetch(
     `${instanceAddress()}/capture-sessions/${sessionId}/messages`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({ content }),
     },
   );
