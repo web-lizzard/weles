@@ -21,10 +21,10 @@ updated: 2026-09-14
 
 #### Automated
 
-- [x] 2.1 Attempt ledger contract passes in memory
-- [x] 2.2 Attempt ledger contract passes on Postgres
-- [x] 2.3 Full backend suite passes
-- [x] 2.4 Type check passes
+- [x] 2.1 Attempt ledger contract passes in memory — 7673156
+- [x] 2.2 Attempt ledger contract passes on Postgres — 7673156
+- [x] 2.3 Full backend suite passes — 7673156
+- [x] 2.4 Type check passes — 7673156
 
 #### Manual
 
