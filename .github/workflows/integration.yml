@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Commit SHA, branch, or tag to run the integration suite against"
+        description: "Full commit SHA (40 chars), branch, or tag to run the integration suite against — actions/checkout does not accept an abbreviated SHA"
         required: true
         type: string
 
@@ -45,8 +45,10 @@ jobs:
           ref: ${{ inputs.ref }}
       - name: Resolve commit SHA
         id: resolve-sha
+        working-directory: .
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Publish pending status
+        working-directory: .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -63,7 +65,8 @@ jobs:
       - run: uv run --frozen pytest tests/integration
       - run: uv run --frozen pytest tests/unit -m postgres
       - name: Publish commit status
-        if: always()
+        if: always() && steps.resolve-sha.outputs.sha != ''
+        working-directory: .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
