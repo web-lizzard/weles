@@ -9,7 +9,7 @@ updated: 2026-09-14
 
 | ID   | Outcome                                                                                                                                 | Change ID                        | Status      |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------- |
-| S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate               | in_progress |
+| S-01 | A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking | deployment-pr-gate               | done        |
 | S-02 | The integration suite, Postgres lane included, runs in CI on demand for any commit                                                      | deployment-integration-on-demand | in_progress |
 | S-03 | Anyone can install the published TUI without credentials                                                                                | deployment-tui-publish           | in_progress |
 | S-04 | The author brings an empty or behind Neon database to a commit's schema with one script                                                 | deployment-neon-schema           | in_progress |
@@ -47,7 +47,7 @@ flowchart LR
 - **Outcome:** A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking
 - **Acceptance criteria:** FR-03, FR-04
 - **Change ID:** deployment-pr-gate
-- **Status:** in_progress
+- **Status:** done
 - **Parallel with:** S-02, S-03, S-04, S-06
 
 The repository has no `.github/` and commits land directly on `main`, so today a check can
@@ -173,4 +173,6 @@ mechanism happens in planning, within that constraint. It reaches the reviewer o
 the private certification submission. Flooding protection stays deferred.
 
 ## Done
+
+- **S-01: A change reaches main only through a pull request whose unit and BDD suites passed, with property hunts reported on it without blocking** — Archived 2026-09-14 → `context/archive/changes/2026-09-14-deployment-pr-gate/`. Lesson: —.
 
